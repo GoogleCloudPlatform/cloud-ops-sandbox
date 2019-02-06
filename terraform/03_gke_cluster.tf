@@ -62,7 +62,7 @@ resource "google_container_cluster" "gke" {
 
     # this stanza could be omitted and both would default to false
     management {
-      auto_repair = true
+      auto_repair  = true
       auto_upgrade = true
     }
   }
