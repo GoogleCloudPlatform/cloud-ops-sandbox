@@ -37,7 +37,15 @@ resource "google_project" "project" {
 # expand the list later.
 resource "google_project_services" "gke" {
   # This could just as easily reference `random_id.project.dec` but generally
-  # you want to dereference the actual object you're trying to interact with
+  # you want to dereference the actual object you're trying to interact with.
+  #
+  # You'll see this line in every resource we create from here on out. This is
+  # necessary because we didn't configure the provider with a project because
+  # the project didn't exist yet. This could be refactored such that the project
+  # was created outside of terraform, the provider configured with the project,
+  # and then we don't have to specify this on every resource any more.
+  #
+  # Anyway, expect to see a lot more of these. I won't explain every time.
   project = "${google_project.project.id}"
 
   # a list of the service URIs we want to enable
