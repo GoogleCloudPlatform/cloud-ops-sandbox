@@ -31,11 +31,16 @@ resource "google_project" "project" {
   billing_account = "${data.google_billing_account.acct.id}"
 }
 
-# This enables GKE in the project we just created. There's also the
-# `google_project_service` resource which can be used to enable a single
-# service, but most of the time you want to use this one so it's easier to
-# expand the list later.
-resource "google_project_services" "gke" {
+# Enable GKE in the project we created. If you look at the docs you might see
+# the `google_project_services` resource which allows you to specify a list of
+# resources to enable. This seems like a good idea but there's a gotcha: to use
+# that resource you have to specify a comprehensive list of services to be
+# enabled for your project. Otherwise it will disable services you might be
+# using elsewhere.
+#
+# For that reason, we use the single service option instead since it allows us
+# granular control.
+resource "google_project_service" "gke" {
   # This could just as easily reference `random_id.project.dec` but generally
   # you want to dereference the actual object you're trying to interact with.
   #
@@ -48,8 +53,6 @@ resource "google_project_services" "gke" {
   # Anyway, expect to see a lot more of these. I won't explain every time.
   project = "${google_project.project.id}"
 
-  # a list of the service URIs we want to enable
-  services = [
-    "container.googleapis.com"
-  ]
+  # the service URI we want to enable
+  service = "container.googleapis.com"
 }
