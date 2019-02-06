@@ -13,7 +13,7 @@ data "google_billing_account" "acct" {
 # ends with a random number in the unsigned int range. See the docs for more:
 # https://www.terraform.io/docs/providers/random/r/id.html
 resource "random_id" "project" {
-  prefix = "stackdriver-sandbox-"
+  prefix      = "stackdriver-sandbox-"
   byte_length = "4"
 }
 
