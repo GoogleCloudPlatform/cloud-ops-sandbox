@@ -77,3 +77,22 @@ When this is done, you'll have a new project with a running GKE cluster. That's
 all we can do right now. If you want to get rid of it, run `terraform destroy`.
 
 [Install terraform]: https://www.terraform.io/downloads.html
+
+Guided Tour
+--------------------------------------------------------------------------------
+
+I've split the terraform configs into separate files for each function. Detailed
+comments are available in each file, but here's the short version:
+
+* `00_state.tf` -- configure state storage
+* `01_provider.tf` -- configure the terraform provider
+* `02_project.tf` -- create a GCP project, set up billing, and enable services
+* `03_gke_cluster.tf` -- provision a GKE cluster per to the Hipster Shop README
+
+I've tried to call out the places where changes would be necessary to productize
+this. Those cases are all based on the assumption that a system under our
+control would run terraform and create resources on the user's behalf. The user
+would not be aware of the underlying tool.
+
+I did not consider the scenario where we ship these configs to the user to
+execute themselves.
