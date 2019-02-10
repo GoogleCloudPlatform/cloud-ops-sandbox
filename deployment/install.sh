@@ -36,7 +36,8 @@ for EMAIL in $EMAILS; do
    echo "Creating project $PROJECT_NAME for $EMAIL ... "
 
    # create
-   gcloud projects create $PROJECT_ID --name $PROJECT_NAME --enable-cloud-apis --labels=product=sandbox --folder=$FOLDER_ID
+   gcloud projects create $PROJECT_ID --name $PROJECT_NAME --enable-cloud-apis --labels=product=sandbox 
+   #--folder=$FOLDER_ID
    #--organization=$ORGANIZATION_ID
    sleep 2
 
