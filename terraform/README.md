@@ -1,7 +1,7 @@
 Hipster Shop Terraform PoC
 ================================================================================
 
-This repo contains a heavily documented, proof-of-concept level [Terraform]
+This directory contains a heavily documented, proof-of-concept level [Terraform]
 config for deploying [Hipster Shop]. It's part of the [Stackdriver Sandbox]
 project. The goal of the project is to provide a one-click installer that builds
 a fullly functional environment including Hipster Shop, some new tools and
@@ -12,7 +12,7 @@ experimentation.
 [Hipster Shop]: https://github.com/GoogleCloudPlatform/microservices-demo
 [Stackdriver Sandbox]: https://docs.google.com/document/d/1mz7VfgQN8Yi6-4H25FrQu6z8LeZfWJksd-cvgeD26A8/edit
 
-⚠️ This repo should not be shared publicly! ⚠️
+⚠️ This should not be shared publicly! ⚠️
 
 tl;dr:
 --------------------------------------------------------------------------------
@@ -65,8 +65,8 @@ administrator.
 
 ```
 $ gcloud auth application-default login
-$ git clone https://source.developers.google.com/p/google.com:bleything/r/hipster-shop-terraform
-$ cd hipster-shop-terraform
+$ git clone -b terraform-demo https://source.developers.google.com/p/stackdriver-sandbox-230822/r/sandbox
+$ cd sandbox/terraform
 $ terraform init
 $ terraform apply
 ```
