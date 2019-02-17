@@ -1,0 +1,36 @@
+# This config file will build and push all microservices that make up Hipstershop
+# Each image will be tagged with the git commit hash, and the git tag associated with the commit, and as 'latest'
+#
+# The recommended way to invoke this is as a 'Tag' trigger that runs each time a git tag is pushed to the repo
+
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args: 
+  - '-c'
+  - |
+    cd src
+    for i in * ; do
+      if [ -d "$i" ]; then
+        echo "building $i"
+        docker build -t 'gcr.io/$PROJECT_ID/$REPO_NAME/'$i:latest ./$i
+        if [ ! -z "$TAG_NAME" ]; then
+            docker tag 'gcr.io/$PROJECT_ID/$REPO_NAME/'$i:latest 'gcr.io/$PROJECT_ID/$REPO_NAME/'$i:$TAG_NAME
+        fi
+        if [ ! -z "$SHORT_SHA" ]; then
+            docker tag 'gcr.io/$PROJECT_ID/$REPO_NAME/'$i:latest 'gcr.io/$PROJECT_ID/$REPO_NAME/'$i:$SHORT_SHA
+        fi
+      fi
+    done
+images: [ 'gcr.io/$PROJECT_ID/$REPO_NAME/adservice',
+          'gcr.io/$PROJECT_ID/$REPO_NAME/cartservice',
+          'gcr.io/$PROJECT_ID/$REPO_NAME/checkoutservice',
+          'gcr.io/$PROJECT_ID/$REPO_NAME/currencyservice',
+          'gcr.io/$PROJECT_ID/$REPO_NAME/emailservice',
+          'gcr.io/$PROJECT_ID/$REPO_NAME/frontend',
+          'gcr.io/$PROJECT_ID/$REPO_NAME/loadgenerator',
+          'gcr.io/$PROJECT_ID/$REPO_NAME/paymentservice',
+          'gcr.io/$PROJECT_ID/$REPO_NAME/productcatalogservice',
+          'gcr.io/$PROJECT_ID/$REPO_NAME/recommendationservice'
+        ]
+timeout: 1800s
