@@ -19,5 +19,5 @@ Images will be pushed to Google Container Registry at the path "gcr.io/$PROJECT_
 
 ### Adding a Release Version
 1. run `git tag -a $YOUR_VERSION_NAME`
-2. run `git push $YOUR_VERSION_NAME`
+2. run `git push origin $YOUR_VERSION_NAME`
 3. watch the trigger build and push new container images in [Google Cloud Build](https://console.cloud.google.com/cloud-build/builds).
