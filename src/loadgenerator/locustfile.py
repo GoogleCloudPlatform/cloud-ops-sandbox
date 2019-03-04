@@ -28,11 +28,20 @@ products = [
     'LS4PSXUNUM',
     'OLJCESPC7Z']
 
+currencies = [
+    'EUR',
+    'USD',
+    'JPY',
+    'GBP',
+    'TRY',
+    'CAD']
+
+# Define specific frontend actions.
+
 def index(l):
     l.client.get("/")
 
 def setCurrency(l):
-    currencies = ['EUR', 'USD', 'JPY', 'CAD']
     l.client.post("/setCurrency",
         {'currency_code': random.choice(currencies)})
 
@@ -42,6 +51,9 @@ def browseProduct(l):
 def viewCart(l):
     l.client.get("/cart")
 
+def emptyCart(l):
+    l.client.post("/cart/empty")
+
 def addToCart(l):
     product = random.choice(products)
     l.client.get("/product/" + product)
@@ -50,7 +62,6 @@ def addToCart(l):
         'quantity': random.choice([1,2,3,4,5,10])})
 
 def checkout(l):
-    addToCart(l)
     l.client.post("/cart/checkout", {
         'email': 'someone@example.com',
         'street_address': '1600 Amphitheatre Parkway',
@@ -60,23 +71,58 @@ def checkout(l):
         'country': 'United States',
         'credit_card_number': '4432-8015-6152-0454',
         'credit_card_expiration_month': '1',
-        'credit_card_expiration_year': '2019',
+        'credit_card_expiration_year': '2039',
         'credit_card_cvv': '672',
     })
 
-class UserBehavior(TaskSet):
+# LocustIO TaskSet classes defining detailed user behaviors.
+
+class PurchasingBehavior(TaskSet):
 
     def on_start(self):
         index(self)
 
     tasks = {index: 1,
-        setCurrency: 2,
-        browseProduct: 10,
+        setCurrency: 1,
+        browseProduct: 2,
         addToCart: 2,
-        viewCart: 3,
+        viewCart: 1,
         checkout: 1}
 
-class WebsiteUser(HttpLocust):
-    task_set = UserBehavior
+class WishlistBehavior(TaskSet):
+
+    def on_start(self):
+        index(self)
+
+    tasks = {index: 1,
+        setCurrency: 1,
+        browseProduct: 5,
+        addToCart: 10,
+        viewCart: 5,
+        emptyCart: 2}
+
+class BrowsingBehavior(TaskSet):
+
+    def on_start(self):
+        index(self)
+
+    tasks = {index: 5,
+        setCurrency: 1,
+        browseProduct: 10}
+
+# LocustIO Locust classes defining general user scenarios.
+
+class PurchasingUser(HttpLocust):
+    task_set = PurchasingBehavior
+    min_wait = 1000
+    max_wait = 10000
+
+class WishlistUser(HttpLocust):
+    task_set = WishlistBehavior
+    min_wait = 1000
+    max_wait = 10000
+
+class BrowsingUser(HttpLocust):
+    task_set = BrowsingBehavior
     min_wait = 1000
     max_wait = 10000
