@@ -6,6 +6,7 @@ Generates fake user HTTP requests to the frontend of a running demo application.
 ## Quick Start
 
 ```sh
+export FRONTEND_ADDR=[APPLICATION_IP_ADDRESS]
 ./loadgen.sh
 ```
 
