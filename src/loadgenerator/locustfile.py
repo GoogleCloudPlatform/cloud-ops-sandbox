@@ -113,16 +113,25 @@ class BrowsingBehavior(TaskSet):
 # LocustIO Locust classes defining general user scenarios.
 
 class PurchasingUser(HttpLocust):
+    '''
+    User that browses products, adds to cart, and purchases via checkout.
+    '''
     task_set = PurchasingBehavior
     min_wait = 1000
     max_wait = 10000
 
 class WishlistUser(HttpLocust):
+    '''
+    User that browses products, adds to cart, empties cart, but never purchases.
+    '''
     task_set = WishlistBehavior
     min_wait = 1000
     max_wait = 10000
 
 class BrowsingUser(HttpLocust):
+    '''
+    User that only browses products.
+    '''
     task_set = BrowsingBehavior
     min_wait = 1000
     max_wait = 10000
