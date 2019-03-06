@@ -6,7 +6,7 @@
 #
 # If productized we'd drop this and use the default billing account instead.
 data "google_billing_account" "acct" {
-  display_name = "Google"
+  display_name = "${var.billing_account}"
 }
 
 # This generates a random project id that starts with "stackdriver-sandbox-" and

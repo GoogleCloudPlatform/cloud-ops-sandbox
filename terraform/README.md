@@ -68,7 +68,7 @@ $ gcloud auth application-default login
 $ git clone -b terraform-demo https://source.developers.google.com/p/stackdriver-sandbox-230822/r/sandbox
 $ cd sandbox/terraform
 $ terraform init
-$ terraform apply
+$ terraform apply -var 'billing_account=<your billing account name>'
 ```
 
 3. there is no step three! Unless you count the commands as separate steps.
