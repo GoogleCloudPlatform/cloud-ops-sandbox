@@ -38,10 +38,11 @@ build:
     context: src/cartservice
   - image: frontend
     context: src/frontend
-  - image: loadgenerator
-    context: src/loadgenerator
   - image: adservice
     context: src/adservice
+  # Intentionally leave out src/loadgenerator. It should be deployed externally
+  # from the microservices cluster to simulate more realistic network latency.
+  # (Real users won't be making requests from inside the kubernetes cluster.)
   tagPolicy:
     gitCommit: {}
 deploy:
