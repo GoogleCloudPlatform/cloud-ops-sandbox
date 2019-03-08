@@ -26,6 +26,26 @@
 export GOOGLE_APPLICATION_CREDENTIALS=""
 gcloud auth application-default login
 
-# Apply Terraform automation
-terraform apply -auto-approve
+echo **WARNING** Terraform script will create a Sandbox cluster. It asks for billing account
+echo If you have not set up billing account, choose `N` and follow this link:
+echo https://cloud.google.com/billing/docs/how-to/manage-billing-account to set it up.
+echo 
+echo To list active billing accounts, run:
+echo gcloud beta billing accounts list --filter open=true
+echo
+while true; do
+    read -p "Do you wish to continue to cluster creation?" yn
+    case $yn in
+        [Yy]* ) applyTerraform; break;;
+        [Nn]* ) exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
+function applyTerraform()
+{
+  # Apply Terraform automation
+  terraform apply -auto-approve
+}
+
 
