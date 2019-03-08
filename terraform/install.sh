@@ -13,6 +13,8 @@
 # limitations under the License.
 #!/bin/bash
 
+# This script provisions Hipster Shop Cluster for Stackdriver Sandbox using Terraform
+
 function installTerraform()
 {
   sudo apt-get install unzip
@@ -26,8 +28,6 @@ function applyTerraform()
   # Apply Terraform automation
   terraform apply -auto-approve
 }
-
-# This script provisions Hipster Shop Cluster for Stackdriver Sandbox using Terraform
 
 # Make sure Terraform is installed
 if ! [ -x "$(command -v terraform)" ]; then
@@ -58,6 +58,4 @@ while true; do
         * ) echo "Please answer yes or no.";;
     esac
 done
-
-
 
