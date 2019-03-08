@@ -1,3 +1,17 @@
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 #!/bin/bash
 #
 # Create a new deployment of Hipster Shop
@@ -32,7 +46,7 @@ EMAILS=$@
 
 for EMAIL in $EMAILS; do
    PROJECT_ID=$(echo "${PROJECT_PREFIX}-${EMAIL}" | sed 's/@/x/g' | sed 's/\./x/g' | cut -c 1-30)
-   gcloud services enable container.googleapis.com --project $PROJECT_ID
+   #gcloud services enable container.googleapis.com --project $PROJECT_ID
    echo "Creating project $PROJECT_NAME for $EMAIL ... "
 
    # create

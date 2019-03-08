@@ -7,11 +7,6 @@ add them to the cart, and purchase them.
 **Google uses this application to demonstrate Kubernetes, GKE, Istio,
 Stackdriver, gRPC, OpenCensus** and similar cloud-native technologies.
 
-> **Note to Googlers:** Please fill out the form at
-[go/microservices-demo](http://go/microservices-demo) if you are using this
-application.
-
-
 ## Screenshots
 
 | Home Page | Checkout Screen |
