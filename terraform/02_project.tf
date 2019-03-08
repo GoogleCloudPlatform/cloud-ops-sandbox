@@ -29,36 +29,22 @@ resource "google_project" "project" {
   # `data.` prefix vs. using the resource name directly as we did above with
   # `random_id.`
   billing_account = "${data.google_billing_account.acct.id}"
-  
-  # We must enable Cloud Resource Manager API before actually creating a project
-  #depends_on = [ "google_project_service.cloudresourcemanager" ]
 }
 
-# Enable Cloud Resource Manager API
-resource "google_project_service" "cloudresourcemanager" {
-
-  # This references the random project ID we created above; note that we're
-  # asking for the `dec` attribute which returns the number in decimal format
-  project = "${random_id.project.dec}"
-
-  service = "cloudresourcemanager.googleapis.com"
-}
-
-resource "google_project_service" "cloudbilling" {
-  project = "${google_project.project.id}"
-
-  service = "cloudbilling.googleapis.com"
-}
 resource "google_project_service" "iam" {
   project = "${google_project.project.id}"
 
   service = "iam.googleapis.com"
+
+  disable_dependent_services = true
 }
 
 resource "google_project_service" "compute" {
   project = "${google_project.project.id}"
 
   service = "compute.googleapis.com"
+
+  disable_dependent_services = true
 }
 
 # Enable GKE in the project we created. If you look at the docs you might see
@@ -85,4 +71,6 @@ resource "google_project_service" "gke" {
 
   # the service URI we want to enable
   service = "container.googleapis.com"
+
+  disable_dependent_services = true
 }
