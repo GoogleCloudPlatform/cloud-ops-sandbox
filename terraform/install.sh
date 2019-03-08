@@ -48,14 +48,10 @@ done
 
 function installTerraform()
 {
+  sudo apt-get install unzip
   wget https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_linux_amd64.zip
   unzip terraform_0.11.11_linux_amd64.zip
-  mkdir sandbox_prereqs
-  mv terraform sandbox_prereqs
-  
-  # Add terraform to path
-  # TODO - Add this to ~/.bash_profile
-  PATH=$PATH:~sandbox_prereqs
+  sudo install terraform /usr/local/bin
 }
 
 function applyTerraform()
