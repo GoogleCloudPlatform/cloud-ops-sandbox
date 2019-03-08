@@ -25,6 +25,9 @@ function installTerraform()
 
 function applyTerraform()
 {
+  # Initialize terraform state
+  terraform init
+
   # Apply Terraform automation
   terraform apply -auto-approve
 }
