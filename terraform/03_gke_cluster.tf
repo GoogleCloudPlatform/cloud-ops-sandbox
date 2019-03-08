@@ -36,6 +36,16 @@ resource "google_container_cluster" "gke" {
   # at this and thinking "huh terraform syntax looks a clunky" you are NOT WRONG
   zone = "${element(random_shuffle.zone.result, 0)}"
 
+  node_config {
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"  
+    ]
+
+    labels = {
+      environment = "dev",
+      cluster = "stackdriver-sandbox-main"   
+    }
+  }
   # here we're using an embedded resource to define the node pool. Another
   # option would be to create the node pool as a separate resource and link it
   # to this cluster. There are tradeoffs to each approach.
