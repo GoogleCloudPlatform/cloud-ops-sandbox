@@ -52,13 +52,15 @@ resource "google_container_cluster" "gke" {
   # Many of the paramaters below are self-explanatory so I'll only call out
   # interesting things.
   node_pool {
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform"  
-    ]
+    node_config {
+      oauth_scopes = [
+        "https://www.googleapis.com/auth/cloud-platform"  
+      ]
 
-    labels = {
-      environment = "dev",
-      cluster = "stackdriver-sandbox-main"   
+      labels = {
+        environment = "dev",
+        cluster = "stackdriver-sandbox-main"   
+      }
     }
     
     initial_node_count = 5
