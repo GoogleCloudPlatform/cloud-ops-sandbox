@@ -54,7 +54,7 @@ echo To list active billing accounts, run:
 echo gcloud beta billing accounts list --filter open=true
 echo
 while true; do
-    read -p "Do you wish to continue to cluster creation?" yn
+    read -p "Do you wish to continue to cluster creation? y/n " yn
     case $yn in
         [Yy]* ) applyTerraform; break;;
         [Nn]* ) exit;;
