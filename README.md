@@ -36,7 +36,7 @@ Google Stackdriver is a suite of tools that helps to gain full observability for
 
 Click the Cloud Shell button for automated one click installation of a new Stackdriver Sandbox cluster in a new Google Cloud Project.
 
-[![Open in Cloud Shell](//gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://source.developers.google.com/p/stackdriver-sandbox-230822/r/sandbox&cloudshell_git_branch=terraform-demo&cloudshell_working_dir=terraform)
+[![Open in Cloud Shell](//gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://source.developers.google.com/p/stackdriver-sandbox-230822/r/sandbox&cloudshell_git_branch=master&cloudshell_working_dir=terraform)
 
 ## Service Overview
 
