@@ -32,10 +32,19 @@ function applyTerraform()
   terraform apply -auto-approve
 }
 
-# Make sure Terraform is installed
+echo Make sure Terraform is installed
 if ! [ -x "$(command -v terraform)" ]; then
   echo 'Terraform is not installed. Trying to install it.' >&2
   installTerraform
+fi
+
+echo Checking Prerequisites...
+echo Checking existance of billing accounts
+if [[ $(gcloud beta billing accounts list --filter open=true) -eq 1 ]] then
+  echo 'No active billing accounts were detected. In order to create a project, Sandbox needs to have at least one billing account'
+  echo 'Follow this link to setup a billing account:'
+  echo 'https://cloud.google.com/billing/docs/how-to/manage-billing-account'
+  exit;
 fi
 
 # Make sure we use Application Default Credentials for authentication
@@ -47,8 +56,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=""
 gcloud auth application-default login
 
 echo **WARNING** Terraform script will create a Sandbox cluster. It asks for billing account
-echo If you have not set up billing account, choose `N` and follow this link:
-echo https://cloud.google.com/billing/docs/how-to/manage-billing-account to set it up.
+echo If you have not set up billing account or want to cancel the operation, choose `N`.
 echo 
 echo To list active billing accounts, run:
 echo gcloud beta billing accounts list --filter open=true

@@ -55,6 +55,8 @@ cluster setup that may or may not be reasonable to do in terraform.
 Okay but I want to try it anyway
 --------------------------------------------------------------------------------
 
+[![Open in Cloud Shell](//gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://source.developers.google.com/p/stackdriver-sandbox-230822/r/sandbox&cloudshell_git_branch=terraform-demo&cloudshell_working_dir=terraform)
+
 That's cool! I'm not going to stop you.First, make sure you have a billing
 account called "Google". Capitalization matters. Ideally that billing account is
 owned by your @google.com GCP user and has your external user listed as an
