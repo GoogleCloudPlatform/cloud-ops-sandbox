@@ -34,9 +34,15 @@ Google Stackdriver is a suite of tools that helps to gain full observability for
 
 ### Setup
 
-Click the Cloud Shell button for automated one click installation of a new Stackdriver Sandbox cluster in a new Google Cloud Project.
+1. Click the Cloud Shell button for automated one click installation of a new Stackdriver Sandbox cluster in a new Google Cloud Project.
 
 [![Open in Cloud Shell](//gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://source.developers.google.com/p/stackdriver-sandbox-230822/r/sandbox&cloudshell_git_branch=master&cloudshell_working_dir=terraform)
+
+2. In the Cloud Shell command prompt, type:
+
+```bash
+$ ./install.sh
+```
 
 ## Service Overview
 
@@ -56,7 +62,6 @@ add them to the cart, and purchase them.
 >**We are not endorsing the architecture of Hipster Shop as the best way to build such a shop!**
 > The architecture is optimized for learning purposes and includes modern stack: Kubernetes, GKE, Istio,
 Stackdriver, gRPC, OpenCensus** and similar cloud-native technologies.
-
 
 [![Architecture of
 microservices](./docs/img/architecture-diagram.png)](./docs/img/architecture-diagram.png)

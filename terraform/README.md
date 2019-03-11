@@ -1,7 +1,7 @@
-Hipster Shop Terraform PoC
+Hipster Shop Terraform
 ================================================================================
 
-This directory contains a heavily documented, proof-of-concept level [Terraform]
+This directory contains a heavily documented, [Terraform]
 config for deploying [Hipster Shop]. It's part of the [Stackdriver Sandbox]
 project. The goal of the project is to provide a one-click installer that builds
 a fullly functional environment including Hipster Shop, some new tools and
@@ -12,25 +12,19 @@ experimentation.
 [Hipster Shop]: https://github.com/GoogleCloudPlatform/microservices-demo
 [Stackdriver Sandbox]: https://docs.google.com/document/d/1mz7VfgQN8Yi6-4H25FrQu6z8LeZfWJksd-cvgeD26A8/edit
 
-⚠️ This should not be shared publicly! ⚠️
-
-tl;dr:
+tl;dr 
 --------------------------------------------------------------------------------
 
-IMO, at this point (1-Feb-2019) terraform does not provide significant value
-over what we could accomplish with a shell script. This will remain true until
-we can manage the desired Stackdriver resources with terraform, which will
-require the APIs to reach beta and [Cloud Graphite] to add support for them to
-the [GCP provider].
+Terraform does not provide significant value over what we could accomplish with a shell script. This will remain true until we can manage the desired Stackdriver resources with terraform, which will require the APIs to reach beta and [Cloud Graphite] to add support for them to the [GCP provider].
 
 More details below, but in a nutshell:
 
 * Terraform can easily provision the infrastructure necessary
 * Some heroics are required to deploy Hipster Shop
-* Stackdriver support in the GCP provider is limited, possibly/probably due to
+* Stackdriver support in the GCP provider is limited due to
   API availability
 
-[Cloud Graphite]: http://go/cloud-graphite/projects/terraform.md
+[Cloud Graphite]: https://github.com/terraform-providers/terraform-provider-google
 [GCP provider]: https://www.terraform.io/docs/providers/google/index.html
 
 Caveats and Limitations
@@ -55,17 +49,19 @@ cluster setup that may or may not be reasonable to do in terraform.
 Okay but I want to try it anyway
 --------------------------------------------------------------------------------
 
+1. Click on "Open in Cloud Shell" button below.
+2. Run ./install.sh script.
+
 [![Open in Cloud Shell](//gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://source.developers.google.com/p/stackdriver-sandbox-230822/r/sandbox&cloudshell_git_branch=terraform-demo&cloudshell_working_dir=terraform)
 
-That's cool! I'm not going to stop you.First, make sure you have a billing
-account called "Google". Capitalization matters. Ideally that billing account is
-owned by your @google.com GCP user and has your external user listed as an
-administrator.
+## Alternative way (no script)
+
+Make sure you have a billing account enabled.
 
 1. [Install terraform]
 2. run some commands:
 
-```
+```bash
 $ gcloud auth application-default login
 $ git clone -b terraform-demo https://source.developers.google.com/p/stackdriver-sandbox-230822/r/sandbox
 $ cd sandbox/terraform
