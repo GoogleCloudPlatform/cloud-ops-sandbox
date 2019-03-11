@@ -2,34 +2,61 @@
 Stackdriver Sandbox is an open source tool that helps practitioners to learn Service Reliability Engineering practices from Google and apply them on their cloud services using Stackdriver. It is based on [Hipster Shop](https://github.com/GoogleCloudPlatform/microservices-demo) - Cloud-Native Microservices Demo Application.
 
 It offers:
-* **Demo Service** - an application built using microservices architecture on modern, cloud native stack
+
+* **Demo Service** - an application built using microservices architecture on modern, cloud native stack.
 * **One-click deployment script** of the service to Google Cloud Platform
 * **Load Generator** - a component that produces synthetic traffic on a demo service
 * (Soon) **SRE Runbook** - pre-built routine procedures  for  operating deployed sample service that follows best SRE practices using Stackdriver
 
-## Why Sandbox?
-Google Stackdriver is a suite of tools that helps to gain full observability for your code and applications.
-Customers that start evaluating Stackdriver often ask: "Will it work for my application needs"? They want to try Stackdriver in "real-life" conditions, but not risk their production. With Sandbox we provide a tool that can automatically provision a new demo cluster that receives traffic, simulating real users. This simulates production environment without risking real production workloads. Practicioners can try out using various Stackdriver tools to solve problems and accomplish standard SRE taks on a Sandboxed environment. This is the most effective way to learn Stackdriver.
+## Why Sandbox
 
-# Getting Started
-This project contains a 10-tier microservices application. The application is a
+Google Stackdriver is a suite of tools that helps to gain full observability for your code and applications. You might want to take Stackdriver to a "test drive" in order to answer a question: "Will it work for my application needs"? The most effective way to learn is by testing the tool in "real-life" conditions, but without risking production. With Sandbox we provide a tool that automatically provisions a new demo cluster that receives traffic, simulating real users. Practicioners can try out using various Stackdriver tools to solve problems and accomplish standard SRE taks on a Sandboxed environment.
+
+## Getting Started
+
+* Creating new Sandbox
+  * [Prerequisites](#Prerequisites)
+  * [Setup](#Setup)
+* [Service Overview](#Service-Overview)
+  * [Screenshots](#Screenshots)
+  * [Architecture](#Architecture)
+* Contribute code to Sandbox
+  * [Running locally](#Running-locally)
+  * [Running on GKE](#Running-on-GKE)
+  * [Using static images](#Using-static-images)
+  * [GKE with Istio](#GKE-with-Istio)
+
+## Creating new Sandbox
+
+### Prerequisites
+
+* Create and enable [Cloud Billing Account](https://cloud.google.com/billing/docs/how-to/manage-billing-account).
+
+### Setup
+
+Click the Cloud Shell button for automated one click installation of a new Stackdriver Sandbox cluster in a new Google Cloud Project.
+
+[![Open in Cloud Shell](//gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://source.developers.google.com/p/stackdriver-sandbox-230822/r/sandbox&cloudshell_git_branch=terraform-demo&cloudshell_working_dir=terraform)
+
+## Service Overview
+
+This project contains a 10-tier microservices application. It is a
 web-based e-commerce app called **“Hipster Shop”** where users can browse items,
 add them to the cart, and purchase them.
 
->**We are not endorsing the architecture of Hipster Shop as the best way to build such a shop!**
-> The architecture is optimized for learning purposes and includes modern stack: Kubernetes, GKE, Istio,
-Stackdriver, gRPC, OpenCensus** and similar cloud-native technologies.
-
-## Screenshots
+### Screenshots
 
 | Home Page | Checkout Screen |
 |-----------|-----------------|
 | [![Screenshot of store homepage](./docs/img/hipster-shop-frontend-1.png)](./docs/img/hipster-shop-frontend-1.png) | [![Screenshot of checkout screen](./docs/img/hipster-shop-frontend-2.png)](./docs/img/hipster-shop-frontend-2.png) |
 
-## Service Architecture
+### Service Architecture
 
-**Hipster Shop** is composed of many microservices written in different
-languages that talk to each other over gRPC.
+**Hipster Shop** is composed of many microservices written in different languages that talk to each other over gRPC.
+>**We are not endorsing the architecture of Hipster Shop as the best way to build such a shop!**
+> The architecture is optimized for learning purposes and includes modern stack: Kubernetes, GKE, Istio,
+Stackdriver, gRPC, OpenCensus** and similar cloud-native technologies.
+
 
 [![Architecture of
 microservices](./docs/img/architecture-diagram.png)](./docs/img/architecture-diagram.png)
@@ -50,28 +77,22 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 | [adservice](./src/adservice) | Java | Provides text ads based on given context words. |
 | [loadgenerator](./src/loadgenerator) | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend. |
 
+### Technologies
 
-## Technologies
-
-- **[Kubernetes](https://kubernetes.io)/[GKE](https://cloud.google.com/kubernetes-engine/):**
+* **[Kubernetes](https://kubernetes.io)/[GKE](https://cloud.google.com/kubernetes-engine/):**
   The app is designed to run on Google Kubernetes Engine.
-- **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to
+* **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to
   communicate to each other.
-- **[OpenCensus](https://opencensus.io/) Tracing:** Most services are
+* **[OpenCensus](https://opencensus.io/) Tracing:** Most services are
   instrumented using OpenCensus trace interceptors for gRPC/HTTP.
-- **[Stackdriver APM](https://cloud.google.com/stackdriver/):** Many services
+* **[Stackdriver APM](https://cloud.google.com/stackdriver/):** Many services
   are instrumented with **Profiling**, **Tracing** and **Debugging**.
   **Metrics** and **Context Graph** out of the box.
-- **[Skaffold](https://github.com/GoogleContainerTools/skaffold):** A tool used for doing repeatable deployments. You can deploy to Kubernetes with a single command using Skaffold.
-- **Synthetic Load Generation:** The application demo comes with dedicated load generation service thatthat creates realistic usage patterns on Hipster Shop website using
+* **[Skaffold](https://github.com/GoogleContainerTools/skaffold):** A tool used for doing repeatable deployments. You can deploy to Kubernetes with a single command using Skaffold.
+* **Synthetic Load Generation:** The application demo comes with dedicated load generation service thatthat creates realistic usage patterns on Hipster Shop website using
   [Locust](https://locust.io/) load generator.
 
-## Prerequisites
-
- - Create and enable [Cloud Billing Account](https://cloud.google.com/billing/docs/how-to/manage-billing-account) named "Google".
-
-
-## Installation
+## For Developers
 
 > **Note:** that the first build can take up to 20-30 minutes. Consequent builds
 > will be faster.
@@ -217,4 +238,4 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
 ---
 
-This is not an official Google project. 
+This is not an official Google project.
