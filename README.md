@@ -44,6 +44,14 @@ Google Stackdriver is a suite of tools that helps to gain full observability for
 $ ./install.sh
 ```
 
+### Generate Fake Traffic
+
+1. In the root of the repository, use the `loadgenerator-tool-gcp` executable. For example:
+
+```bash
+$ ./loadgenerator-tool-gcp startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
+```
+
 ## Service Overview
 
 This project contains a 10-tier microservices application. It is a
