@@ -44,11 +44,12 @@ mk_kubernetes_manifests() {
     for dir in ./src/*/
     do
         svcname="$(basename "${dir}")"
-        image="$REPO_PREFIX/$svcname:$TAG"
+        image="$REPO_PREFIX/$
+        :$TAG"
 
         pattern="^(\s*)image:\s.*$svcname(.*)(\s*)"
         replace="\1image: $image\3"
-        out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
+        out_manifest="$(sed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
     done
     echo "${out_manifest}"
 }
