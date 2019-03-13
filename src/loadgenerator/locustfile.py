@@ -62,6 +62,7 @@ def addToCart(l):
         'quantity': random.choice([1,2,3,4,5,10])})
 
 def checkout(l):
+    addToCart(l)
     l.client.post("/cart/checkout", {
         'email': 'someone@example.com',
         'street_address': '1600 Amphitheatre Parkway',
