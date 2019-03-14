@@ -14,4 +14,4 @@ FROM base
 COPY --from=builder /install /usr/local
 
 COPY . .
-ENTRYPOINT ./loadgen.sh
+ENTRYPOINT ["./loadgen.sh"]
