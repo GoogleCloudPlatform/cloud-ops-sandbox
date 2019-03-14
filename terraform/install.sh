@@ -71,3 +71,11 @@ while true; do
     esac
 done
 
+echo Customizing kubernetes manifests
+.\customize-manifests.sh
+
+echo Setting kubectl context to currently deployed GKE cluster
+gcloud container clusters get-credentials stackdriver-sandbox --zone $(terraform output zone) --project $(terraform output ip))
+
+echo Applying kubernetes manifests
+kubectl apply -f ..\release\kubernetes-manifests.yaml
