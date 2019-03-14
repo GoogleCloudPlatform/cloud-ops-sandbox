@@ -1,25 +1,27 @@
 #!/usr/bin/env python
-"""Generate fake traffic for Stackdriver Sandbox via GCP
+"""Generate fake traffic for Stackdriver Sandbox
 
 A command line tool to start and stop generating load for Stackdriver Sandbox.
 Manages load generation jobs running on GCP by spinning up and tearing down
 Compute Engine instances running the loadgenerator defined under /src/loadgenerator.
 
 Usage:
-    ./loadgenerator-tool-gcp -h
+    ./loadgenerator-tool -h
 
 Quickstart:
-    ./loadgenerator-tool-gcp startup --zone us-central1-c SANDBOX_FRONTEND_ADDRESS
+    ./loadgenerator-tool startup --zone us-central1-c SANDBOX_FRONTEND_ADDRESS
 """
 
 import argparse
+import os
 import random
-import string
 import shlex
+import string
 import subprocess
 
+DEVNULL = open(os.devnull, 'w')
 
-def startup(args):
+def _startup(args):
     """Start a load generator job on Google Cloud Platform
 
     args.target_ip -- the IP address to send load to
@@ -41,47 +43,61 @@ def startup(args):
             command = command + ' --container-arg={0}'.format(s)
 
     subprocess.call(['echo'] + shlex.split(command))
-    subprocess.call(shlex.split(command))
+    subprocess.Popen(shlex.split(command), stdout=DEVNULL)
 
 
-def list_jobs(args):
+def _list(args):
     """List all load generator jobs running on Google Cloud Platform"""
     command = 'gcloud compute instances list --filter=name~\'loadgenerator*\''
     subprocess.call(['echo'] + shlex.split(command))
     subprocess.call(shlex.split(command))
 
 
-def teardown(args):
+def _teardown(args):
     """Teardown a load generator job running on Google Cloud Platform
 
     args.name -- the name of the instance running the job
     args.zone -- the Google Compute Engine zone the job is in
     """
-    command = 'gcloud compute instances delete {0} --zone {1} -q'.format(args.name, args.zone)
-    subprocess.call(['echo'] + shlex.split(command))
-    subprocess.call(shlex.split(command))
+    for n in args.names:
+        command = 'gcloud compute instances delete {0} --zone {1} -q'.format(n, args.zone)
+        subprocess.call(['echo'] + shlex.split(command))
+        subprocess.Popen(shlex.split(command), stdout=DEVNULL)
+
+
+def _check_prereqs():
+    try:
+        subprocess.check_call(shlex.split('gcloud version'),
+                stdout=DEVNULL, stderr=DEVNULL)
+        return True
+    except subprocess.CalledProcessError:
+        print("Missing Prerequisite: can't find command 'gcloud'. "
+                "It appears the Google Cloud SDK has not been installed. "
+                "To install, follow this link: https://cloud.google.com/sdk/install")
+        return False
 
 
 def main(args):
-    args.func(args)
+    if _check_prereqs():
+        args.func(args)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='loadgenerator-tool-gcp')
-    subparsers = parser.add_subparsers(help='manage loadgenerator jobs on Google Cloud Platform')
+    parser = argparse.ArgumentParser(prog='loadgenerator-tool')
+    subparsers = parser.add_subparsers()
 
     parser_startup = subparsers.add_parser('startup', help='startup a load generator job')
     parser_startup.add_argument('target_ip', help='the target ip address to send load to')
     parser_startup.add_argument('--zone', required=True, help='the Google Compute Engine zone to send load from')
-    parser_startup.add_argument('--scenarios', metavar='S', dest='scenarios', type=str, nargs='+', help='the load generator scenario(s) to run [if unspecified, runs all available scenarios]')
-    parser_startup.set_defaults(func=startup)
+    parser_startup.add_argument('--scenarios', metavar='S', dest='scenarios', type=str, nargs='+', help='a load generator scenario to run [if unspecified, runs all available scenarios]')
+    parser_startup.set_defaults(func=_startup)
 
-    parser_list = subparsers.add_parser('list_jobs', help='list all active load generator jobs on Google Cloud Platform')
-    parser_list.set_defaults(func=list_jobs)
+    parser_list = subparsers.add_parser('list', help='list all active load generator job')
+    parser_list.set_defaults(func=_list)
 
     parser_teardown = subparsers.add_parser('teardown', help='teardown a load generator job')
-    parser_teardown.add_argument('name', help='the name of the instance to teardown')
+    parser_teardown.add_argument('names', metavar='N', type=str, nargs='+', help='a name of an instance to teardown')
     parser_teardown.add_argument('--zone', required=True, help='the Google Compute Engine zone the job is in')
-    parser_teardown.set_defaults(func=teardown)
+    parser_teardown.set_defaults(func=_teardown)
 
     main(parser.parse_args())
