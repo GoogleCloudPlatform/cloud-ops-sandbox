@@ -49,7 +49,7 @@ mk_kubernetes_manifests() {
 
         pattern="^(\s*)image:\s.*$svcname(.*)(\s*)"
         replace="\1image: $image\3"
-        out_manifest="$(sed -r "s/$pattern/$replace/g" <(echo "${out_manifest}") )"
+        out_manifest="$(sed -r "s|$pattern|$replace|" <(echo "${out_manifest}") )"
     done
     echo "${out_manifest}"
 }
