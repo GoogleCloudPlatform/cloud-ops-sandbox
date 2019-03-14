@@ -46,10 +46,10 @@ $ ./install.sh
 
 ### Generate Fake Traffic
 
-1. In the root of the repository, use the `loadgenerator-tool-gcp` executable. For example:
+1. In the root of the repository, use the `loadgenerator-tool` executable. For example:
 
 ```bash
-$ ./loadgenerator-tool-gcp startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
+$ ./loadgenerator-tool startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
 ```
 
 ## Service Overview
