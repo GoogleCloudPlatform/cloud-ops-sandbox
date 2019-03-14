@@ -1,18 +1,19 @@
 #!/usr/bin/env python
-"""Generate fake traffic for Stackdriver Sandbox via GCP
+"""Generate fake traffic for Stackdriver Sandbox
 
 A command line tool to start and stop generating load for Stackdriver Sandbox.
 Manages load generation jobs running on GCP by spinning up and tearing down
 Compute Engine instances running the loadgenerator defined under /src/loadgenerator.
 
 Usage:
-    ./loadgenerator-tool-gcp -h
+    ./loadgenerator-tool -h
 
 Quickstart:
-    ./loadgenerator-tool-gcp startup --zone us-central1-c SANDBOX_FRONTEND_ADDRESS
+    ./loadgenerator-tool startup --zone us-central1-c SANDBOX_FRONTEND_ADDRESS
 """
 
 import argparse
+import os
 import random
 import string
 import shlex
@@ -62,12 +63,26 @@ def teardown(args):
     subprocess.call(shlex.split(command))
 
 
+def check_prereqs():
+    try:
+        FNULL = open(os.devnull, 'w')
+        subprocess.check_call(shlex.split('gcloud version'),
+                stdout=FNULL, stderr=subprocess.STDOUT)
+        return True
+    except CalledProcessError:
+        print("Missing Prerequisite: can't find command 'gcloud'. "
+                "It appears the Google Cloud SDK has not been installed. "
+                "To install, follow this link: https://cloud.google.com/sdk/install")
+        return False
+
+
 def main(args):
-    args.func(args)
+    if check_prereqs():
+        args.func(args)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='loadgenerator-tool-gcp')
+    parser = argparse.ArgumentParser(prog='loadgenerator-tool')
     subparsers = parser.add_subparsers(help='manage loadgenerator jobs on Google Cloud Platform')
 
     parser_startup = subparsers.add_parser('startup', help='startup a load generator job')
