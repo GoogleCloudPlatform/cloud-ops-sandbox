@@ -40,7 +40,8 @@ fi
 
 echo Checking Prerequisites...
 echo Checking existance of billing accounts
-if [[ $(gcloud beta billing accounts list --filter open=true) -eq 1 ]] then
+if [ $(gcloud beta billing accounts list --filter open=true) -eq 1 ] 
+then
   echo 'No active billing accounts were detected. In order to create a project, Sandbox needs to have at least one billing account'
   echo 'Follow this link to setup a billing account:'
   echo 'https://cloud.google.com/billing/docs/how-to/manage-billing-account'
