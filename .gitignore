@@ -11,7 +11,8 @@ pkg/
 .kubernetes-manifests-*/
 release/*
 terraform/.terraform/
-terraform/terraform.tfstate
+gterraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 terraform/terraform
 terraform/terraform_0.11.11_linux_amd64.zip
+terraform/terraform.tfstate
