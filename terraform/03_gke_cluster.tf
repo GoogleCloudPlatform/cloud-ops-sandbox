@@ -103,7 +103,7 @@ resource "null_resource" "set_gke_context" {
     command = "gcloud container clusters get-credentials stackdriver-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${google_project.project.id}"
   }
 
-  depends_on = ["null_resource.customize_manifests"]
+  depends_on = ["google_project_service.gke", "null_resource.customize_manifests"]
 }
 
 # Deploy microservices into GKE cluster 
@@ -113,4 +113,15 @@ resource "null_resource" "deploy_services" {
   }
 
   depends_on = ["null_resource.set_gke_context"]
+}
+
+# There is no reliable way to do deployment verification with kubernetes
+# For the purposes of Sandbox, we can mitigage by waiting a few sec to ensure kubectl apply completes
+resource "null_resource" "delay" {
+  provisioner "local-exec" {
+    command = "sleep 5"
+  }
+  triggers = {
+    "before" = "${null_resource.deploy_services.id}"
+  }
 }
