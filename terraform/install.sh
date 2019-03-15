@@ -23,13 +23,23 @@ function installTerraform()
   sudo install terraform /usr/local/bin
 }
 
-function applyTerraform()
-{
+function applyTerraform() {
   # Initialize terraform state
   terraform init
 
   # Apply Terraform automation
   terraform apply -auto-approve
+}
+
+function getExternalIp() {
+  external_ip=""; 
+  while [ -z $external_ip ]; 
+  do
+     echo "Waiting for Hipster Shop endpoint..."; 
+     external_ip=$(kubectl get svc frontend-external --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); 
+     [ -z "$external_ip" ] && sleep 10; 
+  done; 
+  echo "Stackdriver Sandbox cluster provisioning has completed successfully. Access it at http://$external_ip"
 }
 
 echo Make sure Terraform is installed
@@ -65,17 +75,18 @@ echo
 while true; do
     read -p "Do you wish to continue to cluster creation? y/n " yn
     case $yn in
-        [Yy]* ) applyTerraform; break;;
+        [Yy]* ) applyTerraform; getExternalIp; break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac
 done
 
-echo Customizing kubernetes manifests
-.\customize-manifests.sh
+#echo Customizing kubernetes manifests
+#.\customize-manifests.sh
 
-echo Setting kubectl context to currently deployed GKE cluster
-gcloud container clusters get-credentials stackdriver-sandbox --zone $(terraform output zone) --project $(terraform output ip))
+#echo Setting kubectl context to currently deployed GKE cluster
+#gcloud container clusters get-credentials stackdriver-sandbox --zone $(terraform output zone) --project $(gcloud config list --format 'value(core.project)' 2>/dev/null)
 
-echo Applying kubernetes manifests
-kubectl apply -f ..\release\kubernetes-manifests.yaml
+#echo Applying kubernetes manifests
+#kubectl apply -f ..\release\kubernetes-manifests.yaml
+

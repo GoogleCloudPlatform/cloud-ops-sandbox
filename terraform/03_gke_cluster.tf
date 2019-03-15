@@ -78,9 +78,39 @@ resource "google_container_cluster" "gke" {
     }
   }
 
+  # Stores the zone of created gke cluster
+  provisioner "local-exec" {
+    command = "echo ${element(random_shuffle.zone.result, 0)} >>sandbox.txt"
+  }
+  
   # add a hint that the service resource must be created (i.e., the service must
   # be enabled) before the cluster can be created. This will not address the
   # eventual consistency problems we have with the API but it will make sure
   # that we're at least trying to do things in the right order.
   depends_on = ["google_project_service.gke"]
+}
+
+# Customize kubernetes manifests for upcoming deployment to GKE
+resource "null_resource" "customize_manifests" {
+  provisioner "local-exec" {
+    command = "./customize-manifests.sh"
+  }
+}
+
+# Setting kubectl context to currently deployed GKE cluster
+resource "null_resource" "set_gke_context" {
+  provisioner "local-exec" {
+    command = "gcloud container clusters get-credentials stackdriver-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${google_project.project.id}"
+  }
+
+  depends_on = ["null_resource.customize_manifests"]
+}
+
+# Deploy microservices into GKE cluster 
+resource "null_resource" "deploy_services" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ..//release//kubernetes-manifests.yaml"
+  }
+
+  depends_on = ["null_resource.set_gke_context"]
 }

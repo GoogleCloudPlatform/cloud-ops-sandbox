@@ -9,6 +9,7 @@ pkg/
 .idea
 .skaffold-*.yaml
 .kubernetes-manifests-*/
+release/*
 terraform/.terraform/
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
