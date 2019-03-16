@@ -97,22 +97,26 @@ resource "null_resource" "customize_manifests" {
   }
 }
 
-# Setting kubectl context to currently deployed GKE cluster
-resource "null_resource" "set_gke_context" {
-  provisioner "local-exec" {
-    command = "gcloud container clusters get-credentials stackdriver-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${google_project.project.id}"
-  }
-
-  depends_on = ["google_project_service.gke", "null_resource.customize_manifests"]
-}
-
 # Set current project 
 resource "null_resource" "current_project" {
   provisioner "local-exec" {
     command = "gcloud config set project ${google_project.project.id}"
   }
 
-  depends_on = ["null_resource.set_gke_context"]
+  depends_on = ["null_resource.customize_manifests"]
+}
+
+# Setting kubectl context to currently deployed GKE cluster
+resource "null_resource" "set_gke_context" {
+  provisioner "local-exec" {
+    command = "gcloud container clusters get-credentials stackdriver-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${google_project.project.id}"
+  }
+
+  depends_on = [
+    "google_project_service.gke", 
+    "null_resource.customize_manifests",
+    "null_resource.current_project"
+  ]
 }
 
 # Deploy microservices into GKE cluster 
