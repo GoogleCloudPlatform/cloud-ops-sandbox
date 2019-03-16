@@ -106,6 +106,15 @@ resource "null_resource" "set_gke_context" {
   depends_on = ["google_project_service.gke", "null_resource.customize_manifests"]
 }
 
+# Set current project 
+resource "null_resource" "current_project" {
+  provisioner "local-exec" {
+    command = "gcloud config set project ${google_project.project.id}"
+  }
+
+  depends_on = ["null_resource.set_gke_context"]
+}
+
 # Deploy microservices into GKE cluster 
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
@@ -116,7 +125,7 @@ resource "null_resource" "deploy_services" {
 }
 
 # There is no reliable way to do deployment verification with kubernetes
-# For the purposes of Sandbox, we can mitigage by waiting a few sec to ensure kubectl apply completes
+# For the purposes of Sandbox, we can mitigate by waiting a few sec to ensure kubectl apply completes
 resource "null_resource" "delay" {
   provisioner "local-exec" {
     command = "sleep 5"
@@ -125,3 +134,4 @@ resource "null_resource" "delay" {
     "before" = "${null_resource.deploy_services.id}"
   }
 }
+

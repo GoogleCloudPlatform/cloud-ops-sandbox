@@ -42,6 +42,11 @@ function getExternalIp() {
   echo "Stackdriver Sandbox cluster provisioning has completed successfully. Access it at http://$external_ip"
 }
 
+# Install Load Generator service and start generating synthetic traffic to Sandbox
+function loadGen() {
+  ../loadgenerator-tool startup --zone us-west2-a $external_ip
+}
+
 echo Make sure Terraform is installed
 if ! [ -x "$(command -v terraform)" ]; then
   echo 'Terraform is not installed. Trying to install it.' >&2
@@ -75,7 +80,7 @@ echo
 while true; do
     read -p "Do you wish to continue to cluster creation? y/n " yn
     case $yn in
-        [Yy]* ) applyTerraform; getExternalIp; break;;
+        [Yy]* ) applyTerraform; getExternalIp; loadGen; break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac
