@@ -78,9 +78,64 @@ resource "google_container_cluster" "gke" {
     }
   }
 
+  # Stores the zone of created gke cluster
+  provisioner "local-exec" {
+    command = "echo ${element(random_shuffle.zone.result, 0)} >>sandbox.txt"
+  }
+  
   # add a hint that the service resource must be created (i.e., the service must
   # be enabled) before the cluster can be created. This will not address the
   # eventual consistency problems we have with the API but it will make sure
   # that we're at least trying to do things in the right order.
   depends_on = ["google_project_service.gke"]
 }
+
+# Customize kubernetes manifests for upcoming deployment to GKE
+resource "null_resource" "customize_manifests" {
+  provisioner "local-exec" {
+    command = "./customize-manifests.sh"
+  }
+}
+
+# Set current project 
+resource "null_resource" "current_project" {
+  provisioner "local-exec" {
+    command = "gcloud config set project ${google_project.project.id}"
+  }
+
+  depends_on = ["null_resource.customize_manifests"]
+}
+
+# Setting kubectl context to currently deployed GKE cluster
+resource "null_resource" "set_gke_context" {
+  provisioner "local-exec" {
+    command = "gcloud container clusters get-credentials stackdriver-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${google_project.project.id}"
+  }
+
+  depends_on = [
+    "google_project_service.gke", 
+    "null_resource.customize_manifests",
+    "null_resource.current_project"
+  ]
+}
+
+# Deploy microservices into GKE cluster 
+resource "null_resource" "deploy_services" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ..//release//kubernetes-manifests.yaml"
+  }
+
+  depends_on = ["null_resource.set_gke_context"]
+}
+
+# There is no reliable way to do deployment verification with kubernetes
+# For the purposes of Sandbox, we can mitigate by waiting a few sec to ensure kubectl apply completes
+resource "null_resource" "delay" {
+  provisioner "local-exec" {
+    command = "sleep 5"
+  }
+  triggers = {
+    "before" = "${null_resource.deploy_services.id}"
+  }
+}
+

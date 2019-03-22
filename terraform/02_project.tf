@@ -19,7 +19,7 @@ resource "random_id" "project" {
 
 # Here we create the actual project.
 resource "google_project" "project" {
-  name = "Stackdriver Sandbox - demo environment for learning Stackdriver"
+  name = "Stackdriver Sandbox Demo"
 
   # This references the random project ID we created above; note that we're
   # asking for the `dec` attribute which returns the number in decimal format

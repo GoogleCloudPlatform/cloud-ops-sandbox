@@ -45,6 +45,7 @@ images: [ 'gcr.io/$PROJECT_ID/$REPO_NAME/adservice',
           'gcr.io/$PROJECT_ID/$REPO_NAME/loadgenerator',
           'gcr.io/$PROJECT_ID/$REPO_NAME/paymentservice',
           'gcr.io/$PROJECT_ID/$REPO_NAME/productcatalogservice',
-          'gcr.io/$PROJECT_ID/$REPO_NAME/recommendationservice'
+          'gcr.io/$PROJECT_ID/$REPO_NAME/recommendationservice',
+          'gcr.io/$PROJECT_ID/$REPO_NAME/shippingservice'
         ]
 timeout: 1800s

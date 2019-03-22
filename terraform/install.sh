@@ -23,13 +23,28 @@ function installTerraform()
   sudo install terraform /usr/local/bin
 }
 
-function applyTerraform()
-{
+function applyTerraform() {
   # Initialize terraform state
   terraform init
 
   # Apply Terraform automation
   terraform apply -auto-approve
+}
+
+function getExternalIp() {
+  external_ip=""; 
+  while [ -z $external_ip ]; 
+  do
+     echo "Waiting for Hipster Shop endpoint..."; 
+     external_ip=$(kubectl get svc frontend-external --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); 
+     [ -z "$external_ip" ] && sleep 10; 
+  done; 
+  echo "Stackdriver Sandbox cluster provisioning has completed successfully. Access it at http://$external_ip"
+}
+
+# Install Load Generator service and start generating synthetic traffic to Sandbox
+function loadGen() {
+  ../loadgenerator-tool startup --zone us-west2-a $external_ip
 }
 
 echo Make sure Terraform is installed
@@ -65,9 +80,8 @@ echo
 while true; do
     read -p "Do you wish to continue to cluster creation? y/n " yn
     case $yn in
-        [Yy]* ) applyTerraform; break;;
+        [Yy]* ) applyTerraform; getExternalIp; loadGen; break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac
 done
-
