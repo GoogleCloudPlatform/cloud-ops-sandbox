@@ -14,4 +14,5 @@ FROM base
 COPY --from=builder /install /usr/local
 
 COPY . .
-ENTRYPOINT ["./loadgen.sh"]
+ENTRYPOINT ["./loadgenerator-entrypoint.sh"]
+CMD ["--no-web", "--clients=10", "--hatch-rate=5"]
