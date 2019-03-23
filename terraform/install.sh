@@ -45,7 +45,12 @@ getExternalIp() {
      external_ip=$(kubectl get svc frontend-external --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); 
      [ -z "$external_ip" ] && sleep 10; 
   done; 
-  log "Stackdriver Sandbox cluster provisioning has completed successfully. Access it at http://$external_ip"
+
+  log "Verifying that Hipster Shop Frontend is accessible"
+  if [[ $(curl -sL -w "%{http code}\\n" "http://$external_ip" -o /dev/null) -eq 200 ]]
+  then
+    log "Stackdriver Sandbox cluster provisioning has completed successfully! Access it at http://$external_ip"
+  fi
 }
 
 # Install Load Generator service and start generating synthetic traffic to Sandbox
