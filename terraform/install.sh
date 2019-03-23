@@ -34,8 +34,7 @@ applyTerraform() {
   terraform init
 
   log "Apply Terraform automation"
-  terraform apply -auto-approve 
-  #-var 'billing_account=`${billingAccounts[0]}`'
+  terraform apply -auto-approve -var="billing_account=${billingAccounts[0]}"
 }
 
 getExternalIp() {
