@@ -59,24 +59,28 @@ loadGen() {
   ../loadgenerator-tool startup --zone us-west2-a $external_ip
 }
 
-log "Make sure Terraform is installed"
-if ! [ -x "$(command -v terraform)" ]; then
-  log "Terraform is not installed. Trying to install it."
-  installTerraform
-fi
-
 log "Checking Prerequisites..."
 log "Checking existence of billing accounts"
 billingAccounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
-if [[ ${#billingAccounts[@]} -eq 0 ]]
+if [ -z "$billingAccounts" ] || [[ ${#billingAccounts[@]} -eq 0 ]]
 then
   log "No active billing accounts were detected. In order to create a project, Sandbox needs to have at least one billing account"
   log "Follow this link to setup a billing account:"
   log "https://cloud.google.com/billing/docs/how-to/manage-billing-account"
+  log ""
+  log "To list active billing accounts, run:"
+  log "gcloud beta billing accounts list --filter open=true"
+
   exit;
 elif [[ ${#billingAccounts[@]} -eq 1 ]]
 then
   log "Billing account detected: '${billingAccounts[0]}'"
+fi
+
+log "Make sure Terraform is installed"
+if ! [ -x "$(command -v terraform)" ]; then
+  log "Terraform is not installed. Trying to install it."
+  installTerraform
 fi
 
 # Make sure we use Application Default Credentials for authentication
@@ -95,17 +99,22 @@ then
   exit;
 fi;
 
+# Provision Stackdriver Sandbox cluster
+applyTerraform;
+getExternalIp;
+loadGen;
+
 #log "**WARNING** Terraform script will create a Sandbox cluster. It asks for billing account"
 #log "If you have not set up billing account or want to cancel the operation, choose 'N'."
 #log ""
 #log "To list active billing accounts, run:"
 #log "gcloud beta billing accounts list --filter open=true"
 #log
-while true; do
-    read -p "Do you wish to continue to cluster creation? y/n " yn
-    case $yn in
-        [Yy]* ) applyTerraform; getExternalIp; loadGen; break;;
-        [Nn]* ) exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
+#while true; do
+#    read -p "Do you wish to continue to cluster creation? y/n " yn
+#    case $yn in
+#        [Yy]* ) applyTerraform; getExternalIp; loadGen; break;;
+#        [Nn]* ) exit;;
+#        * ) echo "Please answer yes or no.";;
+#    esac
+#done
