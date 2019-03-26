@@ -1,3 +1,17 @@
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Here we are creating a project to contain the deployed resources. A couple of
 # general terraform notes: this is the first time we're seeing the `data`
 # stanza. This gives a way to look stuff up and use it in other resources. Here
@@ -43,6 +57,22 @@ resource "google_project_service" "compute" {
   project = "${google_project.project.id}"
 
   service = "compute.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "clouddebugger" {
+  project = "${google_project.project.id}"
+
+  service = "clouddebugger.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "errorreporting" {
+  project = "${google_project.project.id}"
+
+  service = "clouderrorreporting.googleapis.com"
 
   disable_dependent_services = true
 }

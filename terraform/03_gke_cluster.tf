@@ -1,3 +1,17 @@
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Let's create the GKE cluster! This one's pretty complicated so buckle up.
 
 # This is another example of the random provider. Here we're using it to pick a
@@ -5,8 +19,8 @@
 resource "random_shuffle" "zone" {
   input = ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"]
 
-  # Seeding the RNG is technically optional but while I was building this I
-  # found that it only ever picked `us-central-1c` unless I seeded it. Here
+  # Seeding the RNG is technically optional but while building this we
+  # found that it only ever picked `us-central-1c` unless we seeded it. Here
   # we're using the ID of the project as a seed because it is unique to the
   # project but will not change, thereby guaranteeing stability of the results.
   seed = "${google_project.project.id}"
@@ -28,15 +42,15 @@ resource "random_shuffle" "zone" {
 resource "google_container_cluster" "gke" {
   project = "${google_project.project.id}"
 
-  # ... and here's how you specify the name
+  # Here's how you specify the name
   name = "stackdriver-sandbox"
 
-  # next we set the zone by grabbing the result of the random_shuffle above. It
+  # Set the zone by grabbing the result of the random_shuffle above. It
   # returns a list so we have to pull the first element off. If you're looking
   # at this and thinking "huh terraform syntax looks a clunky" you are NOT WRONG
   zone = "${element(random_shuffle.zone.result, 0)}"
 
-  # here we're using an embedded resource to define the node pool. Another
+  # Using an embedded resource to define the node pool. Another
   # option would be to create the node pool as a separate resource and link it
   # to this cluster. There are tradeoffs to each approach.
   #
@@ -65,13 +79,11 @@ resource "google_container_cluster" "gke" {
     
     initial_node_count = 5
 
-    # this stanza could be left off and we'd just always have five nodes
     autoscaling {
       min_node_count = 3
       max_node_count = 10
     }
 
-    # this stanza could be omitted and both would default to false
     management {
       auto_repair  = true
       auto_upgrade = true
@@ -80,7 +92,7 @@ resource "google_container_cluster" "gke" {
 
   # Stores the zone of created gke cluster
   provisioner "local-exec" {
-    command = "echo ${element(random_shuffle.zone.result, 0)} >>sandbox.txt"
+    command = "gcloud config set compute/zone ${element(random_shuffle.zone.result, 0)}"
   }
   
   # add a hint that the service resource must be created (i.e., the service must
@@ -106,6 +118,14 @@ resource "null_resource" "current_project" {
   depends_on = ["null_resource.customize_manifests"]
 }
 
+#resource "null_resource" "sleeping_subprocess" {
+#  provisioner "local-exec" {
+#      command = "sleep 60 >./stdout.log 2>./stderr.log & echo \"sleeping in PID\" $!"
+#  }
+#
+#  depends_on = ["google_container_cluster.gke"]
+#}
+
 # Setting kubectl context to currently deployed GKE cluster
 resource "null_resource" "set_gke_context" {
   provisioner "local-exec" {
@@ -113,7 +133,7 @@ resource "null_resource" "set_gke_context" {
   }
 
   depends_on = [
-    "google_project_service.gke", 
+    "google_container_cluster.gke", 
     "null_resource.customize_manifests",
     "null_resource.current_project"
   ]
