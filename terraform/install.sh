@@ -44,7 +44,7 @@ function getExternalIp() {
 
 # Install Load Generator service and start generating synthetic traffic to Sandbox
 function loadGen() {
-  ../loadgenerator-tool startup --zone us-west2-a $external_ip
+  ../loadgenerator/quickstart.sh $external_ip
 }
 
 echo Make sure Terraform is installed
