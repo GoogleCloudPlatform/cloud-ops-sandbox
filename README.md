@@ -44,13 +44,10 @@ Google Stackdriver is a suite of tools that helps to gain full observability for
 $ ./install.sh
 ```
 
-### Generate Fake Traffic
+### Next Steps
 
-1. In the root of the repository, use the `loadgenerator-tool` executable. For example:
-
-```bash
-$ ./loadgenerator-tool startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
-```
+* Explore your Sandbox deployment and its [architecture](#Service-Overview)
+* Learn more about Stackdriver using [Code Labs](https://codelabs.developers.google.com/gcp-next/?cat=Monitoring)
 
 ## Service Overview
 
@@ -199,6 +196,13 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
         kubectl get service frontend-external
 
+### Generate Synthetic Traffic
+
+1. If you want to create synthetic load manually, in the root of the repository, use the `loadgenerator-tool` executable. For example:
+
+```bash
+$ ./loadgenerator-tool startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
+```
 
 ### (Optional) Deploying on a Istio-installed GKE cluster
 
