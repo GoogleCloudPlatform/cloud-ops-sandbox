@@ -15,7 +15,13 @@
 
 # This script provisions Hipster Shop Cluster for Stackdriver Sandbox using Terraform
 
-function installTerraform()
+#set -euo pipefail
+set -o errexit  # Exit on error
+#set -o nounset  # Trigger error when expanding unset variables
+
+log() { echo "$1" >&2; }
+
+installTerraform()
 {
   sudo apt-get install unzip
   wget https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_linux_amd64.zip
@@ -23,44 +29,58 @@ function installTerraform()
   sudo install terraform /usr/local/bin
 }
 
-function applyTerraform() {
-  # Initialize terraform state
+applyTerraform() {
+  log "Initialize terraform state"
   terraform init
 
-  # Apply Terraform automation
-  terraform apply -auto-approve
+  log "Apply Terraform automation"
+  terraform apply -auto-approve -var="billing_account=${billingAccounts[0]}"
 }
 
-function getExternalIp() {
+getExternalIp() {
   external_ip=""; 
   while [ -z $external_ip ]; 
   do
-     echo "Waiting for Hipster Shop endpoint..."; 
+     log "Waiting for Hipster Shop endpoint..."; 
      external_ip=$(kubectl get svc frontend-external --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); 
      [ -z "$external_ip" ] && sleep 10; 
   done; 
-  echo "Stackdriver Sandbox cluster provisioning has completed successfully. Access it at http://$external_ip"
+
+  log "Verifying that Hipster Shop Frontend is accessible"
+  if [[ $(curl -sL -w "%{http code}\\n" "http://$external_ip" -o /dev/null) -eq 200 ]]
+  then
+    log "Stackdriver Sandbox cluster provisioning has completed successfully! Access it at http://$external_ip"
+  fi
 }
 
 # Install Load Generator service and start generating synthetic traffic to Sandbox
-function loadGen() {
+loadGen() {
+  log "Running load generator"
   ../loadgenerator-tool startup --zone us-west2-a $external_ip
 }
 
-echo Make sure Terraform is installed
-if ! [ -x "$(command -v terraform)" ]; then
-  echo 'Terraform is not installed. Trying to install it.' >&2
-  installTerraform
+log "Checking Prerequisites..."
+log "Checking existence of billing accounts"
+billingAccounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
+if [ -z "$billingAccounts" ] || [[ ${#billingAccounts[@]} -eq 0 ]]
+then
+  log "No active billing accounts were detected. In order to create a project, Sandbox needs to have at least one billing account"
+  log "Follow this link to setup a billing account:"
+  log "https://cloud.google.com/billing/docs/how-to/manage-billing-account"
+  log ""
+  log "To list active billing accounts, run:"
+  log "gcloud beta billing accounts list --filter open=true"
+
+  exit;
+elif [[ ${#billingAccounts[@]} -eq 1 ]]
+then
+  log "Billing account detected: '${billingAccounts[0]}'"
 fi
 
-echo Checking Prerequisites...
-echo Checking existance of billing accounts
-if [ $(gcloud beta billing accounts list --filter open=true) -eq 1 ] 
-then
-  echo 'No active billing accounts were detected. In order to create a project, Sandbox needs to have at least one billing account'
-  echo 'Follow this link to setup a billing account:'
-  echo 'https://cloud.google.com/billing/docs/how-to/manage-billing-account'
-  exit;
+log "Make sure Terraform is installed"
+if ! [ -x "$(command -v terraform)" ]; then
+  log "Terraform is not installed. Trying to install it."
+  installTerraform
 fi
 
 # Make sure we use Application Default Credentials for authentication
@@ -68,20 +88,33 @@ fi
 # new default credentials by re-authenticating. Re-authentication
 # is needed so we don't assume what's the current state on the machine that runs
 # this script for Sandbox automation with terraform (idempotent automation)
-export GOOGLE_APPLICATION_CREDENTIALS=""
-gcloud auth application-default login
+#export GOOGLE_APPLICATION_CREDENTIALS=""
+#gcloud auth application-default login
 
-echo **WARNING** Terraform script will create a Sandbox cluster. It asks for billing account
-echo If you have not set up billing account or want to cancel the operation, choose `N`.
-echo 
-echo To list active billing accounts, run:
-echo gcloud beta billing accounts list --filter open=true
-echo
-while true; do
-    read -p "Do you wish to continue to cluster creation? y/n " yn
-    case $yn in
-        [Yy]* ) applyTerraform; getExternalIp; loadGen; break;;
-        [Nn]* ) exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
+# Ensure no google.com accounts early - they are not supported!
+acct=$(gcloud info --format="value(config.account)")
+if [[ $acct == *"google.com"* ]];
+then
+  log "Google.com accounts are currently not supported by Stackdriver Sandbox.";
+  exit;
+fi;
+
+# Provision Stackdriver Sandbox cluster
+applyTerraform;
+getExternalIp;
+loadGen;
+
+#log "**WARNING** Terraform script will create a Sandbox cluster. It asks for billing account"
+#log "If you have not set up billing account or want to cancel the operation, choose 'N'."
+#log ""
+#log "To list active billing accounts, run:"
+#log "gcloud beta billing accounts list --filter open=true"
+#log
+#while true; do
+#    read -p "Do you wish to continue to cluster creation? y/n " yn
+#    case $yn in
+#        [Yy]* ) applyTerraform; getExternalIp; loadGen; break;;
+#        [Nn]* ) exit;;
+#        * ) echo "Please answer yes or no.";;
+#    esac
+#done

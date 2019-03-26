@@ -92,7 +92,7 @@ resource "google_container_cluster" "gke" {
 
   # Stores the zone of created gke cluster
   provisioner "local-exec" {
-    command = "echo ${element(random_shuffle.zone.result, 0)} >>sandbox.txt"
+    command = "gcloud config set compute/zone ${element(random_shuffle.zone.result, 0)}"
   }
   
   # add a hint that the service resource must be created (i.e., the service must
@@ -118,6 +118,14 @@ resource "null_resource" "current_project" {
   depends_on = ["null_resource.customize_manifests"]
 }
 
+#resource "null_resource" "sleeping_subprocess" {
+#  provisioner "local-exec" {
+#      command = "sleep 60 >./stdout.log 2>./stderr.log & echo \"sleeping in PID\" $!"
+#  }
+#
+#  depends_on = ["google_container_cluster.gke"]
+#}
+
 # Setting kubectl context to currently deployed GKE cluster
 resource "null_resource" "set_gke_context" {
   provisioner "local-exec" {
@@ -125,7 +133,7 @@ resource "null_resource" "set_gke_context" {
   }
 
   depends_on = [
-    "google_project_service.gke", 
+    "google_container_cluster.gke", 
     "null_resource.customize_manifests",
     "null_resource.current_project"
   ]
