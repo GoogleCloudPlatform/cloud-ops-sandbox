@@ -38,9 +38,68 @@ from time import sleep
 DEVNULL = open(devnull, 'w')
 JOB_WEB_PORT = 8089
 HTTP_TIMEOUT_SECS = 5
+AUTOSTART_NUM_USERS = 100
+AUTOSTART_TIMEOUT = 60
+AUTOSTART_DEFAULT_ZONES = [
+    'us-central1-a',
+    'us-central1-b',
+    'us-central1-c',
+    'us-central1-f',
+]
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
+
+
+def autostart(args):
+    """Automatically starts load generation for the target address.
+
+    Runs setup, creation, and update functionality to start a running load
+    generation job as easily as possible.
+
+    args.target_address -- the IP address to send load to
+    args.zone -- (optional) the Google Compute Engine zone to send load from
+    """
+    setup(args)
+
+    if not _is_address_accessible(args.target_address):
+        logger.error('Could not access target address {0}'.format(args.target_address))
+        print('Please double check the target address and try again.')
+        return
+    
+    name = _generate_job_name()
+    zone = args.zone
+    if not zone:
+        # Randomly choose a default zone
+        zone = choice(AUTOSTART_DEFAULT_ZONES)
+        
+    logger.info('Creating load generation job {0}...'.format(name))
+    address = _create_job(name, zone, args.target_address)
+    if not address:
+        logger.error('Failure accessing load generation job.')
+        logger.info('The job may not have been started correctly; exiting for now.')
+        print('You can try manually starting load generation with this tool\'s "update" command.')
+        return
+
+    logger.info("Waiting up to {0} seconds for {1} to finish setting up...".format(AUTOSTART_TIMEOUT, name))
+    # Attempt to start the job for up to AUTOSTART_TIMEOUT seconds.
+    retry_delay = 5
+    retries = AUTOSTART_TIMEOUT / retry_delay
+    command = (
+            'curl -f -s -S '
+            '--max-time {0} '
+            '--retry {1} '
+            '--retry-delay {2} '
+            '--retry-max-time {3} '
+            '--retry-connrefused '
+            '-X POST -F locust_count={4} -F hatch_rate={4} '
+            '{5}:{6}/swarm'
+            ).format(HTTP_TIMEOUT_SECS, retries, retry_delay, 
+                    AUTOSTART_TIMEOUT, AUTOSTART_NUM_USERS, address, JOB_WEB_PORT)
+    subprocess.Popen(split(command), stdout=DEVNULL, stderr=DEVNULL)
+
+    logger.info('Once finished setting up, load generation will start with {0} users.'.format(AUTOSTART_NUM_USERS))
+    print('After setting up, you can access the job by navigating to http://{0}:{1}'.format(address, JOB_WEB_PORT))
 
 
 def setup(args):
@@ -79,10 +138,9 @@ def create(args):
 
     args.target_address -- the IP address to send load to
     args.zone -- the Google Compute Engine zone to send load from
-    args.scenario -- the load generator scenario to run
+    args.scenario -- (optional) the load generator scenario to run
     """
-    uuid = ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(4))
-    name = 'loadgenerator-' + uuid
+    name = _generate_job_name()
     logger.info('Creating load generation job {0}...'.format(name))
 
     if not _is_address_accessible(args.target_address):
@@ -90,6 +148,26 @@ def create(args):
         print('Please double check the target address and try again.')
         return
 
+    address = _create_job(name, args.zone, args.target_address, args.scenario)
+    if not address:
+        logger.error('Failure while creating load generation job.')
+        logger.info('Exiting...')
+        return
+
+    message = 'Created job {0}'.format(name)
+    message = message + (' with user scenario {0}.'.format(args.scenario) if args.scenario else '.')
+    logger.info(message)
+    logger.info('It may take up to 20 seconds or more for the job to be ready to serve.')
+    print('To start load from this job use this tool\'s "update" command.')
+    print('To access this job\'s web interface, navigate to http://{0}:{1}'.format(address, JOB_WEB_PORT))
+
+
+def _generate_job_name():
+    uuid = ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(4))
+    return 'loadgenerator-' + uuid
+
+
+def _create_job(name, zone, target_address, scenario=None):
     command = (
             'gcloud compute instances create-with-container {0}'
             ' --zone={2}'
@@ -98,28 +176,21 @@ def create(args):
             ' --container-image=gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator:latest'
             ' --container-env="FRONTEND_ADDR={1}"'
             ' --container-arg="--web-port={3}"' 
-            ).format(name, args.target_address, args.zone, JOB_WEB_PORT)
+            ).format(name, target_address, zone, JOB_WEB_PORT)
 
-    if args.scenario:
-        command = command + ' --container-arg={0}'.format(args.scenario)
+    if scenario:
+        command = command + ' --container-arg={0}'.format(scenario)
 
     subprocess.call(['echo'] + split(command))
     try:
         output = subprocess.check_output(split(command))
     except subprocess.CalledProcessError:
-        logger.error('Failure while creating load generation job.')
-        logger.info('Exiting...')
-        return
+        return None
 
     print(output)
 
-    address = findall(r'[0-9]+(?:\.[0-9]+){3}', output)[-1]
-    message = 'Created job {0}'.format(name)
-    message = message + (' with user scenario {0}.'.format(args.scenario) if args.scenario else '.')
-    logger.info(message)
-    logger.info('It may take up to 20 seconds or more for the job to be ready to serve.')
-    print('To start load from this job use this tool\'s "update" command.')
-    print('To access this job\'s web interface, navigate to http://{0}:{1}'.format(address, JOB_WEB_PORT))
+    # Parse the External IP address of the job and return it.
+    return findall(r'[0-9]+(?:\.[0-9]+){3}', output)[-1]
 
 
 def update(args):
@@ -143,7 +214,7 @@ def update(args):
     address = _get_job_address(args.name, args.zone)
     if not address:
         logger.error('Failure accessing load generation job.')
-        logger.info('Exiting...')
+        logger.info('The job may not have started correctly; exiting for now.')
         return
     logger.info('Connecting to {0}...'.format(address))
     if not _is_address_accessible('{0}:{1}'.format(address, JOB_WEB_PORT)):
@@ -222,13 +293,13 @@ def jobs(args):
         print(line_template % (name, zone, url))
 
 
-def stats(args):
-    """Show the stats of all load generator jobs running on Google Cloud Platform.
+def status(args):
+    """Show the status of all load generator jobs running on Google Cloud Platform.
 
     Format:
     NAME / ZONE / STATE / USERS / RPS / FAIL %
     """
-    logger.info('Showing stats of load generation jobs...')
+    logger.info('Showing status of load generation jobs...')
 
     job_list = _get_jobs()
 
@@ -283,20 +354,26 @@ def _check_prereqs():
         subprocess.check_call(split('gcloud version'), stdout=DEVNULL, stderr=DEVNULL)
         return True
     except subprocess.CalledProcessError:
-        logger.error('Unable to find command "gcloud".')
-        logger.warning('It appears the Google Cloud SDK has not been installed.')
-        print('To install "gcloud", follow this link: https://cloud.google.com/sdk/install')
         return False
 
 
 def main(args):
     if _check_prereqs():
         args.func(args)
+    else:
+        logger.error('Unable to find command "gcloud".')
+        logger.warning('It appears the Google Cloud SDK has not been installed.')
+        print('To install "gcloud", follow this link: https://cloud.google.com/sdk/install')
 
 
 if __name__ == "__main__":
     parser = ArgumentParser(prog='loadgenerator-tool')
     subparsers = parser.add_subparsers()
+
+    subparser = subparsers.add_parser('autostart', help='Automatically starts load generation for the target address')
+    subparser.add_argument('target_address', type=str, help='the target address to send load to')
+    subparser.add_argument('--zone', help='the Google Compute Engine zone to send load from [default: configurable]')
+    subparser.set_defaults(func=autostart)
 
     subparser = subparsers.add_parser('setup', help='setup Compute Engine to run load generator jobs')
     subparser.set_defaults(func=setup)
@@ -321,7 +398,7 @@ if __name__ == "__main__":
     subparser = subparsers.add_parser('jobs', help='list all load generator jobs')
     subparser.set_defaults(func=jobs)
 
-    subparser = subparsers.add_parser('stats', help='show the stats of all load generator jobs')
-    subparser.set_defaults(func=stats)
+    subparser = subparsers.add_parser('status', help='show the status of all load generator jobs')
+    subparser.set_defaults(func=status)
 
     main(parser.parse_args())

@@ -56,7 +56,7 @@ getExternalIp() {
 # Install Load Generator service and start generating synthetic traffic to Sandbox
 loadGen() {
   log "Running load generator"
-  ../loadgenerator/quickstart.sh $external_ip
+  ../loadgenerator/loadgenerator-tool autostart $external_ip
 }
 
 log "Checking Prerequisites..."
