@@ -9,7 +9,7 @@ Usage:
     ./loadgenerator-tool -h
 
 Quickstart:
-    ./quickstart.sh
+    ./loadgenerator-tool autostart SANDBOX_FRONTEND_ADDRESS
 
 Fullstart:
     ./loadgenerator-tool setup
@@ -35,18 +35,20 @@ import string
 import subprocess
 from time import sleep
 
-DEVNULL = open(devnull, 'w')
-JOB_WEB_PORT = 8089
-HTTP_TIMEOUT_SECS = 5
-AUTOSTART_NUM_USERS = 100
-AUTOSTART_TIMEOUT = 60
-AUTOSTART_DEFAULT_ZONES = [
+# Global constants that are adjustable.
+JOB_WEB_PORT = 8089  # Web port to access the web interface of a load generation job.
+HTTP_TIMEOUT = 5  # Timeout in seconds for any HTTP calls made by this script.
+AUTOSTART_NUM_USERS = 100  # Number of users to automatically run for the "autostart" command.
+AUTOSTART_TIMEOUT = 60  # Timeout in seconds to wait for new jobs to set up for the "autostart" command.
+AUTOSTART_DEFAULT_ZONES = [  # Default zone selection for the "autostart" command.
     'us-central1-a',
     'us-central1-b',
     'us-central1-c',
     'us-central1-f',
 ]
 
+# Global constants for convenience.
+DEVNULL = open(devnull, 'w')
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
@@ -94,7 +96,7 @@ def autostart(args):
             '--retry-connrefused '
             '-X POST -F locust_count={4} -F hatch_rate={4} '
             '{5}:{6}/swarm'
-            ).format(HTTP_TIMEOUT_SECS, retries, retry_delay, 
+            ).format(HTTP_TIMEOUT, retries, retry_delay, 
                     AUTOSTART_TIMEOUT, AUTOSTART_NUM_USERS, address, JOB_WEB_PORT)
     subprocess.Popen(split(command), stdout=DEVNULL, stderr=DEVNULL)
 
@@ -168,6 +170,15 @@ def _generate_job_name():
 
 
 def _create_job(name, zone, target_address, scenario=None):
+    """Create a load generator job running on Google Cloud Platform.
+
+    Returns the external IP address of the job.
+
+    name -- the name of the job to create
+    zone -- the Google Compute Engine zone to send load from
+    target_address -- the IP address to send load to
+    scenario -- the load generator scenario to run [default: None]
+    """
     command = (
             'gcloud compute instances create-with-container {0}'
             ' --zone={2}'
@@ -242,7 +253,7 @@ def _get_job_address(name, zone):
 
 def _is_address_accessible(address):
     """Check if the specified web address is accessible over HTTP."""
-    command = 'curl -s --max-time {1} --fail {0}'.format(address, HTTP_TIMEOUT_SECS)
+    command = 'curl -s --max-time {1} --fail {0}'.format(address, HTTP_TIMEOUT)
     try:
         subprocess.check_call(split(command), stdout=DEVNULL)
     except subprocess.CalledProcessError:
@@ -254,7 +265,7 @@ def _set_job_users(address, num_users):
     """Sets a job to run the specified number of users."""
     command = (
         'curl -s --max-time {3} --fail -X POST -F locust_count={0} -F hatch_rate={0} {1}:{2}/swarm'
-        ).format(num_users, address, JOB_WEB_PORT, HTTP_TIMEOUT_SECS)
+        ).format(num_users, address, JOB_WEB_PORT, HTTP_TIMEOUT)
     subprocess.call(split(command), stdout=DEVNULL)
 
 
