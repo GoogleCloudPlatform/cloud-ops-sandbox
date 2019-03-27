@@ -13,9 +13,9 @@ Quickstart:
 
 Fullstart:
     ./loadgenerator-tool setup
-    ./loadgenerator-tool create SANDBOX_FRONTEND_ADDRESS --zone us-central1-c
+    ./loadgenerator-tool create SANDBOX_FRONTEND_ADDRESS --zone ZONE
     sleep 20
-    ./loadgenerator-tool update LOADGENERATER_JOB --zone us-central1-c 100
+    ./loadgenerator-tool update LOADGENERATER_JOB --zone ZONE 100
 
 Available User Scenarios:
     [python -m pip install locust]
@@ -383,7 +383,7 @@ if __name__ == "__main__":
 
     subparser = subparsers.add_parser('autostart', help='Automatically starts load generation for the target address')
     subparser.add_argument('target_address', type=str, help='the target address to send load to')
-    subparser.add_argument('--zone', help='the Google Compute Engine zone to send load from [default: configurable]')
+    subparser.add_argument('--zone', help='the Google Compute Engine zone to send load from [default: user-configurable]')
     subparser.set_defaults(func=autostart)
 
     subparser = subparsers.add_parser('setup', help='setup Compute Engine to run load generator jobs')
