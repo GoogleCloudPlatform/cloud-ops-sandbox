@@ -1,0 +1,255 @@
+/* Custom web font */
+@import url('https://fonts.googleapis.com/css?family=Google+Sans:100,200,300,400,700');
+@import url('https://fonts.googleapis.com/css?family=Google+Sans+Display:400,500,700');
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+:root {
+  --blue600: #1a73e8;
+  --grey100: #f1f3f4;
+  --grey200: #e8eaed;
+  --grey400: #bdc1c6;
+  --grey500: #9aa0a6;
+  --grey600: #80868b;
+  --grey700: #5f6368;
+  --grey800: #3c4043;
+  --grey900: #202124;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: Roboto, Arial, sans-serif;
+  padding: 0 2em;
+  background-image: url('../images/bg_01.png'), url('../images/hex_bg.svg');
+  background-position: right -40px top 180px, right -20px top 100px;
+  background-size: 568px 343px, 511px 723px;
+  background-repeat: no-repeat;
+  height: 100%;
+  min-width: 1400px;
+}
+
+h1 {
+  font-family: 'Google Sans Display', Arial, sans-serif;
+  margin: 0;
+  font-size: 44px;
+  line-height: 44px;
+  font-weight: 500;
+}
+
+h2, h3 {
+  font-family: 'Google Sans', Arial, sans-serif;
+}
+
+h3 {
+  color: var(--grey700);
+  font-size: 24px;
+  font-weight: 200;
+  line-height: 33px;
+}
+
+img.cloud-logo {
+  width: 193px;
+}
+
+img.stackdriver-logo {
+  width: 64px;
+  margin-right: 8px;
+}
+
+nav {
+  padding: 2em 0;
+}
+
+.title-row {
+  margin: 3em 0 1em 3em;
+  display: flex;
+  align-items: center;
+}
+
+.content {
+  margin: 1em 3em;
+  max-width: 800px;
+}
+
+.cta {
+  margin: 2em 3em;
+}
+
+
+/* STEPS */
+.steps {
+  display: flex;
+  position: relative;
+}
+
+.step {
+  margin-right: 4em;
+  position: relative;
+}
+
+.step.step-2 {
+  width: 100%;
+  max-width: 100%;
+  flex: 1 1 auto;
+}
+
+.step.step-2 p {
+  max-width: 320px;
+}
+
+.step label {
+  font-size: 14px;
+  line-height: 28px;
+  font-weight: 700;
+  color: var(--grey700);
+}
+
+.step p {
+  font-size: 14px;
+  margin: 0;
+  color: var(--grey800);
+}
+
+.step code {
+  display: inline-block;
+  margin: 1em 0;
+  padding: 0.25em 1em;
+  font-size: 16px;
+  background: var(--grey100);
+  color: var(--grey800);
+  cursor: pointer;
+  user-select: none;
+}
+
+.step code::before {
+  content: '$ ';
+  display: inline;
+}
+
+img.cloud-shell {
+  position: absolute;
+  display: block;
+  width: 347px;
+  height: 207px;
+  top: -100px;
+  right: 150px;
+}
+
+.step-2 .line {
+  position: absolute;
+  left: 60px;
+  right: 150px;
+  height: 1px;
+  top: 14px;
+  background: var(--blue600);
+}
+
+.step-2 .line::before {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 7px;
+  background: var(--blue600);
+  position: absolute;
+  left: -4px;
+  top: -3px;
+}
+
+
+
+/* FOOTER */
+footer {
+  display: flex;
+  position: fixed;
+  width: calc(100% - 10em);
+  left: 0;
+  margin: 0 5em;
+  height: 40px;
+  bottom: 0;
+  border-top: 1px solid var(--grey400);
+  align-items: center;
+}
+
+footer img.cloud-logo {
+  width: 100px;
+  margin-right: 2em;
+}
+
+footer a {
+  color: var(--grey500);
+  font-size: 12px;
+  line-height: 12px;
+  padding: 0 1em;
+  text-decoration: none;
+}
+
+footer a + a {
+  border-left: 1px solid var(--grey500);
+}
+
+.console-btn {
+  background: var(--blue600);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  margin: 0;
+  padding: .5em .75em;
+  text-decoration: none;
+  font-family: 'Google Sans Display', Arial, sans-serif;
+  font-size: 1.2em;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  width: 290px;
+}
+
+.console-btn::before {
+  content: '';
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  margin: 2px .3em 0 0;
+  background-image: url('../images/cloud-shell.svg');
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  color: var(--grey700);
+  font-size: 14px;
+  line-height: 26px;
+  position: relative;
+  list-style-type: none;
+}
+
+li::before {
+  content: '';
+  position: absolute;
+  left: -26px;
+  top: 4px;
+  width: 18px;
+  height: 18px;
+  background-image: url('../images/done.svg');
+}
+
+li b {
+  color: var(--grey900);
+}
+
+.badge.alpha {
+  padding: 0 1em;
+  font-size: 14px;
+  color: var(--grey600);
+  background: var(--grey200);
+  margin: -16px 4px 0;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* @media (max-width: 1240px) {
+
+} */

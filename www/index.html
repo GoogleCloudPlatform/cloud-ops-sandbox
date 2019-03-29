@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Stackdriver Sandbox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" media="screen" href="css/main.css" />
+  <script src="js/main.js"></script>
+</head>
+<body>
+  <nav>
+    <a href="https://cloud.google.com/gcp/" target="_blank"><img src="images/cloud-logo.svg" class="cloud-logo" width="193" alt="Google Cloud"></a>
+
+  </nav>
+  <section class="title-row">
+    <img src="images/logo_stackdriver.svg" class="stackdriver-logo" width="64" alt="Stackdriver logo">
+    <h1>Stackdriver Sandbox</h1>
+    <div class="badge alpha">Alpha</div>
+  </section>
+  <section class="content">
+    <h3>Stackdriver Sandbox is an open source tool that helps practitioners to learn Service Reliability Engineering practices from Google and apply them on their cloud services using Stackdriver. It offers:</h3>
+    <ul>
+      <li><b>Demo Service</b> - an application built using microservices architecture on modern, cloud native stack.</li>
+      <li><b>One-click deployment script</b> of the service to Google Cloud Platform</li>
+      <li><b>Load Generator</b> - a component that produces synthetic traffic on a demo service</li>
+      <li><b>SRE Runbook</b> - for operating deployed sample service that follows best SRE practices</li>
+    </ul>
+  </section>
+  <section class="cta">
+    <h2>Get started now</h2>
+    <div class="steps">
+      <div class="step step-1">
+        <label>Step 1</label>
+        <a class="console-btn" href="https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/stackdriver-sandbox.git&cloudshell_git_branch=master&cloudshell_working_dir=terraform" target="_blank">Open in Google Cloud Shell</a>
+      </div>
+      <div class="step step-2">
+        <label>Step 2</label>
+        <p>In the Cloud Shell command prompt, type this command to install the Sandbox</p>
+        <code onclick="navigator.clipboard.writeText('./install.sh')">./install.sh</code>
+        <div class="line"></div>
+      </div>
+      <img src="images/bg_02.png" class="cloud-shell" alt="cloud shell">
+    </div>
+  </section>
+  <footer>
+    <img src="images/cloud-logo.svg" class="cloud-logo" alt="Google Cloud">
+    <a href="https://www.google.com/about/">About Google</a>
+    <a href="https://policies.google.com/privacy">Privacy</a>
+    <a href="https://www.google.com/intl/en/policies/terms/regional.html">Site Terms</a>
+    <a href="https://cloud.google.com/product-terms/">Google Cloud Terms</a>
+  </footer>
+</body>
+</html>
