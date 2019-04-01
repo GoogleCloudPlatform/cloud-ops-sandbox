@@ -83,7 +83,8 @@ def autostart(args):
         print('You can try manually starting load generation with this tool\'s "update" command.')
         return
 
-    logger.info("Waiting up to {0} seconds for {1} to finish setting up...".format(AUTOSTART_TIMEOUT, name))
+    logger.info("Waiting up to {0} seconds for {1} to finish setting up..."
+            .format(AUTOSTART_TIMEOUT, name))
     # Attempt to start the job for up to AUTOSTART_TIMEOUT seconds.
     retry_delay = 5
     retries = AUTOSTART_TIMEOUT / retry_delay
@@ -100,8 +101,10 @@ def autostart(args):
                     AUTOSTART_TIMEOUT, AUTOSTART_NUM_USERS, address, JOB_WEB_PORT)
     subprocess.Popen(split(command), stdout=DEVNULL, stderr=DEVNULL)
 
-    logger.info('Once finished setting up, load generation will start with {0} users.'.format(AUTOSTART_NUM_USERS))
-    print('After setting up, you can access the job by navigating to http://{0}:{1}'.format(address, JOB_WEB_PORT))
+    logger.info('Once finished setting up, load generation will start with {0} users.'
+            .format(AUTOSTART_NUM_USERS))
+    print('After setting up, you can access the job by navigating to http://{0}:{1}'
+            .format(address, JOB_WEB_PORT))
 
 
 def setup(args):
@@ -244,10 +247,10 @@ def update(args):
 def _get_job_address(name, zone):
     """Returns the ip address of the specified job."""
     command = (
-        'gcloud compute instances describe {0} '
-        '--zone={1} '
-        '--format="value(networkInterfaces[0].accessConfigs[0].natIP)"'
-        ).format(name, zone)
+            'gcloud compute instances describe {0} '
+            '--zone={1} '
+            '--format="value(networkInterfaces[0].accessConfigs[0].natIP)"'
+            ).format(name, zone)
     try:
         return subprocess.check_output(split(command)).decode('utf-8').strip()
     except subprocess.CalledProcessError:
@@ -267,8 +270,8 @@ def _is_address_accessible(address):
 def _set_job_users(address, num_users):
     """Sets a job to run the specified number of users."""
     command = (
-        'curl -s --max-time {0} --fail -X POST -F locust_count={1} -F hatch_rate={1} {2}:{3}/swarm'
-        ).format(HTTP_TIMEOUT, num_users, address, JOB_WEB_PORT)
+            'curl -s --max-time {0} --fail -X POST -F locust_count={1} -F hatch_rate={1} {2}:{3}/swarm'
+            ).format(HTTP_TIMEOUT, num_users, address, JOB_WEB_PORT)
     subprocess.call(split(command), stdout=DEVNULL)
 
 
@@ -280,7 +283,9 @@ def delete(args):
     """
     logger.info('Deleting load generation job {0}...'.format(args.name))
 
-    command = 'gcloud compute instances delete {0} --zone {1} -q'.format(args.name, args.zone)
+    command = (
+            'gcloud compute instances delete {0} --zone {1} -q'
+            ).format(args.name, args.zone)
     subprocess.call(['echo'] + split(command))
     try:
         subprocess.call(split(command), stdout=DEVNULL)
@@ -317,39 +322,50 @@ def status(args):
 
     job_list = _get_jobs()
 
+    with Pool(processes=10) as pool:
+        results = pool.starmap_async(_get_job_status, job_list)
+        pool.close()
+        pool.join()
+
     title_template = '%-25s %-25s %-8s %8s %8s %8s'
     stats_template = '%-25s %-25s %-8s %8d %8d %8.0f'
     error_template = '%-25s %-25s %-32s'
     print(title_template % ('NAME', 'ZONE', 'STATE', 'USERS', 'RPS', 'FAIL %'))
-    for name, zone, address in job_list:
-        stats = _get_job_stats(name, zone, address)
+    for name, zone, stats in results.get():
         if stats:
             print(stats_template % ((name, zone) + stats))
         else:
             print(error_template % (name, zone, 'COULD NOT CONNECT'))
 
 
-def _get_job_stats(name, zone, address):
-    """Returns a tuple of the form: (state, user_count, total_rps, fail_percent)"""
-    command = 'curl -s --max-time 1 --fail {0}:{1}/stats/requests'.format(address, JOB_WEB_PORT)
-    try:
-        stats = loads(subprocess.check_output(split(command)).decode('utf-8').strip())
-    except subprocess.CalledProcessError:
-        return None
-    if not stats:
-        return None
+def _get_job_status(name, zone, address):
+    """Returns a tuple of the form: (name, zone, stats)
 
-    fail_percent = round(stats['fail_ratio'] * 100)
-    return (stats['state'], stats['user_count'], stats['total_rps'], fail_percent)
+    stats - a tuple of the form: (state, user_count, total_rps, fail_percent)
+            otherwise 'None' if there was an error.
+    """
+    command = (
+            'curl -s --max-time {0} --fail {1}:{2}/stats/requests'
+            ).format(HTTP_TIMEOUT, address, JOB_WEB_PORT)
+    try:
+        result = loads(subprocess.check_output(split(command)).decode('utf-8').strip())
+    except subprocess.CalledProcessError:
+        return (name, zone, None)
+    if not result:
+        return (name, zone, None)
+
+    fail_percent = round(result['fail_ratio'] * 100)
+    stats = (result['state'], result['user_count'], result['total_rps'], fail_percent)
+    return (name, zone, stats)
 
 
 def _get_jobs():
     """Returns a list of tuples of the form: (name, zone, address)"""
     command = (
-        'gcloud compute instances list '
-        '--filter=name~"loadgenerator*" '
-        '--format="value(name,zone,networkInterfaces[0].accessConfigs[0].natIP)"'
-        )
+            'gcloud compute instances list '
+            '--filter=name~"loadgenerator*" '
+            '--format="value(name,zone,networkInterfaces[0].accessConfigs[0].natIP)"'
+            )
     output = subprocess.check_output(split(command)).decode('utf-8').strip()
 
     job_list = []
@@ -384,24 +400,36 @@ if __name__ == "__main__":
     parser = ArgumentParser(prog='loadgenerator-tool')
     subparsers = parser.add_subparsers()
 
-    subparser = subparsers.add_parser('autostart', help='automatically starts load generation for a target address (setup + create + update)')
-    subparser.add_argument('target_address', type=str, help='the target address to send load to')
-    subparser.add_argument('--zone', help='the Google Compute Engine zone to send load from [default: user-configurable]')
+    subparser = subparsers.add_parser('autostart',
+            help='automatically starts load generation for a target address (setup + create + update)')
+    subparser.add_argument('target_address', type=str,
+            help='the target address to send load to')
+    subparser.add_argument('--zone',
+            help='the Google Compute Engine zone to send load from [default: user-configurable]')
     subparser.set_defaults(func=autostart)
 
-    subparser = subparsers.add_parser('setup', help='setup the Compute Engine network firewall to allow load generator jobs to run')
+    subparser = subparsers.add_parser('setup',
+            help='setup the Compute Engine network firewall to allow load generator jobs to run')
     subparser.set_defaults(func=setup)
 
-    subparser = subparsers.add_parser('create', help='create a load generator job targeting the specific address with initial load set to zero')
-    subparser.add_argument('target_address', type=str, help='the target address to send load to')
-    subparser.add_argument('--zone', required=True, help='the Google Compute Engine zone to send load from')
-    subparser.add_argument('--scenario', help='the load generator scenario to run [default: all]')
+    subparser = subparsers.add_parser('create',
+            help='create a load generator job targeting the specific address with initial load set to zero')
+    subparser.add_argument('target_address', type=str,
+            help='the target address to send load to')
+    subparser.add_argument('--zone', required=True,
+            help='the Google Compute Engine zone to send load from')
+    subparser.add_argument('--scenario',
+            help='the load generator scenario to run [default: all]')
     subparser.set_defaults(func=create)
 
-    subparser = subparsers.add_parser('update', help='update a load generator job to simulate the specified number of users')
-    subparser.add_argument('name', type=str, help='the name of an instance to delete')
-    subparser.add_argument('num_users', type=int, help='the number of users to simulate load for')
-    subparser.add_argument('--zone', required=True, help='the Google Compute Engine zone to send load from')
+    subparser = subparsers.add_parser('update',
+            help='update a load generator job to simulate the specified number of users')
+    subparser.add_argument('name', type=str,
+            help='the name of an instance to delete')
+    subparser.add_argument('num_users', type=int,
+            help='the number of users to simulate load for')
+    subparser.add_argument('--zone', required=True,
+            help='the Google Compute Engine zone to send load from')
     subparser.set_defaults(func=update)
 
     subparser = subparsers.add_parser('delete', help='delete a load generator job by name')
