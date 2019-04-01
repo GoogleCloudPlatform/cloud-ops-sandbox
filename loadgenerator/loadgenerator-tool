@@ -387,21 +387,13 @@ def _check_prereqs():
         return False
 
 
-def main(args):
-    if _check_prereqs():
-        args.func(args)
-    else:
-        logger.error('Unable to find command "gcloud".')
-        logger.warning('It appears the Google Cloud SDK has not been installed.')
-        print('To install "gcloud", follow this link: https://cloud.google.com/sdk/install')
-
-
-if __name__ == "__main__":
+def _get_parser():
     parser = ArgumentParser(prog='loadgenerator-tool')
-    subparsers = parser.add_subparsers()
+    subparsers = parser.add_subparsers(title='commands')
 
     subparser = subparsers.add_parser('autostart',
-            help='automatically starts load generation for a target address (setup + create + update)')
+            help='starts generating load for a specified address',
+            description='automatically starts a load generation job for a target address (setup + create + update)')
     subparser.add_argument('target_address', type=str,
             help='the target address to send load to')
     subparser.add_argument('--zone',
@@ -409,11 +401,13 @@ if __name__ == "__main__":
     subparser.set_defaults(func=autostart)
 
     subparser = subparsers.add_parser('setup',
-            help='setup the Compute Engine network firewall to allow load generator jobs to run')
+            help='setup Compute Engine to run load generator jobs',
+            description='setup the Compute Engine network firewall to allow load generator jobs to run')
     subparser.set_defaults(func=setup)
 
     subparser = subparsers.add_parser('create',
-            help='create a load generator job targeting the specific address with initial load set to zero')
+            help='create a load generator job',
+            description='create a load generator job targeting the specific address with initial load set to zero')
     subparser.add_argument('target_address', type=str,
             help='the target address to send load to')
     subparser.add_argument('--zone', required=True,
@@ -423,7 +417,8 @@ if __name__ == "__main__":
     subparser.set_defaults(func=create)
 
     subparser = subparsers.add_parser('update',
-            help='update a load generator job to simulate the specified number of users')
+            help='update a load generator job',
+            description='update a load generator job to simulate the specified number of users [range: 0 - 1000]')
     subparser.add_argument('name', type=str,
             help='the name of an instance to delete')
     subparser.add_argument('num_users', type=int,
@@ -432,15 +427,40 @@ if __name__ == "__main__":
             help='the Google Compute Engine zone to send load from')
     subparser.set_defaults(func=update)
 
-    subparser = subparsers.add_parser('delete', help='delete a load generator job by name')
+    subparser = subparsers.add_parser('delete',
+            help='delete a load generator job',
+            description='delete a load generator job by name and zone')
     subparser.add_argument('name', type=str, help='the name of an instance to delete')
     subparser.add_argument('--zone', required=True, help='the Google Compute Engine zone the job is in')
     subparser.set_defaults(func=delete)
 
-    subparser = subparsers.add_parser('jobs', help='list all existing load generator jobs')
+    subparser = subparsers.add_parser('jobs',
+            help='list all load generator jobs',
+            description='list all load generator jobs including the web address of each job')
     subparser.set_defaults(func=jobs)
 
-    subparser = subparsers.add_parser('status', help='show the status of all existing load generator jobs')
+    subparser = subparsers.add_parser('status',
+            help='show the status of all load generator jobs',
+            description='show the status of all load generator jobs whether running or not')
     subparser.set_defaults(func=status)
 
-    main(parser.parse_args())
+    return parser
+
+
+def main(args=None):
+    parser = _get_parser()
+    parser.parse_args(args)
+
+    if _check_prereqs():
+        try:
+            args.func(args)
+        except AttributeError:
+            parser.print_help()
+    else:
+        logger.error('Unable to find command "gcloud".')
+        logger.warning('It appears the Google Cloud SDK has not been installed.')
+        print('To install "gcloud", follow this link: https://cloud.google.com/sdk/install')
+
+
+if __name__ == "__main__":
+    main()
