@@ -16,15 +16,29 @@
   -webkit-font-smoothing: antialiased;
 }
 
+html {
+  height: 100%;
+}
+
 body {
   font-family: Roboto, Arial, sans-serif;
-  padding: 0 2em;
+  height: 100%;
+  position: relative;
+  display: flex;
+  margin: 0;
+  justify-content: center;
+  align-items: center;
   background-image: url('../images/bg_01.png'), url('../images/hex_bg.svg');
-  background-position: right -40px top 180px, right -20px top 100px;
+  background-position: right -20px  top 50%, right -20px center;
+  background-position-x: calc(50% + 600px), calc(100% + 20px);
+  background-position-y: calc(50% - 40px), 50%;
   background-size: 568px 343px, 511px 723px;
   background-repeat: no-repeat;
-  height: 100%;
-  min-width: 1400px;
+}
+
+.page {
+  min-width: 1200px;
+  max-width: 1440px;
 }
 
 h1 {
@@ -44,6 +58,9 @@ h3 {
   font-size: 24px;
   font-weight: 200;
   line-height: 33px;
+}
+h3 span {
+  color: var(--gre500);
 }
 
 img.cloud-logo {
@@ -73,7 +90,6 @@ nav {
 .cta {
   margin: 2em 3em;
 }
-
 
 /* STEPS */
 .steps {
@@ -130,8 +146,8 @@ img.cloud-shell {
   display: block;
   width: 347px;
   height: 207px;
-  top: -100px;
-  right: 150px;
+  top: -115px;
+  right: 0px;
 }
 
 .step-2 .line {
@@ -161,18 +177,20 @@ img.cloud-shell {
 footer {
   display: flex;
   position: fixed;
-  width: calc(100% - 10em);
-  left: 0;
-  margin: 0 5em;
+  max-width: 1200px;
+  width: 1200px;
+  margin: 0 3em;
   height: 40px;
   bottom: 0;
-  border-top: 1px solid var(--grey400);
   align-items: center;
+  border-top: 1px solid var(--grey400);
 }
 
-footer img.cloud-logo {
-  width: 100px;
-  margin-right: 2em;
+footer p {
+  color: var(--grey500);
+  font-style: italic;
+  font-size: 12px;
+  line-height: 40px;
 }
 
 footer a {
@@ -211,6 +229,34 @@ footer a + a {
   height: 22px;
   margin: 2px .3em 0 0;
   background-image: url('../images/cloud-shell.svg');
+}
+
+.github-btn {
+  background: #fff;
+  color: var(--grey700);
+  border: 1px solid var(--grey400);
+  border-radius: 8px;
+  margin: 1em 0;
+  padding: .25em .75em;
+  text-decoration: none;
+  font-family: 'Google Sans Display', Arial, sans-serif;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+}
+
+.github-btn::after {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin: -1px 0 0 .3em ;
+  opacity: .6;
+  background-image: url('../images/github.svg');
 }
 
 ul {
