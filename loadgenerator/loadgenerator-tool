@@ -118,9 +118,9 @@ def setup(args):
 
     command = (
             'gcloud compute firewall-rules create allow-locust-web '
-            '--allow=tcp:{1} '
+            '--allow=tcp:{0} '
             '--target-tags=locust-web '
-            ).format(command, JOB_WEB_PORT)
+            ).format(JOB_WEB_PORT)
     subprocess.call(['echo'] + split(command))
     subprocess.call(split(command), stdout=DEVNULL)
     logging.info("Compute Engine setup for load generation.")
@@ -264,8 +264,8 @@ def _is_address_accessible(address):
 def _set_job_users(address, num_users):
     """Sets a job to run the specified number of users."""
     command = (
-        'curl -s --max-time {3} --fail -X POST -F locust_count={0} -F hatch_rate={0} {1}:{2}/swarm'
-        ).format(num_users, address, JOB_WEB_PORT, HTTP_TIMEOUT)
+        'curl -s --max-time {0} --fail -X POST -F locust_count={1} -F hatch_rate={1} {2}:{3}/swarm'
+        ).format(HTTP_TIMEOUT, num_users, address, JOB_WEB_PORT)
     subprocess.call(split(command), stdout=DEVNULL)
 
 
@@ -381,35 +381,35 @@ if __name__ == "__main__":
     parser = ArgumentParser(prog='loadgenerator-tool')
     subparsers = parser.add_subparsers()
 
-    subparser = subparsers.add_parser('autostart', help='Automatically starts load generation for the target address')
+    subparser = subparsers.add_parser('autostart', help='automatically starts load generation for a target address (setup + create + update)')
     subparser.add_argument('target_address', type=str, help='the target address to send load to')
     subparser.add_argument('--zone', help='the Google Compute Engine zone to send load from [default: user-configurable]')
     subparser.set_defaults(func=autostart)
 
-    subparser = subparsers.add_parser('setup', help='setup Compute Engine to run load generator jobs')
+    subparser = subparsers.add_parser('setup', help='setup the Compute Engine network firewall to allow load generator jobs to run')
     subparser.set_defaults(func=setup)
 
-    subparser = subparsers.add_parser('create', help='create a load generator job')
+    subparser = subparsers.add_parser('create', help='create a load generator job targeting the specific address with initial load set to zero')
     subparser.add_argument('target_address', type=str, help='the target address to send load to')
     subparser.add_argument('--zone', required=True, help='the Google Compute Engine zone to send load from')
     subparser.add_argument('--scenario', help='the load generator scenario to run [default: all]')
     subparser.set_defaults(func=create)
 
-    subparser = subparsers.add_parser('update', help='list all active load generator jobs')
+    subparser = subparsers.add_parser('update', help='update a load generator job to simulate the specified number of users')
     subparser.add_argument('name', type=str, help='the name of an instance to delete')
     subparser.add_argument('num_users', type=int, help='the number of users to simulate load for')
     subparser.add_argument('--zone', required=True, help='the Google Compute Engine zone to send load from')
     subparser.set_defaults(func=update)
 
-    subparser = subparsers.add_parser('delete', help='delete a load generator job')
+    subparser = subparsers.add_parser('delete', help='delete a load generator job by name')
     subparser.add_argument('name', type=str, help='the name of an instance to delete')
     subparser.add_argument('--zone', required=True, help='the Google Compute Engine zone the job is in')
     subparser.set_defaults(func=delete)
 
-    subparser = subparsers.add_parser('jobs', help='list all load generator jobs')
+    subparser = subparsers.add_parser('jobs', help='list all existing load generator jobs')
     subparser.set_defaults(func=jobs)
 
-    subparser = subparsers.add_parser('status', help='show the status of all load generator jobs')
+    subparser = subparsers.add_parser('status', help='show the status of all existing load generator jobs')
     subparser.set_defaults(func=status)
 
     main(parser.parse_args())
