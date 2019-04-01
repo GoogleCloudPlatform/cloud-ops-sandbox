@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 """Generate fake traffic for Stackdriver Sandbox
 
 A command line tool to start and stop generating load for Stackdriver Sandbox.
@@ -194,7 +194,7 @@ def _create_job(name, zone, target_address, scenario=None):
 
     subprocess.call(['echo'] + split(command))
     try:
-        output = subprocess.check_output(split(command))
+        output = subprocess.check_output(split(command)).decode('utf-8')
     except subprocess.CalledProcessError:
         return None
 
@@ -218,6 +218,9 @@ def update(args):
         logger.error('The maximum number of users per job is limited to 1000.')
         logger.warning('Compute Engine instances support only so many concurrent network connections.')
         logger.info('To simulate more users, try creating more load generation jobs.')
+        return
+    elif (args.num_users < 0):
+        logger.error('The number of users must be a positive number.')
         return
 
     logger.info('Updating load generation job {0} to run {1} users...'.format(args.name, args.num_users))
@@ -246,7 +249,7 @@ def _get_job_address(name, zone):
         '--format="value(networkInterfaces[0].accessConfigs[0].natIP)"'
         ).format(name, zone)
     try:
-        return subprocess.check_output(split(command)).strip()
+        return subprocess.check_output(split(command)).decode('utf-8').strip()
     except subprocess.CalledProcessError:
         return None
 
@@ -280,7 +283,7 @@ def delete(args):
     command = 'gcloud compute instances delete {0} --zone {1} -q'.format(args.name, args.zone)
     subprocess.call(['echo'] + split(command))
     try:
-        subprocess.call(split(command))
+        subprocess.call(split(command), stdout=DEVNULL)
     except subprocess.CalledProcessError:
         logger.error('Failure while deleting load generation job.')
         logger.info('Exiting...')
@@ -330,7 +333,7 @@ def _get_job_stats(name, zone, address):
     """Returns a tuple of the form: (state, user_count, total_rps, fail_percent)"""
     command = 'curl -s --max-time 1 --fail {0}:{1}/stats/requests'.format(address, JOB_WEB_PORT)
     try:
-        stats = loads(subprocess.check_output(split(command)).strip())
+        stats = loads(subprocess.check_output(split(command)).decode('utf-8').strip())
     except subprocess.CalledProcessError:
         return None
     if not stats:
@@ -347,7 +350,7 @@ def _get_jobs():
         '--filter=name~"loadgenerator*" '
         '--format="value(name,zone,networkInterfaces[0].accessConfigs[0].natIP)"'
         )
-    output = subprocess.check_output(split(command)).strip()
+    output = subprocess.check_output(split(command)).decode('utf-8').strip()
 
     job_list = []
     for line in output.split('\n'):
