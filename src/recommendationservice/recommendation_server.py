@@ -53,7 +53,10 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         # build and return response
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
-        time.sleep(0.5)
+        
+        for x in xrange(5000000):
+            # if prod_list != null {break}
+            pass
         return response
 
     def Check(self, request, context):
