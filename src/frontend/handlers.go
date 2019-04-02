@@ -194,11 +194,17 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), cartIDs(cart))
-	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "failed to get product recommendations"), http.StatusInternalServerError)
-		return
-	}
+	loopCount := 0
+	for num_recommendations <= 4 && loopCount < 10 {
+		recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), cartIDs(cart))
+
+		if err != nil {
+			renderHTTPError(log, r, w, errors.Wrap(err, "failed to get product recommendations"), http.StatusInternalServerError)
+			return
+		}
+		num_recommendations = len(recommendations)
+		loopCount += loopCount
+	}	
 
 	shippingCost, err := fe.getShippingQuote(r.Context(), cart, currentCurrency(r))
 	if err != nil {
