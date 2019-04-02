@@ -26,7 +26,7 @@ require('@google-cloud/trace-agent').start();
 require('@google-cloud/debug-agent').start({
   serviceContext: {
     service: 'paymentservice',
-    version: 'VERSION'
+    version: '1.0.0'
   }
 });
 
