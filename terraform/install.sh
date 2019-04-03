@@ -19,6 +19,10 @@
 set -o errexit  # Exit on error
 #set -o nounset  # Trigger error when expanding unset variables
 
+# ensure the working dir is the script's folder
+SCRIPT_DIR=$(realpath $(dirname "$0"))
+cd $SCRIPT_DIR
+
 log() { echo "$1" >&2; }
 
 installTerraform()
