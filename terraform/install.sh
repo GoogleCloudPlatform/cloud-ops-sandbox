@@ -63,6 +63,33 @@ loadGen() {
   ../loadgenerator-tool startup --zone us-west2-a $external_ip
 }
 
+displaySuccessMessage() {
+    created_project=$(cat ./terraform.tfstate | \
+                        grep "\"project\":" | \
+                        grep -oh "stackdriver-sandbox-[0-9]*" | \
+                        head -n 1)
+
+    gcp_path="https://console.cloud.google.com/kubernetes/workload"
+    if [[ -n "${created_project}" ]]; then
+        gcp_path="$gcp_path?project=$created_project"
+    fi
+    loadgen_ip=$(gcloud compute instances list --project "$created_project" \
+                                               --filter="name:loadgenerator*" \
+                                               --format="value(networkInterfaces[0].accessConfigs.natIP)")
+    if [[ -z "${loadgen_ip}" ]]; then
+        loadgen_ip='[not found]'
+    fi
+    log ""
+    log ""
+    log "--------------------------------------------------------------"
+    log "Stackdriver Sandbox deployed successfully"
+    log ""
+    log "Stackdriver Dashboard: https://app.google.stackdriver.com/gke"
+    log "Google Cloud Console Dashboard: $gcp_path"
+    log "'Hipstershop' web app address: $external_ip"
+    log "'Locust' load generator web interface: $loadgen_ip"
+}
+
 log "Checking Prerequisites..."
 log "Checking existence of billing accounts"
 billingAccounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
@@ -107,4 +134,5 @@ fi;
 applyTerraform;
 getExternalIp;
 loadGen;
+displaySuccessMessage;
 
