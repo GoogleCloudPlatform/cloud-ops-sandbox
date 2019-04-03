@@ -108,17 +108,3 @@ applyTerraform;
 getExternalIp;
 loadGen;
 
-#log "**WARNING** Terraform script will create a Sandbox cluster. It asks for billing account"
-#log "If you have not set up billing account or want to cancel the operation, choose 'N'."
-#log ""
-#log "To list active billing accounts, run:"
-#log "gcloud beta billing accounts list --filter open=true"
-#log
-#while true; do
-#    read -p "Do you wish to continue to cluster creation? y/n " yn
-#    case $yn in
-#        [Yy]* ) applyTerraform; getExternalIp; loadGen; break;;
-#        [Nn]* ) exit;;
-#        * ) echo "Please answer yes or no.";;
-#    esac
-#done
