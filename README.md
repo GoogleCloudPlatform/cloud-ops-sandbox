@@ -14,9 +14,11 @@ Google Stackdriver is a suite of tools that helps to gain full observability for
 
 ## Getting Started
 
-* Creating new Sandbox
+* Using Sandbox
   * [Prerequisites](#Prerequisites)
   * [Setup](#Setup)
+  * [Next Steps](#Next-Steps)
+  * [Clean Up](#Clean-Up)
 * [Service Overview](#Service-Overview)
   * [Screenshots](#Screenshots)
   * [Architecture](#Architecture)
@@ -26,7 +28,7 @@ Google Stackdriver is a suite of tools that helps to gain full observability for
   * [Using static images](#Using-static-images)
   * [GKE with Istio](#GKE-with-Istio)
 
-## Creating new Sandbox
+## Using Sandbox
 
 ### Prerequisites
 
@@ -48,6 +50,24 @@ $ ./install.sh
 
 * Explore your Sandbox deployment and its [architecture](#Service-Overview)
 * Learn more about Stackdriver using [Code Labs](https://codelabs.developers.google.com/gcp-next/?cat=Monitoring)
+
+### Clean Up
+
+When you are done using Stackdriver Sandbox, you can tear down the environment by deleting 
+the GCP project that was set up for you. This can be accomplished in the following ways:
+
+1. Using the Stackdriver Sandbox destroy script:
+```bash
+$ ./destroy.sh
+```
+
+2. If you no longer have the Stackdriver Sandbox files downloaded, you can delete your project manually using `gcloud`
+```bash
+$ gcloud projects delete $YOUR_PROJECT_ID
+```
+
+2. You can also delete your project through Google Cloud Console's [Resource Manager web interface](https://console.cloud.google.com/cloud-resource-manager)
+
 
 ## Service Overview
 
