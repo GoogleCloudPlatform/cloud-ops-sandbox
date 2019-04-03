@@ -17,39 +17,48 @@
 
 #set -euo pipefail
 set -o errexit  # Exit on error
+#set -x
 
 log() { echo "$1" >&2;  }
-
-get_project(){
-    gcloud projects list --filter="name:stackdriver-sandbox-*" \
-                         --format="value(projectId)"
-}
 
 # ensure the working dir is the script's folder
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
-PROJECT_ID=$(get_project)
-
-# find and delete the Stackdriver Sandbox GCP project
-if [[ -z $PROJECT_ID  ]]; then
-    log "error: Stackdriver Sandbox project not found"
+# find the stackdriver sandbox project id
+found=$(gcloud projects list --filter="name:stackdriver-sandbox-*" --format="value(projectId)")
+if [[ -z $found ]]; then
+    log "error: no Stackdriver Sandbox projects found"
     exit 1
+elif [[ $(echo ${found} | wc -w) -gt 1 ]]; then
+    log "which Stackdriver Sandbox project do you want to delete?:"
+    select opt in $found "cancel"; do
+        if [[ $opt == "cancel" ]]; then
+            exit 0
+        elif [[ -z $opt ]]; then
+            log "invalid response"
+        else
+            PROJECT_ID=$opt
+            break
+        fi
+    done
+else
+    PROJECT_ID=$found
 fi
+
+# attempt deletion (tool will prompt user for confirmation)
 log "attempting to delete $PROJECT_ID"
 gcloud projects delete $PROJECT_ID
 
 
-# if user backed out of project deletion, stop script
-PROJECT_ID=$(get_project)
-if [[ ! -z $PROJECT_ID  ]]; then
+# if user backed out or deletion failed, stop script
+found=$(gcloud projects list --filter=$PROJECT_ID --format="value(projectId)")
+if [[ -z $PROJECT_ID  ]]; then
     log "project $PROJECT_ID not deleted"
     exit 1
 fi
 
 # remove tfstate file so a new project id will be generated next time
 log "removing tfstate file"
-if [[ -f "./terraform.tfstate"  ]]; then
-    rm terraform.tfstate
-fi
+rm -rf terraform.tfstate
 log "Stackdriver Sandbox resources deleted"
