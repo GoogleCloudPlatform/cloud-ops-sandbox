@@ -447,9 +447,9 @@ def _get_parser():
     return parser
 
 
-def main(args=None):
+def main():
     parser = _get_parser()
-    parser.parse_args(args)
+    args = parser.parse_args()
 
     if _check_prereqs():
         try:
