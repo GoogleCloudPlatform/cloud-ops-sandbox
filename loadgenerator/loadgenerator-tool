@@ -36,7 +36,7 @@ import subprocess
 from time import sleep
 
 # Global constants that are adjustable.
-JOB_WEB_PORT = 8089  # Web port to access the web interface of a load generation job.
+JOB_WEB_PORT = 8080  # Web port to access the web interface of a load generation job.
 HTTP_TIMEOUT = 5  # Timeout in seconds for any HTTP calls made by this script.
 AUTOSTART_NUM_USERS = 100  # Number of users to automatically run for the "autostart" command.
 AUTOSTART_TIMEOUT = 60  # Timeout in seconds to wait for new jobs to set up for the "autostart" command.
