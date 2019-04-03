@@ -27,15 +27,15 @@ cd $SCRIPT_DIR
 
 # find the stackdriver sandbox project id
 found=$(gcloud projects list --filter="name:stackdriver-sandbox-*" --format="value(projectId)")
-if [[ -z $found ]]; then
+if [[ -z "${found}" ]]; then
     log "error: no Stackdriver Sandbox projects found"
     exit 1
 elif [[ $(echo ${found} | wc -w) -gt 1 ]]; then
     log "which Stackdriver Sandbox project do you want to delete?:"
     select opt in $found "cancel"; do
-        if [[ $opt == "cancel" ]]; then
+        if [[ "${opt}" == "cancel" ]]; then
             exit 0
-        elif [[ -z $opt ]]; then
+        elif [[ -z "${opt}" ]]; then
             log "invalid response"
         else
             PROJECT_ID=$opt
@@ -52,8 +52,8 @@ gcloud projects delete $PROJECT_ID
 
 
 # if user backed out or deletion failed, stop script
-found=$(gcloud projects list --filter=$PROJECT_ID --format="value(projectId)")
-if [[ -z $PROJECT_ID  ]]; then
+found=$(gcloud projects list --filter="${PROJECT_ID}" --format="value(projectId)")
+if [[ -n "${found}" ]]; then
     log "project $PROJECT_ID not deleted"
     exit 1
 fi
