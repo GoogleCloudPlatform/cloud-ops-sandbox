@@ -73,9 +73,15 @@ displaySuccessMessage() {
     if [[ -n "${created_project}" ]]; then
         gcp_path="$gcp_path?project=$created_project"
     fi
-    loadgen_ip=$(gcloud compute instances list --project "$created_project" \
-                                               --filter="name:loadgenerator*" \
-                                               --format="value(networkInterfaces[0].accessConfigs.natIP)")
+    TRIES=0
+    while [[ -z "${loadgen_ip}" && "${TRIES}" -lt 20  ]]; do
+        sleep 1
+        loadgen_ip=$(gcloud compute instances list --project "$created_project" \
+                                                   --filter="name:loadgenerator*" \
+                                                   --format="value(networkInterfaces[0].accessConfigs.natIP)")
+        TRIES=$((TRIES + 1))
+    done
+
     if [[ -z "${loadgen_ip}" ]]; then
         loadgen_ip='[not found]'
     fi
