@@ -48,7 +48,7 @@ getExternalIp() {
      external_ip=$(kubectl get svc frontend-external --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); 
      [ -z "$external_ip" ] && sleep 10; 
   done; 
-  log "Hipster Shop Frontend is accessible at $external_ip"
+  log "Hipster Shop Frontend is available at $external_ip"
 }
 
 # Install Load Generator service and start generating synthetic traffic to Sandbox
@@ -94,7 +94,7 @@ displaySuccessMessage() {
     log "     Stackdriver Dashboard: https://app.google.stackdriver.com/accounts/create"
     log "     Google Cloud Console Dashboard: $gcp_path"
     log "     Hipstershop web app address: http://$external_ip"
-    log "     Locust load generator web interface: $loadgen_ip"
+    log "     Load generator web interface: $loadgen_ip"
     echo -e $COLOR_RESET
 }
 
