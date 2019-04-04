@@ -81,6 +81,8 @@ displaySuccessMessage() {
     else
         loadgen_ip='[not found]'
     fi
+    GREEN='\033[0;32m'
+    log $GREEN
     log ""
     log ""
     log "--------------------------------------------------------------"
