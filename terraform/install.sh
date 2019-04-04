@@ -82,7 +82,8 @@ displaySuccessMessage() {
         loadgen_ip='[not found]'
     fi
     GREEN='\033[0;32m'
-    log $GREEN
+    COLOR_RESET='\033[0m'
+    echo -e $GREEN
     log ""
     log ""
     log "--------------------------------------------------------------"
@@ -92,6 +93,7 @@ displaySuccessMessage() {
     log "     Google Cloud Console Dashboard: $gcp_path"
     log "     Hipstershop web app address: http://$external_ip"
     log "     Locust load generator web interface: $loadgen_ip"
+    echo -e $COLOR_RESET
 }
 
 log "Checking Prerequisites..."
