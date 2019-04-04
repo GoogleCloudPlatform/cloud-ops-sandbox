@@ -75,7 +75,9 @@ displaySuccessMessage() {
         TRIES=$((TRIES + 1))
     done
 
-    if [[ -z "${loadgen_ip}" ]]; then
+    if [[ -n "${loadgen_ip}" ]]; then
+        loadgen_ip='http://$loadgen_ip'
+    else
         loadgen_ip='[not found]'
     fi
     log ""
@@ -83,9 +85,9 @@ displaySuccessMessage() {
     log "--------------------------------------------------------------"
     log "Stackdriver Sandbox deployed successfully"
     log ""
-    log "Stackdriver Dashboard: https://app.google.stackdriver.com/gke"
-    log "Google Cloud Console Dashboard: http://$gcp_path"
-    log "'Hipstershop' web app address: $external_ip"
+    log "Stackdriver Dashboard: https://app.google.stackdriver.com/accounts/create"
+    log "Google Cloud Console Dashboard: $gcp_path"
+    log "'Hipstershop' web app address: http://$external_ip"
     log "'Locust' load generator web interface: $loadgen_ip"
 }
 
