@@ -48,6 +48,7 @@ getExternalIp() {
      external_ip=$(kubectl get svc frontend-external --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); 
      [ -z "$external_ip" ] && sleep 10; 
   done; 
+  log "Hipster Shop Frontend is accessible at $external_ip"
 }
 
 # Install Load Generator service and start generating synthetic traffic to Sandbox
