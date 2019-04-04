@@ -91,7 +91,7 @@ displaySuccessMessage() {
     log "Stackdriver Sandbox deployed successfully"
     log ""
     log "Stackdriver Dashboard: https://app.google.stackdriver.com/gke"
-    log "Google Cloud Console Dashboard: $gcp_path"
+    log "Google Cloud Console Dashboard: http://$gcp_path"
     log "'Hipstershop' web app address: $external_ip"
     log "'Locust' load generator web interface: $loadgen_ip"
 }
