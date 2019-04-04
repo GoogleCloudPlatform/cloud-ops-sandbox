@@ -84,12 +84,12 @@ displaySuccessMessage() {
     log ""
     log ""
     log "--------------------------------------------------------------"
-    log "Stackdriver Sandbox deployed successfully"
+    log "Stackdriver Sandbox deployed successfully!"
     log ""
-    log "Stackdriver Dashboard: https://app.google.stackdriver.com/accounts/create"
-    log "Google Cloud Console Dashboard: $gcp_path"
-    log "'Hipstershop' web app address: http://$external_ip"
-    log "'Locust' load generator web interface: $loadgen_ip"
+    log "     Stackdriver Dashboard: https://app.google.stackdriver.com/accounts/create"
+    log "     Google Cloud Console Dashboard: $gcp_path"
+    log "     Hipstershop web app address: http://$external_ip"
+    log "     Locust load generator web interface: $loadgen_ip"
 }
 
 log "Checking Prerequisites..."
