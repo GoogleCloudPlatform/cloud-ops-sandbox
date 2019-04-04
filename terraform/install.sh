@@ -55,6 +55,16 @@ getExternalIp() {
 loadGen() {
   log "Running load generator"
   ../loadgenerator-tool startup --zone us-west2-a $external_ip
+  # find the IP of the load generator web interface
+  TRIES=0
+  while [[ -z "${loadgen_ip}" && "${TRIES}" -lt 20  ]]; do
+    log "waiting for load generator instance to spin up"
+    sleep 1
+    loadgen_ip=$(gcloud compute instances list --project "$created_project" \
+                                               --filter="name:loadgenerator*" \
+                                               --format="value(networkInterfaces[0].accessConfigs.natIP)")
+    TRIES=$((TRIES + 1))
+  done
 }
 
 displaySuccessMessage() {
@@ -67,14 +77,6 @@ displaySuccessMessage() {
     if [[ -n "${created_project}" ]]; then
         gcp_path="$gcp_path?project=$created_project"
     fi
-    TRIES=0
-    while [[ -z "${loadgen_ip}" && "${TRIES}" -lt 20  ]]; do
-        sleep 1
-        loadgen_ip=$(gcloud compute instances list --project "$created_project" \
-                                                   --filter="name:loadgenerator*" \
-                                                   --format="value(networkInterfaces[0].accessConfigs.natIP)")
-        TRIES=$((TRIES + 1))
-    done
 
     if [[ -n "${loadgen_ip}" ]]; then
         loadgen_ip='http://$loadgen_ip'
