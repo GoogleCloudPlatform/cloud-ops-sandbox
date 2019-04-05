@@ -16,6 +16,10 @@
   -webkit-font-smoothing: antialiased;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 html {
   height: 100%;
 }
@@ -37,8 +41,7 @@ body {
 }
 
 .page {
-  min-width: 1200px;
-  max-width: 1440px;
+  width: 1200px;
 }
 
 h1 {
@@ -128,7 +131,7 @@ nav {
 .step code {
   display: inline-block;
   margin: 1em 0;
-  padding: 0.25em 1em;
+  padding: 0.25em 0.5em;
   font-size: 16px;
   background: var(--grey100);
   color: var(--grey800);
@@ -139,6 +142,17 @@ nav {
 .step code::before {
   content: '$ ';
   display: inline;
+}
+.step code::after {
+  display: inline-block;
+  content: '';
+  width: 18px;
+  height: 18px;
+  top: 2px;
+  margin: 0 0 0 1em;
+  opacity: .5;
+  background-image: url(../images/content_copy.svg);
+  background-repeat: no-repeat;
 }
 
 img.cloud-shell {
@@ -177,32 +191,20 @@ img.cloud-shell {
 footer {
   display: flex;
   position: fixed;
-  max-width: 1200px;
   width: 1200px;
-  margin: 0 3em;
+  padding: 0 3em;
   height: 40px;
   bottom: 0;
   align-items: center;
-  border-top: 1px solid var(--grey400);
 }
 
 footer p {
+  width: 100%;
+  border-top: 1px solid var(--grey400);
   color: var(--grey500);
   font-style: italic;
   font-size: 12px;
   line-height: 40px;
-}
-
-footer a {
-  color: var(--grey500);
-  font-size: 12px;
-  line-height: 12px;
-  padding: 0 1em;
-  text-decoration: none;
-}
-
-footer a + a {
-  border-left: 1px solid var(--grey500);
 }
 
 .console-btn {
@@ -219,7 +221,8 @@ footer a + a {
   cursor: pointer;
   display: flex;
   justify-content: center;
-  width: 290px;
+  white-space: nowrap;
+  width: 300px;
 }
 
 .console-btn::before {
@@ -229,6 +232,7 @@ footer a + a {
   height: 22px;
   margin: 2px .3em 0 0;
   background-image: url('../images/cloud-shell.svg');
+  background-repeat: none;
 }
 
 .github-btn {
@@ -296,6 +300,103 @@ li b {
   font-weight: 700;
 }
 
-/* @media (max-width: 1240px) {
+/* mobile view */
+@media (max-width: 1130px) {
+  body {
+    display: unset;
+    background-image: url('../images/hex_bg.svg');
+    background-position: right -20px center;
+    background-position-x: calc(100% + 20px);
+    background-position-y: 50%;
+    background-size:255px 361px;
+  }
+  .page {
+    width: 90%;
+    margin: 0 auto;
+    position: relative;
+  }
+  .title-row {
+    margin: 3em 0 1em 0;
+  }
+  h1 {
+    font-size: 26px;
+    line-height: 26px;
+  }
+  .badge.alpha {
+    padding: 0 1em;
+    font-size: 12px;
+    color: var(--grey600);
+    background: var(--grey200);
+    margin: -37px 14px 0;
+    border-radius: 4px;
+    font-weight: 700;
+  }
 
-} */
+  ul {
+    margin: 0 1em;
+    padding: 0;
+  }
+
+  .content,
+  .cta {
+    width: 90%;
+    margin: 1em auto;
+    max-width: unset;
+  }
+  .line {
+    display: none;
+  }
+
+  .steps {
+    display: block;
+    position: relative;
+    width: 100%;
+  }
+
+  .step {
+    margin: 0 0 2em 0;
+  }
+
+  .console-btn {
+    font-size: .9em;
+    padding: .5em;
+    border-radius: 4px;
+    width: 225px;
+  }
+  .console-btn::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin: 2px .3em 0 0;
+    background-image: url('../images/cloud-shell.svg');
+    background-repeat: none;
+  }
+
+
+  img.cloud-shell {
+    position: unset;
+    display: block;
+    height: unset;
+    width: 100%;
+    max-width: 320px;
+    top: unset;
+    right: unset;
+    margin: 0 0 1em 0;
+  }
+
+  footer {
+    display: unset;
+    position: unset;
+    width: 100%;
+  }
+  footer p {
+    width: 100%;
+    padding: 1em;
+    border-top: 1px solid var(--grey400);
+    color: var(--grey500);
+    font-style: italic;
+    font-size: 12px;
+    line-height: unset;
+  }
+}
