@@ -116,9 +116,9 @@ displaySuccessMessage() {
     fi
 
     if [[ -n "${loadgen_ip}" ]]; then
-        loadgen_ip='http://$loadgen_ip'
+        loadgen_ip="http://$loadgen_ip"
     else
-        loadgen_ip='[not found]'
+        loadgen_ip="[not found]"
     fi
     GREEN='\033[0;32m'
     COLOR_RESET='\033[0m'
