@@ -60,8 +60,8 @@ getBillingAccount() {
 
 installTerraform() {
   sudo apt-get install unzip
-  wget https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_linux_amd64.zip
-  unzip terraform_0.11.11_linux_amd64.zip
+  wget -q https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_linux_amd64.zip -O ./terraform.zip
+  unzip -o terraform.zip
   sudo install terraform /usr/local/bin
 }
 
