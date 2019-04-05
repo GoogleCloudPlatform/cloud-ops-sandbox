@@ -48,7 +48,8 @@ getExternalIp() {
      external_ip=$(kubectl get svc frontend-external --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); 
      [ -z "$external_ip" ] && sleep 10; 
   done;
-  if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
+  external_ip="http://$external_ip"
+  if [[ $(curl -sL -w "%{http_code}"  "$external_ip" -o /dev/null) -eq 200 ]]; then
       log "Hipster Shop app is available at $external_ip"
   else
       log "error: Hipsterhop app at $external_ip is unreachable"
@@ -97,7 +98,7 @@ displaySuccessMessage() {
     log ""
     log "     Stackdriver Dashboard: https://app.google.stackdriver.com/accounts/create"
     log "     Google Cloud Console Dashboard: $gcp_path"
-    log "     Hipstershop web app address: http://$external_ip"
+    log "     Hipstershop web app address: $external_ip"
     log "     Load generator web interface: $loadgen_ip"
     echo -e $COLOR_RESET
 }
