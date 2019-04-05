@@ -24,7 +24,6 @@ log() { echo "$1" >&2; }
 getBillingAccount() {
   log "Checking for billing accounts"
   billingAccounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
-  echo "${billingAccounts}"
   if [ -z "$billingAccounts" ] || [[ ${#billingAccounts[@]} -eq 0 ]]; then
     log "No active billing accounts were detected. In order to create a project, Sandbox needs to have at least one billing account"
     log "Follow this link to setup a billing account:"
