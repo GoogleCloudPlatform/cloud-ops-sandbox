@@ -100,7 +100,7 @@ loadGen() {
   # find the IP of the load generator web interface
   TRIES=0
   while [[ -z "${loadgen_ip}" && "${TRIES}" -lt 20  ]]; do
-    log "waiting for load generator instance to spin up"
+    log "waiting for load generator instance..."
     sleep 1
     loadgen_ip=$(gcloud compute instances list --project "$created_project" \
                                                --filter="name:loadgenerator*" \
