@@ -23,8 +23,8 @@ log() { echo "$1" >&2; }
 
 getBillingAccount() {
   log "Checking for billing accounts"
-  billingAccounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
-  if [ -z "$billingAccounts" ] || [[ ${#billingAccounts[@]} -eq 0 ]]; then
+  found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
+  if [ -z "$found_accounts" ] || [[ ${#found_accounts[@]} -eq 0 ]]; then
     log "No active billing accounts were detected. In order to create a project, Sandbox needs to have at least one billing account"
     log "Follow this link to setup a billing account:"
     log "https://cloud.google.com/billing/docs/how-to/manage-billing-account"
@@ -32,11 +32,11 @@ getBillingAccount() {
     log "To list active billing accounts, run:"
     log "gcloud beta billing accounts list --filter open=true"
     exit;
-  elif [[ $(echo "${billingAccounts}" | wc -l) -gt 1 ]]; then
+  elif [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
       log "Which billing account would you like to use?:"
       IFS=$'\n'
       IFS_bak=$IFS
-      select opt in ${billingAccounts} "cancel"; do
+      select opt in ${found_accounts} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
           exit 0
         elif [[ -z "${opt}" ]]; then
@@ -48,7 +48,7 @@ getBillingAccount() {
       done
       IFS=$IFS_bak
   else
-    billing_acct=${billingAccounts}
+    billing_acct=${found_accounts}
   fi
   log "using billing account: $billing_acct"
 }
