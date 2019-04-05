@@ -47,8 +47,12 @@ getExternalIp() {
      log "Waiting for Hipster Shop endpoint..."; 
      external_ip=$(kubectl get svc frontend-external --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); 
      [ -z "$external_ip" ] && sleep 10; 
-  done; 
-  log "Hipster Shop Frontend is available at $external_ip"
+  done;
+  if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
+      log "Hipster Shop app is available at $external_ip"
+  else
+      log "error: Hipsterhop app at $external_ip is unreachable"
+  fi
 }
 
 # Install Load Generator service and start generating synthetic traffic to Sandbox
