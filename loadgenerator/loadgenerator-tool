@@ -1,0 +1,466 @@
+#!/usr/bin/env python3
+"""Generate fake traffic for Stackdriver Sandbox
+
+A command line tool to start and stop generating load for Stackdriver Sandbox.
+Manages load generation jobs running on GCP by spinning up and tearing down
+Compute Engine instances running the loadgenerator defined under /src/loadgenerator.
+
+Usage:
+    ./loadgenerator-tool -h
+
+Quickstart:
+    ./loadgenerator-tool autostart SANDBOX_FRONTEND_ADDRESS
+
+Fullstart:
+    ./loadgenerator-tool setup
+    ./loadgenerator-tool create SANDBOX_FRONTEND_ADDRESS --zone ZONE
+    sleep 20
+    ./loadgenerator-tool update LOADGENERATER_JOB --zone ZONE 100
+
+Available User Scenarios:
+    [python -m pip install locust]
+    locust --list -f /src/loadgenerator/locustfile.py
+"""
+
+from argparse import ArgumentParser
+from json import loads
+import logging
+from math import ceil
+from multiprocessing import Pool
+from os import devnull
+from random import choice
+from re import findall
+from shlex import split
+import string
+import subprocess
+from time import sleep
+
+# Global constants that are adjustable.
+JOB_WEB_PORT = 8080  # Web port to access the web interface of a load generation job.
+HTTP_TIMEOUT = 5  # Timeout in seconds for any HTTP calls made by this script.
+AUTOSTART_NUM_USERS = 100  # Number of users to automatically run for the "autostart" command.
+AUTOSTART_TIMEOUT = 60  # Timeout in seconds to wait for new jobs to set up for the "autostart" command.
+AUTOSTART_DEFAULT_ZONES = [  # Default zone selection for the "autostart" command.
+    'us-central1-a',
+    'us-central1-b',
+    'us-central1-c',
+    'us-central1-f',
+]
+
+# Global constants for convenience.
+DEVNULL = open(devnull, 'w')
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+
+
+def autostart(args):
+    """Automatically starts load generation for the target address.
+
+    Runs setup, creation, and update functionality to start a running load
+    generation job as easily as possible.
+
+    args.target_address -- the IP address to send load to
+    args.zone -- (optional) the Google Compute Engine zone to send load from
+    """
+    setup(args)
+
+    if not _is_address_accessible(args.target_address):
+        logger.error('Could not access target address {0}'.format(args.target_address))
+        print('Please double check the target address and try again.')
+        return
+    
+    name = _generate_job_name()
+    zone = args.zone
+    if not zone:
+        # Randomly choose a default zone
+        zone = choice(AUTOSTART_DEFAULT_ZONES)
+        
+    logger.info('Creating load generation job {0}...'.format(name))
+    address = _create_job(name, zone, args.target_address)
+    if not address:
+        logger.error('Failure accessing load generation job.')
+        logger.info('The job may not have been started correctly; exiting for now.')
+        print('You can try manually starting load generation with this tool\'s "update" command.')
+        return
+
+    logger.info("Waiting up to {0} seconds for {1} to finish setting up..."
+            .format(AUTOSTART_TIMEOUT, name))
+    # Attempt to start the job for up to AUTOSTART_TIMEOUT seconds.
+    retry_delay = 5
+    retries = AUTOSTART_TIMEOUT / retry_delay
+    command = (
+            'curl -f -s -S '
+            '--max-time {0} '
+            '--retry {1} '
+            '--retry-delay {2} '
+            '--retry-max-time {3} '
+            '--retry-connrefused '
+            '-X POST -F locust_count={4} -F hatch_rate={4} '
+            '{5}:{6}/swarm'
+            ).format(HTTP_TIMEOUT, retries, retry_delay, 
+                    AUTOSTART_TIMEOUT, AUTOSTART_NUM_USERS, address, JOB_WEB_PORT)
+    subprocess.Popen(split(command), stdout=DEVNULL, stderr=DEVNULL)
+
+    logger.info('Once finished setting up, load generation will start with {0} users.'
+            .format(AUTOSTART_NUM_USERS))
+    print('After setting up, you can access the job by navigating to http://{0}:{1}'
+            .format(address, JOB_WEB_PORT))
+
+
+def setup(args):
+    """Setup Compute Engine to run load generation jobs.
+
+    Sets a network firewall rule that allows HTTP access to the load generation
+    web service on each job.
+    """
+    logger.info('Setting up Compute Engine to run load generation jobs...')
+
+    if _is_firewall_rule():
+        logging.info('Nothing to do; already setup correctly.')
+        return
+
+    command = (
+            'gcloud compute firewall-rules create allow-locust-web '
+            '--allow=tcp:{0} '
+            '--target-tags=locust-web '
+            ).format(JOB_WEB_PORT)
+    subprocess.call(['echo'] + split(command))
+    subprocess.call(split(command), stdout=DEVNULL)
+    logging.info("Compute Engine setup for load generation.")
+
+
+def _is_firewall_rule():
+    command = 'gcloud compute firewall-rules describe allow-locust-web'
+    try:
+        subprocess.check_call(split(command), stdout=DEVNULL, stderr=DEVNULL)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
+def create(args):
+    """Create a load generator job running on Google Cloud Platform.
+
+    args.target_address -- the IP address to send load to
+    args.zone -- the Google Compute Engine zone to send load from
+    args.scenario -- (optional) the load generator scenario to run
+    """
+    name = _generate_job_name()
+    logger.info('Creating load generation job {0}...'.format(name))
+
+    if not _is_address_accessible(args.target_address):
+        logger.error('Could not access target address {0}'.format(args.target_address))
+        print('Please double check the target address and try again.')
+        return
+
+    address = _create_job(name, args.zone, args.target_address, args.scenario)
+    if not address:
+        logger.error('Failure while creating load generation job.')
+        logger.info('Exiting...')
+        return
+
+    message = 'Created job {0}'.format(name)
+    message = message + (' with user scenario {0}.'.format(args.scenario) if args.scenario else '.')
+    logger.info(message)
+    logger.info('It may take up to 20 seconds or more for the job to be ready to serve.')
+    print('To start load from this job use this tool\'s "update" command.')
+    print('To access this job\'s web interface, navigate to http://{0}:{1}'.format(address, JOB_WEB_PORT))
+
+
+def _generate_job_name():
+    uuid = ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(4))
+    return 'loadgenerator-' + uuid
+
+
+def _create_job(name, zone, target_address, scenario=None):
+    """Create a load generator job running on Google Cloud Platform.
+
+    Returns the external IP address of the job.
+
+    name -- the name of the job to create
+    zone -- the Google Compute Engine zone to send load from
+    target_address -- the IP address to send load to
+    scenario -- the load generator scenario to run [default: None]
+    """
+    command = (
+            'gcloud compute instances create-with-container {0}'
+            ' --zone={2}'
+            ' --machine-type=g1-small'
+            ' --tags=locust-web'
+            ' --container-image=gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator:latest'
+            ' --container-env="FRONTEND_ADDR={1}"'
+            ' --container-arg="--web-port={3}"' 
+            ).format(name, target_address, zone, JOB_WEB_PORT)
+
+    if scenario:
+        command = command + ' --container-arg={0}'.format(scenario)
+
+    subprocess.call(['echo'] + split(command))
+    try:
+        output = subprocess.check_output(split(command)).decode('utf-8')
+    except subprocess.CalledProcessError:
+        return None
+
+    print(output)
+
+    # Parse the External IP address of the job and return it.
+    return findall(r'[0-9]+(?:\.[0-9]+){3}', output)[-1]
+
+
+def update(args):
+    """Update a load generator job to run the specified number of users.
+
+    The maximum number of users is limited to 1000 due to the number of concurrent
+    network connections supported by Compute Engine instances.
+
+    args.name -- the name of the job to update
+    args.zone -- the Google Compute Engine zone the job is in
+    args.num_users -- the number of users to simulate
+    """
+    if (args.num_users > 1000):
+        logger.error('The maximum number of users per job is limited to 1000.')
+        logger.warning('Compute Engine instances support only so many concurrent network connections.')
+        logger.info('To simulate more users, try creating more load generation jobs.')
+        return
+    elif (args.num_users < 0):
+        logger.error('The number of users must be a positive number.')
+        return
+
+    logger.info('Updating load generation job {0} to run {1} users...'.format(args.name, args.num_users))
+
+    address = _get_job_address(args.name, args.zone)
+    if not address:
+        logger.error('Failure accessing load generation job.')
+        logger.info('The job may not have started correctly; exiting for now.')
+        return
+    logger.info('Connecting to {0}...'.format(address))
+    if not _is_address_accessible('{0}:{1}'.format(address, JOB_WEB_PORT)):
+        logger.error('Unable to connect to {0}.'.format(name))
+        print('If this job was just started, try waiting up to 20 seconds while it finishes setting up.')
+        print('Otherwise, it may be Compute Engine\'s firewall configuration; try running this tool\'s "setup" command.')
+        return
+
+    _set_job_users(address, args.num_users)
+    logger.info('{0} updated to run {1} users.'.format(args.name, args.num_users))
+
+
+def _get_job_address(name, zone):
+    """Returns the ip address of the specified job."""
+    command = (
+            'gcloud compute instances describe {0} '
+            '--zone={1} '
+            '--format="value(networkInterfaces[0].accessConfigs[0].natIP)"'
+            ).format(name, zone)
+    try:
+        return subprocess.check_output(split(command)).decode('utf-8').strip()
+    except subprocess.CalledProcessError:
+        return None
+
+
+def _is_address_accessible(address):
+    """Check if the specified web address is accessible over HTTP."""
+    command = 'curl -s --max-time {1} --fail {0}'.format(address, HTTP_TIMEOUT)
+    try:
+        subprocess.check_call(split(command), stdout=DEVNULL)
+    except subprocess.CalledProcessError:
+        return False
+    return True
+
+
+def _set_job_users(address, num_users):
+    """Sets a job to run the specified number of users."""
+    command = (
+            'curl -s --max-time {0} --fail -X POST -F locust_count={1} -F hatch_rate={1} {2}:{3}/swarm'
+            ).format(HTTP_TIMEOUT, num_users, address, JOB_WEB_PORT)
+    subprocess.call(split(command), stdout=DEVNULL)
+
+
+def delete(args):
+    """Delete the load generator job running on Google Cloud Platform.
+
+    args.name -- the name of the job to delete
+    args.zone -- the Google Compute Engine zone the job is in
+    """
+    logger.info('Deleting load generation job {0}...'.format(args.name))
+
+    command = (
+            'gcloud compute instances delete {0} --zone {1} -q'
+            ).format(args.name, args.zone)
+    subprocess.call(['echo'] + split(command))
+    try:
+        subprocess.call(split(command), stdout=DEVNULL)
+    except subprocess.CalledProcessError:
+        logger.error('Failure while deleting load generation job.')
+        logger.info('Exiting...')
+        return
+
+
+def jobs(args):
+    """List all load generator jobs running on Google Cloud Platform.
+    
+    Format:
+    NAME / ZONE / WEB ADDRESS
+    """
+    logger.info('Listing load generation jobs...')
+
+    job_list = _get_jobs()
+
+    line_template = '%-25s %-25s %-30s'
+    print(line_template % ('NAME', 'ZONE', 'WEB ADDRESS'))
+    for name, zone, address in job_list:
+        url = 'http://{0}:{1}'.format(address, JOB_WEB_PORT)
+        print(line_template % (name, zone, url))
+
+
+def status(args):
+    """Show the status of all load generator jobs running on Google Cloud Platform.
+
+    Format:
+    NAME / ZONE / STATE / USERS / RPS / FAIL %
+    """
+    logger.info('Showing status of load generation jobs...')
+
+    job_list = _get_jobs()
+
+    with Pool(processes=10) as pool:
+        results = pool.starmap_async(_get_job_status, job_list)
+        pool.close()
+        pool.join()
+
+    title_template = '%-25s %-25s %-8s %8s %8s %8s'
+    stats_template = '%-25s %-25s %-8s %8d %8d %8.0f'
+    error_template = '%-25s %-25s %-32s'
+    print(title_template % ('NAME', 'ZONE', 'STATE', 'USERS', 'RPS', 'FAIL %'))
+    for name, zone, stats in results.get():
+        if stats:
+            print(stats_template % ((name, zone) + stats))
+        else:
+            print(error_template % (name, zone, 'COULD NOT CONNECT'))
+
+
+def _get_job_status(name, zone, address):
+    """Returns a tuple of the form: (name, zone, stats)
+
+    stats - a tuple of the form: (state, user_count, total_rps, fail_percent)
+            otherwise 'None' if there was an error.
+    """
+    command = (
+            'curl -s --max-time {0} --fail {1}:{2}/stats/requests'
+            ).format(HTTP_TIMEOUT, address, JOB_WEB_PORT)
+    try:
+        result = loads(subprocess.check_output(split(command)).decode('utf-8').strip())
+    except subprocess.CalledProcessError:
+        return (name, zone, None)
+    if not result:
+        return (name, zone, None)
+
+    fail_percent = round(result['fail_ratio'] * 100)
+    stats = (result['state'], result['user_count'], result['total_rps'], fail_percent)
+    return (name, zone, stats)
+
+
+def _get_jobs():
+    """Returns a list of tuples of the form: (name, zone, address)"""
+    command = (
+            'gcloud compute instances list '
+            '--filter=name~"loadgenerator*" '
+            '--format="value(name,zone,networkInterfaces[0].accessConfigs[0].natIP)"'
+            )
+    output = subprocess.check_output(split(command)).decode('utf-8').strip()
+
+    job_list = []
+    for line in output.split('\n'):
+        if not line:
+            continue
+        name, location, address = line.split('\t')
+        zone = location.split('/')[-1]
+        job_list.append((name, zone, address))
+    return job_list
+
+
+def _check_prereqs():
+    """Check if the "gcloud" command is installed on this system."""
+    try:
+        subprocess.check_call(split('gcloud version'), stdout=DEVNULL, stderr=DEVNULL)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
+def _get_parser():
+    parser = ArgumentParser(prog='loadgenerator-tool')
+    subparsers = parser.add_subparsers(title='commands')
+
+    subparser = subparsers.add_parser('autostart',
+            help='starts generating load for a specified address',
+            description='automatically starts a load generation job for a target address (setup + create + update)')
+    subparser.add_argument('target_address', type=str,
+            help='the target address to send load to')
+    subparser.add_argument('--zone',
+            help='the Google Compute Engine zone to send load from [default: user-configurable]')
+    subparser.set_defaults(func=autostart)
+
+    subparser = subparsers.add_parser('setup',
+            help='setup Compute Engine to run load generator jobs',
+            description='setup the Compute Engine network firewall to allow load generator jobs to run')
+    subparser.set_defaults(func=setup)
+
+    subparser = subparsers.add_parser('create',
+            help='create a load generator job',
+            description='create a load generator job targeting the specific address with initial load set to zero')
+    subparser.add_argument('target_address', type=str,
+            help='the target address to send load to')
+    subparser.add_argument('--zone', required=True,
+            help='the Google Compute Engine zone to send load from')
+    subparser.add_argument('--scenario',
+            help='the load generator scenario to run [default: all]')
+    subparser.set_defaults(func=create)
+
+    subparser = subparsers.add_parser('update',
+            help='update a load generator job',
+            description='update a load generator job to simulate the specified number of users [range: 0 - 1000]')
+    subparser.add_argument('name', type=str,
+            help='the name of an instance to delete')
+    subparser.add_argument('num_users', type=int,
+            help='the number of users to simulate load for')
+    subparser.add_argument('--zone', required=True,
+            help='the Google Compute Engine zone to send load from')
+    subparser.set_defaults(func=update)
+
+    subparser = subparsers.add_parser('delete',
+            help='delete a load generator job',
+            description='delete a load generator job by name and zone')
+    subparser.add_argument('name', type=str, help='the name of an instance to delete')
+    subparser.add_argument('--zone', required=True, help='the Google Compute Engine zone the job is in')
+    subparser.set_defaults(func=delete)
+
+    subparser = subparsers.add_parser('jobs',
+            help='list all load generator jobs',
+            description='list all load generator jobs including the web address of each job')
+    subparser.set_defaults(func=jobs)
+
+    subparser = subparsers.add_parser('status',
+            help='show the status of all load generator jobs',
+            description='show the status of all load generator jobs whether running or not')
+    subparser.set_defaults(func=status)
+
+    return parser
+
+
+def main():
+    parser = _get_parser()
+    args = parser.parse_args()
+
+    if _check_prereqs():
+        try:
+            args.func(args)
+        except AttributeError:
+            parser.print_help()
+    else:
+        logger.error('Unable to find command "gcloud".')
+        logger.warning('It appears the Google Cloud SDK has not been installed.')
+        print('To install "gcloud", follow this link: https://cloud.google.com/sdk/install')
+
+
+if __name__ == "__main__":
+    main()

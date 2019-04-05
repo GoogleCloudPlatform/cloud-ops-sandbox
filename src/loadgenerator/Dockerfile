@@ -15,4 +15,4 @@ COPY --from=builder /install /usr/local
 
 COPY . .
 ENTRYPOINT ["./loadgenerator-entrypoint.sh"]
-CMD ["--no-web", "--clients=10", "--hatch-rate=5"]
+CMD ["--no-web", "--clients=100", "--hatch-rate=10"]
