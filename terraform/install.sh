@@ -19,6 +19,10 @@
 set -o errexit  # Exit on error
 #set -o nounset  # Trigger error when expanding unset variables
 
+# ensure the working dir is the script's folder
+SCRIPT_DIR=$(realpath $(dirname "$0"))
+cd $SCRIPT_DIR
+
 log() { echo "$1" >&2; }
 
 getBillingAccount() {
@@ -67,21 +71,25 @@ applyTerraform() {
 
   log "Apply Terraform automation"
   terraform apply -auto-approve -var="billing_account=${billing_acct}"
+  # find the name of the new project
+  created_project=$(cat ./terraform.tfstate | \
+                    grep "\"project\":" | \
+                    grep -oh "stackdriver-sandbox-[0-9]*" | \
+                    head -n 1)
 }
 
 getExternalIp() {
   external_ip=""; 
-  while [ -z $external_ip ]; 
-  do
+  while [ -z $external_ip ]; do
      log "Waiting for Hipster Shop endpoint..."; 
      external_ip=$(kubectl get svc frontend-external --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); 
      [ -z "$external_ip" ] && sleep 10; 
-  done; 
-
-  log "Verifying that Hipster Shop Frontend is accessible"
-  if [[ $(curl -sL -w "%{http code}\\n" "http://$external_ip" -o /dev/null) -eq 200 ]]
-  then
-    log "Stackdriver Sandbox cluster provisioning has completed successfully! Access it at http://$external_ip"
+  done;
+  external_ip="http://$external_ip"
+  if [[ $(curl -sL -w "%{http_code}"  "$external_ip" -o /dev/null) -eq 200 ]]; then
+      log "Hipster Shop app is available at $external_ip"
+  else
+      log "error: Hipsterhop app at $external_ip is unreachable"
   fi
 }
 
@@ -89,6 +97,42 @@ getExternalIp() {
 loadGen() {
   log "Running load generator"
   ../loadgenerator-tool startup --zone us-west2-a $external_ip
+  # find the IP of the load generator web interface
+  TRIES=0
+  while [[ -z "${loadgen_ip}" && "${TRIES}" -lt 20  ]]; do
+    log "waiting for load generator instance..."
+    sleep 1
+    loadgen_ip=$(gcloud compute instances list --project "$created_project" \
+                                               --filter="name:loadgenerator*" \
+                                               --format="value(networkInterfaces[0].accessConfigs.natIP)")
+    TRIES=$((TRIES + 1))
+  done
+}
+
+displaySuccessMessage() {
+    gcp_path="https://console.cloud.google.com/kubernetes/workload"
+    if [[ -n "${created_project}" ]]; then
+        gcp_path="$gcp_path?project=$created_project"
+    fi
+
+    if [[ -n "${loadgen_ip}" ]]; then
+        loadgen_ip="http://$loadgen_ip"
+    else
+        loadgen_ip="[not found]"
+    fi
+    GREEN='\033[0;32m'
+    COLOR_RESET='\033[0m'
+    echo -e $GREEN
+    log ""
+    log ""
+    log "--------------------------------------------------------------"
+    log "Stackdriver Sandbox deployed successfully!"
+    log ""
+    log "     Stackdriver Dashboard: https://app.google.stackdriver.com/accounts/create"
+    log "     Google Cloud Console Dashboard: $gcp_path"
+    log "     Hipstershop web app address: $external_ip"
+    log "     Load generator web interface: $loadgen_ip"
+    echo -e $COLOR_RESET
 }
 
 log "Checking Prerequisites..."
@@ -120,18 +164,5 @@ fi;
 applyTerraform;
 getExternalIp;
 loadGen;
+displaySuccessMessage;
 
-#log "**WARNING** Terraform script will create a Sandbox cluster. It asks for billing account"
-#log "If you have not set up billing account or want to cancel the operation, choose 'N'."
-#log ""
-#log "To list active billing accounts, run:"
-#log "gcloud beta billing accounts list --filter open=true"
-#log
-#while true; do
-#    read -p "Do you wish to continue to cluster creation? y/n " yn
-#    case $yn in
-#        [Yy]* ) applyTerraform; getExternalIp; loadGen; break;;
-#        [Nn]* ) exit;;
-#        * ) echo "Please answer yes or no.";;
-#    esac
-#done
