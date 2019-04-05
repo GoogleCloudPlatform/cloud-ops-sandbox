@@ -120,19 +120,16 @@ displaySuccessMessage() {
     else
         loadgen_ip="[not found]"
     fi
-    GREEN='\033[0;32m'
-    COLOR_RESET='\033[0m'
-    echo -e $GREEN
     log ""
     log ""
-    log "--------------------------------------------------------------"
+    log "********************************************************************************"
     log "Stackdriver Sandbox deployed successfully!"
     log ""
     log "     Stackdriver Dashboard: https://app.google.stackdriver.com/accounts/create"
     log "     Google Cloud Console Dashboard: $gcp_path"
     log "     Hipstershop web app address: $external_ip"
     log "     Load generator web interface: $loadgen_ip"
-    echo -e $COLOR_RESET
+    log "********************************************************************************"
 }
 
 log "Checking Prerequisites..."
