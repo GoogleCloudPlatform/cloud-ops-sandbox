@@ -71,6 +71,11 @@ applyTerraform() {
 
   log "Apply Terraform automation"
   terraform apply -auto-approve -var="billing_account=${billing_acct}"
+  # find the name of the new project
+  created_project=$(cat ./terraform.tfstate | \
+                    grep "\"project\":" | \
+                    grep -oh "stackdriver-sandbox-[0-9]*" | \
+                    head -n 1)
 }
 
 getExternalIp() {
@@ -105,11 +110,6 @@ loadGen() {
 }
 
 displaySuccessMessage() {
-    created_project=$(cat ./terraform.tfstate | \
-                        grep "\"project\":" | \
-                        grep -oh "stackdriver-sandbox-[0-9]*" | \
-                        head -n 1)
-
     gcp_path="https://console.cloud.google.com/kubernetes/workload"
     if [[ -n "${created_project}" ]]; then
         gcp_path="$gcp_path?project=$created_project"
