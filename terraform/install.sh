@@ -25,13 +25,14 @@ getBillingAccount() {
   log "Checking for billing accounts"
   found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
   if [ -z "$found_accounts" ] || [[ ${#found_accounts[@]} -eq 0 ]]; then
-    log "No active billing accounts were detected. In order to create a project, Sandbox needs to have at least one billing account"
+    log "error: no active billing accounts were detected. In order to create a sandboxed environment,"
+    log "the script needs to create a new GCP project and associate it with an active billing account"
     log "Follow this link to setup a billing account:"
     log "https://cloud.google.com/billing/docs/how-to/manage-billing-account"
     log ""
     log "To list active billing accounts, run:"
     log "gcloud beta billing accounts list --filter open=true"
-    exit;
+    exit 1;
   elif [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
       log "Which billing account would you like to use?:"
       IFS=$'\n'
