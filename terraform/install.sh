@@ -21,8 +21,40 @@ set -o errexit  # Exit on error
 
 log() { echo "$1" >&2; }
 
-installTerraform()
-{
+getBillingAccount() {
+  log "Checking for billing accounts"
+  found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
+  if [ -z "$found_accounts" ] || [[ ${#found_accounts[@]} -eq 0 ]]; then
+    log "error: no active billing accounts were detected. In order to create a sandboxed environment,"
+    log "the script needs to create a new GCP project and associate it with an active billing account"
+    log "Follow this link to setup a billing account:"
+    log "https://cloud.google.com/billing/docs/how-to/manage-billing-account"
+    log ""
+    log "To list active billing accounts, run:"
+    log "gcloud beta billing accounts list --filter open=true"
+    exit 1;
+  elif [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
+      log "Which billing account would you like to use?:"
+      IFS=$'\n'
+      IFS_bak=$IFS
+      select opt in ${found_accounts} "cancel"; do
+        if [[ "${opt}" == "cancel" ]]; then
+          exit 0
+        elif [[ -z "${opt}" ]]; then
+          log "invalid response"
+        else
+          billing_acct=$opt
+          break
+        fi
+      done
+      IFS=$IFS_bak
+  else
+    billing_acct=${found_accounts}
+  fi
+  log "using billing account: $billing_acct"
+}
+
+installTerraform() {
   sudo apt-get install unzip
   wget https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_linux_amd64.zip
   unzip terraform_0.11.11_linux_amd64.zip
@@ -34,7 +66,7 @@ applyTerraform() {
   terraform init
 
   log "Apply Terraform automation"
-  terraform apply -auto-approve -var="billing_account=${billingAccounts[0]}"
+  terraform apply -auto-approve -var="billing_account=${billing_acct}"
 }
 
 getExternalIp() {
@@ -60,22 +92,7 @@ loadGen() {
 }
 
 log "Checking Prerequisites..."
-log "Checking existence of billing accounts"
-billingAccounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
-if [ -z "$billingAccounts" ] || [[ ${#billingAccounts[@]} -eq 0 ]]
-then
-  log "No active billing accounts were detected. In order to create a project, Sandbox needs to have at least one billing account"
-  log "Follow this link to setup a billing account:"
-  log "https://cloud.google.com/billing/docs/how-to/manage-billing-account"
-  log ""
-  log "To list active billing accounts, run:"
-  log "gcloud beta billing accounts list --filter open=true"
-
-  exit;
-elif [[ ${#billingAccounts[@]} -eq 1 ]]
-then
-  log "Billing account detected: '${billingAccounts[0]}'"
-fi
+getBillingAccount;
 
 log "Make sure Terraform is installed"
 if ! [ -x "$(command -v terraform)" ]; then
