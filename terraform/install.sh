@@ -98,7 +98,7 @@ loadGen() {
   ../loadgenerator/loadgenerator-tool autostart $external_ip
   # find the IP of the load generator web interface
   TRIES=0
-  while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip" -o /dev/null) -ne 200  && \
+  while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null --max-time 1) -ne 200  && \
       "${TRIES}" -lt 20  ]]; do
     log "waiting for load generator instance..."
     sleep 1
@@ -107,7 +107,7 @@ loadGen() {
                                                --format="value(networkInterfaces[0].accessConfigs.natIP)")
     TRIES=$((TRIES + 1))
   done
-  if [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip" -o /dev/null) -ne 200 ]]; then
+  if [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null  --max-time 1) -ne 200 ]]; then
     log "error: load generator unreachable"
   fi
 }
