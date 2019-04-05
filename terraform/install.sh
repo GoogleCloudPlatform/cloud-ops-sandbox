@@ -34,7 +34,7 @@ getBillingAccount() {
     log "gcloud beta billing accounts list --filter open=true"
     exit;
   elif [[ $(echo "${billingAccounts}" | wc -l) -gt 1 ]]; then
-      log "which billing acpcount would you like to use?:"
+      log "Which billing account would you like to use?:"
       IFS=$'\n'
       IFS_bak=$IFS
       select opt in ${billingAccounts} "cancel"; do
