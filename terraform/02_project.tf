@@ -69,6 +69,15 @@ resource "google_project_service" "clouddebugger" {
   disable_dependent_services = true
 }
 
+
+resource "google_project_service" "cloudtrace" {
+  project = "${google_project.project.id}"
+
+  service = "cloudtrace.googleapis.com"
+
+  disable_dependent_services = true
+}
+
 resource "google_project_service" "errorreporting" {
   project = "${google_project.project.id}"
 
