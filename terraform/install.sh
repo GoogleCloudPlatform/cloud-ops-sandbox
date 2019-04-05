@@ -116,7 +116,7 @@ displaySuccessMessage() {
     fi
 
     if [[ -n "${loadgen_ip}" ]]; then
-        loadgen_ip="http://$loadgen_ip"
+        loadgen_ip="http://$loadgen_ip:8080"
     else
         loadgen_ip="[not found]"
     fi
