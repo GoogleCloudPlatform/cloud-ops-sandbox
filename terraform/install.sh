@@ -85,18 +85,17 @@ getExternalIp() {
      external_ip=$(kubectl get svc frontend-external --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); 
      [ -z "$external_ip" ] && sleep 10; 
   done;
-  external_ip="http://$external_ip"
-  if [[ $(curl -sL -w "%{http_code}"  "$external_ip" -o /dev/null) -eq 200 ]]; then
-      log "Hipster Shop app is available at $external_ip"
+  if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
+      log "Hipster Shop app is available at http://$external_ip"
   else
-      log "error: Hipsterhop app at $external_ip is unreachable"
+      log "error: Hipsterhop app at http://$external_ip is unreachable"
   fi
 }
 
 # Install Load Generator service and start generating synthetic traffic to Sandbox
 loadGen() {
   log "Running load generator"
-  ../loadgenerator-tool startup --zone us-west2-a $external_ip
+  ../loadgenerator/loadgenerator-tool autostart $external_ip
   # find the IP of the load generator web interface
   TRIES=0
   while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip" -o /dev/null) -ne 200  && \
@@ -120,9 +119,9 @@ displaySuccessMessage() {
     fi
 
     if [[ -n "${loadgen_ip}" ]]; then
-        loadgen_ip="http://$loadgen_ip"
+        loadgen_addr="http://$loadgen_ip:8080"
     else
-        loadgen_ip="[not found]"
+        loadgen_addr="[not found]"
     fi
     log ""
     log ""
@@ -131,8 +130,8 @@ displaySuccessMessage() {
     log ""
     log "     Stackdriver Dashboard: https://app.google.stackdriver.com/accounts/create"
     log "     Google Cloud Console Dashboard: $gcp_path"
-    log "     Hipstershop web app address: $external_ip"
-    log "     Load generator web interface: $loadgen_ip"
+    log "     Hipstershop web app address: http://$external_ip"
+    log "     Load generator web interface: $loadgen_addr"
     log "********************************************************************************"
 }
 
