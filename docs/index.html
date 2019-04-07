@@ -6,7 +6,30 @@
   <title>Stackdriver Sandbox</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" media="screen" href="css/main.css" />
-  <script src="js/main.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-137862890-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-137862890-1');
+  </script>
+  <!-- End of Google Analytics -->
+  <script src="scripts/metrics.js"></script>
+  <script>
+      var config = {
+        demo_name : "stackdriver-sandbox",
+        apiKey: "AIzaSyDrqTHsyPL8qMiw8ozfXPrvD3uVY3nm8Kc",
+        authDomain: "next19-metrics-test.firebaseapp.com",
+        databaseURL: "https://next19-metrics-test.firebaseio.com/",
+        projectId: "next19-metrics-test",
+        storageBucket: "next19-metrics-test.appspot.com",
+        messagingSenderId: "186455296600"
+      };
+
+      metrics = new DEMOMETRICS(config);
+    </script>
 </head>
 <body>
   <section class="page">
@@ -24,19 +47,19 @@
         <li><b>Load Generator</b> - a component that produces synthetic traffic on a demo service</li>
         <li><b>(Soon) SRE Runbook</b> - for operating deployed sample service that follows best SRE practices</li>
       </ul>
-      <a class="github-btn" href="https://github.com/GoogleCloudPlatform/stackdriver-sandbox" target="_blank">View source code</a>
+      <a class="github-btn" href="https://github.com/GoogleCloudPlatform/stackdriver-sandbox" target="_blank" onclick="metrics.recordCustomTime('stackdriver-demo-view-source-code')">View source code</a>
     </section>
     <section class="cta">
       <h2>Get started now</h2>
       <div class="steps">
         <div class="step step-1">
           <label>Step 1</label>
-          <a class="console-btn" href="https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/stackdriver-sandbox.git&cloudshell_git_branch=master&cloudshell_working_dir=terraform" target="_blank">Open in Google Cloud Shell</a>
+          <a class="console-btn" href="https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/stackdriver-sandbox.git&cloudshell_git_branch=master&cloudshell_working_dir=terraform" target="_blank" onclick="metrics.recordCustomTime('stackdriver-demo-open-in-cloud-shell')">Open in Google Cloud Shell</a>
         </div>
         <div class="step step-2">
           <label>Step 2</label>
           <p>In the Cloud Shell command prompt, type this command to install the Sandbox</p>
-          <code onclick="navigator.clipboard.writeText('./install.sh')">./install.sh</code>
+          <code onclick="navigator.clipboard.writeText('./install.sh'); metrics.recordCustomTime('stackdriver-demo-copy-code-for-cloud-shell')">./install.sh</code>
           <div class="line"></div>
         </div>
         <img src="images/bg_02.png" class="cloud-shell" alt="cloud shell">
