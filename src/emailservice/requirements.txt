@@ -15,7 +15,7 @@ googleapis-common-protos==1.5.5  # via google-api-core
 grpcio-health-checking==1.12.1
 grpcio==1.16.1
 idna==2.8                 # via requests
-jinja2==2.10
+jinja2==2.10.1
 markupsafe==1.1.0         # via jinja2
 opencensus[stackdriver]==0.1.10
 protobuf==3.6.1           # via google-api-core, googleapis-common-protos, grpcio-health-checking
