@@ -39,8 +39,8 @@ getBillingAccount() {
     exit 1;
   elif [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
       log "Which billing account would you like to use?:"
-      IFS=$'\n'
       IFS_bak=$IFS
+      IFS=$'\n'
       select opt in ${found_accounts} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
           exit 0
