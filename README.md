@@ -1,4 +1,6 @@
+
 # Stackdriver Sandbox (Alpha)
+
 Stackdriver Sandbox is an open-source tool that helps practitioners to learn Service Reliability Engineering practices from Google and apply them on their cloud services using Stackdriver. It is based on [Hipster Shop](https://github.com/GoogleCloudPlatform/microservices-demo), a cloud-native microservices application.
 
 Sandbox offers:
@@ -40,10 +42,10 @@ Google Stackdriver is a suite of tools that helps you gain full observability of
 
 [![Open in Cloud Shell](http://www.gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/stackdriver-sandbox.git&cloudshell_git_branch=master&cloudshell_working_dir=terraform)
 
-2. In the Cloud Shell command prompt, type:
+1. In the Cloud Shell command prompt, type:
 
 ```bash
-$ ./install.sh
+./install.sh
 ```
 
 ### Next Steps
@@ -53,21 +55,21 @@ $ ./install.sh
 
 ### Clean Up
 
-When you are done using Stackdriver Sandbox, you can tear down the environment by deleting 
-the GCP project that was set up for you. This can be accomplished in any of the following ways:
+When you are done using Stackdriver Sandbox, you can tear down the environment by deleting the GCP project that was set up for you. This can be accomplished in any of the following ways:
 
-+ Use the Stackdriver Sandbox `destroy` script:
+* Use the Stackdriver Sandbox `destroy` script:
+
 ```bash
-$ ./destroy.sh
+./destroy.sh
 ```
 
-+ If you no longer have the Stackdriver Sandbox files downloaded, delete your project manually using `gcloud`
+* If you no longer have the Stackdriver Sandbox files downloaded, delete your project manually using `gcloud`
+
 ```bash
-$ gcloud projects delete $YOUR_PROJECT_ID
+gcloud projects delete $YOUR_PROJECT_ID
 ```
 
-+ Delete your project through Google Cloud Console's [Resource Manager web interface](https://console.cloud.google.com/cloud-resource-manager)
-
+* Delete your project through Google Cloud Console's [Resource Manager web interface](https://console.cloud.google.com/cloud-resource-manager)
 
 ## Service Overview
 
@@ -133,25 +135,25 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 
 1. Install tools to run a Kubernetes cluster locally:
 
-   - kubectl (can be installed via `gcloud components install kubectl`)
-   - Docker for Desktop (Mac/Windows): It provides Kubernetes support as [noted
+   * kubectl (can be installed via `gcloud components install kubectl`)
+   * Docker for Desktop (Mac/Windows): It provides Kubernetes support as [noted
      here](https://docs.docker.com/docker-for-mac/kubernetes/).
-   - [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
+   * [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
      (ensure version ≥v0.20)
 
 1. Launch “Docker for Desktop”. Go to **Preferences**:
-   - Choose **Enable Kubernetes**
-   - Set **CPUs** to at least 3
-   - Set **Memory** to at least 6.0 GiB
+   * Choose **Enable Kubernetes**
+   * Set **CPUs** to at least 3
+   * Set **Memory** to at least 6.0 GiB
 
-3. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
+1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
-4. Run `skaffold run` (first time will be slow; it can take up to 30 minutes).
+1. Run `skaffold run` (first time will be slow; it can take up to 30 minutes).
    This will build and deploy the application. If you need to rebuild the images
    automatically as you refactor he code, run the `skaffold dev` command.
 
-5. Run `kubectl get pods` to verify the Pods are ready and running. The
-   application frontend should be available at http://localhost:80 on your
+1. Run `kubectl get pods` to verify the Pods are ready and running. The
+   application frontend should be available at <http://localhost:80> on your
    machine.
 
 ### Option 2: Running on Google Kubernetes Engine (GKE)
@@ -181,19 +183,19 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
    where [PROJECT_ID] is the identifier for your GCP project.
 
    This command:
-   - Builds the container images.
-   - Pushes them to GCR.
-   - Applies the `./kubernetes-manifests` deploying the application to
+   * Builds the container images.
+   * Pushes them to GCR.
+   * Applies the `./kubernetes-manifests` deploying the application to
      Kubernetes.
 
    **Troubleshooting:** If you get the error "No space left on device" on Google
    Cloud Shell, you can build the images on Google Cloud Build. To do this:
    1. [Enable the Cloud Build
        API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com).
-   
+
    2. Run `skaffold run -p gcb  --default-repo=gcr.io/[PROJECT_ID]`.
 
-1.  Find the IP address of your application, then visit the application on your
+1. Find the IP address of your application, then visit the application on your
     browser to confirm installation.
 
         kubectl get service frontend-external
@@ -204,16 +206,16 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
     are seeing this, run `kubectl get service frontend-external -o=yaml | kubectl apply -f-`
     to trigger load-balancer reconfiguration.
 
-### Option 3: Using Static Images 
+### Option 3: Using Static Images
 
-> 💡 Recommended for test-driving the application on an existing cluster. 
+> 💡 Recommended for test-driving the application on an existing cluster.
 
-**Prerequisite**: a running Kubernetes cluster. 
+**Prerequisite**: a running Kubernetes cluster.
 
 1. Clone this repository.
 1. Deploy the application: `kubectl apply -f ./release/kubernetes-manifests`  
 1. Run `kubectl get pods` to see pods are in a healthy and ready state.
-1.  Find the IP address of your application, then visit the application on your
+1. Find the IP address of your application, then visit the application on your
     browser to confirm installation.
 
         kubectl get service frontend-external
@@ -223,7 +225,7 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 1. If you want to create synthetic load manually, use the `loadgenerator-tool` executable found in the root of the repository. For example:
 
 ```bash
-$ ./loadgenerator-tool startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
+./loadgenerator-tool startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
 ```
 
 ### (Optional) Deploying on a Istio-installed GKE cluster
@@ -233,7 +235,7 @@ $ ./loadgenerator-tool startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
 
 1. Create a GKE cluster (described above).
 
-2. Use [Istio on GKE add-on](https://cloud.google.com/istio/docs/istio-on-gke/installing)
+1. Use [Istio on GKE add-on](https://cloud.google.com/istio/docs/istio-on-gke/installing)
    to install Istio to your existing GKE cluster.
 
        gcloud beta container clusters update demo \
@@ -241,32 +243,32 @@ $ ./loadgenerator-tool startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
            --update-addons=Istio=ENABLED \
            --istio-config=auth=MTLS_PERMISSIVE
 
-   > NOTE: If you need to enable `MTLS_STRICT` mode, you will need to update
-   > several manifest files:
-   >
-   > - `kubernetes-manifests/frontend.yaml`: delete "livenessProbe" and
-   >   "readinessProbe" fields.
-   > - `kubernetes-manifests/loadgenerator.yaml`: delete "initContainers" field.
+    > NOTE: If you need to enable `MTLS_STRICT` mode, you will need to update
+    > several manifest files:
+    >
+    > * `kubernetes-manifests/frontend.yaml`: delete "livenessProbe" and
+    >   "readinessProbe" fields.
+    > * `kubernetes-manifests/loadgenerator.yaml`: delete "initContainers" field.
 
-3. (Optional) Enable Stackdriver Tracing/Logging with Istio Stackdriver Adapter
+1. (Optional) Enable Stackdriver Tracing/Logging with Istio Stackdriver Adapter
    by following [this guide](https://cloud.google.com/istio/docs/istio-on-gke/installing#enabling_tracing_and_logging).
 
-4. Install the automatic sidecar injection (annotate the `default` namespace
+1. Install the automatic sidecar injection (annotate the `default` namespace
    with the label):
 
        kubectl label namespace default istio-injection=enabled
 
-5. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
+1. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
 
        kubectl apply -f ./istio-manifests
 
     This is required only once.
 
-6. Deploy the application with `skaffold run --default-repo=gcr.io/[PROJECT_ID]`.
+1. Deploy the application with `skaffold run --default-repo=gcr.io/[PROJECT_ID]`.
 
-7. Run `kubectl get pods` to see pods are in a healthy and ready state.
+1. Run `kubectl get pods` to see pods are in a healthy and ready state.
 
-8. Find the IP address of your Istio gateway Ingress or Service, and visit the
+1. Find the IP address of your Istio gateway Ingress or Service, and visit the
    application.
 
        INGRESS_HOST="$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
