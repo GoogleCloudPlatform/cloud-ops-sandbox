@@ -90,6 +90,11 @@ resource "google_container_cluster" "gke" {
     }
   }
 
+  # Specifies the use of "new" Stackdriver logging and monitoring
+  # https://cloud.google.com/kubernetes-engine-monitoring/
+  logging_service = "logging.googleapis.com/kubernetes"
+  monitoring_service = "monitoring.googleapis.com/kubernetes"
+
   # Stores the zone of created gke cluster
   provisioner "local-exec" {
     command = "gcloud config set compute/zone ${element(random_shuffle.zone.result, 0)}"

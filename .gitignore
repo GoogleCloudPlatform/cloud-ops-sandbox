@@ -16,3 +16,4 @@ terraform/terraform.tfstate.backup
 terraform/terraform
 terraform/terraform_0.11.11_linux_amd64.zip
 terraform/terraform.tfstate
+.token
