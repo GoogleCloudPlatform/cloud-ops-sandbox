@@ -51,6 +51,7 @@ Google Stackdriver is a suite of tools that helps you gain full observability of
 ### Next Steps
 
 * Explore your Sandbox deployment and its [architecture](#Service-Overview)
+* Follow the [User Guide](/docs/README.md) to start using Stackdriver
 * Learn more about Stackdriver using [Code Labs](https://codelabs.developers.google.com/gcp-next/?cat=Monitoring)
 
 ### Clean Up
