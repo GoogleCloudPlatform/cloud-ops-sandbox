@@ -33,19 +33,17 @@ For more information, see ["Create a new billing account"](https://cloud.google.
 
 ## Deploy the Sandbox
 
-In a new browser tab, navigate to the Stackdriver Sandbox website, `[https://stackdriver-sandbox.dev/](https://stackdriver-sandbox.dev/)`, and follow the instructions there:
+In a new browser tab, navigate to the Stackdriver Sandbox [website] (https://stackdriver-sandbox.dev/) and follow the instructions there:
 
 1. Click the **Open in Google Cloud Shell** button. You might have to click Proceed on a second dialog if you haven't run Cloud Shell before.
 
-> After the shell starts, the Stackdriver Sandbox repository is cloned to your shell container, and you are placed in the `stackdriver-sandbox/terraform` directory.
+After the shell starts, the Stackdriver Sandbox repository is cloned to your shell container, and you are placed in the `stackdriver-sandbox/terraform` directory.
 
-1. Run the installer script:
+2. Run the installer script:
 
 ```
 $ ./install.sh
 ```
-
-undefined
 
 The `install.sh` script performs the following tasks:
 
@@ -56,10 +54,7 @@ The `install.sh` script performs the following tasks:
 
 The installation process takes a few minutes. When it completes, you see a message like the following:
 
-<table>
-<thead>
-<tr>
-<th><p><pre>
+```bash
 ********************************************************************************
 Stackdriver Sandbox deployed successfully!
 
@@ -67,18 +62,11 @@ Stackdriver Sandbox deployed successfully!
      Google Cloud Console Dashboard: https://console.cloud.google.com/kubernetes/workload?project=stackdriver-sandbox-68291054
      Hipstershop web app address: http://35.202.126.83
      Load generator web interface: http://34.68.50.4:8080
-</pre></p>
-
-</th>
-</tr>
-</thead>
-<tbody>
-</tbody>
-</table>
+```
 
 The URLs in this message tell you where to find the results of the installation:
 
--  The **Stackdriver Dashboard URL** is where you will end up when you go to Stackdriver Monitoring from the GCP console. The GCP project created by the installer must be part of a Workspace in Stackdriver Monitoring.  A Workspace (_[documentation_](https://cloud.google.com/monitoring/workspaces/)) is a Stackdriver concept for organizing multiple GCP projects.
+-  The **Stackdriver Dashboard URL** is where you will end up when you go to Stackdriver Monitoring from the GCP console. The GCP project created by the installer must be part of a Workspace in Stackdriver Monitoring.  A Workspace ([documentation](https://cloud.google.com/monitoring/workspaces/)) is a Stackdriver concept for organizing multiple GCP projects.
 
 > A Workspace will be created automatically for your project if you don't have one already, so you don't have to do anything explicitly with this URL.
 
@@ -88,17 +76,17 @@ The URLs in this message tell you where to find the results of the installation:
 
 -  The **load generator** URL takes you to an interface for generating synthetic traffic to Hipster Shop.
 
-undefined## Shop like a hipster!
+## Shop like a hipster!
 
 In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase" everything you need for your hipster lifestyle using a mock credit card number:
 
-![image](https://drive.google.com/a/google.com/file/d/1H01jOWer40kB9EhXVKUgFoa6hQZyBObW/view?usp=drivesdk)
+![image](./images/user-guide/2-hipstershop.png)
 
-undefined## Run the load generator
+## Run the load generator
 
 In another browser tab, navigate to the load-generator URL, from which you can simulate users interacting with the application to generate traffic. For this application, values like 100 users with a "hatch rate" of 2 (spawn 2 users per second) are reasonable.
 
-![image](https://drive.google.com/a/google.com/file/d/19qCxjDAy_BlEY8E-2NbNmgboxGUXXxGt/view?usp=drivesdk)
+![image](./images/user-guide/3-locust.png)
 
 ## Explore your project in GCP
 
