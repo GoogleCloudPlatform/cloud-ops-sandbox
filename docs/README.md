@@ -119,7 +119,7 @@ Similarly, cloud-native, microservice-based applications complicate traditional 
 
 You can find the Stackdriver products in the navigation panel on the GCP Console:
 
-![image](.images/user-guide/5-products.png)
+![image](./images/user-guide/5-products.png)
 
 ## The Stackdriver APM products: Trace, Profiler, and Debugger
 
