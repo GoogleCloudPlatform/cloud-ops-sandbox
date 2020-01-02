@@ -139,7 +139,7 @@ To bring up Stackdriver Trace, click **Trace** in the GCP navigation panel. This
 
 ![image](./images/user-guide/6-trace.png)
 
-Click **Trace List **in the navigation panel to get the list of traces captured during a particular time:
+Click **Trace List** in the navigation panel to get the list of traces captured during a particular time:
 
 ![image](./images/user-guide/7-tracelist.png)
 
@@ -147,7 +147,7 @@ Click on any trace in the timeline to get a detailed view and breakdown of the t
 
 ![image](./images/user-guide/8-tracedetail.png)
 
-Finally, click **Analysis Reports **in the navigation menu to see a list of reports that are generated: 
+Finally, click **Analysis Reports** in the navigation menu to see a list of reports that are generated: 
 
 ![image](./images/user-guide/9-traceanalysis.png)
 
@@ -213,7 +213,7 @@ The following Hipster Shop microservices are configured to capture debugger data
 
 #### Using Debugger
 
-undefinedTo bring up the Debugger, select **Debugger** from the navigation panel on the GPC console:
+To bring up the Debugger, select **Debugger** from the navigation panel on the GPC console:
 
 ![image](./images/user-guide/14-debugger.png)
 
@@ -242,7 +242,7 @@ git config --global user.name "first last"       # substitute with your name
 
 ##### Upload source code to Debugger
 
-In the Debugger home page, **copy** the command (_don't click the button!_) in the "Upload a source code capture to Google servers" box, but **_don't include the `LOCAL_PATH` variable**_. (You will replace this with another value before executing the command.)
+In the Debugger home page, **copy** the command (_don't click the button!_) in the "Upload a source code capture to Google servers" box, but **don't include the `LOCAL_PATH` variable**. (You will replace this with another value before executing the command.)
 
 ![image](./images/user-guide/15-codeupload.png)
 
@@ -264,7 +264,7 @@ You are now ready to debug your code!
 
 Start by using the Snapshot functionality to understand the state of your variables.  In the Source capture tree, open the **`server.js`** file under **src** > **currencyservice.** 
 
-Next, click on** line 121** to create a snapshot. in a few moments, you should see a snapshot be created, and you can view the values of all variables at that point on the right side of the screen:
+Next, click on **line 121** to create a snapshot. in a few moments, you should see a snapshot be created, and you can view the values of all variables at that point on the right side of the screen:
 
 ![image](./images/user-guide/17-snapshot.png)
 
@@ -281,7 +281,7 @@ To see all messages that are being generated in Stackdriver Logging from your lo
 
 ![image](./images/user-guide/18-logpoint.png)
 
-## The Stackdriver observability products:Monitoring, Logging, and Error Reporting
+## The Stackdriver observability products: Monitoring, Logging, and Error Reporting
 
 ### Stackdriver Monitoring
 
@@ -295,11 +295,11 @@ To get to Stackdriver Monitoring from the GCP console, select **Monitoring** on 
 
 ![image](./images/user-guide/19-monitoring.png)
 
-undefinedThere are many pre-built monitoring pages. For example, the GKE Cluster Details page (select** Resources > (Infrastructure) Kubernetes Engine**) brings up a page that provides information about the Sandbox cluster:
+There are many pre-built monitoring pages. For example, the GKE Cluster Details page (select **Resources > (Infrastructure) Kubernetes Engine**) brings up a page that provides information about the Sandbox cluster:
 
 ![image](./images/user-guide/20-gkemon.png)
 
-undefinedYou can also use the Monitoring console to create alerts and uptime checks, and to create dashboards that chart metrics you are interested in.  For example, Metrics Explorer lets you select a specific metric, configure it for charting, and then save the chart. Select **Resources > Metrics Explorer** to bring it up.
+You can also use the Monitoring console to create alerts and uptime checks, and to create dashboards that chart metrics you are interested in.  For example, Metrics Explorer lets you select a specific metric, configure it for charting, and then save the chart. Select **Resources > Metrics Explorer** to bring it up.
 
 The following chart shows the client-side RPC calls that did not result in an OK status:
 
@@ -315,9 +315,7 @@ Stackdriver Logging defines some logs-based metrics, but you can also create you
 
 ![image](./images/user-guide/22-lbms.png)
 
-All system-defined logs-based metrics are counters.  User-defined logs-based metrics can be either counter or distribution metrics
-
-undefined##### 
+All system-defined logs-based metrics are counters.  User-defined logs-based metrics can be either counter or distribution metrics.
 
 ##### Creating a logs-based metric
 
@@ -411,7 +409,7 @@ On opening an error group report, operators can access to the exact line in the 
 
 #### Using Error Reporting
 
-You can access Error Reporting by selecting **Error Reporting ** from the GCP navigation menu:
+You can access Error Reporting by selecting **Error Reporting** from the GCP navigation menu:
 
 ![image](./images/user-guide/31-errorrep.png)
 
