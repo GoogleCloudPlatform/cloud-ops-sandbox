@@ -59,9 +59,9 @@ The installation process takes a few minutes. When it completes, you see a messa
 Stackdriver Sandbox deployed successfully!
 
      Stackdriver Dashboard: https://app.google.stackdriver.com/accounts/create
-     Google Cloud Console Dashboard: https://console.cloud.google.com/kubernetes/workload?project=stackdriver-sandbox-68291054
-     Hipstershop web app address: http://35.202.126.83
-     Load generator web interface: http://34.68.50.4:8080
+     Google Cloud Console Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project ID>
+     Hipstershop web app address: http://XX.XX.XX.XX
+     Load generator web interface: http://XX.XX.XX.XX
 ```
 
 The URLs in this message tell you where to find the results of the installation:
