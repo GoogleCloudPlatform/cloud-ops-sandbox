@@ -179,14 +179,6 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:9e1d37b58d17113ec3cb5608ac0382313c5b59470b94ed97d0976e69c7022314"
-  name = "github.com/pkg/errors"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "614d223910a179a466c1767a985424175c39b465"
-  version = "v0.9.1"
-
-[[projects]]
   digest = "1:04457f9f6f3ffc5fea48e71d62f2ca256637dee0a04d710288e27e05c8b41976"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -195,10 +187,11 @@
   version = "v1.4.2"
 
 [[projects]]
-  digest = "1:c62809522b0e3c3a8e1ad60a2b4a15686abe8a62bd119714fa83592653aacfc0"
+  digest = "1:d0d90c1767b8e8a44b9bb1c5982a71e3edfd566adf49120d34f90d78a98ee362"
   name = "go.opencensus.io"
   packages = [
     ".",
+    "examples/exporter",
     "internal",
     "internal/tagencoding",
     "metric/metricdata",
@@ -530,27 +523,21 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "cloud.google.com/go/monitoring/apiv3",
     "cloud.google.com/go/profiler",
     "contrib.go.opencensus.io/exporter/stackdriver",
+    "contrib.go.opencensus.io/exporter/stackdriver/monitoredresource",
     "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto",
     "github.com/golang/protobuf/jsonpb",
     "github.com/golang/protobuf/proto",
-    "github.com/golang/protobuf/ptypes/timestamp",
     "github.com/google/go-cmp/cmp",
-    "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
+    "go.opencensus.io/examples/exporter",
     "go.opencensus.io/metric/metricdata",
     "go.opencensus.io/plugin/ocgrpc",
     "go.opencensus.io/stats",
     "go.opencensus.io/stats/view",
     "go.opencensus.io/trace",
     "golang.org/x/net/context",
-    "google.golang.org/api/iterator",
-    "google.golang.org/genproto/googleapis/api/distribution",
-    "google.golang.org/genproto/googleapis/api/metric",
-    "google.golang.org/genproto/googleapis/api/monitoredres",
-    "google.golang.org/genproto/googleapis/monitoring/v3",
     "google.golang.org/grpc",
     "google.golang.org/grpc/codes",
     "google.golang.org/grpc/health/grpc_health_v1",
