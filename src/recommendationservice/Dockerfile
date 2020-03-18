@@ -1,4 +1,4 @@
-FROM python:2.7-slim
+FROM python:2.7
 RUN apt-get update -qqy && \
 	apt-get -qqy install wget && \
 	rm -rf /var/lib/apt/lists/*
