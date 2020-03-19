@@ -32,20 +32,19 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"cloud.google.com/go/profiler"
-    "contrib.go.opencensus.io/exporter/stackdriver"
-    "contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
+	"contrib.go.opencensus.io/exporter/stackdriver"
+	"contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
-	// "go.opencensus.io/exporter/jaeger"
-    "go.opencensus.io/examples/exporter"
+	"go.opencensus.io/examples/exporter"
+	"go.opencensus.io/metric/metricdata"
 	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/stats/view"
 	"go.opencensus.io/stats"
+	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-    "google.golang.org/grpc/status"
-    "go.opencensus.io/metric/metricdata"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -54,10 +53,10 @@ var (
 	log          *logrus.Logger
 	extraLatency time.Duration
 
-	port = flag.Int("port", 3550, "port to listen at")
-    reloadCatalog bool
-    
-    videoSize = stats.Int64("my.org/measure/video_size", "size of processed videos", stats.UnitBytes)
+	port          = flag.Int("port", 3550, "port to listen at")
+	reloadCatalog bool
+
+	videoSize = stats.Int64("my.org/measure/video_size", "size of processed videos", stats.UnitBytes)
 )
 
 func init() {
@@ -79,10 +78,9 @@ func init() {
 }
 
 func main() {
-	go initTracing()
+	initTracing()
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
-    defer se.StopMetricsExporter()
 	// set injected latency
 	if s := os.Getenv("EXTRA_LATENCY"); s != "" {
 		v, err := time.ParseDuration(s)
@@ -130,33 +128,29 @@ func run(port int) string {
 }
 
 func initStats(exporter *stackdriver.Exporter) {
-	view.SetReportingPeriod(time.Second)
-    exporter.StartMetricsExporter()
-	// view.RegisterExporter(exporter)
+	exporter.StartMetricsExporter()
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
 		log.Info("Error registering default server views")
 	} else {
 		log.Info("Registered default server views")
-    }
+	}
 }
 
 func initStackDriverTracing() {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
-        trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 
-        view.RegisterExporter(&exporter.PrintExporter{})
+		view.RegisterExporter(&exporter.PrintExporter{})
 		exporter, err := stackdriver.NewExporter(stackdriver.Options{
-            ProjectID:  "test-exemplar-project",
-            MonitoredResource: monitoredresource.Autodetect(),
-        })
-        exporter.StartMetricsExporter()
+			ProjectID:         "test-exemplar-project",
+			MonitoredResource: monitoredresource.Autodetect(),
+			ReportingInterval: 60 * time.Second,
+		})
 		if err != nil {
 			log.Warnf("failed to initialize stackdriver exporter: %+v", err)
 		} else {
-            // exporter.StartMetricsExporter()
-			// trace.RegisterExporter(exporter)
 			log.Info("registered stackdriver tracing")
 
 			// Register the views to collect server stats.
@@ -171,7 +165,6 @@ func initStackDriverTracing() {
 }
 
 func initTracing() {
-	// initJaegerTracing()
 	initStackDriverTracing()
 }
 
@@ -229,7 +222,7 @@ func (p *productCatalog) Check(ctx context.Context, req *healthpb.HealthCheckReq
 	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
 
-func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, srv healthpb.Health_WatchServer) (error) {
+func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, srv healthpb.Health_WatchServer) error {
 	return nil
 }
 
@@ -243,21 +236,17 @@ func getSpanCtxAttachment(ctx context.Context) metricdata.Attachments {
 	if spanCtx.IsSampled() {
 		attachments[metricdata.AttachmentKeySpanContext] = spanCtx
 	}
-	log.Info("DEBUGGG attachment ",  attachments)
+	log.Info("DEBUGGG attachment ", attachments)
 	return attachments
 }
 
-
 func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
-    time.Sleep(extraLatency)
+	time.Sleep(extraLatency)
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
 	log.Info("DEBUGGG successfully get product ")
-    ctx, span := trace.StartSpan(ctx, "example.com/ProcessVideo")
-    defer span.End()
-    stats.RecordWithOptions(ctx, stats.WithMeasurements(videoSize.M(25648)), stats.WithAttachments(getSpanCtxAttachment(ctx)))
 	time.Sleep(extraLatency)
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
