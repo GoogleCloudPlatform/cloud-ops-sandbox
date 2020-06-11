@@ -40,7 +40,7 @@ Google Stackdriver is a suite of tools that helps you gain full observability of
 
 1. Click the Cloud Shell button for automated one-click installation of a new Stackdriver Sandbox cluster in a new Google Cloud Project.
 
-[![Open in Cloud Shell](http://www.gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/stackdriver-sandbox.git&cloudshell_git_branch=master&cloudshell_working_dir=terraform)
+[![Open in Cloud Shell](http://www.gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/stackdriver-sandbox.git&cloudshell_git_branch=master&cloudshell_working_dir=terraform&cloudshell_image=gcr.io/cloudshell-images/cloudshell)
 
 1. In the Cloud Shell command prompt, type:
 
@@ -166,19 +166,23 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 1. Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing
    to the cluster:
 
-        gcloud services enable container.googleapis.com
+```bash
+gcloud services enable container.googleapis.com
 
-        gcloud container clusters create demo --enable-autoupgrade \
-            --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5 --zone=us-central1-a
+gcloud container clusters create demo --enable-autoupgrade \
+    --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5 --zone=us-central1-a
 
-        kubectl get nodes
+kubectl get nodes
+```
 
 1. Enable Google Container Registry (GCR) on your GCP project and configure the
    `docker` CLI to authenticate to GCR:
 
-       gcloud services enable containerregistry.googleapis.com
+```bash
+gcloud services enable containerregistry.googleapis.com
 
-       gcloud auth configure-docker -q
+gcloud auth configure-docker -q
+```
 
 1. In the root of this repository, run `skaffold run --default-repo=gcr.io/[PROJECT_ID]`,
    where [PROJECT_ID] is the identifier for your GCP project.
@@ -199,13 +203,15 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 1. Find the IP address of your application, then visit the application on your
     browser to confirm installation.
 
-        kubectl get service frontend-external
+```bash
+kubectl get service frontend-external
+```
 
-    **Troubleshooting:** A Kubernetes bug (will be fixed in 1.12) combined with
-    a Skaffold [bug](https://github.com/GoogleContainerTools/skaffold/issues/887)
-    causes the load balancer to not work, even after getting an IP address. If you
-    are seeing this, run `kubectl get service frontend-external -o=yaml | kubectl apply -f-`
-    to trigger load-balancer reconfiguration.
+> **Troubleshooting:** A Kubernetes bug (will be fixed in 1.12) combined with
+> a Skaffold [bug](https://github.com/GoogleContainerTools/skaffold/issues/887)
+> causes the load balancer to not work, even after getting an IP address. If you
+> are seeing this, run `kubectl get service frontend-external -o=yaml | kubectl apply -f-`
+> to trigger load-balancer reconfiguration.
 
 ### Option 3: Using Static Images
 
@@ -219,7 +225,9 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 1. Find the IP address of your application, then visit the application on your
     browser to confirm installation.
 
-        kubectl get service frontend-external
+```bash
+kubectl get service frontend-external
+```
 
 ### Generate Synthetic Traffic
 
@@ -239,17 +247,19 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 1. Use [Istio on GKE add-on](https://cloud.google.com/istio/docs/istio-on-gke/installing)
    to install Istio to your existing GKE cluster.
 
-       gcloud beta container clusters update demo \
-           --zone=us-central1-a \
-           --update-addons=Istio=ENABLED \
-           --istio-config=auth=MTLS_PERMISSIVE
+```bash
+gcloud beta container clusters update demo \
+    --zone=us-central1-a \
+    --update-addons=Istio=ENABLED \
+    --istio-config=auth=MTLS_PERMISSIVE
+```
 
-    > NOTE: If you need to enable `MTLS_STRICT` mode, you will need to update
-    > several manifest files:
-    >
-    > * `kubernetes-manifests/frontend.yaml`: delete "livenessProbe" and
-    >   "readinessProbe" fields.
-    > * `kubernetes-manifests/loadgenerator.yaml`: delete "initContainers" field.
+> NOTE: If you need to enable `MTLS_STRICT` mode, you will need to update
+> several manifest files:
+>
+> * `kubernetes-manifests/frontend.yaml`: delete "livenessProbe" and
+>   "readinessProbe" fields.
+> * `kubernetes-manifests/loadgenerator.yaml`: delete "initContainers" field.
 
 1. (Optional) Enable Stackdriver Tracing/Logging with Istio Stackdriver Adapter
    by following [this guide](https://cloud.google.com/istio/docs/istio-on-gke/installing#enabling_tracing_and_logging).
@@ -257,13 +267,17 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 1. Install the automatic sidecar injection (annotate the `default` namespace
    with the label):
 
-       kubectl label namespace default istio-injection=enabled
+```bash
+kubectl label namespace default istio-injection=enabled
+```
 
 1. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
 
-       kubectl apply -f ./istio-manifests
+```bash
+kubectl apply -f ./istio-manifests
+```
 
-    This is required only once.
+This is required only once.
 
 1. Deploy the application with `skaffold run --default-repo=gcr.io/[PROJECT_ID]`.
 
@@ -272,11 +286,11 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 1. Find the IP address of your Istio gateway Ingress or Service, and visit the
    application.
 
-       INGRESS_HOST="$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-
-       echo "$INGRESS_HOST"
-
-       curl -v "http://$INGRESS_HOST"
+```bash
+INGRESS_HOST="$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+echo "$INGRESS_HOST"
+curl -v "http://$INGRESS_HOST"
+```
 
 ---
 
