@@ -293,17 +293,17 @@ Stackdriver Monitoring ([documentation](https://cloud.google.com/monitoring/docs
 
 To get to Stackdriver Monitoring from the GCP console, select **Monitoring** on the navigation panel. By default, you reach an overview page:
 
-![image](./images/user-guide/19-monitoring.png)
+![image](./images/user-guide/19-gcp-monitoring-overview.png)
 
-There are many pre-built monitoring pages. For example, the GKE Cluster Details page (select **Monitoring > Dashboards > Kubernetes Engine > Infrastructure**) brings up a page that provides information about the Sandbox cluster:
+There are many pre-built monitoring pages. For example, the GKE Cluster Details page (select **Monitoring > Dashboards > Kubernetes Engine > Infrastructure**) brings up a page that provides information about the Sandbox cluster: 
 
-![image](./images/user-guide/20-gkemon.png)
+![image](./images/user-guide/20-monitoring-dashboards-kubernetes.png)
 
 You can also use the Monitoring console to create alerts and uptime checks, and to create dashboards that chart metrics you are interested in.  For example, Metrics Explorer lets you select a specific metric, configure it for charting, and then save the chart. Select **Monitoring > Metrics Explorer** from the navigation panel to bring it up.
 
 The following chart shows the client-side RPC calls that did not result in an OK status:
 
-![image](./images/user-guide/21-explorer.png)
+![image](./images/user-guide/21-metrics-explorer.png)
 
 This chart uses the  metric type `custom.googleapis.com/opencensus/ grpc.io/client/completed_rpcs` (display name: "OpenCensus/grpc.io/client/ completed_rpcs" ), and filters on the  `grpc_client_status` label to keep only those time series  where the label's value is something other than "OK".
 
