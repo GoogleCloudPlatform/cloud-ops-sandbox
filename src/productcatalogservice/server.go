@@ -33,10 +33,13 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
+	"contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/exporter/jaeger"
+	"go.opencensus.io/examples/exporter"
+	"go.opencensus.io/metric/metricdata"
 	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
@@ -50,9 +53,10 @@ var (
 	log          *logrus.Logger
 	extraLatency time.Duration
 
-	port = flag.Int("port", 3550, "port to listen at")
-
+	port          = flag.Int("port", 3550, "port to listen at")
 	reloadCatalog bool
+
+	videoSize = stats.Int64("my.org/measure/video_size", "size of processed videos", stats.UnitBytes)
 )
 
 func init() {
@@ -74,10 +78,9 @@ func init() {
 }
 
 func main() {
-	go initTracing()
+	initTracing()
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
-
 	// set injected latency
 	if s := os.Getenv("EXTRA_LATENCY"); s != "" {
 		v, err := time.ParseDuration(s)
@@ -87,7 +90,7 @@ func main() {
 		extraLatency = v
 		log.Infof("extra latency enabled (duration: %v)", extraLatency)
 	} else {
-		extraLatency = time.Duration(0)
+		extraLatency = time.Duration(2)
 	}
 
 	sigs := make(chan os.Signal, 1)
@@ -124,30 +127,8 @@ func run(port int) string {
 	return l.Addr().String()
 }
 
-func initJaegerTracing() {
-	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
-	if svcAddr == "" {
-		log.Info("jaeger initialization disabled.")
-		return
-	}
-	// Register the Jaeger exporter to be able to retrieve
-	// the collected spans.
-	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: fmt.Sprintf("http://%s", svcAddr),
-		Process: jaeger.Process{
-			ServiceName: "productcatalogservice",
-		},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	trace.RegisterExporter(exporter)
-	log.Info("jaeger initialization completed.")
-}
-
 func initStats(exporter *stackdriver.Exporter) {
-	view.SetReportingPeriod(60 * time.Second)
-	view.RegisterExporter(exporter)
+	exporter.StartMetricsExporter()
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
 		log.Info("Error registering default server views")
 	} else {
@@ -159,12 +140,17 @@ func initStackDriverTracing() {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+
+		view.RegisterExporter(&exporter.PrintExporter{})
+		exporter, err := stackdriver.NewExporter(stackdriver.Options{
+			ProjectID:         "test-exemplar-project",
+			MonitoredResource: monitoredresource.Autodetect(),
+			ReportingInterval: 60 * time.Second,
+		})
 		if err != nil {
 			log.Warnf("failed to initialize stackdriver exporter: %+v", err)
 		} else {
-			trace.RegisterExporter(exporter)
-			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 			log.Info("registered stackdriver tracing")
 
 			// Register the views to collect server stats.
@@ -179,7 +165,6 @@ func initStackDriverTracing() {
 }
 
 func initTracing() {
-	initJaegerTracing()
 	initStackDriverTracing()
 }
 
@@ -237,12 +222,31 @@ func (p *productCatalog) Check(ctx context.Context, req *healthpb.HealthCheckReq
 	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
 
+func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, srv healthpb.Health_WatchServer) error {
+	return nil
+}
+
+func getSpanCtxAttachment(ctx context.Context) metricdata.Attachments {
+	attachments := map[string]interface{}{}
+	span := trace.FromContext(ctx)
+	if span == nil {
+		return attachments
+	}
+	spanCtx := span.SpanContext()
+	if spanCtx.IsSampled() {
+		attachments[metricdata.AttachmentKeySpanContext] = spanCtx
+	}
+	log.Info("DEBUGGG attachment ", attachments)
+	return attachments
+}
+
 func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
 	time.Sleep(extraLatency)
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
+	log.Info("DEBUGGG successfully get product ")
 	time.Sleep(extraLatency)
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {

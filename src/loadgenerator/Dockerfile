@@ -1,4 +1,4 @@
-FROM python:3-slim as base
+FROM python:3 as base
 
 FROM base as builder
 
