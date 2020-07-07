@@ -147,11 +147,11 @@ Click on any trace in the timeline to get a detailed view and breakdown of the t
 
 ![image](./images/user-guide/8-tracedetail.png)
 
-Finally, click **Analysis Reports** in the navigation menu to see a list of reports that are generated: 
+Finally, click **Analysis Reports** in the navigation menu to see a list of reports that are generated.
+
+If you have just set up the Sandbox environment, you may not have any reports. Click on **New Report** to create one. An example of a first report: in the Request Filter field, select **Recv./cart**. Leave the other options the default. Once the report is created, you should be able to see it in the **Analysis Reports** list.
 
 ![image](./images/user-guide/9-traceanalysis.png)
-
-> **Note**:  if you have just set up the Sandbox environment, you may not have any reports; click on **Create a report** to create one.
 
 View one of the reports that was created (or the one you created yourself) to understand either the density or cumulative distribution of latency for the call you selected:
 
