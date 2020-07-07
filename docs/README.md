@@ -388,9 +388,9 @@ The Logs Viewer now shows all audited actions that took place in the project dur
 
 ##### Exporting logs
 
-Audit logs contain the records of who did what. For long-term retention of these records, the recommended practice is to create exports for audit logs. You can do that by clicking on **Create Export**:
+Audit logs contain the records of who did what. For long-term retention of these records, the recommended practice is to create exports for audit logs. You can do that by clicking on **Create Sink**:
 
-![image](./images/user-guide/29-exporting.png)
+![image](./images/user-guide/29-exporting-logs.png)
 
 Give your sink a name, and select the service  and destination to which you will export your logs. We recommend using a less expensive class of storage for exported audit logs, since they are not likely to be accessed frequently. For this example, create an export for audit logs to Google Cloud Storage.
 
