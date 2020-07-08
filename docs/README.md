@@ -291,19 +291,19 @@ Stackdriver Monitoring ([documentation](https://cloud.google.com/monitoring/docs
 
 #### Using Monitoring
 
-To get to Stackdriver Monitoring from the GCP console, select **Monitoring** on the navigation panel. This brings up the Stackdriver Monitoring console, a separate UI from the consoles for other GCP and Stackdriver products.  By default, you reach an overview page:
+To get to Stackdriver Monitoring from the GCP console, select **Monitoring** on the navigation panel. By default, you reach an overview page:
 
-![image](./images/user-guide/19-monitoring.png)
+![image](./images/user-guide/19-gcp-monitoring-overview.png)
 
-There are many pre-built monitoring pages. For example, the GKE Cluster Details page (select **Resources > (Infrastructure) Kubernetes Engine**) brings up a page that provides information about the Sandbox cluster:
+There are many pre-built monitoring pages. For example, the GKE Cluster Details page (select **Monitoring > Dashboards > Kubernetes Engine > Infrastructure**) brings up a page that provides information about the Sandbox cluster: 
 
-![image](./images/user-guide/20-gkemon.png)
+![image](./images/user-guide/20-monitoring-dashboards-kubernetes.png)
 
-You can also use the Monitoring console to create alerts and uptime checks, and to create dashboards that chart metrics you are interested in.  For example, Metrics Explorer lets you select a specific metric, configure it for charting, and then save the chart. Select **Resources > Metrics Explorer** to bring it up.
+You can also use the Monitoring console to create alerts and uptime checks, and to create dashboards that chart metrics you are interested in.  For example, Metrics Explorer lets you select a specific metric, configure it for charting, and then save the chart. Select **Monitoring > Metrics Explorer** from the navigation panel to bring it up.
 
 The following chart shows the client-side RPC calls that did not result in an OK status:
 
-![image](./images/user-guide/21-explorer.png)
+![image](./images/user-guide/21-metrics-explorer.png)
 
 This chart uses the  metric type `custom.googleapis.com/opencensus/ grpc.io/client/completed_rpcs` (display name: "OpenCensus/grpc.io/client/ completed_rpcs" ), and filters on the  `grpc_client_status` label to keep only those time series  where the label's value is something other than "OK".
 
@@ -330,9 +330,8 @@ This example creates a logs-based metric that counts the number of times a user 
 
 First, create a logs query that finds the relevant set of log entries:
 
-1. For the resource type, select **GKE Container -> stackdriver-sandbox -> default**
-2. For the log type,  select **server**
-3. In the box with default text "Filter by label or text search", enter "AddItemAsync" (the method used to add an item to the cart), and hit return.
+1. For the resource type, select **Kubernetes Container > stackdriver-sandbox > default > server**
+2. In the box with default text "Filter by label or text search", enter "AddItemAsync" (the method used to add an item to the cart), and hit return.
 
 The Logs Viewer display shows the resulting entries:
 
@@ -389,9 +388,9 @@ The Logs Viewer now shows all audited actions that took place in the project dur
 
 ##### Exporting logs
 
-Audit logs contain the records of who did what. For long-term retention of these records, the recommended practice is to create exports for audit logs. You can do that by clicking on **Create Export**:
+Audit logs contain the records of who did what. For long-term retention of these records, the recommended practice is to create exports for audit logs. You can do that by clicking on **Create Sink**:
 
-![image](./images/user-guide/29-exporting.png)
+![image](./images/user-guide/29-exporting-logs.png)
 
 Give your sink a name, and select the service  and destination to which you will export your logs. We recommend using a less expensive class of storage for exported audit logs, since they are not likely to be accessed frequently. For this example, create an export for audit logs to Google Cloud Storage.
 
