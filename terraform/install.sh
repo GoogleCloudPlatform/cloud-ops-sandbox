@@ -128,7 +128,6 @@ displaySuccessMessage() {
     log "********************************************************************************"
     log "Stackdriver Sandbox deployed successfully!"
     log ""
-    log "     Stackdriver Dashboard: https://app.google.stackdriver.com/accounts/create"
     log "     Google Cloud Console Dashboard: $gcp_path"
     log "     Hipstershop web app address: http://$external_ip"
     log "     Load generator web interface: $loadgen_addr"
