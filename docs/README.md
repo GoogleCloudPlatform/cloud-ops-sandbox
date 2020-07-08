@@ -58,7 +58,8 @@ The installation process takes a few minutes. When it completes, you see a messa
 ********************************************************************************
 Stackdriver Sandbox deployed successfully!
 
-     Google Cloud Console Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project ID>
+     Google Cloud Console GKE Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project ID>
+     Google Cloud Console Monitoring Workspace: https://console.cloud.google.com/monitoring?project=<project ID>
      Hipstershop web app address: http://XX.XX.XX.XX
      Load generator web interface: http://XX.XX.XX.XX
 ```
@@ -67,7 +68,9 @@ The URLs in this message tell you where to find the results of the installation:
 
 > A Workspace will be created automatically for your project if you don't have one already, so you don't have to do anything explicitly with this URL.
 
--  The **Google Cloud Console** **Dashboard** URL takes you to the Kubernetes Engine console for your deployment.
+-  The **Google Cloud Console GKE Dashboard** URL takes you to the Kubernetes Engine console for your deployment.
+
+- The **Google Cloud Console Monitoring Workspace** URL takes you to the Cloud Monitoring console for your deployment.
 
 -  The **Hipster Shop** URL takes you to the storefront.
 
@@ -75,9 +78,15 @@ The URLs in this message tell you where to find the results of the installation:
 
 ## Explore your project in GCP
 
-In another browser tab, navigate to the GCP Dashboard URL, which takes you to the Kubernetes Engine ([documentation](https://cloud.google.com/kubernetes-engine/docs/)) **Workloads** page for the project created by the installer:
+In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you to the Kubernetes Engine ([documentation](https://cloud.google.com/kubernetes-engine/docs/)) **Workloads** page for the project created by the installer:
 
 ![image](./images/user-guide/4-cloudconsole.png)
+
+## Explore Cloud Monitoring
+
+In a new browser tab, navigate to the GCP Monitoring Workspace URL, which takes you to the Cloud Monitoring ([documentation](https://cloud.google.com/monitoring)) **Workspace** page for your new project. The console may take some time to create a new workspace. Afterward, you'll be able to see a few dashboards generated through Ops Management tools.
+
+![image](./images/user-guide/19-gcp-monitoring-overview.png)
 
 ## Shop like a hipster!
 
