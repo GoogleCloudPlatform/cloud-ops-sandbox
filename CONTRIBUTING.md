@@ -1,7 +1,7 @@
 # How to Contribute
 
 We'd love to accept your patches and contributions to this project. There are
-just a few small guidelines you need to follow. In the last section [Build Sandbox Locally](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/edit/master/CONTRIBUTING.md#L37), we will
+just a few small guidelines you need to follow. In the last section [Build Sandbox Locally](build-sandbox-locally), we will
 show you how to build the project locally.
 
 ## Development Principles (for Googlers)
