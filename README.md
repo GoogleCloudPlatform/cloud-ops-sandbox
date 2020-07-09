@@ -125,6 +125,9 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 * **Synthetic Load Generation:** The application demo comes with dedicated load generation service that creates realistic usage patterns on Hipster Shop website using
   [Locust](https://locust.io/) load generator.
 
+## For Developers
+If you are a developer and want to contribute to the Sandbox, you can refer to [CONTIBUTING.md](CONTRIBUTING.md).
+
 ---
 
 This is not an official Google project.
