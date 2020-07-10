@@ -68,3 +68,9 @@ comments are available in each file, but here's the short version:
 
 The assumption is that a system under user control would run terraform and create resources on the user's behalf. 
 The user would not be aware of the underlying tool.
+
+Monitoring Examples
+--------------------------------------------------------------------------------
+
+To provision monitoring examples for the stackdriver sandbox, navigate 
+to the `monitoring` folder. 
