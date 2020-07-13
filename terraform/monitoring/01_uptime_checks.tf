@@ -1,13 +1,6 @@
-provider "google" {
-  # pin provider to 2.x
-  version = "~> 2.1"
-
-  # credentials = "/path/to/creds.json"
-  # project = "project-id"
-  # region = "default-region"
-  # zone = "default-zone"
-}
-
+# Here we create a default HTTP Uptime Check on the External IP of our
+# Kubernetes cluster revealed by the Load Balancer
+# Our uptime check has a period of 1 minute and times out after 10 seconds
 resource "google_monitoring_uptime_check_config" "http" {
   display_name = "HTTP Uptime Check"
   timeout      = "10s"
@@ -27,6 +20,11 @@ resource "google_monitoring_uptime_check_config" "http" {
   }
 }
 
+# Here we place an alerting policy on the HTTP Uptime Check that alerts based on
+# failed uptime checks. The alerting policy will be triggered if the uptime check
+# fails more than 1 time over a 1 minute period aligned over 20 minutes.
+# 
+# Our alerting policy notifies errors via email
 resource "google_monitoring_alert_policy" "alert_policy" {
   display_name = "HTTP Uptime Check Alerting Policy"
   combiner     = "OR"
@@ -48,18 +46,15 @@ resource "google_monitoring_alert_policy" "alert_policy" {
       }
     }
   }
-  #notification_channels = ["${google_monitoring_notification_channel.basic.id}"]
+  notification_channels = ["${google_monitoring_notification_channel.basic.id}"]
 }
 
-resource "google_service_account" "service_account" {
-  account_id = "sandbox-service-account"
-  display_name = "Service Account"
-}
-
+# Here we configure the email notification channel for the HTTP uptime check 
+# alerting policy. The email configured is the email of the owner of the project.
 resource "google_monitoring_notification_channel" "basic" {
-  display_name = "Google Service Account Email"
+  display_name = "Google Project Owner Account Email"
   type         = "email"
   labels = {
-    email_address = "${google_service_account.service_account.email}"
+    email_address = "${var.project_owner_email}"
   }
 }
