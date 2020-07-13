@@ -17,6 +17,9 @@ kind: Deployment
 metadata:
   name: productcatalogservice
 spec:
+  selector:
+    matchLabels:
+      app: productcatalogservice
   template:
     metadata:
       labels:

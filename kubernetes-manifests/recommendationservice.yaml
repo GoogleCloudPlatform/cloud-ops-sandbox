@@ -17,6 +17,9 @@ kind: Deployment
 metadata:
   name: recommendationservice
 spec:
+  selector:
+    matchLabels:
+      app: recommendationservice
   template:
     metadata:
       labels:

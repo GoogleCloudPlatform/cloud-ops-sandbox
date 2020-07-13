@@ -17,6 +17,9 @@ kind: Deployment
 metadata:
   name: emailservice
 spec:
+  selector:
+    matchLabels:
+      app: emailservice
   template:
     metadata:
       labels:

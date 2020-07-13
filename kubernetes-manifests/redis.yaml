@@ -17,6 +17,9 @@ kind: Deployment
 metadata:
   name: redis-cart
 spec:
+  selector:
+    matchLabels:
+      app: redis-cart
   template:
     metadata:
       labels:

@@ -17,6 +17,9 @@ kind: Deployment
 metadata:
   name: shippingservice
 spec:
+  selector:
+    matchLabels:
+      app: shippingservice
   template:
     metadata:
       labels:
