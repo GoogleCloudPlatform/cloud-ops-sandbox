@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-cachetools==3.0.0         # via google-auth
+cachetools==3.1.1         # via google-auth
 certifi==2018.11.29       # via requests
 chardet==3.0.4            # via requests
 google-api-core[grpc]==1.6.0  # via -r requirements.in, google-cloud-core, google-cloud-trace, opencensus
