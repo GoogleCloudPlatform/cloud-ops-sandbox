@@ -16,7 +16,7 @@
 set -euo pipefail
 
 # install kubectl
-sudo apt-get install kubectl
+sudo apt-get -y install git kubectl
 
 # install go
 curl -O https://storage.googleapis.com/golang/go1.12.9.linux-amd64.tar.gz
