@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v1beta2
+apiVersion: skaffold/v2alpha4
 kind: Config
 build:
   artifacts:
@@ -46,6 +46,7 @@ build:
   tagPolicy:
     gitCommit: {}
 deploy:
+  statusCheckDeadlineSeconds: 300
   kubectl:
     manifests:
     - ./kubernetes-manifests/**.yaml
@@ -53,6 +54,7 @@ profiles:
 # "travis-ci" profile is used to build the images withou
 # pushing them.
 - name: travis-ci
+  statusCheckDeadlineSeconds: 300
   build:
     local:
       push: false
