@@ -48,7 +48,7 @@ jobs:
       run: |
         set -x
         skaffold config set --global local-cluster true
-        skaffold run --default-repo local
+        skaffold run --default-repo local --status-check=false
     - name: Deploy Load Generator
       run: |
         set -x
