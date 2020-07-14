@@ -7,7 +7,7 @@
 cachetools==3.1.0         # via google-auth
 certifi==2018.11.29       # via requests
 chardet==3.0.4            # via requests
-enum34==1.1.6             # via grpcio
+enum34==1.1.10             # via grpcio
 futures==3.3.0            # via google-api-core, grpcio
 google-api-core[grpc]==1.6.0
 google-api-python-client==1.7.8  # via google-python-cloud-debugger
