@@ -73,4 +73,7 @@ Monitoring Examples
 --------------------------------------------------------------------------------
 
 To provision monitoring examples for the stackdriver sandbox, navigate 
-to the `monitoring` folder. 
+to the `monitoring` folder and run the command `terraform apply`. Please note that in order to run this command
+you must have first created a [Monitoring Workspace] for the Google Cloud Project. 
+
+[Monitoring Workspace]: https://cloud.google.com/monitoring/workspaces/create
