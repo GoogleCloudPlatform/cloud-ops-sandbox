@@ -1,18 +1,22 @@
 
 # Stackdriver Sandbox (Alpha)
 
-Stackdriver Sandbox is an open-source tool that helps practitioners to learn Service Reliability Engineering practices from Google and apply them on their cloud services using Stackdriver. It is based on [Hipster Shop](https://github.com/GoogleCloudPlatform/microservices-demo), a cloud-native microservices application.
+Stackdriver Sandbox is an open-source tool that helps practitioners to learn Service Reliability Engineering practices from Google and apply them on their cloud services using [Ops Management](https://cloud.google.com/products/operations) (formerly Stackdriver).
+It is based on [Hipster Shop](https://github.com/GoogleCloudPlatform/microservices-demo), a cloud-native microservices application.
 
 Sandbox offers:
 
 * **Demo Service** - an application built using microservices architecture on modern, cloud-native stack.
 * **One-click deployment**  - a script handles the work of deploying the service to Google Cloud Platform.
 * **Load Generator** - a component that produces synthetic traffic on a demo service.
-* (Soon) **SRE Runbook** - pre-built routine procedures for operating the deployed sample service that follow best SRE practices using Stackdriver.
+* (Soon) **SRE Runbook** - pre-built routine procedures for operating the deployed sample service that follow best SRE practices using Ops Management.
 
 ## Why Sandbox
 
-Google Stackdriver is a suite of tools that helps you gain full observability of your code and applications. You might want to take Stackdriver to a "test drive" in order to answer the question, "will it work for my application needs"? The most effective way to learn is by testing the tool in "real-life" conditions, but without risking a production system. With Sandbox, we provide a tool that automatically provisions a new demo cluster, which receives traffic, simulating real users. Practicioners can experiment with various Stackdriver tools to solve problems and accomplish standard SRE tasks in a sandboxed environment.
+Google Cloud Ops Management is a suite of tools that helps you gain full observability of your code and applications.
+You might want to take Ops Management to a "test drive" in order to answer the question, "will it work for my application needs"?
+The most effective way to learn is by testing the tool in "real-life" conditions, but without risking a production system.
+With Sandbox, we provide a tool that automatically provisions a new demo cluster, which receives traffic, simulating real users. Practicioners can experiment with various Ops Management tools to solve problems and accomplish standard SRE tasks in a sandboxed environment.
 
 ## Getting Started
 
@@ -51,8 +55,8 @@ Google Stackdriver is a suite of tools that helps you gain full observability of
 ### Next Steps
 
 * Explore your Sandbox deployment and its [architecture](#Service-Overview)
-* Follow the [User Guide](/docs/README.md) to start using Stackdriver
-* Learn more about Stackdriver using [Code Labs](https://codelabs.developers.google.com/gcp-next/?cat=Monitoring)
+* Follow the [User Guide](/docs/README.md) to start using Ops Management
+* Learn more about Ops Management using [Code Labs](https://codelabs.developers.google.com/gcp-next/?cat=Monitoring)
 
 ### Clean Up
 
@@ -89,7 +93,7 @@ add them to the cart, and purchase them.
 **Hipster Shop** is composed of many microservices, written in different languages, that talk to each other over gRPC.
 >**We are not endorsing the architecture of Hipster Shop as the best way to build such a shop!**
 > The architecture is optimized for learning purposes and includes modern stack: Kubernetes, GKE, Istio,
-> Stackdriver, gRPC, OpenCensus, and similar cloud-native technologies.
+> Ops Management, gRPC, OpenCensus, and similar cloud-native technologies.
 
 [![Architecture of
 microservices](./docs/img/architecture-diagram.png)](./docs/img/architecture-diagram.png)
@@ -118,9 +122,8 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
   communicate to each other.
 * **[OpenCensus](https://opencensus.io/) Tracing:** Most services are
   instrumented using OpenCensus trace interceptors for gRPC/HTTP.
-* **[Stackdriver APM](https://cloud.google.com/stackdriver/):** Many services
-  are instrumented with **Profiling**, **Tracing** and **Debugging**.
-  **Metrics** and **Context Graph** out of the box.
+* **[Ops Management APM and SRE](https://cloud.google.com/products/operations):** Many services
+  are instrumented with **Profiling**, **Tracing**, **Debugging**, **Monitoring**, **Logging** and **Error Reporting**.
 * **[Skaffold](https://github.com/GoogleContainerTools/skaffold):** A tool used for doing repeatable deployments. You can deploy to Kubernetes with a single command using Skaffold.
 * **Synthetic Load Generation:** The application demo comes with dedicated load generation service that creates realistic usage patterns on Hipster Shop website using
   [Locust](https://locust.io/) load generator.
