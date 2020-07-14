@@ -9,7 +9,7 @@ certifi==2018.11.29       # via requests
 chardet==3.0.4            # via requests
 google-api-core[grpc]==1.6.0  # via -r requirements.in, google-cloud-core, google-cloud-trace, opencensus
 google-api-python-client==1.7.8  # via google-cloud-profiler
-google-auth-httplib2==0.0.3  # via google-api-python-client, google-cloud-profiler
+google-auth-httplib2==0.0.4  # via google-api-python-client, google-cloud-profiler
 google-auth==1.19.0        # via google-api-core, google-api-python-client, google-auth-httplib2, google-cloud-profiler
 google-cloud-core==0.29.1  # via google-cloud-trace
 google-cloud-profiler==1.0.8  # via -r requirements.in
