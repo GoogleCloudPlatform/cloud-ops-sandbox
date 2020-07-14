@@ -18,7 +18,7 @@
 resource "google_monitoring_dashboard" "userexp_dashboard" {
 	dashboard_json = <<EOF
 	{
-  "displayName": "User Experience Dashboard V1",
+  "displayName": "User Experience Dashboard",
   "gridLayout": {
     "columns": "2",
     "widgets": [
