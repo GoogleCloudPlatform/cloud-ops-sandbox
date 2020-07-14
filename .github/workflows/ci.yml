@@ -49,6 +49,12 @@ jobs:
         set -x
         skaffold config set --global local-cluster true
         skaffold run --default-repo local
+    - name: Deploy Load Generator
+      run: |
+        set -x
+        kubectl create deployment loadgenerator \
+          --image=gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator:latest
+         kubectl set env deployment/loadgenerator FRONTEND_ADDR=frontend:80
     - name: Wait For Pods
       timeout-minutes: 20
       run: |
@@ -72,7 +78,7 @@ jobs:
         kubectl delete pod -l app=loadgenerator
         # wait for requests to come in
         REQUEST_COUNT="0"
-        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
+        while [[ "$REQUEST_COUNT"  -lt "100"  ]]; do
             sleep 5
             REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
         done
