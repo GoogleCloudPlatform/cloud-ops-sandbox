@@ -24,10 +24,10 @@ variable "external_ip" {
 
 variable "project_id" {
   type        = "string"
-  description = "The project id that was created by stackdriver sandbox."
+  description = "The project id that was created by Stackdriver Sandbox."
 }
 
 variable "project_owner_email" {
 	type	      = "string"
-	description = "The email of the project owner."
+	description = "The email to receive alerts caused by violations of alerting policies."
 }
