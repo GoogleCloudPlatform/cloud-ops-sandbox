@@ -68,7 +68,7 @@ Guidelines](https://opensource.google.com/conduct/).
 ### Option 2: Running on Google Kubernetes Engine (GKE)
 
 > 💡  Recommended for demos and making it available publicly.
-> ℹ️   This step can be automated with `make cluster PROJECT_ID=my-project`
+> ℹ️   This task can be automated with `make cluster PROJECT_ID=my-project`
 
 1. Install tools specified in the previous section (Docker, kubectl, skaffold)
 
@@ -144,6 +144,32 @@ kubectl get service frontend-external
 
 ```bash
 ./loadgenerator-tool startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
+```
+
+### (Optional) Using the Makefile
+
+The project contains an optional makefile to automate several common development tasks
+
+1. Creating a cluster
+
+```bash
+make cluster PROJECT_ID=my-project
+```
+
+2. Building and deploying from source
+
+```bash
+make deploy PROJECT_ID=my-project
+```
+
+```bash
+make deploy-continuous PROJECT_ID=my-project
+```
+
+3. Viewing logs
+
+```bash
+make logs SERVICE=x
 ```
 
 ### (Optional) Deploying on a Istio-installed GKE cluster
