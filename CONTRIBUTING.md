@@ -158,10 +158,12 @@ make cluster PROJECT_ID=my-project
 
 2. Building and deploying from source
 
+  - a) Standard (single deploy)
 ```bash
 make deploy PROJECT_ID=my-project
 ```
 
+  - b) Continuously (re-deploy on each file change)
 ```bash
 make deploy-continuous PROJECT_ID=my-project
 ```
