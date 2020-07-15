@@ -140,10 +140,10 @@ kubectl get service frontend-external
 
 ### Generate Synthetic Traffic
 
-1. If you want to create synthetic load manually, use the `loadgenerator-tool` executable found in the root of the repository. For example:
+1. If you want to create synthetic load manually, use the `loadgen` executable found in the root of the repository. For example:
 
 ```bash
-./loadgenerator-tool startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
+./loadgen startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
 ```
 
 ### (Optional) Using the Makefile
