@@ -20,7 +20,7 @@ RUN dotnet restore && \
     dotnet publish -c release -r linux-musl-x64 -o /cartservice
 
 # cartservice
-FROM alpine:3.8
+FROM alpine:3.12
 
 RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
