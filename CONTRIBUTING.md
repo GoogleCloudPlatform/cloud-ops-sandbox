@@ -68,6 +68,7 @@ Guidelines](https://opensource.google.com/conduct/).
 ### Option 2: Running on Google Kubernetes Engine (GKE)
 
 > 💡  Recommended for demos and making it available publicly.
+> ℹ️   This step can be automated with `make cluster PROJECT_ID=my-project`
 
 1. Install tools specified in the previous section (Docker, kubectl, skaffold)
 
