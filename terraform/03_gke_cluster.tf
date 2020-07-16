@@ -155,3 +155,11 @@ resource "null_resource" "delay" {
   }
 }
 
+# Install Istio into the GKE cluster
+resource "null_resource" "install_istio" {
+  provisioner "local-exec" {
+    command = "./install_istio.sh"
+  }
+
+  depends_on = ["null_resource.deploy_services"]
+}
