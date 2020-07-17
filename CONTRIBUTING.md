@@ -78,8 +78,11 @@ Guidelines](https://opensource.google.com/conduct/).
 ```bash
 gcloud services enable container.googleapis.com
 
-gcloud container clusters create demo --enable-autoupgrade \
-    --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5 --zone=us-central1-a
+gcloud container clusters create demo --zone=us-central1-a \
+    --machine-type=n1-standard-2 \
+    --num-nodes=4 \
+    --enable-stackdriver-kubernetes \
+    --scopes https://www.googleapis.com/auth/cloud-platform
 
 kubectl get nodes
 ```
