@@ -45,7 +45,7 @@ dependencies {
     if (speed) {
         compile fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        compile "com.google.api.grpc:proto-google-common-protos:1.12.0",
+        compile "com.google.api.grpc:proto-google-common-protos:1.18.0",
                 "io.opencensus:opencensus-api:${opencensusVersion}",
                 "io.opencensus:opencensus-contrib-grpc-util:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-jaeger:${opencensusVersion}",
