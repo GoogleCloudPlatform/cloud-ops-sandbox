@@ -34,8 +34,6 @@ spec:
         env:
         - name: PORT
           value: "9555"
-        #- name: JAEGER_SERVICE_ADDR
-        #  value: "jaeger-collector:14268"
         resources:
           requests:
             cpu: 200m
