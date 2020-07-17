@@ -95,7 +95,7 @@ getExternalIp() {
 # Install Load Generator service and start generating synthetic traffic to Sandbox
 loadGen() {
   log "Running load generator"
-  ../loadgenerator/loadgenerator-tool autostart $external_ip
+  ../loadgenerator/loadgen autostart $external_ip
   # find the IP of the load generator web interface
   TRIES=0
   while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null --max-time 1) -ne 200  && \
