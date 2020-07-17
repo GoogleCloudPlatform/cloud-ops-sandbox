@@ -68,7 +68,7 @@ type checkoutService struct {
 }
 
 func main() {
-	go initTracing()
+	go initStackDriverTracing()
 	go initProfiling("checkoutservice", "1.0.0")
 
 	port := listenPort
@@ -128,10 +128,6 @@ func initStackDriverTracing() {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
-}
-
-func initTracing() {
-	initStackDriverTracing()
 }
 
 func initProfiling(service, version string) {

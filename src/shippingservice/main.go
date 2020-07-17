@@ -55,7 +55,7 @@ func init() {
 }
 
 func main() {
-	go initTracing()
+	go initStackDriverTracing()
 	go initProfiling("shippingservice", "1.0.0")
 
 	port := defaultPort
@@ -159,10 +159,6 @@ func initStackDriverTracing() {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
-}
-
-func initTracing() {
-	initStackDriverTracing()
 }
 
 func initProfiling(service, version string) {
