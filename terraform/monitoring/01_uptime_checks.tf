@@ -35,8 +35,8 @@ resource "google_monitoring_uptime_check_config" "http" {
 }
 
 # Here we place an alerting policy on the HTTP Uptime Check that alerts based on
-# failed uptime checks. The alerting policy will be triggered if the uptime check
-# fails more than 1 time over a 1 minute period aligned over 20 minutes.
+# failed uptime checks. The alerting policy will be triggered if any uptime check location 
+# fails more than 2 times over a 5 minute period. The metric is viewed over a 20 minute window.
 # 
 # Our alerting policy notifies errors via email
 resource "google_monitoring_alert_policy" "alert_policy" {
@@ -46,15 +46,16 @@ resource "google_monitoring_alert_policy" "alert_policy" {
     display_name = "HTTP Uptime Check Alert"
     condition_threshold {
       filter     = "metric.type=\"monitoring.googleapis.com/uptime_check/check_passed\" AND metric.label.check_id=\"${google_monitoring_uptime_check_config.http.uptime_check_id}\" AND resource.type=\"uptime_url\""
-      duration   = "60s"
+      duration   = "300s"
       comparison = "COMPARISON_GT"
       aggregations {
+        # the alignment sets the window over which the metric is viewed
         alignment_period   = "1200s"
         per_series_aligner = "ALIGN_NEXT_OLDER"
         cross_series_reducer = "REDUCE_COUNT_FALSE"
         group_by_fields = ["resource.label.*"]
       }
-      threshold_value = "1"
+      threshold_value = "2"
       trigger {
         count = "1"
       }

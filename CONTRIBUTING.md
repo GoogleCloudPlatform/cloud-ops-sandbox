@@ -115,6 +115,17 @@ gcloud auth configure-docker -q
 kubectl get service frontend-external
 ```
 
+1. To create monitoring examples in GCP, navigate to the monitoring folder and run 
+the `terraform apply` command.
+
+   2. Please note that in order to do this you will need the external IP address, project ID, 
+   and an email address. The project ID can be found in GCP or with the command `gcloud config get-value project`
+
+```bash
+cd ./monitoring
+
+terraform apply
+```
 > **Troubleshooting:** A Kubernetes bug (will be fixed in 1.12) combined with
 > a Skaffold [bug](https://github.com/GoogleContainerTools/skaffold/issues/887)
 > causes the load balancer to not work, even after getting an IP address. If you
