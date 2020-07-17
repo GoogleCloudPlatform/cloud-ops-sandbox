@@ -20,7 +20,7 @@ googleapis-common-protos==1.52.0  # via google-api-core
 grpcio-health-checking==1.13.0  # via -r requirements.in
 grpcio==1.30.0            # via -r requirements.in, google-api-core, grpcio-health-checking
 httplib2==0.18.1          # via google-api-python-client, google-auth-httplib2
-idna==2.8                 # via requests
+idna==2.10                 # via requests
 opencensus[stackdriver]==0.1.10  # via -r requirements.in
 protobuf==3.6.1           # via google-api-core, googleapis-common-protos, grpcio-health-checking
 pyasn1-modules==0.2.4     # via google-auth
