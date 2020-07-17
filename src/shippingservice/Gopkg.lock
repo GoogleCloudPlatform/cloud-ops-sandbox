@@ -98,8 +98,6 @@
   name = "go.opencensus.io"
   packages = [
     ".",
-    "exporter/jaeger",
-    "exporter/jaeger/internal/gen-go/jaeger",
     "internal",
     "internal/tagencoding",
     "plugin/ocgrpc",
@@ -306,7 +304,6 @@
     "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto",
     "github.com/golang/protobuf/proto",
     "github.com/sirupsen/logrus",
-    "go.opencensus.io/exporter/jaeger",
     "go.opencensus.io/plugin/ocgrpc",
     "go.opencensus.io/stats/view",
     "go.opencensus.io/trace",

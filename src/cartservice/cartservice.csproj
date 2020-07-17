@@ -7,11 +7,11 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.2.1" />
-    <PackageReference Include="Google.Protobuf" Version="3.7.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.12.3" />
     <PackageReference Include="Google.Protobuf.Tools" Version="3.12.3" />
-    <PackageReference Include="grpc" Version="1.12.0" />
+    <PackageReference Include="grpc" Version="1.22.1" />
     <PackageReference Include="Grpc.HealthCheck" Version="1.22.1" />
-    <PackageReference Include="grpc.tools" Version="1.12.0" />
+    <PackageReference Include="grpc.tools" Version="1.22.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
     <PackageReference Include="OpenCensus" Version="0.1.0-alpha-33381" />

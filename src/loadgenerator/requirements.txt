@@ -10,7 +10,7 @@ click==7.0                # via flask
 flask==1.1.2              # via locustio
 gevent==1.4.0             # via locustio
 greenlet==0.4.15          # via gevent
-idna==2.8                 # via requests
+idna==2.10                 # via requests
 itsdangerous==1.1.0       # via flask
 jinja2==2.10.1            # via flask
 locustio==0.8.1
