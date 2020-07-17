@@ -23,11 +23,9 @@ echo "### "
 
 # Set vars for DIRs
 ISTIO_VERSION="${ISTIO_VERSION:-1.6.2}"
+
+# Set the working directory to our current directory (/sandbox/terraform)
 export WORK_DIR=`pwd`
-export ISTIO_DIR=$WORK_DIR/istio-$ISTIO_VERSION
-export BASE_DIR=${BASE_DIR:="${PWD}/.."}
-echo "BASE_DIR set to $BASE_DIR"
-export ISTIO_CONFIG_DIR="$BASE_DIR"
 
 # Install Istio on ${CONTEXT}
 kubectx ${CONTEXT}
@@ -60,7 +58,6 @@ kubectl create clusterrolebinding cluster-admin-binding \
 INSTALL_PROFILE="./istio_operator.yaml"
 ${WORK_DIR}/istioctl manifest apply -f ${INSTALL_PROFILE}
 
-# redeploy the pods
-cd ../release
-kubectl delete -f kubernetes-manifests.yaml
-kubectl apply -f kubernetes-manifests.yaml
+# apply manifests
+cd ../
+kubectl apply -f ./istio-manifests

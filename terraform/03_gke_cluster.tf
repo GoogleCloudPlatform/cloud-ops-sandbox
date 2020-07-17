@@ -135,13 +135,22 @@ resource "null_resource" "set_gke_context" {
   ]
 }
 
+# Install Istio into the GKE cluster
+resource "null_resource" "install_istio" {
+  provisioner "local-exec" {
+    command = "./install_istio.sh"
+  }
+
+  depends_on = ["null_resource.set_gke_context"]
+}
+
 # Deploy microservices into GKE cluster 
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
     command = "kubectl apply -f ../kubernetes-manifests"
   }
 
-  depends_on = ["null_resource.set_gke_context"]
+  depends_on = ["null_resource.install_istio"]
 }
 
 # There is no reliable way to do deployment verification with kubernetes
@@ -155,11 +164,3 @@ resource "null_resource" "delay" {
   }
 }
 
-# Install Istio into the GKE cluster
-resource "null_resource" "install_istio" {
-  provisioner "local-exec" {
-    command = "./install_istio.sh"
-  }
-
-  depends_on = ["null_resource.deploy_services"]
-}

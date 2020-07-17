@@ -112,11 +112,13 @@ gcloud auth configure-docker -q
 
    2. Run `skaffold run -p gcb  --default-repo=gcr.io/[PROJECT_ID]`.
 
-1. Find the IP address of your application, then visit the application on your
-    browser to confirm installation.
+1. Find the IP address of your Istio gateway Ingress or Service, and visit the
+   application.
 
 ```bash
-kubectl get service frontend-external
+INGRESS_HOST="$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+echo "$INGRESS_HOST"
+curl -v "http://$INGRESS_HOST"
 ```
 
 1. To create monitoring examples in GCP, navigate to the monitoring folder and run 
@@ -145,12 +147,15 @@ terraform apply
 1. Clone this repository.
 1. Deploy the application: `kubectl apply -f ./release/kubernetes-manifests`  
 1. Run `kubectl get pods` to see pods are in a healthy and ready state.
-1. Find the IP address of your application, then visit the application on your
-    browser to confirm installation.
+1. Find the IP address of your Istio gateway Ingress or Service, and visit the
+   application.
 
 ```bash
-kubectl get service frontend-external
+INGRESS_HOST="$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+echo "$INGRESS_HOST"
+curl -v "http://$INGRESS_HOST"
 ```
+
 
 ### Generate Synthetic Traffic
 
@@ -186,61 +191,6 @@ make deploy-continuous PROJECT_ID=my-project
 
 ```bash
 make logs SERVICE=x
-```
-
-### (Optional) Deploying on a Istio-installed GKE cluster
-
-> **Note:** If you followed GKE deployment steps above, run `skaffold delete` first
-> to delete what's deployed.
-
-1. Create a GKE cluster (described above).
-
-1. Use [Istio on GKE add-on](https://cloud.google.com/istio/docs/istio-on-gke/installing)
-   to install Istio to your existing GKE cluster.
-
-```bash
-gcloud beta container clusters update demo \
-    --zone=us-central1-a \
-    --update-addons=Istio=ENABLED \
-    --istio-config=auth=MTLS_PERMISSIVE
-```
-
-> NOTE: If you need to enable `MTLS_STRICT` mode, you will need to update
-> several manifest files:
->
-> * `kubernetes-manifests/frontend.yaml`: delete "livenessProbe" and
->   "readinessProbe" fields.
-> * `kubernetes-manifests/loadgenerator.yaml`: delete "initContainers" field.
-
-1. (Optional) Enable Stackdriver Tracing/Logging with Istio Stackdriver Adapter
-   by following [this guide](https://cloud.google.com/istio/docs/istio-on-gke/installing#enabling_tracing_and_logging).
-
-1. Install the automatic sidecar injection (annotate the `default` namespace
-   with the label):
-
-```bash
-kubectl label namespace default istio-injection=enabled
-```
-
-1. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
-
-```bash
-kubectl apply -f ./istio-manifests
-```
-
-This is required only once.
-
-1. Deploy the application with `skaffold run --default-repo=gcr.io/[PROJECT_ID]`.
-
-1. Run `kubectl get pods` to see pods are in a healthy and ready state.
-
-1. Find the IP address of your Istio gateway Ingress or Service, and visit the
-   application.
-
-```bash
-INGRESS_HOST="$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-echo "$INGRESS_HOST"
-curl -v "http://$INGRESS_HOST"
 ```
 
 ### (Optional) Building and Running Individual Services Locally
