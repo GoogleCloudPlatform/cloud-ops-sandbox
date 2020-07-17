@@ -78,8 +78,11 @@ Guidelines](https://opensource.google.com/conduct/).
 ```bash
 gcloud services enable container.googleapis.com
 
-gcloud container clusters create demo --enable-autoupgrade \
-    --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5 --zone=us-central1-a
+gcloud container clusters create demo --zone=us-central1-a \
+    --machine-type=n1-standard-2 \
+    --num-nodes=4 \
+    --enable-stackdriver-kubernetes \
+    --scopes https://www.googleapis.com/auth/cloud-platform
 
 kubectl get nodes
 ```
@@ -140,10 +143,10 @@ kubectl get service frontend-external
 
 ### Generate Synthetic Traffic
 
-1. If you want to create synthetic load manually, use the `loadgenerator-tool` executable found in the root of the repository. For example:
+1. If you want to create synthetic load manually, use the `loadgen` executable found in the loadgenerator folder of the repository. For example:
 
 ```bash
-./loadgenerator-tool startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
+./loadgenerator/loadgen startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
 ```
 
 ### (Optional) Using the Makefile
