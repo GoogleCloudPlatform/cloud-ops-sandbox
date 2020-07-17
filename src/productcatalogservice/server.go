@@ -78,7 +78,7 @@ func init() {
 }
 
 func main() {
-	initTracing()
+	initStackDriverTracing()
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
 	// set injected latency
@@ -162,10 +162,6 @@ func initStackDriverTracing() {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
-}
-
-func initTracing() {
-	initStackDriverTracing()
 }
 
 func initProfiling(service, version string) {

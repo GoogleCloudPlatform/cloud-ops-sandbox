@@ -23,11 +23,11 @@
 # that were populated appropriately at runtime.
 
 provider "google" {
-  # pin provider to 2.x
-  version = "~> 2.1"
+  # pin provider to 3.23.0
+  version = ">=3.23.0"
 
   # credentials = "/path/to/creds.json"
   # project = "project-id"
   # region = "default-region"
   # zone = "default-zone"
-}
+} 

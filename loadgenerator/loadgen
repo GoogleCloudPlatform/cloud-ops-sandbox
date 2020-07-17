@@ -20,16 +20,16 @@ Manages load generation jobs running on GCP by spinning up and tearing down
 Compute Engine instances running the loadgenerator defined under /src/loadgenerator.
 
 Usage:
-    ./loadgenerator-tool -h
+    ./loadgen -h
 
 Quickstart:
-    ./loadgenerator-tool autostart SANDBOX_FRONTEND_ADDRESS
+    ./loadgen autostart SANDBOX_FRONTEND_ADDRESS
 
 Fullstart:
-    ./loadgenerator-tool setup
-    ./loadgenerator-tool create SANDBOX_FRONTEND_ADDRESS --zone ZONE
+    ./loadgen setup
+    ./loadgen create SANDBOX_FRONTEND_ADDRESS --zone ZONE
     sleep 20
-    ./loadgenerator-tool update LOADGENERATER_JOB --zone ZONE 100
+    ./loadgen update LOADGENERATER_JOB --zone ZONE 100
 
 Available User Scenarios:
     [python -m pip install locust]
@@ -402,7 +402,7 @@ def _check_prereqs():
 
 
 def _get_parser():
-    parser = ArgumentParser(prog='loadgenerator-tool')
+    parser = ArgumentParser(prog='loadgen')
     subparsers = parser.add_subparsers(title='commands')
 
     subparser = subparsers.add_parser('autostart',
