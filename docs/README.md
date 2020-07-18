@@ -436,6 +436,17 @@ You can expand any of the messages that matches the filter to see the full stack
 
 ![image](./images/user-guide/35-logdet.png)
 
+# Destroying your cluster
+
+Once you have finished exploring the Stackdriver Sandbox project, don't forget to destroy it to avoid incurring additional billing.
+
+Destroy your Sandbox project by opening the Cloud Shell and running the destroy script:
+```
+$ ./destroy.sh
+```
+
+This script destroys the current Stackdriver Sandbox project. If the install.sh script were run again, a Stackdriver Sandbox project with a new project id would be created.
+
 # OpenCensus to become OpenTelemetry
 
 The Stackdriver Sandbox project uses the [OpenCensus libraries](https://opencensus.io/) for collection of traces and metrics. OpenCensus provides a set of open-source libraries for a variety of languages, and the trace/metric data collected with these libraries can be exported to a variety of backends, including Stackdriver.
