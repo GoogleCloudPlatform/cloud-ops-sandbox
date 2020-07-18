@@ -78,8 +78,11 @@ Guidelines](https://opensource.google.com/conduct/).
 ```bash
 gcloud services enable container.googleapis.com
 
-gcloud container clusters create demo --enable-autoupgrade \
-    --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5 --zone=us-central1-a
+gcloud container clusters create demo --zone=us-central1-a \
+    --machine-type=n1-standard-2 \
+    --num-nodes=4 \
+    --enable-stackdriver-kubernetes \
+    --scopes https://www.googleapis.com/auth/cloud-platform
 
 kubectl get nodes
 ```
@@ -116,6 +119,17 @@ gcloud auth configure-docker -q
 kubectl get service frontend-external
 ```
 
+1. To create monitoring examples in GCP, navigate to the monitoring folder and run 
+the `terraform apply` command.
+
+   2. Please note that in order to do this you will need the external IP address, project ID, 
+   and an email address. The project ID can be found in GCP or with the command `gcloud config get-value project`
+
+```bash
+cd ./monitoring
+
+terraform apply
+```
 > **Troubleshooting:** A Kubernetes bug (will be fixed in 1.12) combined with
 > a Skaffold [bug](https://github.com/GoogleContainerTools/skaffold/issues/887)
 > causes the load balancer to not work, even after getting an IP address. If you
@@ -140,10 +154,10 @@ kubectl get service frontend-external
 
 ### Generate Synthetic Traffic
 
-1. If you want to create synthetic load manually, use the `loadgenerator-tool` executable found in the root of the repository. For example:
+1. If you want to create synthetic load manually, use the `loadgen` executable found in the loadgenerator folder of the repository. For example:
 
 ```bash
-./loadgenerator-tool startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
+./loadgenerator/loadgen startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
 ```
 
 ### (Optional) Using the Makefile

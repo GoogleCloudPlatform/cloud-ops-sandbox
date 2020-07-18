@@ -28,11 +28,6 @@ With Sandbox, we provide a tool that automatically provisions a new demo cluster
 * [Service Overview](#Service-Overview)
   * [Screenshots](#Screenshots)
   * [Architecture](#Architecture)
-* Contribute code to Sandbox
-  * [Running locally](#Running-locally)
-  * [Running on GKE](#Running-on-GKE)
-  * [Using static images](#Using-static-images)
-  * [GKE with Istio](#GKE-with-Istio)
 
 ## Using Sandbox
 
