@@ -29,7 +29,7 @@ version = "0.1.0-SNAPSHOT"
 
 def opencensusVersion = "0.18.0"
 def grpcVersion = "1.17.0"
-def jacksonVersion = "2.9.6"
+def jacksonVersion = "2.11.1"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = '1.8'
