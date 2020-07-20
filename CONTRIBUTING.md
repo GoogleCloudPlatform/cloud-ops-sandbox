@@ -242,3 +242,57 @@ INGRESS_HOST="$(kubectl -n istio-system get service istio-ingressgateway -o json
 echo "$INGRESS_HOST"
 curl -v "http://$INGRESS_HOST"
 ```
+
+### (Optional) Building and Running Individual Services Locally
+
+> 💡 Recommended for quick, repeatable debugging an individual microservice.
+
+Each service runs in its own docker container; you can view the container images pushed to your GCP project's [Container Registry](https://console.cloud.google.com/gcr/images/). Instead of using something like GCP Cloud Build, you can also build and run each container locally.
+
+#### Authentication
+This is required only once.
+
+1. Configure docker to authenticate requests to your Container Registry.
+```bash
+gcloud auth configure-docker
+```
+2. [Create a service account](https://cloud.google.com/docs/authentication/getting-started#creating_a_service_account) and generate a key file, either through your GCP Console or through command line:
+
+```bash
+gcloud iam service-accounts create [NAME]
+gcloud projects add-iam-policy-binding [PROJECT_ID] --member "serviceAccount:[NAME]@[PROJECT_ID].iam.gserviceaccount.com" --role "roles/owner"
+gcloud iam service-accounts keys create [FILE_NAME].json --iam-account [NAME]@[PROJECT_ID].iam.gserviceaccount.com
+```
+Where `[NAME]` is the name you choose for your service account, `[PROJECT_ID]` is the name of your GCP project, and `[FILE_NAME]` is the path to + name of the file in which you wish to store your keys.
+
+3. Set your `GOOGLE_APPLICATION_CREDENTIALS` environment variable on your machine.
+
+Linux/macOS:
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
+```
+Windows:
+```bash
+$env:GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
+```
+
+#### Docker Build and Run
+
+1. Build and tag the image. Make sure you are in the service's directory (i.e. where the Dockerfile is) or pass in the relative path.
+```bash
+docker build . --tag gcr.io/[PROJECT_ID]/[IMAGE]
+```
+
+2. Run with the following flags (`-e` sets environment variables in the container and `-v` injects the credential file).
+
+```bash
+PORT=8080 && docker run \
+-p 9090:${PORT} \
+-e PORT=${PORT} \
+-e K_SERVICE=dev \
+-e K_CONFIGURATION=dev \
+-e K_REVISION=dev-00001 \
+-e GOOGLE_APPLICATION_CREDENTIALS=[FILE_NAME] \
+-v $GOOGLE_APPLICATION_CREDENTIALS:[FILE_NAME] \
+gcr.io/[PROJECT_ID]/[IMAGE]
+```
