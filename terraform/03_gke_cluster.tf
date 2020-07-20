@@ -107,20 +107,12 @@ resource "google_container_cluster" "gke" {
   depends_on = ["google_project_service.gke"]
 }
 
-# Customize kubernetes manifests for upcoming deployment to GKE
-resource "null_resource" "customize_manifests" {
-  provisioner "local-exec" {
-    command = "./customize-manifests.sh"
-  }
-}
 
 # Set current project 
 resource "null_resource" "current_project" {
   provisioner "local-exec" {
     command = "gcloud config set project ${google_project.project.id}"
   }
-
-  depends_on = ["null_resource.customize_manifests"]
 }
 
 #resource "null_resource" "sleeping_subprocess" {
@@ -139,7 +131,6 @@ resource "null_resource" "set_gke_context" {
 
   depends_on = [
     "google_container_cluster.gke", 
-    "null_resource.customize_manifests",
     "null_resource.current_project"
   ]
 }
@@ -147,7 +138,7 @@ resource "null_resource" "set_gke_context" {
 # Deploy microservices into GKE cluster 
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ..//release//kubernetes-manifests.yaml"
+    command = "kubectl apply -f ./kubernetes-manifests"
   }
 
   depends_on = ["null_resource.set_gke_context"]
