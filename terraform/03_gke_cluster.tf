@@ -138,7 +138,7 @@ resource "null_resource" "set_gke_context" {
 # Deploy microservices into GKE cluster 
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ./kubernetes-manifests"
+    command = "kubectl apply -f ../kubernetes-manifests"
   }
 
   depends_on = ["null_resource.set_gke_context"]
