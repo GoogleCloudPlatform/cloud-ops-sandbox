@@ -82,7 +82,7 @@ getExternalIp() {
   external_ip=""; 
   while [ -z $external_ip ]; do
      log "Waiting for Hipster Shop endpoint..."; 
-     external_ip=$(kubectl get svc frontend-external --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); 
+     external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'); 
      [ -z "$external_ip" ] && sleep 10; 
   done;
   if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then

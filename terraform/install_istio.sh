@@ -57,7 +57,3 @@ kubectl create clusterrolebinding cluster-admin-binding \
 # install using operator config - https://istio.io/docs/setup/install/istioctl/#customizing-the-configuration
 INSTALL_PROFILE="./istio_operator.yaml"
 ${WORK_DIR}/istioctl manifest apply -f ${INSTALL_PROFILE}
-
-# apply manifests
-cd ../
-kubectl apply -f ./istio-manifests
