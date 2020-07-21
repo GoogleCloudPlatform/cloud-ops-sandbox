@@ -21,8 +21,8 @@ cluster: check-env
 	gcloud beta container clusters create ${CLUSTER} \
 		--project=${PROJECT_ID} --zone=${ZONE} \
 		--machine-type=n1-standard-2 --num-nodes=4 \
-		--enable-stackdriver-kubernetes --subnetwork=default \
-		--labels csm=
+		--enable-stackdriver-kubernetes \
+		--scopes https://www.googleapis.com/auth/cloud-platform
 	skaffold run --default-repo=gcr.io/${PROJECT_ID}/sandbox -l skaffold.dev/run-id=${CLUSTER}-${PROJECT_ID}-${ZONE}
 
 deploy: check-env

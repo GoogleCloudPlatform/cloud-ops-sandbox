@@ -68,3 +68,12 @@ comments are available in each file, but here's the short version:
 
 The assumption is that a system under user control would run terraform and create resources on the user's behalf. 
 The user would not be aware of the underlying tool.
+
+Monitoring Examples
+--------------------------------------------------------------------------------
+
+To provision monitoring examples for the Stackdriver Sandbox, navigate 
+to the `monitoring` folder and run the command `terraform apply`. Please note that in order to run this command
+you must have first created a [Monitoring Workspace] for the Google Cloud Project. 
+
+[Monitoring Workspace]: https://cloud.google.com/monitoring/workspaces/create

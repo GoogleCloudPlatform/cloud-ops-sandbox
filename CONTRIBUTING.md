@@ -78,8 +78,11 @@ Guidelines](https://opensource.google.com/conduct/).
 ```bash
 gcloud services enable container.googleapis.com
 
-gcloud container clusters create demo --enable-autoupgrade \
-    --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5 --zone=us-central1-a
+gcloud container clusters create demo --zone=us-central1-a \
+    --machine-type=n1-standard-2 \
+    --num-nodes=4 \
+    --enable-stackdriver-kubernetes \
+    --scopes https://www.googleapis.com/auth/cloud-platform
 
 kubectl get nodes
 ```
@@ -116,6 +119,17 @@ gcloud auth configure-docker -q
 kubectl get service frontend-external
 ```
 
+1. To create monitoring examples in GCP, navigate to the monitoring folder and run 
+the `terraform apply` command.
+
+   2. Please note that in order to do this you will need the external IP address, project ID, 
+   and an email address. The project ID can be found in GCP or with the command `gcloud config get-value project`
+
+```bash
+cd ./monitoring
+
+terraform apply
+```
 > **Troubleshooting:** A Kubernetes bug (will be fixed in 1.12) combined with
 > a Skaffold [bug](https://github.com/GoogleContainerTools/skaffold/issues/887)
 > causes the load balancer to not work, even after getting an IP address. If you
@@ -140,10 +154,10 @@ kubectl get service frontend-external
 
 ### Generate Synthetic Traffic
 
-1. If you want to create synthetic load manually, use the `loadgenerator-tool` executable found in the root of the repository. For example:
+1. If you want to create synthetic load manually, use the `loadgen` executable found in the loadgenerator folder of the repository. For example:
 
 ```bash
-./loadgenerator-tool startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
+./loadgenerator/loadgen startup --zone us-central1-c [SANDBOX_FRONTEND_ADDRESS]
 ```
 
 ### (Optional) Using the Makefile
@@ -227,4 +241,58 @@ This is required only once.
 INGRESS_HOST="$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
 echo "$INGRESS_HOST"
 curl -v "http://$INGRESS_HOST"
+```
+
+### (Optional) Building and Running Individual Services Locally
+
+> 💡 Recommended for quick, repeatable debugging an individual microservice.
+
+Each service runs in its own docker container; you can view the container images pushed to your GCP project's [Container Registry](https://console.cloud.google.com/gcr/images/). Instead of using something like GCP Cloud Build, you can also build and run each container locally.
+
+#### Authentication
+This is required only once.
+
+1. Configure docker to authenticate requests to your Container Registry.
+```bash
+gcloud auth configure-docker
+```
+2. [Create a service account](https://cloud.google.com/docs/authentication/getting-started#creating_a_service_account) and generate a key file, either through your GCP Console or through command line:
+
+```bash
+gcloud iam service-accounts create [NAME]
+gcloud projects add-iam-policy-binding [PROJECT_ID] --member "serviceAccount:[NAME]@[PROJECT_ID].iam.gserviceaccount.com" --role "roles/owner"
+gcloud iam service-accounts keys create [FILE_NAME].json --iam-account [NAME]@[PROJECT_ID].iam.gserviceaccount.com
+```
+Where `[NAME]` is the name you choose for your service account, `[PROJECT_ID]` is the name of your GCP project, and `[FILE_NAME]` is the path to + name of the file in which you wish to store your keys.
+
+3. Set your `GOOGLE_APPLICATION_CREDENTIALS` environment variable on your machine.
+
+Linux/macOS:
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
+```
+Windows:
+```bash
+$env:GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
+```
+
+#### Docker Build and Run
+
+1. Build and tag the image. Make sure you are in the service's directory (i.e. where the Dockerfile is) or pass in the relative path.
+```bash
+docker build . --tag gcr.io/[PROJECT_ID]/[IMAGE]
+```
+
+2. Run with the following flags (`-e` sets environment variables in the container and `-v` injects the credential file).
+
+```bash
+PORT=8080 && docker run \
+-p 9090:${PORT} \
+-e PORT=${PORT} \
+-e K_SERVICE=dev \
+-e K_CONFIGURATION=dev \
+-e K_REVISION=dev-00001 \
+-e GOOGLE_APPLICATION_CREDENTIALS=[FILE_NAME] \
+-v $GOOGLE_APPLICATION_CREDENTIALS:[FILE_NAME] \
+gcr.io/[PROJECT_ID]/[IMAGE]
 ```

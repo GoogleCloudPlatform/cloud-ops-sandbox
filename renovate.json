@@ -1,5 +1,21 @@
 {
   "extends": [
     "config:base"
-  ]
+  ],
+
+  "pinVersions": false,
+  "rebaseStalePrs": true,
+  "schedule": [
+    "after 9am and before 3pm"
+  ],
+  "gitAuthor": null,
+  "packageRules": [
+    {
+      "extends": "packages:linters",
+      "groupName": "linters"
+    }
+  ],
+  "labels": ["dependencies"],
+  "prConcurrentLimit": 5,
+  "reviewersFromCodeOwners": true
 }

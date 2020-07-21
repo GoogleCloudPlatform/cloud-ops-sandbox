@@ -10,7 +10,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.3'
-        classpath "gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.7.1"
+        classpath "gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.9"
     }
 }
 
@@ -29,7 +29,7 @@ version = "0.1.0-SNAPSHOT"
 
 def opencensusVersion = "0.18.0"
 def grpcVersion = "1.17.0"
-def jacksonVersion = "2.9.6"
+def jacksonVersion = "2.11.1"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = '1.8'
@@ -45,10 +45,9 @@ dependencies {
     if (speed) {
         compile fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        compile "com.google.api.grpc:proto-google-common-protos:1.12.0",
+        compile "com.google.api.grpc:proto-google-common-protos:1.18.0",
                 "io.opencensus:opencensus-api:${opencensusVersion}",
                 "io.opencensus:opencensus-contrib-grpc-util:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-trace-jaeger:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-stats-stackdriver:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-stackdriver:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-logging:${opencensusVersion}",
@@ -62,7 +61,7 @@ dependencies {
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
                 "io.opencensus:opencensus-contrib-log-correlation-log4j2:${opencensusVersion}",
                 "io.opencensus:opencensus-impl:${opencensusVersion}",
-                "io.netty:netty-tcnative-boringssl-static:2.0.8.Final"
+                "io.netty:netty-tcnative-boringssl-static:2.0.31.Final"
     }
 }
 
