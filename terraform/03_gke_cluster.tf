@@ -138,7 +138,7 @@ resource "null_resource" "set_gke_context" {
 # Install Istio into the GKE cluster
 resource "null_resource" "install_istio" {
   provisioner "local-exec" {
-    command = "./install_istio.sh"
+    command = "cd istio && ./install_istio.sh"
   }
 
   depends_on = ["null_resource.set_gke_context"]

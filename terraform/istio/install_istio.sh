@@ -18,7 +18,7 @@
 # Download Istio
 
 echo "### "
-echo "### Begin install istio control plane - ${CONTEXT}"
+echo "### Begin install istio control plane"
 echo "### "
 
 # Set vars for DIRs
@@ -26,9 +26,6 @@ ISTIO_VERSION="${ISTIO_VERSION:-1.6.2}"
 
 # Set the working directory to our current directory (/sandbox/terraform)
 export WORK_DIR=`pwd`
-
-# Install Istio on ${CONTEXT}
-kubectx ${CONTEXT}
 
 echo "Downloading Istio ${ISTIO_VERSION}..."
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
@@ -46,7 +43,7 @@ kubectl create secret generic cacerts -n istio-system \
     --from-file=samples/certs/root-cert.pem \
     --from-file=samples/certs/cert-chain.pem
 
-# cd back into install/
+# cd back into istio/
 cd ../
 
 kubectl label namespace default istio-injection=enabled
@@ -57,3 +54,10 @@ kubectl create clusterrolebinding cluster-admin-binding \
 # install using operator config - https://istio.io/docs/setup/install/istioctl/#customizing-the-configuration
 INSTALL_PROFILE="./istio_operator.yaml"
 ${WORK_DIR}/istioctl manifest apply -f ${INSTALL_PROFILE}
+
+# apply manifests
+cd ../../
+kubectl apply -f ./istio-manifests
+
+# give some time for changes to be successfully applied
+sleep 10
