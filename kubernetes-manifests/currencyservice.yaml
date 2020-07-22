@@ -28,7 +28,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/stackdriver-sandbox-230822/sandbox/currencyservice:latest
+        image: gcr.io/stackdriver-sandbox-230822/sandbox/currencyservice:v0.1.14
         ports:
         - name: grpc
           containerPort: 7000
