@@ -29,11 +29,21 @@ import (
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
-
+	
+	// OTel Metric
 	"go.opentelemetry.io/otel/api/metric"
 	metricstdout "go.opentelemetry.io/otel/exporters/metric/stdout"
 	"go.opentelemetry.io/otel/instrumentation/othttp"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
+
+	// OTel Trace
+	// OTel -> GCP Trace direct exporter for go
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/api/standard"
+	"go.opentelemetry.io/otel/instrumentation/grpctrace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/resource"
 
 	"google.golang.org/grpc"
 )
@@ -115,6 +125,9 @@ func main() {
 	http_request_count = metric.Must(meter).NewInt64Counter("http_request_count")
 	http_response_errors = metric.Must(meter).NewInt64Counter("http_response_errors")
 	http_request_latency = metric.Must(meter).NewInt64ValueRecorder("http_request_latency")
+	tracer := global.TraceProvider().Tracer("hipstershop/frontend")
+	ctx, span := tracer.Start(ctx, "root")
+	defer span.End()
 
 	srvPort := port
 	if os.Getenv("PORT") != "" {
@@ -216,6 +229,24 @@ func initTelemetry(log logrus.FieldLogger) {
 	// TODO: Remove OpenCensus after full conversion to OpenTelemetry
 	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 	initOpenCensus(log)
+
+	// Initialize exporter OTel Trace -> GCP Trace
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
+	if err != nil {
+		log.Fatalf("failed to initialize exporter: %v", err)
+	}
+
+	// Create trace provider with the exporter.
+	tp, err := sdktrace.NewProvider(sdktrace.WithConfig(
+		sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithSyncer(exporter),
+		// TODO: replace with predefined constant for GKE or autodetection when available
+		sdktrace.WithResource(resource.New(standard.ServiceNameKey.String("GKE"))))
+	if err != nil {
+		log.Fatal("failed to initialize trace provider: %v", err)
+	}
+	global.SetTraceProvider(tp)
 }
 
 func initProfiling(log logrus.FieldLogger, service, version string) {
@@ -254,7 +285,9 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	*conn, err = grpc.DialContext(ctx, addr,
 		grpc.WithInsecure(),
 		grpc.WithTimeout(time.Second*3),
-		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
+		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
+		grpc.WithUnaryInterceptor(grpctrace.UnaryClientInterceptor(global.TraceProvider().Tracer("frontend"))),
+		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(global.TraceProvider().Tracer("frontend"))))
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}

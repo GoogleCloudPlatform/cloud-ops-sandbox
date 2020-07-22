@@ -33,15 +33,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1d8f3cb93c42c5652bb509fde29ecdd1feede9334e355e8bbdc0f9f95b40c254"
-  name = "git.apache.org/thrift.git"
-  packages = ["lib/go/thrift"]
-  pruneopts = "UT"
-  revision = "6503043bc42ab96da14c25f3aee2bb4add719774"
-  source = "github.com/apache/thrift"
-
-[[projects]]
-  branch = "master"
   digest = "1:6cbe7676244a1429f4c22601f799d377a70449469ef636f91d992d719b559ff3"
   name = "github.com/GoogleCloudPlatform/microservices-demo"
   packages = [
@@ -50,6 +41,14 @@
   ]
   pruneopts = "UT"
   revision = "d944092100696aa4a5974ef5c2e710547a824622"
+
+[[projects]]
+  digest = "1:9fe8532210bb4a51753c8b783bb6ff4bf03da370b2440a05f5686b3b440ce930"
+  name = "github.com/GoogleCloudPlatform/opentelemetry-operations-go"
+  packages = ["exporter/trace"]
+  pruneopts = "UT"
+  revision = "a1393affee9a13ed21974ae1d791da1b3189f4a0"
+  version = "v0.2.1"
 
 [[projects]]
   digest = "1:72856926f8208767b837bf51e3373f49139f61889b67dc7fd3c2a0fd711e3f7a"
@@ -137,7 +136,7 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:a5154dfd6b37bef5a3eab759e13296348e639dc8c7604f538368167782b08ccd"
+  digest = "1:1bb914cfb78f68f488a91cd7872d3d06a5f83c5bbacf0296dbef44e120b00a91"
   name = "go.opencensus.io"
   packages = [
     ".",
@@ -160,7 +159,7 @@
   version = "v0.16.0"
 
 [[projects]]
-  digest = "1:d02187d2b2b2a05d013cd60ab8d1d3e1841bff4f65475572cbc37827f73957ff"
+  digest = "1:2f2ba64eb51ae09d5f683c176a5114f3a6d7e8fd9bb3b196c1fbd7cc0ddc2512"
   name = "go.opentelemetry.io/otel"
   packages = [
     "api/correlation",
@@ -199,6 +198,12 @@
     "sdk/metric/controller/time",
     "sdk/metric/processor/basic",
     "sdk/metric/selector/simple",
+    "instrumentation/grpctrace",
+    "internal/trace/parent",
+    "sdk",
+    "sdk/export/trace",
+    "sdk/instrumentation",
+    "sdk/internal",
     "sdk/resource",
     "sdk/trace",
     "sdk/trace/internal",
@@ -396,6 +401,7 @@
     "contrib.go.opencensus.io/exporter/stackdriver",
     "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto",
     "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money",
+    "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace",
     "github.com/golang/protobuf/proto",
     "github.com/google/uuid",
     "github.com/gorilla/mux",
