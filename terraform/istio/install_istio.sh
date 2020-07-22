@@ -60,4 +60,4 @@ cd ../../
 kubectl apply -f ./istio-manifests
 
 # give some time for changes to be successfully applied
-sleep 10
+sleep 20

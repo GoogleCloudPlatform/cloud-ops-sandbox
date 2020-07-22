@@ -157,7 +157,7 @@ resource "null_resource" "deploy_services" {
 # For the purposes of Sandbox, we can mitigate by waiting a few sec to ensure kubectl apply completes
 resource "null_resource" "delay" {
   provisioner "local-exec" {
-    command = "sleep 5"
+    command = "sleep 20"
   }
   triggers = {
     "before" = "${null_resource.deploy_services.id}"
