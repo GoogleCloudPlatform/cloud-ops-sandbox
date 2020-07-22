@@ -115,3 +115,15 @@ resource "google_monitoring_dashboard" "userexp_dashboard" {
 }
 EOF
 }
+
+# Here we create a dashboard for the adservice. The details of the charts
+# in the dashboard can be found in the JSON specification file.
+resource "google_monitoring_dashboard" "adservice_dashboard" {
+  dashboard_json = file("./dashboards/adservice_dashboard.json")
+}
+
+# Here we create a dashboard for the recommendationservice. The details of the charts
+# in the dashboard can be found in the JSON specification file.
+resource "google_monitoring_dashboard" "recommendationservice_dashboard" {
+  dashboard_json = file("./dashboards/recommendationservice_dashboard.json")
+}

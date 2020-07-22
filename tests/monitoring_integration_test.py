@@ -95,16 +95,28 @@ class TestUptimeCheck(unittest.TestCase):
 		self.assertEqual(len(channel_list), 1)
 
 class TestMonitoringDashboard(unittest.TestCase):
-	def testUserExpDashboard(self):
-		""" Test that the User Experience Dashboard gets created. """
+	def checkForDashboard(self, dashboard_display_name):
 		client = v1.DashboardsServiceClient()
 		dashboards = client.list_dashboards(project_name)
-		found_userexp_dashboard = False
 		for dashboard in dashboards:
-			if dashboard.display_name == 'User Experience Dashboard':
-				found_userexp_dashboard = True
-				
-		self.assertTrue(found_userexp_dashboard)
+			if dashboard.display_name == dashboard_display_name:
+				return True
+		return False
+
+	def testUserExpDashboard(self):
+		""" Test that the User Experience Dashboard gets created. """
+		found_dash = self.checkForDashboard('User Experience Dashboard')
+		self.assertTrue(found_dash)
+
+	def testAdServiceDashboard(self):
+		"""" Test that the Ad Service Dashboard gets created. """
+		found_dash = self.checkForDashboard('Ad Service Dashboard')
+		self.assertTrue(found_dash)
+
+	def testRecommendationServiceDashboard(self):
+		"""" Test that the Recommendation Service Dashboard gets created. """
+		found_dash = self.checkForDashboard('Recommendation Service Dashboard')
+		self.assertTrue(found_dash)
 
 if __name__ == '__main__':
 	project_name = project_name + getProjectId()
