@@ -1,10 +1,12 @@
 # Releasing
 
 There are two artifacts that make up a Stackdriver Sandbox release:
-- a set of tagged container images in "gcr.io/$PROJECT_ID/$REPO_NAME/service_name"
-- a set of manifests and code, saved as a git tag in this repository
+- A set of tagged container images in "gcr.io/stackdriver-sandbox-230822/service_name"
+- A set of manifests and code, saved as a git tag in this repository
 
-Contributors can use `./make-release.sh`, along with [GitHub Actions automation](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/tree/master/.github/workflows), to produce both
+Contributors can use `./make-release.sh`, along with
+[GitHub Actions automation](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/tree/master/.github/workflows), 
+to produce both at once.
 
 ## Release Process
 1. run `export NEW_VERSION=vX.Y.Z`
