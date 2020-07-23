@@ -37,7 +37,7 @@ chmod +x ./kind && \
 sudo mv ./kind /usr/local/bin
 
 # install skaffold
-curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
+curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-darwin-amd64 && \
 chmod +x skaffold && \
 sudo mv skaffold /usr/local/bin
 
@@ -48,6 +48,9 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debi
 sudo apt update && \
 sudo apt install -y docker-ce && \
 sudo usermod -aG docker ${USER}
+
+# docker auth with service account used for CI
+gcloud auth configure-docker --quiet
 
 # reboot to complete docker setup
 sudo reboot
