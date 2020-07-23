@@ -18,7 +18,7 @@ to produce both at once.
    [`push-tags` CI job](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/blob/master/.github/workflows/push-tags.yml).
    Check that the job completed successfully, and the tagged images appear in the 
    [`stackdriver-sandbox-230822` GCR repo](http://console.cloud.google.com/gcr/images/stackdriver-sandbox-230822)
-1. When the PR has been reviewed and throughly tested, merge it into master
+1. When the PR has been reviewed and thoroughly tested, merge it into master
    - Don't squash; we must keep the tagged commit in the git history
 1. The merge to master should kick off a 
    [`github-pages` job](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/deployments/activity_log?environment=github-pages) 
