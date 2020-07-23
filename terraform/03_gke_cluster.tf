@@ -77,7 +77,7 @@ resource "google_container_cluster" "gke" {
       }
     }
     
-    initial_node_count = 5
+    initial_node_count = 7
 
     autoscaling {
       min_node_count = 3
@@ -135,21 +135,40 @@ resource "null_resource" "set_gke_context" {
   ]
 }
 
+# Install Istio into the GKE cluster
+resource "null_resource" "install_istio" {
+  provisioner "local-exec" {
+    command = "./istio/install_istio.sh"
+  }
+
+  depends_on = ["null_resource.set_gke_context"]
+}
+
 # Deploy microservices into GKE cluster 
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
     command = "kubectl apply -f ../kubernetes-manifests"
   }
 
-  depends_on = ["null_resource.set_gke_context"]
+  depends_on = ["null_resource.install_istio"]
 }
 
-# There is no reliable way to do deployment verification with kubernetes
-# For the purposes of Sandbox, we can mitigate by waiting a few sec to ensure kubectl apply completes
+# We wait for all of our microservices to become available on kubernetes
 resource "null_resource" "delay" {
   provisioner "local-exec" {
-    command = "sleep 5"
+    command = <<-EOT
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/adservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/cartservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/checkoutservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/currencyservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/emailservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/frontend
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/paymentservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/productcatalogservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/recommendationservice
+  EOT
   }
+
   triggers = {
     "before" = "${null_resource.deploy_services.id}"
   }
