@@ -24,8 +24,12 @@ echo "### "
 # Set vars for DIRs
 ISTIO_VERSION="${ISTIO_VERSION:-1.6.2}"
 
-# Set the working directory to our current directory (/sandbox/terraform)
-export WORK_DIR=`pwd`
+# Set the working directory to our current directory (/sandbox/terraform/istio)
+export SCRIPTPATH=$(dirname $(realpath $0))
+cd $SCRIPTPATH
+# WORKDIR and SCRIPTPATH should be the same in our case, 
+# but you may find it more readable to keep both variables around
+export WORK_DIR=$SCRIPTPATH
 
 echo "Downloading Istio ${ISTIO_VERSION}..."
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
@@ -44,7 +48,7 @@ kubectl create secret generic cacerts -n istio-system \
     --from-file=samples/certs/cert-chain.pem
 
 # cd back into istio/
-cd ../
+cd ${WORD_DIR}
 
 kubectl label namespace default istio-injection=enabled
 kubectl create clusterrolebinding cluster-admin-binding \
@@ -52,9 +56,8 @@ kubectl create clusterrolebinding cluster-admin-binding \
     --user=$(gcloud config get-value core/account)
 
 # install using operator config - https://istio.io/docs/setup/install/istioctl/#customizing-the-configuration
-INSTALL_PROFILE="./istio_operator.yaml"
+INSTALL_PROFILE="${WORK_DIR}/istio_operator.yaml"
 ${WORK_DIR}/istioctl manifest apply -f ${INSTALL_PROFILE}
 
 # apply manifests
-cd ../../
-kubectl apply -f ./istio-manifests
+kubectl apply -f ${WORK_DIR}/../../istio-manifests
