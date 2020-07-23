@@ -15,7 +15,6 @@
 name: "Continuous Integration - Testing Auth"
 on:
   push:
-    # run on pushes to master or release/*
     branches:    
       - ci-auth-fix
   pull_request:
@@ -27,16 +26,6 @@ jobs:
     runs-on: [self-hosted, test-only]
     steps:
     - uses: actions/checkout@v2
-    - name: License Check
-      run: |
-        set -x
-        git init
-        git add --all
-        git -c user.name="CI Bot" -c user.email="<>" commit -m "initial state"
-        addlicense ./
-        if [[ -n $(git status -s) ]]; then
-          exit 1
-        fi
     - name: Setup Cluster
       run: |
         set -x
