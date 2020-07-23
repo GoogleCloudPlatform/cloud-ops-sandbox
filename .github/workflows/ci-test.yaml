@@ -12,19 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Continuous Integration"
+name: "Continuous Integration - Testing Auth"
 on:
   push:
     # run on pushes to master or release/*
     branches:    
-      - master
-      - release/*
+      - ci-auth-fix
   pull_request:
     # run on pull requests targeting master
     branches:
       - master
 jobs:
-  run-tests:
+  run-tests-simon-testing:
     runs-on: [self-hosted, test-only]
     steps:
     - uses: actions/checkout@v2
