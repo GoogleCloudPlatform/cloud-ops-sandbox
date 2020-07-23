@@ -27,35 +27,34 @@ if [[ ! "${NEW_VERSION}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     exit 1
 fi
 
-# update manifest versions
+# temporarily pin manifests to :$NEW_VERSION
 find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:latest/:${NEW_VERSION}/g" {} \;
 
-# update website tag
+# update website deployment tag
 sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=v0.2.0/g" ${REPO_ROOT}/docs/index.html;
 
-if [[ "$*" == *dryrun*  ]]; then
-    echo "dryrun finished"
+if [[ "$*" == *dryrun*  || "$*" == *dry-run* ]]; then
     exit 0
 else
 
-    # push release PR
+    # create release commit
     git checkout -b "release/${NEW_VERSION}"
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
     git add "${REPO_ROOT}/docs/index.html"
     git commit -m "release/${NEW_VERSION}"
 
-    # add tag
+    # add git tag
     git tag "${NEW_VERSION}"
 
-    # change back to latest tag
+    # change back manifests to :latest
     find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:${NEW_VERSION}/:latest/g" {} \;
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
     git commit -m "revert to latest images"
 
-    if [[ "$*" == *no-push*  ]]; then
+    if [[ "$*" == *nopush* || "$*" == *no-push* ]]; then
         exit 0
     else
-        # push to repo
+        # push release branch to origin
         git push --set-upstream origin "release/${NEW_VERSION}"
         git push --tags
         echo "Release branch created. Please open PR manually in GitHub to finalize release"
