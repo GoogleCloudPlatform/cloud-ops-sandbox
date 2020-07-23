@@ -12,7 +12,7 @@ to produce both at once.
 1. run `export NEW_VERSION=vX.Y.Z`
    - see [Version Names](#version-names)
 1. run `./make-release.sh`
-   - tip: try running with `--dry-run` or `--no-push` first
+   - tip: try running with `--dry-run` or `--no-push` first to do sanity checks
 1. The script will open a new release branch on the origin repository. Create a pull request for the release
 1. The script will push a git tag to the repo, which should kick off a 
    [`push-tags` CI job](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/blob/master/.github/workflows/push-tags.yml).
