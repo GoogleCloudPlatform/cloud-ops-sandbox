@@ -27,10 +27,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/plugin/ochttp"
-	"go.opencensus.io/plugin/ochttp/propagation/b3"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
+
+	"go.opentelemetry.io/otel/api/metric"
+	metricstdout "go.opentelemetry.io/otel/exporters/metric/stdout"
+	"go.opentelemetry.io/otel/instrumentation/othttp"
+	"go.opentelemetry.io/otel/sdk/metric/controller/push"
+
 	"google.golang.org/grpc"
 )
 
@@ -52,6 +56,12 @@ var (
 		"JPY": true,
 		"GBP": true,
 		"TRY": true}
+		// Custom Metrics for User Dashboard
+		// TODO: use automatic metrics collection when Views API available in OpenTelemetry
+		// TODO: remove these after automatically collected
+		http_request_count metric.Int64Counter
+		http_response_errors metric.Int64Counter
+		http_request_latency metric.Int64ValueRecorder
 )
 
 type ctxKeySessionID struct{}
@@ -93,8 +103,18 @@ func main() {
 	}
 	log.Out = os.Stdout
 
+	controller := initMetricsExporter(log)
+	defer controller.Stop()
+
 	go initProfiling(log, "frontend", "1.0.0")
-	go initTracing(log)
+	go initTelemetry(log)
+
+	// TODO: register views when OpenTelemetry Views API is available
+	meter := controller.Provider().Meter("hipstershop/frontend")
+	// TODO: use automatic default metrics collection and remove custom metrics
+	http_request_count = metric.Must(meter).NewInt64Counter("http_request_count")
+	http_response_errors = metric.Must(meter).NewInt64Counter("http_response_errors")
+	http_request_latency = metric.Must(meter).NewInt64ValueRecorder("http_request_latency")
 
 	srvPort := port
 	if os.Getenv("PORT") != "" {
@@ -131,25 +151,19 @@ func main() {
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
 	r.HandleFunc("/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
 
-	var handler http.Handler = r
+	var handler http.Handler = othttp.NewHandler(r, "frontend", // OpenTelemetry HTTP wrapper
+		othttp.WithMessageEvents(othttp.ReadEvents, othttp.WriteEvents)) // Uses global meter and tracer
 	handler = &logHandler{log: log, next: handler} // add logging
 	handler = ensureSessionID(handler)             // add session ID
-	handler = &ochttp.Handler{                     // add opencensus instrumentation
-		Handler:     handler,
-		Propagation: &b3.HTTPFormat{}}
 
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
+// TODO: remove this after full conversion to OpenTelemetry
 func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
 	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
-	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
-		log.Warn("Error registering http default server views")
-	} else {
-		log.Info("Registered http default server views")
-	}
 	if err := view.Register(ocgrpc.DefaultClientViews...); err != nil {
 		log.Warn("Error registering grpc default client views")
 	} else {
@@ -157,7 +171,20 @@ func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
 	}
 }
 
-func initStackdriverTracing(log logrus.FieldLogger) {
+// Initialize OpenTelemetry Metrics exporter
+func initMetricsExporter(log logrus.FieldLogger) *push.Controller {
+	// TODO: export to Cloud Monitoring instead of stdout
+	pusher, err := metricstdout.InstallNewPipeline(metricstdout.Config{
+		PrettyPrint: false,
+	})
+	if err != nil {
+		log.Panicf("failed to initialize metric stdout exporter %v", err)
+	}
+	return pusher
+}
+
+// TODO: remove this after full conversion to OpenTelemetry
+func initOpenCensus(log logrus.FieldLogger) {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
@@ -180,13 +207,15 @@ func initStackdriverTracing(log logrus.FieldLogger) {
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
 }
 
-func initTracing(log logrus.FieldLogger) {
+// Initialize Telemetry collection (Tracing, Metrics/Stats) with OpenCensus and OpenTelemetry
+func initTelemetry(log logrus.FieldLogger) {
 	// This is a demo app with low QPS. trace.AlwaysSample() is used here
 	// to make sure traces are available for observation and analysis.
 	// In a production environment or high QPS setup please use
 	// trace.ProbabilitySampler set at the desired probability.
+	// TODO: Remove OpenCensus after full conversion to OpenTelemetry
 	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-	initStackdriverTracing(log)
+	initOpenCensus(log)
 }
 
 func initProfiling(log logrus.FieldLogger, service, version string) {

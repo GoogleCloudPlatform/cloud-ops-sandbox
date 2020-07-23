@@ -24,6 +24,14 @@
   version = "v0.5.0"
 
 [[projects]]
+  digest = "1:34624033bc188a4e41a68c1ba6ca9b2650e8c5f2136c28045b18c9c503a749d1"
+  name = "github.com/DataDog/sketches-go"
+  packages = ["ddsketch"]
+  pruneopts = "UT"
+  revision = "43f19ad77ff73bc865c41f7e391ef4b23b82810a"
+  version = "v0.0.1"
+
+[[projects]]
   branch = "master"
   digest = "1:1d8f3cb93c42c5652bb509fde29ecdd1feede9334e355e8bbdc0f9f95b40c254"
   name = "git.apache.org/thrift.git"
@@ -150,6 +158,54 @@
   pruneopts = "UT"
   revision = "b11f239c032624b045c4c2bfd3d1287b4012ce89"
   version = "v0.16.0"
+
+[[projects]]
+  digest = "1:d02187d2b2b2a05d013cd60ab8d1d3e1841bff4f65475572cbc37827f73957ff"
+  name = "go.opentelemetry.io/otel"
+  packages = [
+    "api/correlation",
+    "api/global",
+    "api/global/internal",
+    "api/internal",
+    "api/kv",
+    "api/kv/value",
+    "api/label",
+    "api/metric",
+    "api/metric/registry",
+    "api/oterror",
+    "api/propagation",
+    "api/standard",
+    "api/trace",
+    "api/unit",
+    "exporters/metric/stdout",
+    "instrumentation/grpctrace",
+    "instrumentation/othttp",
+    "internal/metric",
+    "internal/trace/parent",
+    "sdk",
+    "sdk/export/metric",
+    "sdk/export/metric/aggregation",
+    "sdk/export/trace",
+    "sdk/instrumentation",
+    "sdk/internal",
+    "sdk/metric",
+    "sdk/metric/aggregator",
+    "sdk/metric/aggregator/array",
+    "sdk/metric/aggregator/ddsketch",
+    "sdk/metric/aggregator/histogram",
+    "sdk/metric/aggregator/minmaxsumcount",
+    "sdk/metric/aggregator/sum",
+    "sdk/metric/controller/push",
+    "sdk/metric/controller/time",
+    "sdk/metric/processor/basic",
+    "sdk/metric/selector/simple",
+    "sdk/resource",
+    "sdk/trace",
+    "sdk/trace/internal",
+  ]
+  pruneopts = "UT"
+  revision = "58e50e249fe4c57f64e421e300b5d2316ae96811"
+  version = "v0.9.0"
 
 [[projects]]
   branch = "master"
@@ -350,6 +406,16 @@
     "go.opencensus.io/plugin/ochttp/propagation/b3",
     "go.opencensus.io/stats/view",
     "go.opencensus.io/trace",
+    "go.opentelemetry.io/otel/api/global",
+    "go.opentelemetry.io/otel/api/metric",
+    "go.opentelemetry.io/otel/api/standard",
+    "go.opentelemetry.io/otel/api/trace",
+    "go.opentelemetry.io/otel/exporters/metric/stdout",
+    "go.opentelemetry.io/otel/instrumentation/grpctrace",
+    "go.opentelemetry.io/otel/instrumentation/othttp",
+    "go.opentelemetry.io/otel/sdk/metric/controller/push",
+    "go.opentelemetry.io/otel/sdk/resource",
+    "go.opentelemetry.io/otel/sdk/trace",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
   ]
