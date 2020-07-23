@@ -77,7 +77,7 @@ resource "google_container_cluster" "gke" {
       }
     }
     
-    initial_node_count = 5
+    initial_node_count = 7
 
     autoscaling {
       min_node_count = 3
