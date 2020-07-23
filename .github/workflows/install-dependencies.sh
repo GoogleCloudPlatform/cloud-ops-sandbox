@@ -37,7 +37,7 @@ chmod +x ./kind && \
 sudo mv ./kind /usr/local/bin
 
 # install skaffold
-curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-darwin-amd64 && \
+curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
 chmod +x skaffold && \
 sudo mv skaffold /usr/local/bin
 
