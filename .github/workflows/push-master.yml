@@ -18,6 +18,7 @@ on:
     # run on pushes to master
     branches:
       - master
+      - push-images
 jobs:
   push-master:
     runs-on: [self-hosted, push-privilege]
