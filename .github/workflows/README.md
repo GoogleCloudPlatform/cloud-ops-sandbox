@@ -20,11 +20,13 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 ### ci.yaml
 
 #### Triggers
+
 - commits pushed to master
 - PRs to master
 - PRs to release/ branches
 
 #### Actions
+
 - ensures kind cluster is running
 - builds all containers in src/
 - deploys local containers to kind
