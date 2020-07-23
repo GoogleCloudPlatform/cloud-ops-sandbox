@@ -1,23 +1,28 @@
 # Releasing
-Versioned releases of this repository can be built and published using `cloudbuild-release.yaml`.
 
-When triggered, this Cloud Build config file will build all the microservices that make up the application and tag them with:
-- the git tag that triggered the release
-- the git hash associated with the tag
-- with the 'latest' tag
+There are two artifacts that make up a Stackdriver Sandbox release:
+- a set of tagged container images in "gcr.io/$PROJECT_ID/$REPO_NAME/service_name"
+- a set of manifests and code, saved as a git tag in this repository
 
-Images will be pushed to Google Container Registry at the path "gcr.io/$PROJECT_ID/$REPO_NAME/service_name"
+Contributors can use `./make-release.sh`, along with [GitHub Actions automation](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/tree/master/.github/workflows), to produce both
 
-### Setting up the Release Trigger
+## Release Process
+1. run `export NEW_VERSION=vX.Y.Z`
+  - see [Version Names](#version-names)
+1. run `./make-release.sh`
+  - tip: try running with `--dry-run` or `--no-push` first
+1. The script will open a new release branch on the origin repository. Create a pull request for the release
+1. The script will push a git tag to the repo, which should kick off a [`push-tags` CI job](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/blob/master/.github/workflows/push-tags.yml).
+   Check that the job completed successfully, and the tagged images appear in the `stackdriver-sandbox-230822` GCR repo
+1. When the PR has been reviewed and throughly tested, merge it into master
+  - Don't squash; we must keep the tagged commit in the git history
+1. The merge to master should kick off a [`github-pages` job](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/deployments/activity_log?environment=github-pages) 
+   to re-build the website. Ensure that [stackdriver-sandbox.dev](https://stackdriver-sandbox.dev/) was updated to use the new tag
+1. Do a manual sanity check, running through a deployment on  [stackdriver-sandbox.dev](https://stackdriver-sandbox.dev/) to make sure everything still works
 
-1. Enable the [Cloud Build API](https://console.cloud.google.com/cloud-build/triggers) for your project
-2. Select "Create a Trigger"
-3. Enter the repository URL to link the trigger to your copy of this repository
-4. Set the Trigger type as "Tag"
-5. Set "Build Configuration" to "Cloud Build configuration file", and set the file location to `/cloudbuild-release.yaml`
-6. Select the "Create trigger" button to finalize the trigger
-
-### Adding a Release Version
-1. run `git tag -a $YOUR_VERSION_NAME`
-2. run `git push origin $YOUR_VERSION_NAME`
-3. watch the trigger build and push new container images in [Google Cloud Build](https://console.cloud.google.com/cloud-build/builds).
+## Version Names
+Version names should generally follow [semantic versioning](https://semver.org/) conventions:
+- vX.Y.Z
+  - X = major version: for major milestone or breaking changes
+  - Y = minor version: for regularly scheduled milestone releases
+  - Z=  Patch version: for hotfixes and other minor, unscheduled releases
