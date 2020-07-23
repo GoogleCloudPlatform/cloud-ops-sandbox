@@ -156,8 +156,19 @@ resource "null_resource" "deploy_services" {
 # We wait for all of our microservices to become available on kubernetes
 resource "null_resource" "delay" {
   provisioner "local-exec" {
-    command = "kubectl wait --for=condition=available --timeout=600s deployment/adservice && kubectl wait --for=condition=available --timeout=600s deployment/cartservice && kubectl wait --for=condition=available --timeout=600s deployment/checkoutservice && kubectl wait --for=condition=available --timeout=600s deployment/currencyservice && kubectl wait --for=condition=available --timeout=600s deployment/emailservice && kubectl wait --for=condition=available --timeout=600s deployment/frontend && kubectl wait --for=condition=available --timeout=600s deployment/paymentservice && kubectl wait --for=condition=available --timeout=600s deployment/productcatalogservice && kubectl wait --for=condition=available --timeout=600s deployment/recommendationservice"
+    command = <<-EOT
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/adservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/cartservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/checkoutservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/currencyservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/emailservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/frontend
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/paymentservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/productcatalogservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/recommendationservice
+  EOT
   }
+
   triggers = {
     "before" = "${null_resource.deploy_services.id}"
   }
