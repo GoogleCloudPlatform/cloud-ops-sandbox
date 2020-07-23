@@ -33,7 +33,7 @@ Version names should generally follow [semantic versioning](https://semver.org/)
   - Z =  Patch version: for hotfixes and other minor, unscheduled releases
 
 ## Reverting Faulty Releases
-Once a release has been merged to master and finalized, **it is strongly advised not to delete modify its artifacts**.
+Once a release has been merged to master and finalized, **it is strongly advised not to delete or modify its artifacts**.
 Instead, you should push a new patch to fix any issues that may have come up.
 
 If a faulty release is still in the PR stage, or you have decided a deletion is necessary, here are the steps to do so:
