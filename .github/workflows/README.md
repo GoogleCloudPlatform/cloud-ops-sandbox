@@ -18,7 +18,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 
 Some actions require authentication to GCP to push container images. These workers need extra setup
 
-**Note:** only one worker in the pool requires this additional setup
+**Note:** only one worker in the pool requires this additional setup. Try to avoid granting privileges to workers that don't need them
 
 1. Provision the VM with a service account with write access to your GCR data bucket
 2. Ensure `PROJECT_ID` is set properly in the [repo's secrets](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/secrets)
