@@ -14,6 +14,16 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 5. Run the following command to install dependencies
     - `wget -O - https://raw.githubusercontent.com/GoogleCloudPlatform/stackdriver-sandbox/master/.github/workflows/install-dependencies.sh | bash`
 
+## Setup - Push Enabled
+
+Some actions require authentication to GCP to push container images. These workers need extra setup
+
+**Note:** only one worker in the pool requires this additional setup. Try to avoid granting privileges to workers that don't need them
+
+1. Provision the VM with a service account with write access to your GCR data bucket
+2. Ensure `PROJECT_ID` is set properly in the [repo's secrets](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/secrets)
+3. Tag the new worker with `push-privilege` on the [Actions Settings page](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/actions)
+
 ---
 ## Workflows
 
@@ -32,6 +42,21 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 - deploys local containers to kind
   - ensures all pods reach ready state
   - ensures HTTP request to frontend returns HTTP status 200
-- deploys manifests from /releases
-  - ensures all pods reach ready state
-  - ensures HTTP request to frontend returns HTTP status 200
+
+### push-master.yaml
+
+#### Triggers
+- commits pushed to master
+
+#### Actions
+- builds and pushes images to official GCR repo tagged with git commit
+- builds and pushes images to official GCR repo tagged as latest
+
+### push-tags.yaml
+
+#### Triggers
+- tags pushed to repo
+
+#### Actions
+- builds and pushes images to official GCR repo tagged with git tag name
+
