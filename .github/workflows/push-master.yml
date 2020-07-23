@@ -19,7 +19,7 @@ on:
     branches:
       - master
 jobs:
-  push-images:
+  push-master:
     runs-on: [self-hosted, push-privilege]
     steps:
     - uses: actions/checkout@v2

@@ -14,11 +14,11 @@
 
 name: "Push Tagged Images"
 on:
-  push:
-    # run on all pushed tags
+  create:
     tags:
+      - v*
 jobs:
-  push-images:
+  push-tags:
     runs-on: [self-hosted, push-privilege]
     steps:
     - uses: actions/checkout@v2
