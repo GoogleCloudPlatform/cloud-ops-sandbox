@@ -1,5 +1,5 @@
 plugins {
-    id 'com.google.protobuf' version '0.8.11'
+    id 'com.google.protobuf' version '0.8.12'
     id 'com.github.sherter.google-java-format' version '0.8'
     id 'idea'
     id 'application'
@@ -14,10 +14,10 @@ description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def opencensusVersion = "0.25.0"
-def grpcVersion = "1.26.0"
-def jacksonVersion = "2.10.2"
-def protocVersion = "3.11.4"
+def opencensusVersion = "0.26.0"
+def grpcVersion = "1.30.2"
+def jacksonVersion = "2.11.1"
+def protocVersion = "3.12.3"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_1_8
