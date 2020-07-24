@@ -27,9 +27,10 @@ repositories {
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def opencensusVersion = "0.18.0"
-def grpcVersion = "1.17.0"
+def opencensusVersion = "0.25.0"
+def grpcVersion = "1.30.2"
 def jacksonVersion = "2.11.1"
+def protocVersion = "3.12.3"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = '1.8'
@@ -47,6 +48,7 @@ dependencies {
     } else {
         compile "com.google.api.grpc:proto-google-common-protos:1.18.0",
                 "io.opencensus:opencensus-api:${opencensusVersion}",
+                "io.opencensus:opencensus-contrib-grpc-metrics:${opencensusVersion}",
                 "io.opencensus:opencensus-contrib-grpc-util:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-stats-stackdriver:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-stackdriver:${opencensusVersion}",
@@ -67,7 +69,7 @@ dependencies {
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.5.1-1'
+        artifact = "com.google.protobuf:protoc:${protocVersion}"
     }
     plugins {
         grpc {
