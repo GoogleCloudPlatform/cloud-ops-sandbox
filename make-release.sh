@@ -33,6 +33,7 @@ find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:late
 # update website deployment tag
 sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/docs/index.html;
 
+# if dry-run mode, exit directly after modifying files
 if [[ "$*" == *dryrun*  || "$*" == *dry-run* ]]; then
     exit 0
 else
@@ -51,6 +52,7 @@ else
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
     git commit -m "revert to latest images"
 
+    # if no-push mode, exit without pushing git branch or tags to origin
     if [[ "$*" == *nopush* || "$*" == *no-push* ]]; then
         exit 0
     else
