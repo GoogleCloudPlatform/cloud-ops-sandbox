@@ -60,6 +60,9 @@ class BaseEmailService(demo_pb2_grpc.EmailServiceServicer):
   def Check(self, request, context):
     return health_pb2.HealthCheckResponse(
       status=health_pb2.HealthCheckResponse.SERVING)
+  def Watch(self, request, context):
+    return health_pb2.HealthCheckResponse(
+      status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
 
 class EmailService(BaseEmailService):
   def __init__(self):
