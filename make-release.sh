@@ -31,7 +31,7 @@ fi
 find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:latest/:${NEW_VERSION}/g" {} \;
 
 # update website deployment tag
-sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=v0.2.0/g" ${REPO_ROOT}/docs/index.html;
+sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/docs/index.html;
 
 if [[ "$*" == *dryrun*  || "$*" == *dry-run* ]]; then
     exit 0
