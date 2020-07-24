@@ -16,22 +16,28 @@
 # backend which stores everything in a local directory. The config you see below
 # is functionally equivalent to the defaults.
 
-terraform {
-  backend "local" {
-    path = "terraform.tfstate"
-  }
-}
+#terraform {
+#  backend "local" {
+#    path = "terraform.tfstate"
+#  }
+#}
 
 # TODO - Consider storing state remotely on a per-instance basis. 
 # In that case we'd generate a backend config just before
 # running terraform that would look something like this:
 
-# terraform {
-#   backend "gcs" {
-#     bucket = "stackdriver-sandbox"
-#     prefix = "<project-id>"
-#   }
-# }
+terraform {
+   backend "gcs" {
+       bucket="stackdriver-sandbox-1882647097-bucket"
+   }
+}
+
+data "terraform_remote_state" "state" {
+    backend = "gcs"
+    config = {
+        bucket = "${var.bucket_name}"
+    }
+}
 
 # Interpolations are not supported in backend configs so we'd have to generate
 # the file rather than rely on env vars like we can do almost everywhere else.

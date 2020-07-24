@@ -20,3 +20,13 @@ variable "billing_account" {
   type        = "string"
   description = "The name of your billing account. Case-sensitive."
 }
+
+variable "project_id" {
+  type        = "string"
+  description = "The id of your project. Case-sensitive."
+}
+
+variable "bucket_name" {
+  type        = "string"
+  description = "The name of your bucket. Case-sensitive."
+}

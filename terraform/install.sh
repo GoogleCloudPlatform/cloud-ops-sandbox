@@ -23,6 +23,8 @@ set -o errexit  # Exit on error
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
+create_flag=false
+
 log() { echo "$1" >&2; }
 
 getBillingAccount() {
@@ -58,6 +60,51 @@ getBillingAccount() {
   log "using billing account: $billing_acct"
 }
 
+getProject() {
+  log "Checking for project list"
+  found_projects=$(gcloud projects list --filter="name:stackdriver-sandbox-*" --format="value(projectId)")
+  if [ -z "$found_projects" ] || [[ ${#found_projects[@]} -eq 0 ]]; then
+    create_flag=true
+  else
+      log "Which project would you like to use?:"
+      IFS_bak=$IFS
+      IFS=$'\n'
+      select opt in ${found_projects} "create" "cancel"; do
+        if [[ "${opt}" == "cancel" ]]; then
+          exit 0
+        elif [[ "${opt}" == "create" ]]; then
+          create_flag=true
+          log "create a new Sandbox!"
+          break
+        elif [[ -z "${opt}" ]]; then
+          log "invalid response"
+        else
+          project_id=$opt
+          bucket_name="$project_id-bucket"
+          break
+        fi
+      done
+      IFS=$IFS_bak
+  fi
+}
+
+createProject() {
+  if [ "$create_flag" = true ]; then
+    # generate random id
+    project_id="stackdriver-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
+    bucket_name="$project_id-bucket"
+    # create project
+    gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo"
+    # link billing account
+    billing_id=$(gcloud beta billing accounts list --format="value(name)" --filter="displayName:$billing_acct")
+    gcloud beta billing projects link "$project_id" --billing-account="$billing_id"
+    # create bucket
+    gsutil mb -p "$project_id" "gs://$bucket_name"
+    log "created project: $project_id"
+    log "created bucket: $bucket_name"
+  fi
+}
+
 installTerraform() {
   sudo apt-get install unzip
   wget -q https://releases.hashicorp.com/terraform/0.12.29/terraform_0.12.29_linux_amd64.zip -O ./terraform.zip
@@ -66,16 +113,16 @@ installTerraform() {
 }
 
 applyTerraform() {
-  log "Initialize terraform state"
-  terraform init
+  log "Initialize terraform state with bucket ${bucket_name}"
+  terraform init -backend-config "bucket=${bucket_name}"
 
   log "Apply Terraform automation"
-  terraform apply -auto-approve -var="billing_account=${billing_acct}"
+  terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
   # find the name of the new project
-  created_project=$(cat ./terraform.tfstate | \
-                    grep "\"project\":" | \
-                    grep -oh "stackdriver-sandbox-[0-9]*" | \
-                    head -n 1)
+  #created_project=$(cat ./terraform.tfstate | \
+  #                  grep "\"project\":" | \
+  #                  grep -oh "stackdriver-sandbox-[0-9]*" | \
+  #                  head -n 1)
 }
 
 getExternalIp() {
@@ -102,7 +149,7 @@ loadGen() {
       "${TRIES}" -lt 20  ]]; do
     log "waiting for load generator instance..."
     sleep 1
-    loadgen_ip=$(gcloud compute instances list --project "$created_project" \
+    loadgen_ip=$(gcloud compute instances list --project "$project_id" \
                                                --filter="name:loadgenerator*" \
                                                --format="value(networkInterfaces[0].accessConfigs.natIP)")
     TRIES=$((TRIES + 1))
@@ -114,9 +161,9 @@ loadGen() {
 
 displaySuccessMessage() {
     gcp_path="https://console.cloud.google.com"
-    if [[ -n "${created_project}" ]]; then
-        gcp_kubernetes_path="$gcp_path/kubernetes/workload?project=$created_project"
-        gcp_monitoring_path="$gcp_path/monitoring?project=$created_project"
+    if [[ -n "${project_id}" ]]; then
+        gcp_kubernetes_path="$gcp_path/kubernetes/workload?project=$project_id"
+        gcp_monitoring_path="$gcp_path/monitoring?project=$project_id"
     fi
 
     if [[ -n "${loadgen_ip}" ]]; then
@@ -159,6 +206,8 @@ then
 fi;
 
 # Provision Stackdriver Sandbox cluster
+getProject;
+createProject;
 applyTerraform;
 getExternalIp;
 loadGen;
