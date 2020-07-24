@@ -22,10 +22,9 @@ from concurrent import futures
 
 import googleclouddebugger
 import grpc
-from opencensus.trace.exporters import print_exporter
-from opencensus.trace.exporters import stackdriver_exporter
-from opencensus.trace.ext.grpc import server_interceptor
-from opencensus.trace.samplers import always_on
+from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
+from opencensus.ext.grpc import server_interceptor
+from opencensus.trace import samplers
 
 import demo_pb2
 import demo_pb2_grpc
@@ -66,7 +65,7 @@ if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
     try:
-        sampler = always_on.AlwaysOnSampler()
+        sampler = samplers.AlwaysOnSampler()
         exporter = stackdriver_exporter.StackdriverExporter()
         tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
     except:
