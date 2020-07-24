@@ -123,11 +123,7 @@ class TestMonitoringDashboard(unittest.TestCase):
 		found_dash = self.checkForDashboard('Ad Service Dashboard')
 		self.assertTrue(found_dash)
 
-	def testRecommendationServiceDashboard(self):
-		"""" Test that the Recommendation Service Dashboard gets created. """
-		found_dash = self.checkForDashboard('Recommendation Service Dashboard')
-
-  def testFrontendServiceDashboard(self):
+	def testFrontendServiceDashboard(self):
 		""" Test that the Frontend Service Dashboard gets created. """
 		found_dashboard = self.checkForDashboard('Frontend Service Dashboard')
 		self.assertTrue(found_dashboard)
@@ -146,6 +142,55 @@ class TestMonitoringDashboard(unittest.TestCase):
 		""" Test that the Shipping Service Dashboard gets created. """
 		found_dashboard = self.checkForDashboard('Shipping Service Dashboard')
 		self.assertTrue(found_dashboard)
+
+class TestCustomService(unittest.TestCase):
+	def setUp(self):
+		self.client = monitoring_v3.ServiceMonitoringServiceClient()
+		self.project_id = getProjectId()
+
+	def checkForService(self, service_name):
+		name = self.client.service_path(self.project_id, service_name)
+		return self.client.get_service(name)
+
+	def testFrontendServiceExists(self):
+		""" Test that the Frontend Custom Service gets created. """
+		response = self.checkForService('frontend-srv')
+		# check that we found an object
+		self.assertTrue(response)
+
+class TestServiceSlo(unittest.TestCase):
+	def setUp(self):
+		self.client = monitoring_v3.ServiceMonitoringServiceClient()
+		self.project_id = getProjectId()
+
+	def checkForSlo(self, service, slo):
+		name = self.client.service_level_objective_path(self.project_id, service, slo)
+		return self.client.get_service_level_objective(name)
+
+	def testFrontendServiceSloExists(self):
+		""" Test that for each service that two SLOs (availability, latency) get created. """
+		found_availability_slo = self.checkForSlo('frontend-srv', 'availability-slo')
+		self.assertTrue(found_availability_slo)
+		found_latency_slo = self.checkForSlo('frontend-srv', 'latency-slo')
+		self.assertTrue(found_latency_slo)
+
+class TestSloAlertPolicy(unittest.TestCase):
+	def setUp(self):
+		self.client = monitoring_v3.AlertPolicyServiceClient()
+
+	def checkForAlertingPolicy(self, policy_display_name):
+		policies = self.client.list_alert_policies(project_name)
+		for policy in policies:
+			if policy.display_name == policy_display_name:
+				return True
+		return False
+
+	def testFrontendServiceSloAlertExists(self):
+		""" Test that the Alerting Policies for the Frontend Service SLO get created. """
+		found_availability_alert = self.checkForAlertingPolicy('Frontend Service Availability Alert Policy')
+		self.assertTrue(found_availability_alert)
+		found_latency_alert = self.checkForAlertingPolicy('Frontend Service Latency Alert Policy')
+		self.assertTrue(found_latency_alert)
 
 if __name__ == '__main__':
 	project_name = project_name + getProjectId()
