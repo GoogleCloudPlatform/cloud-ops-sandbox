@@ -27,9 +27,7 @@
 # running terraform that would look something like this:
 
 terraform {
-   backend "gcs" {
-       bucket="stackdriver-sandbox-1882647097-bucket"
-   }
+   backend "gcs" {}
 }
 
 data "terraform_remote_state" "state" {

@@ -94,10 +94,20 @@ createProject() {
     project_id="stackdriver-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
     bucket_name="$project_id-bucket"
     # create project
-    gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo"
+    if [ -z "$folder_id" ]; then
+      gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo"
+    else
+      gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo" --folder="$folder_id"
+    fi;
     # link billing account
     billing_id=$(gcloud beta billing accounts list --format="value(name)" --filter="displayName:$billing_acct")
     gcloud beta billing projects link "$project_id" --billing-account="$billing_id"
+    # confirm billing account linked
+    check_billing=$(gcloud beta billing projects list --billing-account="$billing_id" --format="value(project_id)" --filter="project_id:$project_id")
+    while [ -z "$check_billing" ]; do
+      log "waiting for billing account to be linked"
+      sleep 1
+    done;
     # create bucket
     gsutil mb -p "$project_id" "gs://$bucket_name"
     log "created project: $project_id"
@@ -114,7 +124,8 @@ installTerraform() {
 
 applyTerraform() {
   log "Initialize terraform state with bucket ${bucket_name}"
-  terraform init -backend-config "bucket=${bucket_name}"
+  # lock-free to prevent access fail
+  terraform init -backend-config "bucket=${bucket_name}" -lock=false
 
   log "Apply Terraform automation"
   terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
@@ -187,7 +198,7 @@ log "Checking Prerequisites..."
 getBillingAccount;
 
 log "Install current version of Terraform"
-installTerraform
+#installTerraform
 
 # Make sure we use Application Default Credentials for authentication
 # For that we need to unset GOOGLE_APPLICATION_CREDENTIALS and generate
@@ -197,12 +208,10 @@ installTerraform
 #export GOOGLE_APPLICATION_CREDENTIALS=""
 #gcloud auth application-default login
 
-# Ensure no google.com accounts early - they are not supported!
 acct=$(gcloud info --format="value(config.account)")
 if [[ $acct == *"google.com"* ]];
 then
-  log "Google.com accounts are currently not supported by Stackdriver Sandbox.";
-  exit;
+  folder_id="261046259366"            
 fi;
 
 # Provision Stackdriver Sandbox cluster
