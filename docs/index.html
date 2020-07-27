@@ -32,20 +32,6 @@
     gtag('config', 'UA-137862890-1');
   </script>
   <!-- End of Google Analytics -->
-  <script src="scripts/metrics.js"></script>
-  <script>
-      var config = {
-        demo_name : "stackdriver-sandbox",
-        apiKey: "AIzaSyDrqTHsyPL8qMiw8ozfXPrvD3uVY3nm8Kc",
-        authDomain: "next19-metrics-test.firebaseapp.com",
-        databaseURL: "https://next19-metrics-test.firebaseio.com/",
-        projectId: "next19-metrics-test",
-        storageBucket: "next19-metrics-test.appspot.com",
-        messagingSenderId: "186455296600"
-      };
-
-      metrics = new DEMOMETRICS(config);
-    </script>
 </head>
 <body>
   <section class="page">
@@ -63,14 +49,14 @@
         <li><b>Load Generator</b> - a component that produces synthetic traffic on a demo service</li>
         <li><b>(Soon) SRE Runbook</b> - for operating deployed sample service that follows best SRE practices</li>
       </ul>
-      <a class="github-btn" href="https://github.com/GoogleCloudPlatform/stackdriver-sandbox" target="_blank" onclick="metrics.recordCustomTime('stackdriver-demo-view-source-code')">View source code</a>
+      <a class="github-btn" href="https://github.com/GoogleCloudPlatform/stackdriver-sandbox" target="_blank">View source code</a>
     </section>
     <section class="cta">
       <h2>Get started now</h2>
       <div class="steps">
         <div class="step step-1">
           <label>Step 1</label>
-          <a class="console-btn" href="https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/stackdriver-sandbox.git&cloudshell_git_branch=master&cloudshell_working_dir=terraform&cloudshell_image=gcr.io/cloudshell-images/cloudshell" target="_blank" onclick="metrics.recordCustomTime('stackdriver-demo-open-in-cloud-shell')">Open in Google Cloud Shell</a>
+          <a class="console-btn" href="https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/stackdriver-sandbox.git&cloudshell_git_branch=v0.1.14&cloudshell_working_dir=terraform&cloudshell_image=gcr.io/cloudshell-images/cloudshell" target="_blank" onclick="metrics.recordCustomTime('stackdriver-demo-open-in-cloud-shell')">Open in Google Cloud Shell</a>
         </div>
 	<div class="step step-2">
           <label>Step 2</label>

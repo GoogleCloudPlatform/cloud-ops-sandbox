@@ -28,7 +28,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: productcatalogservice
+        image: gcr.io/stackdriver-sandbox-230822/sandbox/productcatalogservice:latest
         ports:
         - containerPort: 3550
         readinessProbe:
@@ -37,9 +37,6 @@ spec:
         livenessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
-#        env:
-#          - name: JAEGER_SERVICE_ADDR
-#            value: "jaeger-collector:14268"
         resources:
           requests:
             cpu: 100m

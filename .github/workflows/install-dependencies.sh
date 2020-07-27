@@ -49,5 +49,8 @@ sudo apt update && \
 sudo apt install -y docker-ce && \
 sudo usermod -aG docker ${USER}
 
+# docker auth with service account used for CI
+gcloud auth configure-docker --quiet
+
 # reboot to complete docker setup
 sudo reboot

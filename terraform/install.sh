@@ -60,7 +60,7 @@ getBillingAccount() {
 
 installTerraform() {
   sudo apt-get install unzip
-  wget -q https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_linux_amd64.zip -O ./terraform.zip
+  wget -q https://releases.hashicorp.com/terraform/0.12.29/terraform_0.12.29_linux_amd64.zip -O ./terraform.zip
   unzip -o terraform.zip
   sudo install terraform /usr/local/bin
 }
@@ -82,7 +82,7 @@ getExternalIp() {
   external_ip=""; 
   while [ -z $external_ip ]; do
      log "Waiting for Hipster Shop endpoint..."; 
-     external_ip=$(kubectl get svc frontend-external --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); 
+     external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'); 
      [ -z "$external_ip" ] && sleep 10; 
   done;
   if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
@@ -95,7 +95,7 @@ getExternalIp() {
 # Install Load Generator service and start generating synthetic traffic to Sandbox
 loadGen() {
   log "Running load generator"
-  ../loadgenerator/loadgenerator-tool autostart $external_ip
+  ../loadgenerator/loadgen autostart $external_ip
   # find the IP of the load generator web interface
   TRIES=0
   while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null --max-time 1) -ne 200  && \
@@ -139,11 +139,8 @@ displaySuccessMessage() {
 log "Checking Prerequisites..."
 getBillingAccount;
 
-log "Make sure Terraform is installed"
-if ! [ -x "$(command -v terraform)" ]; then
-  log "Terraform is not installed. Trying to install it."
-  installTerraform
-fi
+log "Install current version of Terraform"
+installTerraform
 
 # Make sure we use Application Default Credentials for authentication
 # For that we need to unset GOOGLE_APPLICATION_CREDENTIALS and generate

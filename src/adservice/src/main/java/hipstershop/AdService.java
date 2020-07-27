@@ -32,7 +32,6 @@ import io.opencensus.common.Duration;
 import io.opencensus.contrib.grpc.metrics.RpcViews;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
-import io.opencensus.exporter.trace.jaeger.JaegerTraceExporter;
 import io.opencensus.exporter.trace.stackdriver.StackdriverTraceConfiguration;
 import io.opencensus.exporter.trace.stackdriver.StackdriverTraceExporter;
 import io.opencensus.trace.AttributeValue;
@@ -255,18 +254,6 @@ public final class AdService {
     logger.info("StackDriver initialization complete.");
   }
 
-  private static void initJaeger() {
-    String jaegerAddr = System.getenv("JAEGER_SERVICE_ADDR");
-    if (jaegerAddr != null && !jaegerAddr.isEmpty()) {
-      String jaegerUrl = String.format("http://%s/api/traces", jaegerAddr);
-      // Register Jaeger Tracing.
-      JaegerTraceExporter.createAndRegister(jaegerUrl, "adservice");
-      logger.info("Jaeger initialization complete.");
-    } else {
-      logger.info("Jaeger initialization disabled.");
-    }
-  }
-
   /** Main launches the server from the command line. */
   public static void main(String[] args) throws IOException, InterruptedException {
     // Registers all RPC views.
@@ -279,9 +266,6 @@ public final class AdService {
               }
             })
         .start();
-
-    // Register Jaeger
-    initJaeger();
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");

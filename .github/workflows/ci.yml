@@ -48,7 +48,7 @@ jobs:
       run: |
         set -x
         skaffold config set --global local-cluster true
-        skaffold run --default-repo local --status-check=false
+        skaffold run -p local --status-check=false
     - name: Deploy Load Generator
       run: |
         set -x
@@ -56,7 +56,7 @@ jobs:
           --image=gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator:latest
          kubectl set env deployment/loadgenerator FRONTEND_ADDR=frontend:80
     - name: Wait For Pods
-      timeout-minutes: 20
+      timeout-minutes: 10
       run: |
         set -x
         kubectl wait --for=condition=available --timeout=500s deployment/adservice

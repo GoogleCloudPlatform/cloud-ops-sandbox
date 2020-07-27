@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: checkoutservice
+          image: gcr.io/stackdriver-sandbox-230822/sandbox/checkoutservice:latest
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -49,8 +49,6 @@ spec:
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
-          # - name: JAEGER_SERVICE_ADDR
-          #   value: "jaeger-collector:14268"
           resources:
             requests:
               cpu: 100m

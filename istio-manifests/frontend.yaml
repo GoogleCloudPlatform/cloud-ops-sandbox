@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-sudo: required
-
-services:
-- docker
-
-install:
-- curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v0.20.0/skaffold-linux-amd64
-- chmod +x skaffold
-- sudo mv skaffold /usr/local/bin
-
-script:
-- skaffold build --profile travis-ci
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: frontend
+spec:
+  hosts:
+  - "frontend.default.svc.cluster.local"
+  http:
+  - route:
+    - destination:
+        host: frontend
+        port:
+          number: 80

@@ -25,7 +25,6 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
@@ -69,7 +68,7 @@ type checkoutService struct {
 }
 
 func main() {
-	go initTracing()
+	go initStackDriverTracing()
 	go initProfiling("checkoutservice", "1.0.0")
 
 	port := listenPort
@@ -97,28 +96,6 @@ func main() {
 	log.Infof("starting to listen on tcp: %q", lis.Addr().String())
 	err = srv.Serve(lis)
 	log.Fatal(err)
-}
-
-func initJaegerTracing() {
-	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
-	if svcAddr == "" {
-		log.Info("jaeger initialization disabled.")
-		return
-	}
-
-	// Register the Jaeger exporter to be able to retrieve
-	// the collected spans.
-	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: fmt.Sprintf("http://%s", svcAddr),
-		Process: jaeger.Process{
-			ServiceName: "checkoutservice",
-		},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	trace.RegisterExporter(exporter)
-	log.Info("jaeger initialization completed.")
 }
 
 func initStats(exporter *stackdriver.Exporter) {
@@ -151,11 +128,6 @@ func initStackDriverTracing() {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
-}
-
-func initTracing() {
-	initJaegerTracing()
-	initStackDriverTracing()
 }
 
 func initProfiling(service, version string) {

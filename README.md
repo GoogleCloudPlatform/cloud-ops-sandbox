@@ -1,6 +1,8 @@
 
 # Stackdriver Sandbox (Alpha)
 
+![Continuous Integration](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/workflows/Continuous%20Integration/badge.svg)
+
 Stackdriver Sandbox is an open-source tool that helps practitioners to learn Service Reliability Engineering practices from Google and apply them on their cloud services using [Ops Management](https://cloud.google.com/products/operations) (formerly Stackdriver).
 It is based on [Hipster Shop](https://github.com/GoogleCloudPlatform/microservices-demo), a cloud-native microservices application.
 
@@ -28,11 +30,6 @@ With Sandbox, we provide a tool that automatically provisions a new demo cluster
 * [Service Overview](#Service-Overview)
   * [Screenshots](#Screenshots)
   * [Architecture](#Architecture)
-* Contribute code to Sandbox
-  * [Running locally](#Running-locally)
-  * [Running on GKE](#Running-on-GKE)
-  * [Using static images](#Using-static-images)
-  * [GKE with Istio](#GKE-with-Istio)
 
 ## Using Sandbox
 

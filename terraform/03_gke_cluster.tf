@@ -77,7 +77,7 @@ resource "google_container_cluster" "gke" {
       }
     }
     
-    initial_node_count = 5
+    initial_node_count = 7
 
     autoscaling {
       min_node_count = 3
@@ -107,20 +107,12 @@ resource "google_container_cluster" "gke" {
   depends_on = ["google_project_service.gke"]
 }
 
-# Customize kubernetes manifests for upcoming deployment to GKE
-resource "null_resource" "customize_manifests" {
-  provisioner "local-exec" {
-    command = "./customize-manifests.sh"
-  }
-}
 
 # Set current project 
 resource "null_resource" "current_project" {
   provisioner "local-exec" {
     command = "gcloud config set project ${google_project.project.id}"
   }
-
-  depends_on = ["null_resource.customize_manifests"]
 }
 
 #resource "null_resource" "sleeping_subprocess" {
@@ -139,26 +131,44 @@ resource "null_resource" "set_gke_context" {
 
   depends_on = [
     "google_container_cluster.gke", 
-    "null_resource.customize_manifests",
     "null_resource.current_project"
   ]
 }
 
-# Deploy microservices into GKE cluster 
-resource "null_resource" "deploy_services" {
+# Install Istio into the GKE cluster
+resource "null_resource" "install_istio" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ..//release//kubernetes-manifests.yaml"
+    command = "./istio/install_istio.sh"
   }
 
   depends_on = ["null_resource.set_gke_context"]
 }
 
-# There is no reliable way to do deployment verification with kubernetes
-# For the purposes of Sandbox, we can mitigate by waiting a few sec to ensure kubectl apply completes
+# Deploy microservices into GKE cluster 
+resource "null_resource" "deploy_services" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ../kubernetes-manifests"
+  }
+
+  depends_on = ["null_resource.install_istio"]
+}
+
+# We wait for all of our microservices to become available on kubernetes
 resource "null_resource" "delay" {
   provisioner "local-exec" {
-    command = "sleep 5"
+    command = <<-EOT
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/adservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/cartservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/checkoutservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/currencyservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/emailservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/frontend
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/paymentservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/productcatalogservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/recommendationservice
+  EOT
   }
+
   triggers = {
     "before" = "${null_resource.deploy_services.id}"
   }

@@ -12,33 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v1beta2
+apiVersion: skaffold/v1
 kind: Config
 build:
   artifacts:
-  # image tags are relative; to specify an image repo (e.g. GCR), you
-  # must provide a "default repo" using one of the methods described 
-  # here:
-  # https://skaffold.dev/docs/concepts/#image-repository-handling
-  - image: emailservice
+  - image: gcr.io/stackdriver-sandbox-230822/sandbox/emailservice
     context: src/emailservice
-  - image: productcatalogservice
+  - image: gcr.io/stackdriver-sandbox-230822/sandbox/productcatalogservice
     context: src/productcatalogservice
-  - image: recommendationservice
+  - image: gcr.io/stackdriver-sandbox-230822/sandbox/recommendationservice
     context: src/recommendationservice
-  - image: shippingservice
+  - image: gcr.io/stackdriver-sandbox-230822/sandbox/shippingservice
     context: src/shippingservice
-  - image: checkoutservice
+  - image: gcr.io/stackdriver-sandbox-230822/sandbox/checkoutservice
     context: src/checkoutservice
-  - image: paymentservice
+  - image: gcr.io/stackdriver-sandbox-230822/sandbox/paymentservice
     context: src/paymentservice
-  - image: currencyservice
+  - image: gcr.io/stackdriver-sandbox-230822/sandbox/currencyservice
     context: src/currencyservice
-  - image: cartservice
+  - image: gcr.io/stackdriver-sandbox-230822/sandbox/cartservice
     context: src/cartservice
-  - image: frontend
+  - image: gcr.io/stackdriver-sandbox-230822/sandbox/frontend
     context: src/frontend
-  - image: adservice
+  - image: gcr.io/stackdriver-sandbox-230822/sandbox/adservice
     context: src/adservice
   # Intentionally leave out src/loadgenerator. It should be deployed externally
   # from the microservices cluster to simulate more realistic network latency.
@@ -46,16 +42,11 @@ build:
   tagPolicy:
     gitCommit: {}
 deploy:
+  statusCheckDeadlineSeconds: 120
   kubectl:
     manifests:
     - ./kubernetes-manifests/**.yaml
 profiles:
-# "travis-ci" profile is used to build the images withou
-# pushing them.
-- name: travis-ci
-  build:
-    local:
-      push: false
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker
 # installed on the developer machine. However, note that
@@ -70,3 +61,8 @@ profiles:
       diskSizeGb: 300
       machineType: N1_HIGHCPU_32
       timeout: 4000s
+- name: local
+  build:
+    local: 
+      push: false
+   
