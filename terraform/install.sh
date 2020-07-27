@@ -39,9 +39,24 @@ getBillingAccount() {
     log "To list active billing accounts, run:"
     log "gcloud beta billing accounts list --filter open=true"
     exit 1;
-  elif [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
+  fi
+
+  # store (name:id) info in a map
+  IFS_bak=$IFS
+  declare -A map
+  acc_ids=$(gcloud beta billing accounts list --format="value(displayName,name)" --filter open=true)
+  IFS=$'\n'
+  acc_ids=($acc_ids)
+  for acc in ${acc_ids[@]}
+  do
+    IFS=$'\t'
+    acc=($acc)
+    IFS=$'\n'
+    map[${acc[0]}]=${acc[1]}
+  done
+
+  if [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
       log "Which billing account would you like to use?:"
-      IFS_bak=$IFS
       IFS=$'\n'
       select opt in ${found_accounts} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
@@ -49,15 +64,18 @@ getBillingAccount() {
         elif [[ -z "${opt}" ]]; then
           log "invalid response"
         else
-          billing_acct=$opt
+          billing_acct=${opt}
+          billing_id=${map[$billing_acct]}
           break
         fi
       done
-      IFS=$IFS_bak
   else
     billing_acct=${found_accounts}
+    billing_id=${map[$found_accounts]}
   fi
+  IFS=$IFS_bak
   log "using billing account: $billing_acct"
+  log "id: $billing_id"
 }
 
 getProject() {
@@ -69,10 +87,10 @@ getProject() {
       log "Which project would you like to use?:"
       IFS_bak=$IFS
       IFS=$'\n'
-      select opt in ${found_projects} "create" "cancel"; do
+      select opt in ${found_projects} "create a new Sandbox" "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
           exit 0
-        elif [[ "${opt}" == "create" ]]; then
+        elif [[ "${opt}" == "create a new Sandbox" ]]; then
           create_flag=true
           log "create a new Sandbox!"
           break
@@ -100,7 +118,6 @@ createProject() {
       gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo" --folder="$folder_id"
     fi;
     # link billing account
-    billing_id=$(gcloud beta billing accounts list --format="value(name)" --filter="displayName:$billing_acct")
     gcloud beta billing projects link "$project_id" --billing-account="$billing_id"
     # confirm billing account linked
     check_billing=$(gcloud beta billing projects list --billing-account="$billing_id" --format="value(project_id)" --filter="project_id:$project_id")
@@ -211,7 +228,7 @@ log "Install current version of Terraform"
 acct=$(gcloud info --format="value(config.account)")
 if [[ $acct == *"google.com"* ]];
 then
-  folder_id="261046259366"            
+  folder_id="262044416022"            
 fi;
 
 # Provision Stackdriver Sandbox cluster
