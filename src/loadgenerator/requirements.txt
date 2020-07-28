@@ -14,7 +14,7 @@ idna==2.10                 # via requests
 itsdangerous==1.1.0       # via flask
 jinja2==2.11.2            # via flask
 locustio==0.999
-markupsafe==1.1.0         # via jinja2
+markupsafe==1.1.1         # via jinja2
 msgpack-python==0.5.6     # via locustio
 pyzmq==17.0.0             # via locustio
 requests==2.21.0          # via locustio
