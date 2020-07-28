@@ -23,7 +23,7 @@ set -o errexit  # Exit on error
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
-create_flag=false
+create_flag=false # whether user wants to create a new project
 
 log() { echo "$1" >&2; }
 
@@ -74,8 +74,6 @@ getBillingAccount() {
     billing_id=${map[$found_accounts]}
   fi
   IFS=$IFS_bak
-  log "using billing account: $billing_acct"
-  log "id: $billing_id"
 }
 
 getProject() {
@@ -110,7 +108,7 @@ createProject() {
   if [ "$create_flag" = true ]; then
     # generate random id
     project_id="stackdriver-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
-    bucket_name="$project_id-bucket"
+    bucket_name="stackdriver-sandbox-state"
     # create project
     if [ -z "$folder_id" ]; then
       gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo"
@@ -127,8 +125,6 @@ createProject() {
     done;
     # create bucket
     gsutil mb -p "$project_id" "gs://$bucket_name"
-    log "created project: $project_id"
-    log "created bucket: $bucket_name"
   fi
 }
 
@@ -141,16 +137,10 @@ installTerraform() {
 
 applyTerraform() {
   log "Initialize terraform state with bucket ${bucket_name}"
-  # lock-free to prevent access fail
-  terraform init -backend-config "bucket=${bucket_name}" -lock=false
+  terraform init -backend-config "bucket=${bucket_name}" -lock=false # lock-free to prevent access fail
 
   log "Apply Terraform automation"
   terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
-  # find the name of the new project
-  #created_project=$(cat ./terraform.tfstate | \
-  #                  grep "\"project\":" | \
-  #                  grep -oh "stackdriver-sandbox-[0-9]*" | \
-  #                  head -n 1)
 }
 
 getExternalIp() {
@@ -215,7 +205,7 @@ log "Checking Prerequisites..."
 getBillingAccount;
 
 log "Install current version of Terraform"
-#installTerraform
+installTerraform
 
 # Make sure we use Application Default Credentials for authentication
 # For that we need to unset GOOGLE_APPLICATION_CREDENTIALS and generate

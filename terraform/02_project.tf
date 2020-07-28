@@ -27,28 +27,6 @@ data "google_project" "project" {
   project_id = "${var.project_id}"
 }
 
-# This generates a random project id that starts with "stackdriver-sandbox-" and
-# ends with a random number in the unsigned int range. See the docs for more:
-# https://www.terraform.io/docs/providers/random/r/id.html
-#resource "random_id" "project" {
-#  prefix      = "stackdriver-sandbox-"
-#  byte_length = "4"
-#}
-
-# Here we create the actual project.
-#resource "google_project" "project" {
-#  name = "Stackdriver Sandbox Demo"
-#
-#  # This references the random project ID we created above; note that we're
-#  # asking for the `dec` attribute which returns the number in decimal format
-#  project_id = "${random_id.project.dec}"
-#
-#  # This references the billing account that we looked up before. Note the
-#  # `data.` prefix vs. using the resource name directly as we did above with
-#  # `random_id.`
-#  billing_account = "${data.google_billing_account.acct.id}"
-#}
-
 resource "google_project_service" "iam" {
   project = "${data.google_project.project.id}"
 
