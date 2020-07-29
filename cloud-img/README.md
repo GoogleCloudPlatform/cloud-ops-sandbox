@@ -5,9 +5,14 @@ When the Dockerfile changes, here are the steps to follow in order to push it to
 Build the Dockerfile, tag the image, and push the image to the Container Registry.
 
 ```bash
-$ docker build sandbox-img
+$ docker build -t cloudshell-image .
 
-$ docker tag sandbox-img gcr.io/stackdriver-sandbox-230822/sandbox-img:tag1
+$ gcloud auth configure-docker 
 
-$ docker push gcr.io/stackdriver-sandbox-230822/sandbox-img:tag1
+$ docker tag cloudshell-image gcr.io/stackdriver-sandbox-230822/cloudshell-image
+
+$ docker push gcr.io/stackdriver-sandbox-230822/cloudshell-image
+
 ```
+
+See the [Google documentation for Container Registry](cloud.google.com/container-registry/docs/quickstart)  for more information.
