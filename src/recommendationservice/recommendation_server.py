@@ -22,10 +22,9 @@ from concurrent import futures
 
 import googleclouddebugger
 import grpc
-from opencensus.trace.exporters import print_exporter
-from opencensus.trace.exporters import stackdriver_exporter
-from opencensus.trace.ext.grpc import server_interceptor
-from opencensus.trace.samplers import always_on
+from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
+from opencensus.ext.grpc import server_interceptor
+from opencensus.trace import samplers
 
 import demo_pb2
 import demo_pb2_grpc
@@ -58,13 +57,15 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def Check(self, request, context):
         return health_pb2.HealthCheckResponse(
             status=health_pb2.HealthCheckResponse.SERVING)
-
+    def Watch(self, request, context):
+        return health_pb2.HealthCheckResponse(
+            status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
 
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
     try:
-        sampler = always_on.AlwaysOnSampler()
+        sampler = samplers.AlwaysOnSampler()
         exporter = stackdriver_exporter.StackdriverExporter()
         tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
     except:
@@ -75,7 +76,7 @@ if __name__ == "__main__":
             module='recommendationserver',
             version='1.0.0'
         )
-    except Exception, err:
+    except (Exception, err):
         logger.error("could not enable debugger")
         logger.error(traceback.print_exc())
         pass
