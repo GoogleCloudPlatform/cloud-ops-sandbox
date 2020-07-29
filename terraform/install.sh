@@ -86,7 +86,7 @@ getProject() {
       found_projects+=("$bill_proj | $create_time")
     fi
   done
-  
+
   if [ -z "$found_projects" ] || [[ ${#found_projects[@]} -eq 0 ]]; then
     createProject;
   else
@@ -123,11 +123,12 @@ createProject() {
     if [[ $acct == *"google.com"* ]];
     then
       log ""
-      log "Are you sure you have requested access to /experimental-gke folder?"
-      log "If not, please make a request at https://sphinx.corp.google.com/sphinx/#accessChangeRequest:systemName=internal_google_cloud_platform_usage"
+      log "Note: your project will be created in the /experimental-gke folder."
+      log "If you don't have access to this folder, please make sure to request at:"
+      log "https://sphinx.corp.google.com/sphinx/#accessChangeRequest:systemName=internal_google_cloud_platform_usage"
       log ""
-      select opt in "yes" "no"; do
-        if [[ "$opt" == "yes" ]]; then
+      select opt in "continue" "cancel"; do
+        if [[ "$opt" == "continue" ]]; then
           break;
         else
           exit 0;
@@ -235,7 +236,7 @@ log "Checking Prerequisites..."
 getBillingAccount;
 
 log "Install current version of Terraform"
-#installTerraform
+installTerraform
 
 # Make sure we use Application Default Credentials for authentication
 # For that we need to unset GOOGLE_APPLICATION_CREDENTIALS and generate

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-# We are now using gcs as our backend, so the state file will be stored
+# We use gcs as our backend, so the state file will be stored
 # in a storage bucket. Since the bucket must preexists, we will create 
 # the project and bucket outside Terraform. Also since the configuration
 # of bucket can't be a variable, we create an empty config and modify it
