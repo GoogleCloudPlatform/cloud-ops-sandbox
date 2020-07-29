@@ -27,19 +27,19 @@ from google.cloud.monitoring_dashboard import v1
 project_name = 'projects/'
 
 def getProjectId():
-  """Retreieves the project id from the environment variable.
-  Raises:
-      MissingProjectIdError -- When not set.
-  Returns:
-      str -- the project name
-  """
-  project_id = os.environ['GOOGLE_CLOUD_PROJECT']
+    """Retrieves the project id from the environment variable.
+    Raises:
+    MissingProjectIdError -- When not set.
+    Returns:
+    str -- the project name
+    """
+    project_id = os.environ['GOOGLE_CLOUD_PROJECT']
 
-  if not project_id:
-      raise MissingProjectIdError(
-          'Set the environment variable ' +
-          'GCLOUD_PROJECT to your Google Cloud Project Id.')
-  return project_id
+    if not project_id:
+        raise MissingProjectIdError(
+            'Set the environment variable ' +
+            'GOOGLE_CLOUD_PROJECT to your Google Cloud Project Id.')
+    return project_id
 
 class TestUptimeCheck(unittest.TestCase):
 
@@ -105,13 +105,38 @@ class TestMonitoringDashboard(unittest.TestCase):
 
 	def testUserExpDashboard(self):
 		""" Test that the User Experience Dashboard gets created. """
-		found_dash = self.checkForDashboard('User Experience Dashboard')
-		self.assertTrue(found_dash)
+		found_dashboard = self.checkForDashboard('User Experience Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testAdServiceDashboard(self):
+		"""" Test that the Ad Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Ad Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testRecommendationServiceDashboard(self):
+		"""" Test that the Recommendation Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Recommendation Service Dashboard')
+		self.assertTrue(found_dashboard)
 
 	def testFrontendServiceDashboard(self):
 		""" Test that the Frontend Service Dashboard gets created. """
-		found_dash = self.checkForDashboard('Frontend Service Dashboard')
-		self.assertTrue(found_dash)
+		found_dashboard = self.checkForDashboard('Frontend Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testEmailServiceDashboard(self):
+		""" Test that the Email Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Email Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testPaymentServiceDashboard(self):
+		""" Test that the Payment Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Payment Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testShippingServiceDashboard(self):
+		""" Test that the Shipping Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Shipping Service Dashboard')
+		self.assertTrue(found_dashboard)
 
 if __name__ == '__main__':
 	project_name = project_name + getProjectId()
