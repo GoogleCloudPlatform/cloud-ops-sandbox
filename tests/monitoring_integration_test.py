@@ -108,7 +108,16 @@ class TestMonitoringDashboard(unittest.TestCase):
 		found_dash = self.checkForDashboard('User Experience Dashboard')
 		self.assertTrue(found_dash)
 
-	def testFrontendServiceDashboard(self):
+	def testAdServiceDashboard(self):
+		"""" Test that the Ad Service Dashboard gets created. """
+		found_dash = self.checkForDashboard('Ad Service Dashboard')
+		self.assertTrue(found_dash)
+
+	def testRecommendationServiceDashboard(self):
+		"""" Test that the Recommendation Service Dashboard gets created. """
+		found_dash = self.checkForDashboard('Recommendation Service Dashboard')
+
+  def testFrontendServiceDashboard(self):
 		""" Test that the Frontend Service Dashboard gets created. """
 		found_dash = self.checkForDashboard('Frontend Service Dashboard')
 		self.assertTrue(found_dash)
