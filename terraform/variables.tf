@@ -28,5 +28,5 @@ variable "project_id" {
 
 variable "bucket_name" {
   type        = "string"
-  description = "The name of your bucket. Case-sensitive."
+  description = "The name of your bucket to store the state file. Case-sensitive."
 }

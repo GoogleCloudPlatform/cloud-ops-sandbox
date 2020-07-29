@@ -23,8 +23,6 @@ set -o errexit  # Exit on error
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
-create_flag=false # whether user wants to create a new project
-
 log() { echo "$1" >&2; }
 
 getBillingAccount() {
@@ -78,19 +76,19 @@ getBillingAccount() {
 
 getProject() {
   log "Checking for project list"
-  found_projects=$(gcloud projects list --filter="name:stackdriver-sandbox-*" --format="value(projectId)")
+  found_projects=$(gcloud projects list --filter="id:stackdriver-sandbox-* AND name='Stackdriver Sandbox Demo'" --format="value(projectId)")
   if [ -z "$found_projects" ] || [[ ${#found_projects[@]} -eq 0 ]]; then
-    create_flag=true
+    createProject;
   else
       log "Which project would you like to use?:"
       IFS_bak=$IFS
       IFS=$'\n'
-      select opt in ${found_projects} "create a new Sandbox" "cancel"; do
+      select opt in "create a new Sandbox" ${found_projects} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
           exit 0
         elif [[ "${opt}" == "create a new Sandbox" ]]; then
-          create_flag=true
           log "create a new Sandbox!"
+          createProject;
           break
         elif [[ -z "${opt}" ]]; then
           log "invalid response"
@@ -105,27 +103,45 @@ getProject() {
 }
 
 createProject() {
-  if [ "$create_flag" = true ]; then
     # generate random id
     project_id="stackdriver-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
-    bucket_name="stackdriver-sandbox-state"
+    bucket_name="$project_id-bucket" # bucket name should be globally unique
     # create project
-    if [ -z "$folder_id" ]; then
-      gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo"
+    acct=$(gcloud info --format="value(config.account)")
+    if [[ $acct == *"google.com"* ]];
+    then
+      log ""
+      log "Are you sure you have requested access to /experimental-gke folder?"
+      log "If not, please make a request at https://sphinx.corp.google.com/sphinx/#accessChangeRequest:systemName=internal_google_cloud_platform_usage"
+      log ""
+      select opt in "yes" "no"; do
+        if [[ "$opt" == "yes" ]]; then
+          break;
+        else
+          exit 0;
+        fi
+      done
+      folder_id="262044416022" # /experimental-gke  
+      gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo" --folder="$folder_id"    
     else
-      gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo" --folder="$folder_id"
+      gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo"      
     fi;
     # link billing account
     gcloud beta billing projects link "$project_id" --billing-account="$billing_id"
-    # confirm billing account linked
-    check_billing=$(gcloud beta billing projects list --billing-account="$billing_id" --format="value(project_id)" --filter="project_id:$project_id")
-    while [ -z "$check_billing" ]; do
-      log "waiting for billing account to be linked"
-      sleep 1
-    done;
     # create bucket
-    gsutil mb -p "$project_id" "gs://$bucket_name"
-  fi
+    gcloud config set project "$project_id"
+    TRIES=0
+    while [[ $(gsutil mb -p "$project_id" "gs://$bucket_name") || "${TRIES}" -lt 5 ]]; do
+      log "Check if bucket is created..."
+      if [[ -n "$(gsutil ls)" ]]; then
+        log "It's created!"
+        break;
+      else
+        log "Creating bucket failed. Try to create it again..."
+        sleep 1
+        TRIES=$((TRIES + 1))
+      fi
+    done    
 }
 
 installTerraform() {
@@ -136,6 +152,8 @@ installTerraform() {
 }
 
 applyTerraform() {
+  rm -f .terraform/terraform.tfstate
+
   log "Initialize terraform state with bucket ${bucket_name}"
   terraform init -backend-config "bucket=${bucket_name}" -lock=false # lock-free to prevent access fail
 
@@ -205,7 +223,7 @@ log "Checking Prerequisites..."
 getBillingAccount;
 
 log "Install current version of Terraform"
-installTerraform
+#installTerraform
 
 # Make sure we use Application Default Credentials for authentication
 # For that we need to unset GOOGLE_APPLICATION_CREDENTIALS and generate
@@ -215,15 +233,8 @@ installTerraform
 #export GOOGLE_APPLICATION_CREDENTIALS=""
 #gcloud auth application-default login
 
-acct=$(gcloud info --format="value(config.account)")
-if [[ $acct == *"google.com"* ]];
-then
-  folder_id="262044416022"            
-fi;
-
 # Provision Stackdriver Sandbox cluster
 getProject;
-createProject;
 applyTerraform;
 getExternalIp;
 loadGen;
