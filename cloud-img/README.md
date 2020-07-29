@@ -15,4 +15,4 @@ $ docker push gcr.io/stackdriver-sandbox-230822/cloudshell-image
 
 ```
 
-See the [Google documentation for Container Registry](cloud.google.com/container-registry/docs/quickstart)  for more information.
+See the [Google documentation for Container Registry](https://cloud.google.com/container-registry/docs/quickstart)  for more information.
