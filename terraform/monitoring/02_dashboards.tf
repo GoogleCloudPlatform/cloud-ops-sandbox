@@ -14,104 +14,15 @@
 
 # Here we create a dashboard for the general user experience - it contains metrics
 # that reflect how users are interacting with the demo application such as latency
-# of requests, distribution of types of requests, and response types.
+# of requests, distribution of types of requests, and response types. The JSON object
+# containing the exact details of the dashboard can be found in the 'dashboards' folder.
 resource "google_monitoring_dashboard" "userexp_dashboard" {
-	dashboard_json = <<EOF
-	{
-  "displayName": "User Experience Dashboard",
-  "gridLayout": {
-    "columns": "2",
-    "widgets": [
-      {
-        "title": "HTTP Request Count by Method",
-        "xyChart": {
-          "dataSets": [
-            {
-              "timeSeriesQuery": {
-                "timeSeriesFilter": {
-                  "filter": "metric.type=\"custom.googleapis.com/opencensus/opencensus.io/http/server/request_count_by_method\"",
-                  "aggregation": {
-                    "perSeriesAligner": "ALIGN_RATE"
-                  },
-                  "secondaryAggregation": {}
-                },
-                "unitOverride": "1"
-              },
-              "plotType": "LINE",
-              "minAlignmentPeriod": "60s"
-            }
-          ],
-          "timeshiftDuration": "0s",
-          "yAxis": {
-            "label": "y1Axis",
-            "scale": "LINEAR"
-          },
-          "chartOptions": {
-            "mode": "COLOR"
-          }
-        }
-      },
-      {
-        "title": "HTTP Response Errors",
-        "xyChart": {
-          "dataSets": [
-            {
-              "timeSeriesQuery": {
-                "timeSeriesFilter": {
-                  "filter": "metric.type=\"custom.googleapis.com/opencensus/opencensus.io/http/server/response_count_by_status_code\" metric.label.\"http_status\"!=\"200\"",
-                  "aggregation": {
-                    "perSeriesAligner": "ALIGN_RATE"
-                  },
-                  "secondaryAggregation": {}
-                },
-                "unitOverride": "1"
-              },
-              "plotType": "LINE",
-              "minAlignmentPeriod": "60s"
-            }
-          ],
-          "timeshiftDuration": "0s",
-          "yAxis": {
-            "label": "y1Axis",
-            "scale": "LINEAR"
-          },
-          "chartOptions": {
-            "mode": "COLOR"
-          }
-        }
-      },
-      {
-        "title": "HTTP Request Latency",
-        "xyChart": {
-          "dataSets": [
-            {
-              "timeSeriesQuery": {
-                "timeSeriesFilter": {
-                  "filter": "metric.type=\"custom.googleapis.com/opencensus/opencensus.io/http/server/latency\"",
-                  "aggregation": {
-                    "perSeriesAligner": "ALIGN_DELTA",
-                    "crossSeriesReducer": "REDUCE_PERCENTILE_99"
-                  },
-                  "secondaryAggregation": {}
-                },
-                "unitOverride": "ms"
-              },
-              "plotType": "LINE",
-              "minAlignmentPeriod": "60s"
-            }
-          ],
-          "timeshiftDuration": "0s",
-          "yAxis": {
-            "label": "y1Axis",
-            "scale": "LINEAR"
-          },
-          "chartOptions": {
-            "mode": "COLOR"
-          }
-        }
-      }
-    ]
-  }
+	dashboard_json = file("./dashboards/userexp_dashboard.json")
 }
-EOF
-}
+
+# This resource creates dashboards for the frontend service of the
+# Stackdriver Sandbox. The JSON object containing the exact details
+# of the dashboard can be found in the 'dashboards' folder.
+resource "google_monitoring_dashboard" "frontend_dashboard" {
+  dashboard_json = file("./dashboards/frontend_dashboard.json")
+} 
