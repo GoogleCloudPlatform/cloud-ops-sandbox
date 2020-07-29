@@ -76,14 +76,24 @@ getBillingAccount() {
 
 getProject() {
   log "Checking for project list"
-  found_projects=$(gcloud projects list --filter="id:stackdriver-sandbox-* AND name='Stackdriver Sandbox Demo'" --format="value(projectId)")
+  billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="project_id:stackdriver-sandbox-*" --format="value(projectId)")
+  # only keep projects with name "Stackdriver Sandbox Demo"
+  found_projects=()
+  for bill_proj in ${billed_projects[@]}
+  do
+    if [[ -n $(gcloud projects describe "$bill_proj" | grep "Stackdriver Sandbox Demo") ]]; then
+      create_time=$(gcloud projects describe "$bill_proj" | grep "createTime")
+      found_projects+=("$bill_proj | $create_time")
+    fi
+  done
+  
   if [ -z "$found_projects" ] || [[ ${#found_projects[@]} -eq 0 ]]; then
     createProject;
   else
       log "Which project would you like to use?:"
       IFS_bak=$IFS
       IFS=$'\n'
-      select opt in "create a new Sandbox" ${found_projects} "cancel"; do
+      select opt in "create a new Sandbox" ${found_projects[@]} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
           exit 0
         elif [[ "${opt}" == "create a new Sandbox" ]]; then
@@ -93,7 +103,9 @@ getProject() {
         elif [[ -z "${opt}" ]]; then
           log "invalid response"
         else
-          project_id=$opt
+          IFS=$' |'
+          opt=($opt)
+          project_id=${opt[0]}
           bucket_name="$project_id-bucket"
           break
         fi
