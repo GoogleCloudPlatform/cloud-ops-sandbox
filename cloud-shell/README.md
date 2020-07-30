@@ -1,6 +1,6 @@
-# Custom Image for Stackdriver Sandbox Project
+# Custom Cloud Shell Image for Stackdriver Sandbox Project
 
-## Updating the Custom Image
+## Updating the Custom Cloud Shell Image
 The Stackdriver Sandbox website currently points at the image stored in Google Container Registry (GCR). If a project developer wants to change the Custom Image, it is **not enough** to update the Dockerfile stored in this directory. The developer must additionally update the image stored in GCR.
 
 Steps to update the image locally and from GCP are described below.
@@ -12,7 +12,7 @@ Steps to update the image locally and from GCP are described below.
 $ docker build -t cloudshell-image .
 ```
 
-2. Set up docker to authenticate using `gcloud` (only if developer has not previously done this). *Note: Currently only developers with 'Owner' permissions can push images to GCR.*
+2. Set up docker to authenticate using `gcloud` (only if developer has not previously done this). *Note: Currently only developers with 'Owner' permissions on the stackdriver-sandbox project (where GCR repo is located) can push images to the stackdriver-sandbox GCR.*
 
 ```bash
 $ gcloud auth configure-docker 
