@@ -21,9 +21,4 @@ RUN sudo apt-get install unzip && \
   sudo install terraform /usr/local/bin
 
 # Change "Open in Cloudshell" script to run ./install.sh using local file and changing it
-COPY cloudshell_open_cp.sh cloudshell_open.sh
-
-RUN sed -i '$i\
-    ./install.sh' cloudshell_open.sh
-
-RUN cp cloudshell_open.sh /google/devshell/bashrc.google.d/cloudshell_open.sh
+COPY cloudshell_open_cp.sh /google/devshell/bashrc.google.d/cloudshell_open.sh
