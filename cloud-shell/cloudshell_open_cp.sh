@@ -16,6 +16,10 @@
 #
 # Clones the given git repository and then cd's into the git directory.
 #
+# NOTE: this file is a copy of cloudshell_open.sh script usually stored
+# at /google/devshell/bashrc.google.d/ in GCP. It should be updated if that
+# script changes.
+
 function cloudshell_open {
   valid_param_chars=^[a-zA-Z0-9~_,\.\/\:@\-]*$
 
