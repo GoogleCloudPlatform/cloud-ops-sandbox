@@ -43,4 +43,6 @@ $ exit
 $ cloudshell env push
 ```
 
+1. **Don't forget to update the Dockerfile in the GitHub repository to reflect changes made in GCP.**
+
 More information can be found on the steps above by running `teachme /google/devshell/tutorials/custom-image-tutorial.md` in GCP Cloud Shell.
