@@ -19,6 +19,8 @@
 # NOTE: this file is a copy of cloudshell_open.sh script usually stored
 # at /google/devshell/bashrc.google.d/ in GCP. It should be updated if that
 # script changes.
+# The only change from the original script is the addition of "./install.sh"
+# right before the end.
 
 function cloudshell_open {
   valid_param_chars=^[a-zA-Z0-9~_,\.\/\:@\-]*$
@@ -81,4 +83,5 @@ function cloudshell_open {
       try_envset "$line"
     done <<< "$output"
   fi
+  ./install.sh # This line automatically runs the install script when cloudshell button is pressed
 }
