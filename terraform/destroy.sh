@@ -60,5 +60,5 @@ fi
 
 # remove tfstate file so a new project id will be generated next time
 log "removing tfstate file"
-rm -f terraform.tfstate
+rm -f .terraform/terraform.tfstate
 log "Stackdriver Sandbox resources deleted"

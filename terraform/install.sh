@@ -37,9 +37,24 @@ getBillingAccount() {
     log "To list active billing accounts, run:"
     log "gcloud beta billing accounts list --filter open=true"
     exit 1;
-  elif [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
+  fi
+
+  # store (name:id) info in a map
+  IFS_bak=$IFS
+  declare -A map
+  acc_ids=$(gcloud beta billing accounts list --format="value(displayName,name)" --filter open=true)
+  IFS=$'\n'
+  acc_ids=($acc_ids)
+  for acc in ${acc_ids[@]}
+  do
+    IFS=$'\t'
+    acc=($acc)
+    IFS=$'\n'
+    map[${acc[0]}]=${acc[1]}
+  done
+
+  if [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
       log "Which billing account would you like to use?:"
-      IFS_bak=$IFS
       IFS=$'\n'
       select opt in ${found_accounts} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
@@ -47,15 +62,99 @@ getBillingAccount() {
         elif [[ -z "${opt}" ]]; then
           log "invalid response"
         else
-          billing_acct=$opt
+          billing_acct=${opt}
+          billing_id=${map[$billing_acct]}
+          break
+        fi
+      done
+  else
+    billing_acct=${found_accounts}
+    billing_id=${map[$found_accounts]}
+  fi
+  IFS=$IFS_bak
+}
+
+getProject() {
+  log "Checking for project list"
+  billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="project_id:stackdriver-sandbox-*" --format="value(projectId)")
+  # only keep projects with name "Stackdriver Sandbox Demo"
+  found_projects=()
+  for bill_proj in ${billed_projects[@]}
+  do
+    if [[ -n $(gcloud projects describe "$bill_proj" | grep "Stackdriver Sandbox Demo") ]]; then
+      create_time=$(gcloud projects describe "$bill_proj" | grep "createTime")
+      found_projects+=("$bill_proj | $create_time")
+    fi
+  done
+
+  if [ -z "$found_projects" ] || [[ ${#found_projects[@]} -eq 0 ]]; then
+    createProject;
+  else
+      log "Which project would you like to use?:"
+      IFS_bak=$IFS
+      IFS=$'\n'
+      select opt in "create a new Sandbox" ${found_projects[@]} "cancel"; do
+        if [[ "${opt}" == "cancel" ]]; then
+          exit 0
+        elif [[ "${opt}" == "create a new Sandbox" ]]; then
+          log "create a new Sandbox!"
+          createProject;
+          break
+        elif [[ -z "${opt}" ]]; then
+          log "invalid response"
+        else
+          IFS=$' |'
+          opt=($opt)
+          project_id=${opt[0]}
+          bucket_name="$project_id-bucket"
           break
         fi
       done
       IFS=$IFS_bak
-  else
-    billing_acct=${found_accounts}
   fi
-  log "using billing account: $billing_acct"
+}
+
+createProject() {
+    # generate random id
+    project_id="stackdriver-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
+    bucket_name="$project_id-bucket" # bucket name should be globally unique
+    # create project
+    acct=$(gcloud info --format="value(config.account)")
+    if [[ $acct == *"google.com"* ]];
+    then
+      log ""
+      log "Note: your project will be created in the /experimental-gke folder."
+      log "If you don't have access to this folder, please make sure to request at:"
+      log "https://sphinx.corp.google.com/sphinx/#accessChangeRequest:systemName=internal_google_cloud_platform_usage"
+      log ""
+      select opt in "continue" "cancel"; do
+        if [[ "$opt" == "continue" ]]; then
+          break;
+        else
+          exit 0;
+        fi
+      done
+      folder_id="262044416022" # /experimental-gke  
+      gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo" --folder="$folder_id"    
+    else
+      gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo"      
+    fi;
+    # link billing account
+    gcloud beta billing projects link "$project_id" --billing-account="$billing_id"
+    # create bucket
+    gcloud config set project "$project_id"
+    TRIES=0
+    while [[ $(gsutil mb -p "$project_id" "gs://$bucket_name") || "${TRIES}" -lt 5 ]]; do
+      log "Check if bucket is created..."
+      if [[ -n "$(gsutil ls)" ]]; then
+        log "It's created!"
+        break;
+      else
+        log "Creating bucket failed. Try to create it again..."
+        sleep 1
+        TRIES=$((TRIES + 1))
+      fi
+    done    
 }
 
 installTerraform() {
@@ -66,16 +165,13 @@ installTerraform() {
 }
 
 applyTerraform() {
-  log "Initialize terraform state"
-  terraform init
+  rm -f .terraform/terraform.tfstate
+
+  log "Initialize terraform state with bucket ${bucket_name}"
+  terraform init -backend-config "bucket=${bucket_name}" -lock=false # lock-free to prevent access fail
 
   log "Apply Terraform automation"
-  terraform apply -auto-approve -var="billing_account=${billing_acct}"
-  # find the name of the new project
-  created_project=$(cat ./terraform.tfstate | \
-                    grep "\"project\":" | \
-                    grep -oh "stackdriver-sandbox-[0-9]*" | \
-                    head -n 1)
+  terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
 }
 
 getExternalIp() {
@@ -102,7 +198,7 @@ loadGen() {
       "${TRIES}" -lt 20  ]]; do
     log "waiting for load generator instance..."
     sleep 1
-    loadgen_ip=$(gcloud compute instances list --project "$created_project" \
+    loadgen_ip=$(gcloud compute instances list --project "$project_id" \
                                                --filter="name:loadgenerator*" \
                                                --format="value(networkInterfaces[0].accessConfigs.natIP)")
     TRIES=$((TRIES + 1))
@@ -114,9 +210,9 @@ loadGen() {
 
 displaySuccessMessage() {
     gcp_path="https://console.cloud.google.com"
-    if [[ -n "${created_project}" ]]; then
-        gcp_kubernetes_path="$gcp_path/kubernetes/workload?project=$created_project"
-        gcp_monitoring_path="$gcp_path/monitoring?project=$created_project"
+    if [[ -n "${project_id}" ]]; then
+        gcp_kubernetes_path="$gcp_path/kubernetes/workload?project=$project_id"
+        gcp_monitoring_path="$gcp_path/monitoring?project=$project_id"
     fi
 
     if [[ -n "${loadgen_ip}" ]]; then
@@ -150,15 +246,8 @@ installTerraform
 #export GOOGLE_APPLICATION_CREDENTIALS=""
 #gcloud auth application-default login
 
-# Ensure no google.com accounts early - they are not supported!
-acct=$(gcloud info --format="value(config.account)")
-if [[ $acct == *"google.com"* ]];
-then
-  log "Google.com accounts are currently not supported by Stackdriver Sandbox.";
-  exit;
-fi;
-
 # Provision Stackdriver Sandbox cluster
+getProject;
 applyTerraform;
 getExternalIp;
 loadGen;

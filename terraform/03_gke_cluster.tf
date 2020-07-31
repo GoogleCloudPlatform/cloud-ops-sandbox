@@ -23,7 +23,7 @@ resource "random_shuffle" "zone" {
   # found that it only ever picked `us-central-1c` unless we seeded it. Here
   # we're using the ID of the project as a seed because it is unique to the
   # project but will not change, thereby guaranteeing stability of the results.
-  seed = "${google_project.project.id}"
+  seed = "${data.google_project.project.id}"
 }
 
 # First we create the cluster. If you're wondering where all the sizing details
@@ -40,7 +40,7 @@ resource "random_shuffle" "zone" {
 # replicates what the Hipster Shop README creates. If you want to see what else
 # is possible, check out the docs: https://www.terraform.io/docs/providers/google/r/container_cluster.html
 resource "google_container_cluster" "gke" {
-  project = "${google_project.project.id}"
+  project = "${data.google_project.project.id}"
 
   # Here's how you specify the name
   name = "stackdriver-sandbox"
@@ -113,7 +113,7 @@ resource "google_container_cluster" "gke" {
 # Set current project 
 resource "null_resource" "current_project" {
   provisioner "local-exec" {
-    command = "gcloud config set project ${google_project.project.id}"
+    command = "gcloud config set project ${data.google_project.project.id}"
   }
 }
 
@@ -128,7 +128,7 @@ resource "null_resource" "current_project" {
 # Setting kubectl context to currently deployed GKE cluster
 resource "null_resource" "set_gke_context" {
   provisioner "local-exec" {
-    command = "gcloud container clusters get-credentials stackdriver-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${google_project.project.id}"
+    command = "gcloud container clusters get-credentials stackdriver-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${data.google_project.project.id}"
   }
 
   depends_on = [
