@@ -36,6 +36,8 @@ build:
     context: src/frontend
   - image: gcr.io/stackdriver-sandbox-230822/sandbox/adservice
     context: src/adservice
+  - image: gcr.io/stackdriver-sandbox-230822/cloudshell-image
+    context: cloud-shell
   # Intentionally leave out src/loadgenerator. It should be deployed externally
   # from the microservices cluster to simulate more realistic network latency.
   # (Real users won't be making requests from inside the kubernetes cluster.)
