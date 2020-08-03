@@ -78,7 +78,7 @@ func init() {
 }
 
 func main() {
-	initStackDriverTracing()
+	initOpenCensusStats()
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
 	// set injected latency
@@ -127,18 +127,9 @@ func run(port int) string {
 	return l.Addr().String()
 }
 
-func initStats(exporter *stackdriver.Exporter) {
-	exporter.StartMetricsExporter()
-	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		log.Info("Error registering default server views")
-	} else {
-		log.Info("Registered default server views")
-	}
-}
-
-func initStackDriverTracing() {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
+// Initialize Stats using OpenCensus
+// TODO: remove this after conversion to using OpenTelemetry Metrics
+func initOpenCensusStats() {
 	for i := 1; i <= 3; i++ {
 		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 
@@ -151,10 +142,12 @@ func initStackDriverTracing() {
 		if err != nil {
 			log.Warnf("failed to initialize stackdriver exporter: %+v", err)
 		} else {
-			log.Info("registered stackdriver tracing")
-
-			// Register the views to collect server stats.
-			initStats(exporter)
+			exporter.StartMetricsExporter()
+			if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
+				log.Info("Error registering default grpc server views")
+			} else {
+				log.Info("Registered default grpc server views")
+			}
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
