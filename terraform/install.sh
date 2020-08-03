@@ -123,7 +123,7 @@ getOrCreateBucket() {
     gcloud config set project "$project_id"
     if [[ -n "$(gsutil ls | grep gs://$bucket_name/)" ]]; then
       log "bucket exists"
-      break;
+      return
     fi
 
     # create new bucket
