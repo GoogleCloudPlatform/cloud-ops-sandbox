@@ -25,7 +25,7 @@ cd $SCRIPT_DIR
 
 log() { echo "$1" >&2; }
 
-getBillingAccount() {
+promptForBillingAccount() {
   log "Checking for billing accounts"
   found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
   if [ -z "$found_accounts" ] || [[ ${#found_accounts[@]} -eq 0 ]]; then
@@ -74,7 +74,7 @@ getBillingAccount() {
   IFS=$IFS_bak
 }
 
-getOrCreateProject() {
+promptForProject() {
   log "Checking for project list"
   billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="project_id:stackdriver-sandbox-*" --format="value(projectId)")
   # only keep projects with name "Stackdriver Sandbox Demo"
@@ -163,6 +163,7 @@ createProject() {
 }
 
 installTerraform() {
+  log "Installing current version of Terraform"
   sudo apt-get install unzip
   wget -q https://releases.hashicorp.com/terraform/0.12.29/terraform_0.12.29_linux_amd64.zip -O ./terraform.zip
   unzip -o terraform.zip
@@ -242,7 +243,7 @@ while (( "$#" )); do
   case "$1" in
     -p|--project|--project-id)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-        project=$2
+        project_id=$2
         shift 2
       else
         echo "Error: Argument for $1 is missing" >&2
@@ -270,24 +271,19 @@ while (( "$#" )); do
 done
 }
 
+# check for command line arguments
 parseArguments $*;
 
-log "Checking Prerequisites..."
-getBillingAccount;
+# prompt user for missing information
+if [ -z "$billing_id" || -z "$billing_acct" ]; then
+  promptForBillingAccount;
+fi
+if [ -z "$project_id" ]; then
+  promptForProject;
+fi
 
-log "Install current version of Terraform"
+# deploy
 installTerraform
-
-# Make sure we use Application Default Credentials for authentication
-# For that we need to unset GOOGLE_APPLICATION_CREDENTIALS and generate
-# new default credentials by re-authenticating. Re-authentication
-# is needed so we don't assume what's the current state on the machine that runs
-# this script for Sandbox automation with terraform (idempotent automation)
-#export GOOGLE_APPLICATION_CREDENTIALS=""
-#gcloud auth application-default login
-
-# Provision Stackdriver Sandbox cluster
-getOrCreateProject;
 getOrCreateBucket;
 applyTerraform;
 getExternalIp;
