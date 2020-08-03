@@ -224,7 +224,7 @@
   version = "v0.22.3"
 
 [[projects]]
-  digest = "1:69f5a80734fb8b58f3b0211cdda49ba8d957db824ba81f1a840372265bffdf2f"
+  digest = "1:d756b2b40d48038459c1fdb1068a834c0f6aa839f8260e961dd1862531a63226"
   name = "go.opentelemetry.io/otel"
   packages = [
     "api/correlation",
@@ -241,6 +241,7 @@
     "api/standard",
     "api/trace",
     "api/unit",
+    "instrumentation/grpctrace",
     "internal/trace/parent",
     "sdk",
     "sdk/export/trace",
@@ -579,6 +580,8 @@
     "go.opencensus.io/trace",
     "go.opentelemetry.io/otel/api/global",
     "go.opentelemetry.io/otel/api/standard",
+    "go.opentelemetry.io/otel/api/trace",
+    "go.opentelemetry.io/otel/instrumentation/grpctrace",
     "go.opentelemetry.io/otel/sdk/resource",
     "go.opentelemetry.io/otel/sdk/trace",
     "golang.org/x/net/context",

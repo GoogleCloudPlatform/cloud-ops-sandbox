@@ -52,6 +52,8 @@ import (
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/standard"
+	"go.opentelemetry.io/otel/instrumentation/grpctrace"
+	apitrace "go.opentelemetry.io/otel/api/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/resource"
 )
@@ -129,7 +131,11 @@ func run(port int) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	srv := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+	srv := grpc.NewServer(
+		grpc.StatsHandler(&ocgrpc.ServerHandler{}),
+		grpc.UnaryInterceptor(grpctrace.UnaryServerInterceptor(global.TraceProvider().Tracer("productcatalog"))),
+		grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(global.TraceProvider().Tracer("productcatalog"))),
+	)
 	svc := &productCatalog{}
 	pb.RegisterProductCatalogServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
@@ -260,12 +266,16 @@ func getSpanCtxAttachment(ctx context.Context) metricdata.Attachments {
 	return attachments
 }
 
-func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
+func (p *productCatalog) ListProducts(ctx context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
+	span := apitrace.SpanFromContext(ctx)
+	span.AddEvent(ctx, "List Products")
 	time.Sleep(extraLatency)
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
+	span := apitrace.SpanFromContext(ctx)
+	span.AddEvent(ctx, fmt.Sprintf("Get Product %d", req.Id))
 	log.Info("DEBUGGG successfully get product ")
 	time.Sleep(extraLatency)
 	var found *pb.Product
