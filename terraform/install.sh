@@ -275,10 +275,10 @@ done
 parseArguments $*;
 
 # prompt user for missing information
-if [ -z "$billing_id" || -z "$billing_acct" ]; then
+if [[ -z "$billing_id" || -z "$billing_acct" ]]; then
   promptForBillingAccount;
 fi
-if [ -z "$project_id" ]; then
+if [[ -z "$project_id" ]]; then
   promptForProject;
 fi
 
