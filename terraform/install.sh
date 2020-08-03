@@ -74,7 +74,7 @@ getBillingAccount() {
   IFS=$IFS_bak
 }
 
-getProject() {
+getOrCreateProject() {
   log "Checking for project list"
   billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="project_id:stackdriver-sandbox-*" --format="value(projectId)")
   # only keep projects with name "Stackdriver Sandbox Demo"
@@ -106,18 +106,37 @@ getProject() {
           IFS=$' |'
           opt=($opt)
           project_id=${opt[0]}
-          bucket_name="$project_id-bucket"
           break
         fi
       done
       IFS=$IFS_bak
   fi
+  # attach to project
+  gcloud config set project "$project_id"
+}
+
+getOrCreateBucket() {
+    # bucket name should be globally unique
+    bucket_name="$project_id-bucket"
+
+    gcloud config set project "$project_id"
+    TRIES=0
+    while [[ $(gsutil mb -p "$project_id" "gs://$bucket_name") || "${TRIES}" -lt 5 ]]; do
+      log "Check if bucket $bucket_name exists..."
+      if [[ -n "$(gsutil ls)" ]]; then
+        log "It's created!"
+        break;
+      else
+        log "Creating bucket failed. Try to create it again..."
+        sleep 1
+        TRIES=$((TRIES + 1))
+      fi
+    done
 }
 
 createProject() {
     # generate random id
     project_id="stackdriver-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
-    bucket_name="$project_id-bucket" # bucket name should be globally unique
     # create project
     acct=$(gcloud info --format="value(config.account)")
     if [[ $acct == *"google.com"* ]];
@@ -141,20 +160,6 @@ createProject() {
     fi;
     # link billing account
     gcloud beta billing projects link "$project_id" --billing-account="$billing_id"
-    # create bucket
-    gcloud config set project "$project_id"
-    TRIES=0
-    while [[ $(gsutil mb -p "$project_id" "gs://$bucket_name") || "${TRIES}" -lt 5 ]]; do
-      log "Check if bucket is created..."
-      if [[ -n "$(gsutil ls)" ]]; then
-        log "It's created!"
-        break;
-      else
-        log "Creating bucket failed. Try to create it again..."
-        sleep 1
-        TRIES=$((TRIES + 1))
-      fi
-    done    
 }
 
 installTerraform() {
@@ -255,6 +260,8 @@ while (( "$#" )); do
 done
 }
 
+parseArguments $*;
+
 log "Checking Prerequisites..."
 getBillingAccount;
 
@@ -270,7 +277,8 @@ installTerraform
 #gcloud auth application-default login
 
 # Provision Stackdriver Sandbox cluster
-getProject;
+getOrCreateProject;
+getOrCreateBucket;
 applyTerraform;
 getExternalIp;
 loadGen;
