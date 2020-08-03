@@ -27,7 +27,7 @@ log() { echo "$1" >&2; }
 
 promptForBillingAccount() {
   log "Checking for billing accounts"
-  found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
+  found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true --sort-by=displayName)
   if [ -z "$found_accounts" ] || [[ ${#found_accounts[@]} -eq 0 ]]; then
     log "error: no active billing accounts were detected. In order to create a sandboxed environment,"
     log "the script needs to create a new GCP project and associate it with an active billing account"
@@ -42,7 +42,7 @@ promptForBillingAccount() {
   # store (name:id) info in a map
   IFS_bak=$IFS
   declare -A map
-  acc_ids=$(gcloud beta billing accounts list --format="value(displayName,name)" --filter open=true)
+  acc_ids=$(gcloud beta billing accounts list --format="value(displayName,name)" --filter open=true --sort-by=displayName)
   IFS=$'\n'
   acc_ids=($acc_ids)
   for acc in ${acc_ids[@]}
@@ -122,7 +122,7 @@ getOrCreateBucket() {
     # check if bucket already exists
     gcloud config set project "$project_id"
     if [[ -n "$(gsutil ls | grep gs://$bucket_name/)" ]]; then
-      log "bucket exists"
+      log "bucket $bucket already exists"
       return
     fi
 
