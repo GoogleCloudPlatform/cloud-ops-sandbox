@@ -27,7 +27,7 @@ opencensus-ext-grpc==0.7.1  # via -r requirements.in
 opencensus-ext-stackdriver==0.7.3  # via -r requirements.in
 opencensus==0.7.10        # via -r requirements.in, opencensus-ext-grpc, opencensus-ext-stackdriver
 protobuf==3.12.2          # via google-api-core, google-cloud-profiler, googleapis-common-protos, grpcio-health-checking
-pyasn1-modules==0.2.3     # via google-auth
+pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.5             # via pyasn1-modules, rsa
 python-json-logger==0.1.11  # via -r requirements.in
 pytz==2018.9              # via google-api-core
