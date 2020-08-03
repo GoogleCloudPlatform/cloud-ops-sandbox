@@ -44,6 +44,14 @@
   version = "v0.1.4"
 
 [[projects]]
+  digest = "1:9fe8532210bb4a51753c8b783bb6ff4bf03da370b2440a05f5686b3b440ce930"
+  name = "github.com/GoogleCloudPlatform/opentelemetry-operations-go"
+  packages = ["exporter/trace"]
+  pruneopts = "UT"
+  revision = "a1393affee9a13ed21974ae1d791da1b3189f4a0"
+  version = "v0.2.1"
+
+[[projects]]
   digest = "1:b1e7ba6d161db9032698416c621f39d08aefc9afe441edde4010c39d7f5510e9"
   name = "github.com/aws/aws-sdk-go"
   packages = [
@@ -214,6 +222,37 @@
   pruneopts = "UT"
   revision = "d835ff86be02193d324330acdb7d65546b05f814"
   version = "v0.22.3"
+
+[[projects]]
+  digest = "1:69f5a80734fb8b58f3b0211cdda49ba8d957db824ba81f1a840372265bffdf2f"
+  name = "go.opentelemetry.io/otel"
+  packages = [
+    "api/correlation",
+    "api/global",
+    "api/global/internal",
+    "api/internal",
+    "api/kv",
+    "api/kv/value",
+    "api/label",
+    "api/metric",
+    "api/metric/registry",
+    "api/oterror",
+    "api/propagation",
+    "api/standard",
+    "api/trace",
+    "api/unit",
+    "internal/trace/parent",
+    "sdk",
+    "sdk/export/trace",
+    "sdk/instrumentation",
+    "sdk/internal",
+    "sdk/resource",
+    "sdk/trace",
+    "sdk/trace/internal",
+  ]
+  pruneopts = "UT"
+  revision = "58e50e249fe4c57f64e421e300b5d2316ae96811"
+  version = "v0.9.0"
 
 [[projects]]
   branch = "master"
@@ -527,6 +566,7 @@
     "contrib.go.opencensus.io/exporter/stackdriver",
     "contrib.go.opencensus.io/exporter/stackdriver/monitoredresource",
     "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto",
+    "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace",
     "github.com/golang/protobuf/jsonpb",
     "github.com/golang/protobuf/proto",
     "github.com/google/go-cmp/cmp",
@@ -537,6 +577,10 @@
     "go.opencensus.io/stats",
     "go.opencensus.io/stats/view",
     "go.opencensus.io/trace",
+    "go.opentelemetry.io/otel/api/global",
+    "go.opentelemetry.io/otel/api/standard",
+    "go.opentelemetry.io/otel/sdk/resource",
+    "go.opentelemetry.io/otel/sdk/trace",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
     "google.golang.org/grpc/codes",
