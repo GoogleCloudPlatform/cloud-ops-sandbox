@@ -35,7 +35,7 @@ jobs:
                        --tag=${{ steps.get_version.outputs.VERSION  }}
       env:
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
-    - name: Push to Cloud Shell Image GCR
+    - name: Push Cloud Shell Image to GCR
       timeout-minutes: 20
       run: |
         set -x
