@@ -14,6 +14,9 @@
 
 name: "Push Tagged Images"
 on:
+  push:
+    branches:
+      - cloudshell-release-scripts
   create:
     tags:
       - v*
