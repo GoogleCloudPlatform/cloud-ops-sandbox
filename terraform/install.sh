@@ -80,7 +80,7 @@ getProject() {
   # get projects with user account
   owner_projects=$(gcloud projects list --filter="id:stackdriver-sandbox-* AND name='Stackdriver Sandbox Demo'" --format="value(projectId)")
   # get projects with billing account
-  billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="id:stackdriver-sandbox-*" --format="value(projectId)")
+  billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="project_id:stackdriver-sandbox-*" --format="value(projectId)")
   declare -A proj_map
   for proj in ${billed_projects[@]}
   do
@@ -90,11 +90,13 @@ getProject() {
   found_projects=()
   for proj in ${owner_projects[@]}
   do
-    proj_iam=$(gcloud projects get-iam-policy "$proj" --format="json" \
-               | jq -r --arg acct "$acct" '.bindings[] | select(.members[] | contains($acct)) | select (.role | contains("roles/owner"))')
-    if [[ -n "$proj_iam" && -v proj_map["$proj"] ]]; then
-      create_time=$(gcloud projects describe "$proj" | grep "createTime")
-      found_projects+=("$proj | $create_time")
+    if [[ -v proj_map["$proj"] ]]; then
+      proj_iam=$(gcloud projects get-iam-policy "$proj" --format="json" \
+                 | jq -r --arg acct "$acct" '.bindings[] | select(.members[] | contains($acct)) | select (.role | contains("roles/owner"))')
+      if [[ -n "$proj_iam" ]]; then
+        create_time=$(gcloud projects describe "$proj" | grep "createTime")
+        found_projects+=("$proj | $create_time")
+      fi
     fi
   done
   # make user choose projects
@@ -177,8 +179,15 @@ installTerraform() {
 applyTerraform() {
   rm -f .terraform/terraform.tfstate
 
-  log "Initialize terraform state with bucket ${bucket_name}"
-  terraform init -backend-config "bucket=${bucket_name}" -lock=false # lock-free to prevent access fail
+  log "Initialize terraform backend with bucket ${bucket_name}"  
+  if [[ $(terraform init -backend-config "bucket=${bucket_name}" -lock=false) ]]; then
+    log "Credential check OK..."
+  else
+    log ""
+    log "Credential check failed. Please login..."
+    gcloud auth application-default login
+    terraform init -backend-config "bucket=${bucket_name}" -lock=false # lock-free to prevent access fail
+  fi
 
   log "Apply Terraform automation"
   terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
