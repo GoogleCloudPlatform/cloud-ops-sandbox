@@ -35,7 +35,9 @@ For more information, see ["Create a new billing account"](https://cloud.google.
 
 In a new browser tab, navigate to the Stackdriver Sandbox [website](https://stackdriver-sandbox.dev/) and follow the instructions there:
 
-1. Click the **Open in Google Cloud Shell** button. You might have to click Proceed on a second dialog if you haven't run Cloud Shell before. Additionally, there will be a window that opens asking whether you trust the custom container. Check the "Trust" box in order to authenticate.
+Click the **Open in Google Cloud Shell** button. You might have to click Proceed on a second dialog if you haven't run Cloud Shell before.
+
+Additionally, there will be a window that opens asking whether you trust the custom container. Check the "Trust" box in order to authenticate.
 
 ![image](./images/user-guide/TrustImage.png)
 
