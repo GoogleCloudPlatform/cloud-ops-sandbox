@@ -23,7 +23,7 @@ resource "random_shuffle" "zone" {
   # found that it only ever picked `us-central-1c` unless we seeded it. Here
   # we're using the ID of the project as a seed because it is unique to the
   # project but will not change, thereby guaranteeing stability of the results.
-  seed = "${data.google_project.project.id}"
+  seed = data.google_project.project.id
 }
 
 # First we create the cluster. If you're wondering where all the sizing details
@@ -40,7 +40,7 @@ resource "random_shuffle" "zone" {
 # replicates what the Hipster Shop README creates. If you want to see what else
 # is possible, check out the docs: https://www.terraform.io/docs/providers/google/r/container_cluster.html
 resource "google_container_cluster" "gke" {
-  project = "${data.google_project.project.id}"
+  project = data.google_project.project.id
 
   # Here's how you specify the name
   name = "stackdriver-sandbox"
@@ -48,7 +48,7 @@ resource "google_container_cluster" "gke" {
   # Set the zone by grabbing the result of the random_shuffle above. It
   # returns a list so we have to pull the first element off. If you're looking
   # at this and thinking "huh terraform syntax looks a clunky" you are NOT WRONG
-  zone = "${element(random_shuffle.zone.result, 0)}"
+  zone = element(random_shuffle.zone.result, 0)
 
   # Using an embedded resource to define the node pool. Another
   # option would be to create the node pool as a separate resource and link it
@@ -104,7 +104,7 @@ resource "google_container_cluster" "gke" {
   # be enabled) before the cluster can be created. This will not address the
   # eventual consistency problems we have with the API but it will make sure
   # that we're at least trying to do things in the right order.
-  depends_on = ["google_project_service.gke"]
+  depends_on = [google_project_service.gke]
 }
 
 
@@ -120,7 +120,7 @@ resource "null_resource" "current_project" {
 #      command = "sleep 60 >./stdout.log 2>./stderr.log & echo \"sleeping in PID\" $!"
 #  }
 #
-#  depends_on = ["google_container_cluster.gke"]
+#  depends_on = [google_container_cluster.gke]
 #}
 
 # Setting kubectl context to currently deployed GKE cluster
@@ -130,8 +130,8 @@ resource "null_resource" "set_gke_context" {
   }
 
   depends_on = [
-    "google_container_cluster.gke", 
-    "null_resource.current_project"
+    google_container_cluster.gke, 
+    null_resource.current_project
   ]
 }
 
@@ -141,7 +141,7 @@ resource "null_resource" "install_istio" {
     command = "./istio/install_istio.sh"
   }
 
-  depends_on = ["null_resource.set_gke_context"]
+  depends_on = [null_resource.set_gke_context]
 }
 
 # Deploy microservices into GKE cluster 
@@ -150,7 +150,7 @@ resource "null_resource" "deploy_services" {
     command = "kubectl apply -f ../kubernetes-manifests"
   }
 
-  depends_on = ["null_resource.install_istio"]
+  depends_on = [null_resource.install_istio]
 }
 
 # We wait for all of our microservices to become available on kubernetes
@@ -170,7 +170,7 @@ resource "null_resource" "delay" {
   }
 
   triggers = {
-    "before" = "${null_resource.deploy_services.id}"
+    "before" = null_resource.deploy_services.id
   }
 }
 

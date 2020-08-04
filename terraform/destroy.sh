@@ -26,7 +26,7 @@ SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
 # find the stackdriver sandbox project id
-found=$(gcloud projects list --filter="name:stackdriver-sandbox-*" --format="value(projectId)")
+found=$(gcloud projects list --filter="id:stackdriver-sandbox-* AND name='Stackdriver Sandbox Demo'" --format="value(projectId)")
 if [[ -z "${found}" ]]; then
     log "error: no Stackdriver Sandbox projects found"
     exit 1

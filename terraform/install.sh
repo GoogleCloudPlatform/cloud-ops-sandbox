@@ -26,7 +26,7 @@ cd $SCRIPT_DIR
 log() { echo "$1" >&2; }
 
 getBillingAccount() {
-  log "Checking for billing accounts"
+  log "Checking for billing accounts..."
   found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
   if [ -z "$found_accounts" ] || [[ ${#found_accounts[@]} -eq 0 ]]; then
     log "error: no active billing accounts were detected. In order to create a sandboxed environment,"
@@ -54,7 +54,7 @@ getBillingAccount() {
   done
 
   if [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
-      log "Which billing account would you like to use?:"
+      log "Which billing account would you like to use? Enter the number below:"
       IFS=$'\n'
       select opt in ${found_accounts} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
@@ -75,22 +75,33 @@ getBillingAccount() {
 }
 
 getProject() {
-  log "Checking for project list"
-  billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="project_id:stackdriver-sandbox-*" --format="value(projectId)")
-  # only keep projects with name "Stackdriver Sandbox Demo"
-  found_projects=()
-  for bill_proj in ${billed_projects[@]}
+  log "Checking for project list..."
+  acct=$(gcloud info --format="value(config.account)")
+  # get projects with user account
+  owner_projects=$(gcloud projects list --filter="id:stackdriver-sandbox-* AND name='Stackdriver Sandbox Demo'" --format="value(projectId)")
+  # get projects with billing account
+  billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="id:stackdriver-sandbox-*" --format="value(projectId)")
+  declare -A proj_map
+  for proj in ${billed_projects[@]}
   do
-    if [[ -n $(gcloud projects describe "$bill_proj" | grep "Stackdriver Sandbox Demo") ]]; then
-      create_time=$(gcloud projects describe "$bill_proj" | grep "createTime")
-      found_projects+=("$bill_proj | $create_time")
+    proj_map["$proj"]="yes"
+  done
+  # get projects with owner permission and under the billing account
+  found_projects=()
+  for proj in ${owner_projects[@]}
+  do
+    proj_iam=$(gcloud projects get-iam-policy "$proj" --format="json" \
+               | jq -r --arg acct "$acct" '.bindings[] | select(.members[] | contains($acct)) | select (.role | contains("roles/owner"))')
+    if [[ -n "$proj_iam" && -v proj_map["$proj"] ]]; then
+      create_time=$(gcloud projects describe "$proj" | grep "createTime")
+      found_projects+=("$proj | $create_time")
     fi
   done
-
+  # make user choose projects
   if [ -z "$found_projects" ] || [[ ${#found_projects[@]} -eq 0 ]]; then
     createProject;
   else
-      log "Which project would you like to use?:"
+      log "Which project would you like to use? Enter the number below:"
       IFS_bak=$IFS
       IFS=$'\n'
       select opt in "create a new Sandbox" ${found_projects[@]} "cancel"; do
@@ -119,7 +130,6 @@ createProject() {
     project_id="stackdriver-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
     bucket_name="$project_id-bucket" # bucket name should be globally unique
     # create project
-    acct=$(gcloud info --format="value(config.account)")
     if [[ $acct == *"google.com"* ]];
     then
       log ""
@@ -236,7 +246,7 @@ log "Checking Prerequisites..."
 getBillingAccount;
 
 log "Install current version of Terraform"
-installTerraform
+#installTerraform
 
 # Make sure we use Application Default Credentials for authentication
 # For that we need to unset GOOGLE_APPLICATION_CREDENTIALS and generate
