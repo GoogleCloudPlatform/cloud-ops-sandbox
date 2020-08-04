@@ -85,10 +85,9 @@ getProject() {
                  --flatten="bindings[].members" \
                  --format="table(bindings.members)" \
                  --filter="bindings.role:roles/owner" 2> /dev/null | grep $acct | cat)
-      if [[ -n "$iam_test" && \
-            "$(gcloud projects describe $proj --format='value(name)')" == "Stackdriver Sandbox Demo" ]]; then
+      if [[ -n "$iam_test" ]]; then
       create_time=$(gcloud projects describe "$proj" --format="value(create_time.date(%b-%d-%Y))")
-      found_projects+=("$proj [$create_time]")
+      found_projects+=("$proj | [$create_time]")
     fi
   done
 
