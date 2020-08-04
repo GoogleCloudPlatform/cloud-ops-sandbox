@@ -14,9 +14,6 @@
 
 name: "Push Tagged Images"
 on:
-  push:
-    branches:
-      - cloudshell-release-scripts
   create:
     tags:
       - v*
@@ -28,23 +25,22 @@ jobs:
     - name: Get the version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
-    #- name: Push Service Images to GCR
-    #  timeout-minutes: 20
-    #  run: |
-    #    set -x
-    #    skaffold config set --global local-cluster false
-    #    # tag with release version
-    #    skaffold build --default-repo=gcr.io/$PROJECT_ID \
-    #                   --tag=${{ steps.get_version.outputs.VERSION  }}
-    #  env:
-    #    PROJECT_ID: ${{ secrets.PROJECT_ID }}
+    - name: Push Service Images to GCR
+      timeout-minutes: 20
+      run: |
+        set -x
+        skaffold config set --global local-cluster false
+        # tag with release version
+        skaffold build --default-repo=gcr.io/$PROJECT_ID \
+                       --tag=${{ steps.get_version.outputs.VERSION  }}
+      env:
+        PROJECT_ID: ${{ secrets.PROJECT_ID }}
     - name: Push to Cloud Shell Image GCR
       timeout-minutes: 20
       run: |
         set -x
         gcloud auth configure-docker --quiet
-        #IMAGE_PATH=gcr.io/$PROJECT_ID/cloudshell-image:${{ steps.get_version.outputs.VERSION }}
-        IMAGE_PATH=gcr.io/$PROJECT_ID/cloudshell-image:test
+        IMAGE_PATH=gcr.io/$PROJECT_ID/cloudshell-image:${{ steps.get_version.outputs.VERSION }}
         docker build -t $IMAGE_PATH ./cloud-shell
         docker push $IMAGE_PATH
       env:
