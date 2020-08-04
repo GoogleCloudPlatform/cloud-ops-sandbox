@@ -27,6 +27,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/plugin/ochttp/propagation/b3"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	
@@ -168,6 +170,9 @@ func main() {
 		othttp.WithMessageEvents(othttp.ReadEvents, othttp.WriteEvents)) // Uses global meter and tracer
 	handler = &logHandler{log: log, next: handler} // add logging
 	handler = ensureSessionID(handler)             // add session ID
+	handler = &ochttp.Handler{                     // add opencensus instrumentation
+		Handler:     handler,
+		Propagation: &b3.HTTPFormat{}}
 
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
@@ -177,6 +182,11 @@ func main() {
 func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
 	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
+	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
+		log.Warn("Error registering http default server views")
+	} else {
+		log.Info("Registered http default server views")
+	}
 	if err := view.Register(ocgrpc.DefaultClientViews...); err != nil {
 		log.Warn("Error registering grpc default client views")
 	} else {
