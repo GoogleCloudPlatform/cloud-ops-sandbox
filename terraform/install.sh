@@ -87,8 +87,8 @@ getProject() {
                  --filter="bindings.role:roles/owner" 2> /dev/null | grep $acct | cat)
     proj_name=$(gcloud projects describe $proj --format="value(name)")
     if [[ -n "$iam_test" && "$proj_name" == "Stackdriver Sandbox Demo" ]]; then
-      create_time=$(gcloud projects describe "$proj" --format="value(create_time.date(%b %d %Y))")
-      found_projects+=("$proj (created: $create_time)")
+      create_time=$(gcloud projects describe "$proj" --format="value(create_time.date(%b-%d-%Y))")
+      found_projects+=("$proj [$create_time]")
     fi
   done
 
