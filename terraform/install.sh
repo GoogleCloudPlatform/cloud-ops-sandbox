@@ -88,8 +88,8 @@ getProject() {
                  | grep $proj)
     proj_name=$(gcloud projects describe $proj --format="value(name)")
     if [[ -n "$iam_test" && "$proj_name" == "Stackdriver Sandbox Demo" ]]; then
-      create_time=$(gcloud projects describe "$proj" | grep "createTime")
-      found_projects+=("$proj | $create_time")
+      create_time=$(gcloud projects describe "$proj" --format="value(create_time.date(%b %d %Y))")
+      found_projects+=("$proj (created: $create_time)")
     fi
   done
 
