@@ -84,8 +84,7 @@ getProject() {
     iam_test=$(gcloud projects get-iam-policy "$proj" \
                  --flatten="bindings[].members" \
                  --format="table(bindings.members)" \
-                 --filter="bindings.role:roles/owner" 2> /dev/null \
-                 | grep $proj)
+                 --filter="bindings.role:roles/owner" 2> /dev/null | grep $proj)
     proj_name=$(gcloud projects describe $proj --format="value(name)")
     if [[ -n "$iam_test" && "$proj_name" == "Stackdriver Sandbox Demo" ]]; then
       create_time=$(gcloud projects describe "$proj" --format="value(create_time.date(%b %d %Y))")
