@@ -37,11 +37,9 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/examples/exporter"
-	"go.opencensus.io/metric/metricdata"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -147,8 +145,6 @@ func run(port int) string {
 // TODO: remove this after conversion to using OpenTelemetry Metrics
 func initOpenCensusStats() {
 	for i := 1; i <= 3; i++ {
-		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-
 		view.RegisterExporter(&exporter.PrintExporter{})
 		exporter, err := stackdriver.NewExporter(stackdriver.Options{
 			ProjectID:         "test-exemplar-project",
@@ -252,21 +248,7 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, srv healthpb.He
 	return nil
 }
 
-func getSpanCtxAttachment(ctx context.Context) metricdata.Attachments {
-	attachments := map[string]interface{}{}
-	span := trace.FromContext(ctx)
-	if span == nil {
-		return attachments
-	}
-	spanCtx := span.SpanContext()
-	if spanCtx.IsSampled() {
-		attachments[metricdata.AttachmentKeySpanContext] = spanCtx
-	}
-	log.Info("DEBUGGG attachment ", attachments)
-	return attachments
-}
-
-func (p *productCatalog) ListProducts(ctx context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
+func (p *productCatalog) ListProducts(ctx context.Context, _ *pb.Empty) (*pb.ListProductsResponse, error) {
 	span := apitrace.SpanFromContext(ctx)
 	span.AddEvent(ctx, "List Products")
 	time.Sleep(extraLatency)
