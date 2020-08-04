@@ -122,19 +122,19 @@ getOrCreateBucket() {
     # check if bucket already exists
     gcloud config set project "$project_id"
     if [[ -n "$(gsutil ls | grep gs://$bucket_name/)" ]]; then
-      log "bucket $bucket already exists"
+      log "Bucket $bucket already exists"
       return
     fi
 
     # create new bucket
     TRIES=0
     while [[ $(gsutil mb -p "$project_id" "gs://$bucket_name") || "${TRIES}" -lt 5 ]]; do
-      log "Check if bucket $bucket_name exists..."
+      log "Checking if bucket $bucket_name exists..."
       if [[ -n "$(gsutil ls | grep gs://$bucket_name/)" ]]; then
-        log "It's created!"
+        log "Bucket $bucket_name created"
         break;
       else
-        log "Creating bucket failed. Try to create it again..."
+        log "Bucket creation failed. retrying..."
         sleep 1
         TRIES=$((TRIES + 1))
       fi
