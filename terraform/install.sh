@@ -174,6 +174,32 @@ applyTerraform() {
   terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
 }
 
+installMonitoring() {
+  log "Retrieving the external IP address of the application..."
+  TRIES=0
+  external_ip="";
+  while [[ -z $external_ip && "${TRIES}" -lt 20 ]]; do
+     external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'); 
+     [ -z "$external_ip" ] && sleep 5; 
+     TRIES=$((TRIES + 1))
+  done;
+
+  if [[ -z $external_ip ]]; then
+    log "Could not retrieve external IP... skipping monitoring configuration."
+    return 1
+  fi
+
+  gcp_monitoring_path="https://console.cloud.google.com/monitoring?project=$project_id"
+  log "Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
+  read -p "When you are done, please press enter to continue"
+
+  log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
+  pushd monitoring/
+  terraform init -lock=false
+  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}"
+  popd
+}
+
 getExternalIp() {
   external_ip=""; 
   while [ -z $external_ip ]; do
@@ -249,7 +275,8 @@ installTerraform
 # Provision Stackdriver Sandbox cluster
 getProject;
 applyTerraform;
+# || true to prevent errors during monitoring setup from stopping the installation script
+installMonitoring || true;
 getExternalIp;
 loadGen;
 displaySuccessMessage;
-
