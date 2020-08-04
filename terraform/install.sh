@@ -54,7 +54,7 @@ getBillingAccount() {
   done
 
   if [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
-      log "Which billing account would you like to use? Enter the number next to the billing account:"
+      log "Enter the number next to the billing account you would like to use:"
       IFS=$'\n'
       select opt in ${found_accounts} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
@@ -77,33 +77,26 @@ getBillingAccount() {
 getProject() {
   log "Checking for project list..."
   acct=$(gcloud info --format="value(config.account)")
-  # get projects with user account
-  owner_projects=$(gcloud projects list --filter="id:stackdriver-sandbox-* AND name='Stackdriver Sandbox Demo'" --format="value(projectId)")
-  # get projects with billing account
+  # get projects associated with the billing account
   billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="project_id:stackdriver-sandbox-*" --format="value(projectId)")
-  declare -A proj_map
-  for proj in ${billed_projects[@]}
-  do
-    proj_map["$proj"]="yes"
-  done
-  # get projects with owner permission and under the billing account
-  found_projects=()
-  for proj in ${owner_projects[@]}
-  do
-    if [[ -v proj_map["$proj"] ]]; then
-      proj_iam=$(gcloud projects get-iam-policy "$proj" --format="json" \
-                 | jq -r --arg acct "$acct" '.bindings[] | select(.members[] | contains($acct)) | select (.role | contains("roles/owner"))')
-      if [[ -n "$proj_iam" ]]; then
-        create_time=$(gcloud projects describe "$proj" | grep "createTime")
-        found_projects+=("$proj | $create_time")
-      fi
+  for proj in ${billed_projects[@]}; do
+    # check if user is owner
+    iam_test=$(gcloud projects get-iam-policy "$proj" \
+                 --flatten="bindings[].members" \
+                 --format="table(bindings.members)" \
+                 --filter="bindings.role:roles/owner" 2> /dev/null \
+                 | grep $proj
+    if [[ -n "$iam_test" ]]; then
+      create_time=$(gcloud projects describe "$proj" | grep "createTime")
+      found_projects+=("$proj | $create_time")
     fi
   done
-  # make user choose projects
+
+  # prompt user to choose a project
   if [ -z "$found_projects" ] || [[ ${#found_projects[@]} -eq 0 ]]; then
     createProject;
   else
-      log "Which project would you like to use? Enter the number next to the project:"
+      log "Enter the number next to the project you would like to use:"
       IFS_bak=$IFS
       IFS=$'\n'
       select opt in "create a new Sandbox" ${found_projects[@]} "cancel"; do
