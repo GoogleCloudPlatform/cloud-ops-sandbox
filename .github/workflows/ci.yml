@@ -25,7 +25,7 @@ on:
       - master
 jobs:
   run-tests:
-    runs-on: self-hosted
+    runs-on: [self-hosted, standard-worker]
     steps:
     - uses: actions/checkout@v2
     - name: License Check

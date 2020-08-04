@@ -5,13 +5,14 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 ## Setup
 
 1. Create a GCE instance for running tests
-    - VM should be at least n1-standard-4 with 50GB persistent disk
+    - VM should be at least n1-standard-4 with 100GB persistent disk
     - VM should be created with no service account
 2. SSH into new VM through Google Cloud Console
 3. Follow the instructions to add a new runner on the [Actions Settings page](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/actions) to authenticate the new runner
-4. Set GitHub Actions as a background service
+4. Attach the "standard-worker" tag to the new runner
+5. Set GitHub Actions as a background service
     - `sudo ~/actions-runner/svc.sh install ; sudo ~/actions-runner/svc.sh start`
-5. Run the following command to install dependencies
+6. Run the following command to install dependencies
     - `wget -O - https://raw.githubusercontent.com/GoogleCloudPlatform/stackdriver-sandbox/master/.github/workflows/install-dependencies.sh | bash`
 
 ## Setup - Push Enabled
