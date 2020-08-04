@@ -54,7 +54,7 @@ getBillingAccount() {
   done
 
   if [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
-      log "Which billing account would you like to use? Enter the number below:"
+      log "Which billing account would you like to use? Enter the number next to the billing account:"
       IFS=$'\n'
       select opt in ${found_accounts} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
@@ -101,7 +101,7 @@ getProject() {
   if [ -z "$found_projects" ] || [[ ${#found_projects[@]} -eq 0 ]]; then
     createProject;
   else
-      log "Which project would you like to use? Enter the number below:"
+      log "Which project would you like to use? Enter the number next to the project:"
       IFS_bak=$IFS
       IFS=$'\n'
       select opt in "create a new Sandbox" ${found_projects[@]} "cancel"; do
@@ -135,7 +135,7 @@ createProject() {
       log ""
       log "Note: your project will be created in the /experimental-gke folder."
       log "If you don't have access to this folder, please make sure to request at:"
-      log "https://sphinx.corp.google.com/sphinx/#accessChangeRequest:systemName=internal_google_cloud_platform_usage"
+      log "go/experimental-folder-access"
       log ""
       select opt in "continue" "cancel"; do
         if [[ "$opt" == "continue" ]]; then

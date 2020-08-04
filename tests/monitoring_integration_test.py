@@ -27,19 +27,19 @@ from google.cloud.monitoring_dashboard import v1
 project_name = 'projects/'
 
 def getProjectId():
-  """Retreieves the project id from the environment variable.
-  Raises:
-      MissingProjectIdError -- When not set.
-  Returns:
-      str -- the project name
-  """
-  project_id = os.environ['GOOGLE_CLOUD_PROJECT']
+    """Retrieves the project id from the environment variable.
+    Raises:
+    MissingProjectIdError -- When not set.
+    Returns:
+    str -- the project name
+    """
+    project_id = os.environ['GOOGLE_CLOUD_PROJECT']
 
-  if not project_id:
-      raise MissingProjectIdError(
-          'Set the environment variable ' +
-          'GCLOUD_PROJECT to your Google Cloud Project Id.')
-  return project_id
+    if not project_id:
+        raise MissingProjectIdError(
+            'Set the environment variable ' +
+            'GOOGLE_CLOUD_PROJECT to your Google Cloud Project Id.')
+    return project_id
 
 class TestUptimeCheck(unittest.TestCase):
 
@@ -95,16 +95,102 @@ class TestUptimeCheck(unittest.TestCase):
 		self.assertEqual(len(channel_list), 1)
 
 class TestMonitoringDashboard(unittest.TestCase):
-	def testUserExpDashboard(self):
-		""" Test that the User Experience Dashboard gets created. """
+	def checkForDashboard(self, dashboard_display_name):
 		client = v1.DashboardsServiceClient()
 		dashboards = client.list_dashboards(project_name)
-		found_userexp_dashboard = False
 		for dashboard in dashboards:
-			if dashboard.display_name == 'User Experience Dashboard':
-				found_userexp_dashboard = True
-				
-		self.assertTrue(found_userexp_dashboard)
+			if dashboard.display_name == dashboard_display_name:
+				return True
+		return False
+
+	def testUserExpDashboard(self):
+		""" Test that the User Experience Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('User Experience Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testAdServiceDashboard(self):
+		"""" Test that the Ad Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Ad Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testRecommendationServiceDashboard(self):
+		"""" Test that the Recommendation Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Recommendation Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testAdServiceDashboard(self):
+		"""" Test that the Ad Service Dashboard gets created. """
+		found_dash = self.checkForDashboard('Ad Service Dashboard')
+		self.assertTrue(found_dash)
+
+	def testFrontendServiceDashboard(self):
+		""" Test that the Frontend Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Frontend Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testEmailServiceDashboard(self):
+		""" Test that the Email Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Email Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testPaymentServiceDashboard(self):
+		""" Test that the Payment Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Payment Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testShippingServiceDashboard(self):
+		""" Test that the Shipping Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Shipping Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+class TestCustomService(unittest.TestCase):
+	def setUp(self):
+		self.client = monitoring_v3.ServiceMonitoringServiceClient()
+		self.project_id = getProjectId()
+
+	def checkForService(self, service_name):
+		name = self.client.service_path(self.project_id, service_name)
+		return self.client.get_service(name)
+
+	def testFrontendServiceExists(self):
+		""" Test that the Frontend Custom Service gets created. """
+		response = self.checkForService('frontend-srv')
+		# check that we found an object
+		self.assertTrue(response)
+
+class TestServiceSlo(unittest.TestCase):
+	def setUp(self):
+		self.client = monitoring_v3.ServiceMonitoringServiceClient()
+		self.project_id = getProjectId()
+
+	def checkForSlo(self, service, slo):
+		name = self.client.service_level_objective_path(self.project_id, service, slo)
+		return self.client.get_service_level_objective(name)
+
+	def testFrontendServiceSloExists(self):
+		""" Test that for each service that two SLOs (availability, latency) get created. """
+		found_availability_slo = self.checkForSlo('frontend-srv', 'availability-slo')
+		self.assertTrue(found_availability_slo)
+		found_latency_slo = self.checkForSlo('frontend-srv', 'latency-slo')
+		self.assertTrue(found_latency_slo)
+
+class TestSloAlertPolicy(unittest.TestCase):
+	def setUp(self):
+		self.client = monitoring_v3.AlertPolicyServiceClient()
+
+	def checkForAlertingPolicy(self, policy_display_name):
+		policies = self.client.list_alert_policies(project_name)
+		for policy in policies:
+			if policy.display_name == policy_display_name:
+				return True
+		return False
+
+	def testFrontendServiceSloAlertExists(self):
+		""" Test that the Alerting Policies for the Frontend Service SLO get created. """
+		found_availability_alert = self.checkForAlertingPolicy('Frontend Service Availability Alert Policy')
+		self.assertTrue(found_availability_alert)
+		found_latency_alert = self.checkForAlertingPolicy('Frontend Service Latency Alert Policy')
+		self.assertTrue(found_latency_alert)
 
 if __name__ == '__main__':
 	project_name = project_name + getProjectId()
