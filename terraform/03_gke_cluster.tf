@@ -67,6 +67,8 @@ resource "google_container_cluster" "gke" {
   # interesting things.
   node_pool {
     node_config {
+      machine_type = "n1-standard-2"
+
       oauth_scopes = [
         "https://www.googleapis.com/auth/cloud-platform"  
       ]
@@ -76,8 +78,8 @@ resource "google_container_cluster" "gke" {
         cluster = "stackdriver-sandbox-main"   
       }
     }
-    
-    initial_node_count = 7
+
+    initial_node_count = 4
 
     autoscaling {
       min_node_count = 3
