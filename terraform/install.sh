@@ -162,13 +162,6 @@ createProject() {
     done    
 }
 
-installTerraform() {
-  sudo apt-get install unzip
-  wget -q https://releases.hashicorp.com/terraform/0.12.29/terraform_0.12.29_linux_amd64.zip -O ./terraform.zip
-  unzip -o terraform.zip
-  sudo install terraform /usr/local/bin
-}
-
 applyTerraform() {
   rm -f .terraform/terraform.tfstate
 
@@ -246,9 +239,6 @@ displaySuccessMessage() {
 
 log "Checking Prerequisites..."
 getBillingAccount;
-
-log "Install current version of Terraform"
-#installTerraform
 
 # Make sure we use Application Default Credentials for authentication
 # For that we need to unset GOOGLE_APPLICATION_CREDENTIALS and generate
