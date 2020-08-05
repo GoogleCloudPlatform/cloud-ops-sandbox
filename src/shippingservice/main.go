@@ -55,7 +55,7 @@ func init() {
 }
 
 func main() {
-	go initStackDriverTracing()
+	go initOpenCensusStats()
 	go initProfiling("shippingservice", "1.0.0")
 
 	port := defaultPort
@@ -68,6 +68,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+	// TOOD: replace ocgrpc with automatic OpenTelemetry grpc metrics collector
 	srv := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
 	svc := &server{}
 	pb.RegisterShippingServiceServer(srv, svc)
@@ -128,19 +129,9 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 	}, nil
 }
 
-func initStats(exporter *stackdriver.Exporter) {
-	view.SetReportingPeriod(60 * time.Second)
-	view.RegisterExporter(exporter)
-	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		log.Warn("Error registering default server views")
-	} else {
-		log.Info("Registered default server views")
-	}
-}
-
-func initStackDriverTracing() {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
+// Initialize Stats using OpenCensus
+// TODO: remove this after conversion to OpenTelemetry Metrics
+func initOpenCensusStats() {
 	for i := 1; i <= 3; i++ {
 		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 		if err != nil {
@@ -151,7 +142,13 @@ func initStackDriverTracing() {
 			log.Info("registered stackdriver tracing")
 
 			// Register the views to collect server stats.
-			initStats(exporter)
+			view.SetReportingPeriod(60 * time.Second)
+			view.RegisterExporter(exporter)
+			if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
+				log.Warn("Error registering default server views")
+			} else {
+				log.Info("Registered default server views")
+			}
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
