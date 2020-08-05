@@ -194,6 +194,8 @@ installMonitoring() {
     return 1
   fi
 
+  acct=$(gcloud info --format="value(config.account)")
+
   gcp_monitoring_path="https://console.cloud.google.com/monitoring?project=$project_id"
   log "Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
   read -p "When you are done, please press enter to continue"
@@ -201,7 +203,7 @@ installMonitoring() {
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
   terraform init -lock=false
-  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}"
+  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}"
   popd
 }
 
