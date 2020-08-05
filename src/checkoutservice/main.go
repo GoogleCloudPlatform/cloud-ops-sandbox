@@ -41,6 +41,8 @@ import (
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/standard"
+	"go.opentelemetry.io/otel/instrumentation/grpctrace"
+	apitrace "go.opentelemetry.io/otel/api/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/resource"
 )
@@ -99,7 +101,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	srv := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+	srv := grpc.NewServer(
+		grpc.StatsHandler(&ocgrpc.ServerHandler{}),
+		grpc.UnaryInterceptor(grpctrace.UnaryServerInterceptor(global.TraceProvider().Tracer("checkout"))),
+		grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(global.TraceProvider().Tracer("checkout"))),
+	)
 	pb.RegisterCheckoutServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
 	log.Infof("starting to listen on tcp: %q", lis.Addr().String())
@@ -191,6 +197,8 @@ func (cs *checkoutService) Check(ctx context.Context, req *healthpb.HealthCheckR
 
 // Acting as gRPC server, handling PlaceOrder request from Frontend.
 func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderRequest) (*pb.PlaceOrderResponse, error) {
+	span := apitrace.SpanFromContext(ctx)
+	span.AddEvent(ctx, "Place Order")
 	log.Infof("[PlaceOrder] user_id=%q user_currency=%q", req.UserId, req.UserCurrency)
 
 	orderID, err := uuid.NewUUID()
@@ -199,6 +207,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	}
 
 	// Dispatch subtasks (as gRPC client)
+	span.AddEvent(ctx, "Prepare Items from Cart")
 	prep, err := cs.prepareOrderItemsAndShippingQuoteFromCart(ctx, req.UserId, req.UserCurrency, req.Address)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
@@ -212,17 +221,20 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		total = money.Must(money.Sum(total, *it.Cost))
 	}
 
+	span.AddEvent(ctx, "Charge Credit Card")
 	txID, err := cs.chargeCard(ctx, &total, req.CreditCard)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to charge card: %+v", err)
 	}
 	log.Infof("payment went through (transaction_id: %s)", txID)
 
+	span.AddEvent(ctx, "Prepare Shipment")
 	shippingTrackingID, err := cs.shipOrder(ctx, req.Address, prep.cartItems)
 	if err != nil {
 		return nil, status.Errorf(codes.Unavailable, "shipping error: %+v", err)
 	}
 
+	span.AddEvent(ctx, "Empty Cart")
 	_ = cs.emptyUserCart(ctx, req.UserId)
 
 	orderResult := &pb.OrderResult{
@@ -233,6 +245,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		Items:              prep.orderItems,
 	}
 
+	span.AddEvent(ctx, "Send Confirmation Email")
 	if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {
 		log.Warnf("failed to send order confirmation to %q: %+v", req.Email, err)
 	} else {
