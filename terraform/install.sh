@@ -180,6 +180,11 @@ applyTerraform() {
   terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
 }
 
+authGCloud() {
+  CLUSTER_ZONE=$(gcloud container clusters list --filter="name:stackdriver-sandbox" --project $project_id --format="value(zone)")
+  gcloud container clusters get-credentials stackdriver-sandbox --zone "$CLUSTER_ZONE"
+}
+
 installMonitoring() {
   log "Retrieving the external IP address of the application..."
   TRIES=0
@@ -298,6 +303,7 @@ getBillingAccount;
 # Provision Stackdriver Sandbox cluster
 getProject;
 applyTerraform;
+authGCloud;
 # || true to prevent errors during monitoring setup from stopping the installation script
 installMonitoring || true;
 getExternalIp;
