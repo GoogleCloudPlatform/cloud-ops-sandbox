@@ -263,7 +263,7 @@ displaySuccessMessage() {
     log "********************************************************************************"
 }
 
-encureAuthentication() {
+checkAuthentication() {
     TRIES=0
     AUTH_ACCT=$(gcloud auth list --format="value(account)")
     if [[ -z $AUTH_ACCT ]]; then
@@ -281,7 +281,7 @@ encureAuthentication() {
 }
 
 log "Checking Prerequisites..."
-encureAuthentication;
+checkAuthentication;
 getBillingAccount;
 
 # Make sure we use Application Default Credentials for authentication
