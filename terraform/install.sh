@@ -117,6 +117,7 @@ getProject() {
       done
       IFS=$IFS_bak
   fi
+  gcloud config set project "$project_id"
 }
 
 createProject() {
