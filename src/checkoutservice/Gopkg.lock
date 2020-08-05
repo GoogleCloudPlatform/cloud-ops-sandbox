@@ -25,15 +25,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1d8f3cb93c42c5652bb509fde29ecdd1feede9334e355e8bbdc0f9f95b40c254"
-  name = "git.apache.org/thrift.git"
-  packages = ["lib/go/thrift"]
-  pruneopts = "UT"
-  revision = "a5df39032ca206e2e6a9ec975147e81746d9a255"
-  source = "github.com/apache/thrift"
-
-[[projects]]
-  branch = "master"
   digest = "1:f6bdf3d8d3cbb2f98d3ebaa66b3ac25166a06830027ece7d592d9ea09dedf504"
   name = "github.com/GoogleCloudPlatform/microservices-demo"
   packages = [
@@ -42,6 +33,14 @@
   ]
   pruneopts = "UT"
   revision = "33ca3b63d82698035ffc1230dcb650885a005197"
+
+[[projects]]
+  digest = "1:9fe8532210bb4a51753c8b783bb6ff4bf03da370b2440a05f5686b3b440ce930"
+  name = "github.com/GoogleCloudPlatform/opentelemetry-operations-go"
+  packages = ["exporter/trace"]
+  pruneopts = "UT"
+  revision = "a1393affee9a13ed21974ae1d791da1b3189f4a0"
+  version = "v0.2.1"
 
 [[projects]]
   digest = "1:72856926f8208767b837bf51e3373f49139f61889b67dc7fd3c2a0fd711e3f7a"
@@ -105,7 +104,7 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:a5154dfd6b37bef5a3eab759e13296348e639dc8c7604f538368167782b08ccd"
+  digest = "1:1bb914cfb78f68f488a91cd7872d3d06a5f83c5bbacf0296dbef44e120b00a91"
   name = "go.opencensus.io"
   packages = [
     ".",
@@ -126,6 +125,37 @@
   pruneopts = "UT"
   revision = "b11f239c032624b045c4c2bfd3d1287b4012ce89"
   version = "v0.16.0"
+
+[[projects]]
+  digest = "1:69f5a80734fb8b58f3b0211cdda49ba8d957db824ba81f1a840372265bffdf2f"
+  name = "go.opentelemetry.io/otel"
+  packages = [
+    "api/correlation",
+    "api/global",
+    "api/global/internal",
+    "api/internal",
+    "api/kv",
+    "api/kv/value",
+    "api/label",
+    "api/metric",
+    "api/metric/registry",
+    "api/oterror",
+    "api/propagation",
+    "api/standard",
+    "api/trace",
+    "api/unit",
+    "internal/trace/parent",
+    "sdk",
+    "sdk/export/trace",
+    "sdk/instrumentation",
+    "sdk/internal",
+    "sdk/resource",
+    "sdk/trace",
+    "sdk/trace/internal",
+  ]
+  pruneopts = "UT"
+  revision = "58e50e249fe4c57f64e421e300b5d2316ae96811"
+  version = "v0.9.0"
 
 [[projects]]
   branch = "master"
@@ -312,12 +342,17 @@
     "contrib.go.opencensus.io/exporter/stackdriver",
     "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto",
     "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money",
+    "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace",
     "github.com/golang/protobuf/proto",
     "github.com/google/uuid",
     "github.com/sirupsen/logrus",
     "go.opencensus.io/plugin/ocgrpc",
     "go.opencensus.io/stats/view",
     "go.opencensus.io/trace",
+    "go.opentelemetry.io/otel/api/global",
+    "go.opentelemetry.io/otel/api/standard",
+    "go.opentelemetry.io/otel/sdk/resource",
+    "go.opentelemetry.io/otel/sdk/trace",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
     "google.golang.org/grpc/codes",

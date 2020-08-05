@@ -35,6 +35,14 @@ import (
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
 	money "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+
+	// OpenTelemetry
+	// OTel traces -> GCP Trace direct exporter
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/api/standard"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/resource"
 )
 
 const (
@@ -69,6 +77,7 @@ type checkoutService struct {
 
 func main() {
 	go initOpenCensusStats()
+	initTraceProvider()
 	go initProfiling("checkoutservice", "1.0.0")
 
 	port := listenPort
@@ -124,6 +133,26 @@ func initOpenCensusStats() {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
+}
+
+// Initialize OTel trace provider that exports to Cloud Trace
+func initTraceProvider() {
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
+	if err != nil {
+		log.Fatalf("failed to initialize exporter: %v", err)
+	}
+
+	// Create trace provider with the exporter.
+	tp, err := sdktrace.NewProvider(sdktrace.WithConfig(
+		sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithSyncer(exporter),
+		// TODO: replace with predefined constant for GKE or autodetection when available
+		sdktrace.WithResource(resource.New(standard.ServiceNameKey.String("GKE"))))
+	if err != nil {
+		log.Fatal("failed to initialize trace provider: %v", err)
+	}
+	global.SetTraceProvider(tp)
 }
 
 func initProfiling(service, version string) {
