@@ -25,7 +25,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -81,7 +80,7 @@ func main() {
 	}
 	// TOOD: replace ocgrpc with automatic OpenTelemetry grpc metrics collector
 	srv := grpc.NewServer(grpc.StatsHandler(
-		&ocgrpc.ServerHandler{}),
+		&ocgrpc.ServerHandler{}), // TODO: replace with automatic OTel grpc metrics collector when available
 		grpc.UnaryInterceptor(grpctrace.UnaryServerInterceptor(global.TraceProvider().Tracer("shipping"))),
 		grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(global.TraceProvider().Tracer("shipping"))),
 	)
@@ -156,10 +155,6 @@ func initOpenCensusStats() {
 		if err != nil {
 			log.Warnf("failed to initialize stackdriver exporter: %+v", err)
 		} else {
-			trace.RegisterExporter(exporter)
-			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-			log.Info("registered stackdriver tracing")
-
 			// Register the views to collect server stats.
 			view.SetReportingPeriod(60 * time.Second)
 			view.RegisterExporter(exporter)
