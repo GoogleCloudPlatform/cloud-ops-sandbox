@@ -275,6 +275,9 @@ encureAuthentication() {
         sleep 3;
         TRIES=$((TRIES + 1))
     done
+    if [[ -z $AUTH_ACCT ]]; then
+        exit 1
+    fi
 }
 
 log "Checking Prerequisites..."
