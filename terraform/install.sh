@@ -263,7 +263,22 @@ displaySuccessMessage() {
     log "********************************************************************************"
 }
 
+encureAuthentication() {
+    TRIES=0
+    AUTH_ACCT=$(gcloud auth list --format="value(account)")
+    if [[ -z $AUTH_ACCT ]]; then
+        log "Authentication failed"
+        log "Please authorize gcloud and Cloud Shell to your GCP account"
+    fi
+    while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 20  ]]; do
+        AUTH_ACCT=$(gcloud auth list --format="value(account)")
+        sleep 5;
+        TRIES=$((TRIES + 1))
+    done
+}
+
 log "Checking Prerequisites..."
+encureAuthentication;
 getBillingAccount;
 
 # Make sure we use Application Default Credentials for authentication
