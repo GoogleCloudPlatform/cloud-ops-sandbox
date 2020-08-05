@@ -270,7 +270,7 @@ encureAuthentication() {
         log "Authentication failed"
         log "Please allow gcloud and Cloud Shell to access your GCP account"
     fi
-    while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 100  ]]; do
+    while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 10  ]]; do
         AUTH_ACCT=$(gcloud auth list --format="value(account)")
         sleep 3;
         TRIES=$((TRIES + 1))
