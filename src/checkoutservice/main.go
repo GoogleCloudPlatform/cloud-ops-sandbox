@@ -27,7 +27,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -121,7 +120,7 @@ func main() {
 		log.Fatal(err)
 	}
 	srv := grpc.NewServer(
-		grpc.StatsHandler(&ocgrpc.ServerHandler{}),
+		grpc.StatsHandler(&ocgrpc.ServerHandler{}), // TODO: replace with OTel grpc metrics collector
 		grpc.UnaryInterceptor(grpctrace.UnaryServerInterceptor(global.TraceProvider().Tracer("checkout"))),
 		grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(global.TraceProvider().Tracer("checkout"))),
 	)
@@ -140,9 +139,6 @@ func initOpenCensusStats() {
 		if err != nil {
 			log.Infof("failed to initialize stackdriver exporter: %+v", err)
 		} else {
-			trace.RegisterExporter(exporter)
-			log.Info("registered stackdriver tracing")
-
 			// Register the views to collect server stats.
 			view.SetReportingPeriod(60 * time.Second)
 			view.RegisterExporter(exporter)
@@ -402,7 +398,7 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	*conn, err = grpc.DialContext(ctx, addr,
 		grpc.WithInsecure(),
 		grpc.WithTimeout(time.Second*3),
-		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
+		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}), // TODO: replace with OTel grpc metrics collector
 		grpc.WithUnaryInterceptor(grpctrace.UnaryClientInterceptor(global.TraceProvider().Tracer("checkout"))),
 		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(global.TraceProvider().Tracer("checkout"))))
 	if err != nil {

@@ -349,7 +349,6 @@
     "github.com/sirupsen/logrus",
     "go.opencensus.io/plugin/ocgrpc",
     "go.opencensus.io/stats/view",
-    "go.opencensus.io/trace",
     "go.opentelemetry.io/otel/api/global",
     "go.opentelemetry.io/otel/api/standard",
     "go.opentelemetry.io/otel/api/trace",
