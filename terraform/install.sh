@@ -26,7 +26,7 @@ cd $SCRIPT_DIR
 log() { echo "$1" >&2; }
 
 getBillingAccount() {
-  log "Checking for billing accounts"
+  log "Checking for billing accounts..."
   found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
   if [ -z "$found_accounts" ] || [[ ${#found_accounts[@]} -eq 0 ]]; then
     log "error: no active billing accounts were detected. In order to create a sandboxed environment,"
@@ -54,7 +54,7 @@ getBillingAccount() {
   done
 
   if [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
-      log "Which billing account would you like to use?:"
+      log "Enter the number next to the billing account you would like to use:"
       IFS=$'\n'
       select opt in ${found_accounts} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
@@ -75,22 +75,27 @@ getBillingAccount() {
 }
 
 getProject() {
-  log "Checking for project list"
+  log "Checking for project list..."
+  acct=$(gcloud info --format="value(config.account)")
+  # get projects associated with the billing account
   billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="project_id:stackdriver-sandbox-*" --format="value(projectId)")
-  # only keep projects with name "Stackdriver Sandbox Demo"
-  found_projects=()
-  for bill_proj in ${billed_projects[@]}
-  do
-    if [[ -n $(gcloud projects describe "$bill_proj" | grep "Stackdriver Sandbox Demo") ]]; then
-      create_time=$(gcloud projects describe "$bill_proj" | grep "createTime")
-      found_projects+=("$bill_proj | $create_time")
+  for proj in ${billed_projects[@]}; do
+    # check if user is owner
+    iam_test=$(gcloud projects get-iam-policy "$proj" \
+                 --flatten="bindings[].members" \
+                 --format="table(bindings.members)" \
+                 --filter="bindings.role:roles/owner" 2> /dev/null | grep $acct | cat)
+      if [[ -n "$iam_test" ]]; then
+      create_time=$(gcloud projects describe "$proj" --format="value(create_time.date(%b-%d-%Y))")
+      found_projects+=("$proj | [$create_time]")
     fi
   done
 
+  # prompt user to choose a project
   if [ -z "$found_projects" ] || [[ ${#found_projects[@]} -eq 0 ]]; then
     createProject;
   else
-      log "Which project would you like to use?:"
+      log "Enter the number next to the project you would like to use:"
       IFS_bak=$IFS
       IFS=$'\n'
       select opt in "create a new Sandbox" ${found_projects[@]} "cancel"; do
@@ -119,13 +124,12 @@ createProject() {
     project_id="stackdriver-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
     bucket_name="$project_id-bucket" # bucket name should be globally unique
     # create project
-    acct=$(gcloud info --format="value(config.account)")
     if [[ $acct == *"google.com"* ]];
     then
       log ""
       log "Note: your project will be created in the /experimental-gke folder."
       log "If you don't have access to this folder, please make sure to request at:"
-      log "https://sphinx.corp.google.com/sphinx/#accessChangeRequest:systemName=internal_google_cloud_platform_usage"
+      log "go/experimental-folder-access"
       log ""
       select opt in "continue" "cancel"; do
         if [[ "$opt" == "continue" ]]; then
@@ -157,18 +161,19 @@ createProject() {
     done    
 }
 
-installTerraform() {
-  sudo apt-get install unzip
-  wget -q https://releases.hashicorp.com/terraform/0.12.29/terraform_0.12.29_linux_amd64.zip -O ./terraform.zip
-  unzip -o terraform.zip
-  sudo install terraform /usr/local/bin
-}
-
 applyTerraform() {
   rm -f .terraform/terraform.tfstate
 
-  log "Initialize terraform state with bucket ${bucket_name}"
-  terraform init -backend-config "bucket=${bucket_name}" -lock=false # lock-free to prevent access fail
+  log "Initialize terraform backend with bucket ${bucket_name}"  
+  
+  if terraform init -backend-config "bucket=${bucket_name}" -lock=false 2> /dev/null; then
+    log "Credential check OK..."
+  else
+    log ""
+    log "Credential check failed. Please login..."
+    gcloud auth application-default login
+    terraform init -backend-config "bucket=${bucket_name}" -lock=false # lock-free to prevent access fail
+  fi
 
   log "Apply Terraform automation"
   terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
@@ -261,9 +266,6 @@ displaySuccessMessage() {
 log "Checking Prerequisites..."
 getBillingAccount;
 
-log "Install current version of Terraform"
-installTerraform
-
 # Make sure we use Application Default Credentials for authentication
 # For that we need to unset GOOGLE_APPLICATION_CREDENTIALS and generate
 # new default credentials by re-authenticating. Re-authentication
@@ -280,3 +282,4 @@ installMonitoring || true;
 getExternalIp;
 loadGen;
 displaySuccessMessage;
+
