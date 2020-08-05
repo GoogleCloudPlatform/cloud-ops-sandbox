@@ -48,7 +48,7 @@ resource "google_container_cluster" "gke" {
   # Set the zone by grabbing the result of the random_shuffle above. It
   # returns a list so we have to pull the first element off. If you're looking
   # at this and thinking "huh terraform syntax looks a clunky" you are NOT WRONG
-  zone = element(random_shuffle.zone.result, 0)
+  location = element(random_shuffle.zone.result, 0)
 
   # Using an embedded resource to define the node pool. Another
   # option would be to create the node pool as a separate resource and link it
