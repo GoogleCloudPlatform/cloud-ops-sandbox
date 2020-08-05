@@ -112,12 +112,12 @@ getProject() {
           opt=($opt)
           project_id=${opt[0]}
           bucket_name="$project_id-bucket"
-          gcloud config set project "$project_id"
           break
         fi
       done
       IFS=$IFS_bak
   fi
+  gcloud config set project "$project_id"
 }
 
 createProject() {
