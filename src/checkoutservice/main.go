@@ -68,7 +68,7 @@ type checkoutService struct {
 }
 
 func main() {
-	go initStackDriverTracing()
+	go initOpenCensusStats()
 	go initProfiling("checkoutservice", "1.0.0")
 
 	port := listenPort
@@ -98,19 +98,9 @@ func main() {
 	log.Fatal(err)
 }
 
-func initStats(exporter *stackdriver.Exporter) {
-	view.SetReportingPeriod(60 * time.Second)
-	view.RegisterExporter(exporter)
-	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		log.Warn("Error registering default server views")
-	} else {
-		log.Info("Registered default server views")
-	}
-}
-
-func initStackDriverTracing() {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
+// Initialize Stats collection using OpenCensus
+// TOOD: remove this after conversion to OpenTelemetry Metrics
+func initOpenCensusStats() {
 	for i := 1; i <= 3; i++ {
 		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 		if err != nil {
@@ -120,7 +110,13 @@ func initStackDriverTracing() {
 			log.Info("registered stackdriver tracing")
 
 			// Register the views to collect server stats.
-			initStats(exporter)
+			view.SetReportingPeriod(60 * time.Second)
+			view.RegisterExporter(exporter)
+			if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
+				log.Warn("Error registering default server views")
+			} else {
+				log.Info("Registered default server views")
+			}
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
@@ -164,6 +160,7 @@ func (cs *checkoutService) Check(ctx context.Context, req *healthpb.HealthCheckR
 	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
 
+// Acting as gRPC server, handling PlaceOrder request from Frontend.
 func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderRequest) (*pb.PlaceOrderResponse, error) {
 	log.Infof("[PlaceOrder] user_id=%q user_currency=%q", req.UserId, req.UserCurrency)
 
@@ -172,6 +169,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		return nil, status.Errorf(codes.Internal, "failed to generate order uuid")
 	}
 
+	// Dispatch subtasks (as gRPC client)
 	prep, err := cs.prepareOrderItemsAndShippingQuoteFromCart(ctx, req.UserId, req.UserCurrency, req.Address)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
@@ -246,6 +244,7 @@ func (cs *checkoutService) prepareOrderItemsAndShippingQuoteFromCart(ctx context
 	return out, nil
 }
 
+// Acting as gRPC client
 func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Address, items []*pb.CartItem) (*pb.Money, error) {
 	conn, err := grpc.DialContext(ctx, cs.shippingSvcAddr,
 		grpc.WithInsecure(),
@@ -265,6 +264,7 @@ func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Addres
 	return shippingQuote.GetCostUsd(), nil
 }
 
+// Acting as gPRC client
 func (cs *checkoutService) getUserCart(ctx context.Context, userID string) ([]*pb.CartItem, error) {
 	conn, err := grpc.DialContext(ctx, cs.cartSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
@@ -279,6 +279,7 @@ func (cs *checkoutService) getUserCart(ctx context.Context, userID string) ([]*p
 	return cart.GetItems(), nil
 }
 
+// Acting as gPRC client
 func (cs *checkoutService) emptyUserCart(ctx context.Context, userID string) error {
 	conn, err := grpc.DialContext(ctx, cs.cartSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
@@ -292,6 +293,7 @@ func (cs *checkoutService) emptyUserCart(ctx context.Context, userID string) err
 	return nil
 }
 
+// Acting as gPRC client
 func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartItem, userCurrency string) ([]*pb.OrderItem, error) {
 	out := make([]*pb.OrderItem, len(items))
 
@@ -318,6 +320,7 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 	return out, nil
 }
 
+// Acting as gPRC client
 func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, toCurrency string) (*pb.Money, error) {
 	conn, err := grpc.DialContext(ctx, cs.currencySvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
@@ -333,6 +336,7 @@ func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, 
 	return result, err
 }
 
+// Acting as gPRC client
 func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, paymentInfo *pb.CreditCardInfo) (string, error) {
 	conn, err := grpc.DialContext(ctx, cs.paymentSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
@@ -361,6 +365,7 @@ func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email stri
 	return err
 }
 
+// Acting as gPRC client
 func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, items []*pb.CartItem) (string, error) {
 	conn, err := grpc.DialContext(ctx, cs.shippingSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
