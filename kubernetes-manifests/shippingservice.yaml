@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: gcr.io/stackdriver-sandbox-230822/sandbox/shippingservice:latest
+        image: gcr.io/stackdriver-sandbox-230822/sandbox/shippingservice:v0.2.0
         ports:
         - containerPort: 50051
         readinessProbe:
