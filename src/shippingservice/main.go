@@ -29,6 +29,16 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	
+	// OpenTelemetry
+	// OTel traces -> GCP Trace direct exporter
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/api/standard"
+	"go.opentelemetry.io/otel/instrumentation/grpctrace"
+	apitrace "go.opentelemetry.io/otel/api/trace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/resource"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
@@ -56,6 +66,7 @@ func init() {
 
 func main() {
 	go initOpenCensusStats()
+	initTraceProvider()
 	go initProfiling("shippingservice", "1.0.0")
 
 	port := defaultPort
@@ -69,7 +80,11 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	// TOOD: replace ocgrpc with automatic OpenTelemetry grpc metrics collector
-	srv := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+	srv := grpc.NewServer(grpc.StatsHandler(
+		&ocgrpc.ServerHandler{}),
+		grpc.UnaryInterceptor(grpctrace.UnaryServerInterceptor(global.TraceProvider().Tracer("shipping"))),
+		grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(global.TraceProvider().Tracer("shipping"))),
+	)
 	svc := &server{}
 	pb.RegisterShippingServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
@@ -92,6 +107,8 @@ func (s *server) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*
 
 // GetQuote produces a shipping quote (cost) in USD.
 func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQuoteResponse, error) {
+	span := apitrace.SpanFromContext(ctx)
+	span.AddEvent(ctx, "Get Shipping Quote")
 	log.Info("[GetQuote] received request")
 	defer log.Info("[GetQuote] completed request")
 
@@ -117,6 +134,8 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 // ShipOrder mocks that the requested items will be shipped.
 // It supplies a tracking ID for notional lookup of shipment delivery status.
 func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.ShipOrderResponse, error) {
+	span := apitrace.SpanFromContext(ctx)
+	span.AddEvent(ctx, "Ship Order")
 	log.Info("[ShipOrder] received request")
 	defer log.Info("[ShipOrder] completed request")
 	// 1. Create a Tracking ID
@@ -156,6 +175,26 @@ func initOpenCensusStats() {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
+}
+
+// Initialize OTel trace provider that exports to Cloud Trace
+func initTraceProvider() {
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
+	if err != nil {
+		log.Fatalf("failed to initialize exporter: %v", err)
+	}
+
+	// Create trace provider with the exporter.
+	tp, err := sdktrace.NewProvider(sdktrace.WithConfig(
+		sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithSyncer(exporter),
+		// TODO: replace with predefined constant for GKE or autodetection when available
+		sdktrace.WithResource(resource.New(standard.ServiceNameKey.String("GKE"))))
+	if err != nil {
+		log.Fatal("failed to initialize trace provider: %v", err)
+	}
+	global.SetTraceProvider(tp)
 }
 
 func initProfiling(service, version string) {
