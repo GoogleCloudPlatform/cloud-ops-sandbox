@@ -121,16 +121,14 @@ promptForProject() {
 }
 
 getOrCreateBucket() {
-    # bucket name should be globally unique
-    bucket_name="$project_id-bucket"
+  # bucket name should be globally unique
+  bucket_name="$project_id-bucket"
 
-    # check if bucket already exists
-    gcloud config set project "$project_id"
-    if [[ -n "$(gsutil ls | grep gs://$bucket_name/)" ]]; then
-      log "Bucket $bucket already exists"
-      return
-    fi
-
+  # check if bucket already exists
+  gcloud config set project "$project_id"
+  if [[ -n "$(gsutil ls | grep gs://$bucket_name/)" ]]; then
+    log "Bucket $bucket already exists"
+  else
     # create new bucket
     TRIES=0
     while [[ $(gsutil mb -p "$project_id" "gs://$bucket_name") || "${TRIES}" -lt 5 ]]; do
@@ -144,6 +142,7 @@ getOrCreateBucket() {
         TRIES=$((TRIES + 1))
       fi
     done
+  fi
 }
 
 createProject() {
