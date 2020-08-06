@@ -300,37 +300,37 @@ checkAuthentication() {
 }
 
 parseArguments() {
-while (( "$#" )); do
-  case "$1" in
-    -p|--project|--project-id)
-      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-        project_id=$2
-        gcloud config set project "$project_id"
-        shift 2
-      else
-        log "Error: Argument for $1 is missing" >&2
-        exit 1
-      fi
-      ;;
-    -b|--billing|--billing-id)
-      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-        billing_id=$2
-        billing_acct=$(gcloud beta billing accounts describe $billing_id --format="value(displayName)")
-        shift 2
-      else
-        log "Error: Argument for $1 is missing" >&2
-        exit 1
-      fi
-      ;;
-    -*|--*=) # unsupported flags
-      log "Error: Unsupported flag $1" >&2
-      exit 1
-      ;;
-    *) # ignore positional arguments
-      shift
-      ;;
-  esac
-done
+    while (( "$#" )); do
+      case "$1" in
+        -p|--project|--project-id)
+          if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+            project_id=$2
+            gcloud config set project "$project_id"
+            shift 2
+          else
+            log "Error: Argument for $1 is missing" >&2
+            exit 1
+          fi
+          ;;
+        -b|--billing|--billing-id)
+          if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+            billing_id=$2
+            billing_acct=$(gcloud beta billing accounts describe $billing_id --format="value(displayName)")
+            shift 2
+          else
+            log "Error: Argument for $1 is missing" >&2
+            exit 1
+          fi
+          ;;
+        -*|--*=) # unsupported flags
+          log "Error: Unsupported flag $1" >&2
+          exit 1
+          ;;
+        *) # ignore positional arguments
+          shift
+          ;;
+      esac
+    done
 }
 
 # check for command line arguments
