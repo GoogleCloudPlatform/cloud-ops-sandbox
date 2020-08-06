@@ -13,15 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: python27
-api_version: 1
-threadsafe: true
+runtime: python37
 
 handlers:
         - url: /
-          static_files: www/index.html
-          upload: www/index.html
+          static_files: website/index.html
+          upload: website/index.html
 
         - url: /(.*)
-          static_files: www/\1
-          upload: www/(.*)
+          static_files: website/\1
+          upload: website/(.*)
