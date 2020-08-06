@@ -32,10 +32,30 @@ resource "google_monitoring_dashboard" "adservice_dashboard" {
   dashboard_json = file("./dashboards/adservice_dashboard.json")
 }
 
-# Ceates a dashboard for the recommendationservice. The details of the charts
+# Creates a dashboard for the recommendationservice. The details of the charts
 # in the dashboard can be found in the JSON specification file.
 resource "google_monitoring_dashboard" "recommendationservice_dashboard" {
   dashboard_json = file("./dashboards/recommendationservice_dashboard.json")
+}
+
+# Creates a dashboard for the cartservice.
+resource "google_monitoring_dashboard" "cartservice_dashboard" {
+  dashboard_json = file("./dashboards/cartservice_dashboard.json")
+}
+
+# Creates a dashboard for the checkoutservice.
+resource "google_monitoring_dashboard" "checkoutservice_dashboard" {
+  dashboard_json = file("./dashboards/checkoutservice_dashboard.json")
+}
+
+# Creates a dashboard for the currencyservice.
+resource "google_monitoring_dashboard" "currencyservice_dashboard" {
+  dashboard_json = file("./dashboards/currencyservice_dashboard.json")
+}
+
+# Creates a dashboard for the productcatalogservice.
+resource "google_monitoring_dashboard" "productcatalogservice_dashboard" {
+  dashboard_json = file("./dashboards/productcatalogservice_dashboard.json")
 }
 
 # Create generic dashboards for three of the microservices. Since all three microservices
