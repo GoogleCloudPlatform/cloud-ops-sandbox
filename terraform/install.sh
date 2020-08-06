@@ -215,7 +215,9 @@ installMonitoring() {
 
   gcp_monitoring_path="https://console.cloud.google.com/monitoring?project=$project_id"
   log "Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
-  read -p "When you are done, please press enter to continue"
+  if [[ -z $skip_workspace_prompt ]]; then
+      read -p "When you are done, please press enter to continue"
+  fi
 
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
@@ -321,6 +323,10 @@ parseArguments() {
             log "Error: Argument for $1 is missing" >&2
             exit 1
           fi
+          ;;
+        --skip-workspace-prompt)
+          skip_workspace_prompt=1
+          shift
           ;;
         -*|--*=) # unsupported flags
           log "Error: Unsupported flag $1" >&2
