@@ -32,6 +32,7 @@ find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:late
 
 # update website deployment tag
 sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/docs/index.html;
+sed -i -e "s/cloudshell-image:v\([0-9\.]\+\)/cloudshell-image:${NEW_VERSION}/g" ${REPO_ROOT}/docs/index.html;
 
 # if dry-run mode, exit directly after modifying files
 if [[ "$*" == *dryrun*  || "$*" == *dry-run* ]]; then

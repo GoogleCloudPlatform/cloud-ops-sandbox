@@ -26,7 +26,7 @@ cd $SCRIPT_DIR
 log() { echo "$1" >&2; }
 
 promptForBillingAccount() {
-  log "Checking for billing accounts"
+  log "Checking for billing accounts..."
   found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true --sort-by=displayName)
   if [ -z "$found_accounts" ] || [[ ${#found_accounts[@]} -eq 0 ]]; then
     log "error: no active billing accounts were detected. In order to create a sandboxed environment,"
@@ -54,7 +54,7 @@ promptForBillingAccount() {
   done
 
   if [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
-      log "Which billing account would you like to use?:"
+      log "Enter the number next to the billing account you would like to use:"
       IFS=$'\n'
       select opt in ${found_accounts} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
@@ -75,22 +75,27 @@ promptForBillingAccount() {
 }
 
 promptForProject() {
-  log "Checking for project list"
+  log "Checking for project list..."
+  acct=$(gcloud info --format="value(config.account)")
+  # get projects associated with the billing account
   billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="project_id:stackdriver-sandbox-*" --format="value(projectId)")
-  # only keep projects with name "Stackdriver Sandbox Demo"
-  found_projects=()
-  for bill_proj in ${billed_projects[@]}
-  do
-    if [[ -n $(gcloud projects describe "$bill_proj" | grep "Stackdriver Sandbox Demo") ]]; then
-      create_time=$(gcloud projects describe "$bill_proj" | grep "createTime")
-      found_projects+=("$bill_proj | $create_time")
+  for proj in ${billed_projects[@]}; do
+    # check if user is owner
+    iam_test=$(gcloud projects get-iam-policy "$proj" \
+                 --flatten="bindings[].members" \
+                 --format="table(bindings.members)" \
+                 --filter="bindings.role:roles/owner" 2> /dev/null | grep $acct | cat)
+      if [[ -n "$iam_test" ]]; then
+      create_time=$(gcloud projects describe "$proj" --format="value(create_time.date(%b-%d-%Y))")
+      found_projects+=("$proj | [$create_time]")
     fi
   done
 
+  # prompt user to choose a project
   if [ -z "$found_projects" ] || [[ ${#found_projects[@]} -eq 0 ]]; then
     createProject;
   else
-      log "Which project would you like to use?:"
+      log "Enter the number next to the project you would like to use:"
       IFS_bak=$IFS
       IFS=$'\n'
       select opt in "create a new Sandbox" ${found_projects[@]} "cancel"; do
@@ -145,13 +150,12 @@ createProject() {
     # generate random id
     project_id="stackdriver-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
     # create project
-    acct=$(gcloud info --format="value(config.account)")
     if [[ $acct == *"google.com"* ]];
     then
       log ""
       log "Note: your project will be created in the /experimental-gke folder."
       log "If you don't have access to this folder, please make sure to request at:"
-      log "https://sphinx.corp.google.com/sphinx/#accessChangeRequest:systemName=internal_google_cloud_platform_usage"
+      log "go/experimental-folder-access"
       log ""
       select opt in "continue" "cancel"; do
         if [[ "$opt" == "continue" ]]; then
@@ -169,22 +173,55 @@ createProject() {
     gcloud beta billing projects link "$project_id" --billing-account="$billing_id"
 }
 
-installTerraform() {
-  log "Installing current version of Terraform"
-  sudo apt-get install unzip
-  wget -q https://releases.hashicorp.com/terraform/0.12.29/terraform_0.12.29_linux_amd64.zip -O ./terraform.zip
-  unzip -o terraform.zip
-  sudo install terraform /usr/local/bin
-}
-
 applyTerraform() {
   rm -f .terraform/terraform.tfstate
 
-  log "Initialize terraform state with bucket ${bucket_name}"
-  terraform init -backend-config "bucket=${bucket_name}" -lock=false # lock-free to prevent access fail
+  log "Initialize terraform backend with bucket ${bucket_name}"  
+  
+  if terraform init -backend-config "bucket=${bucket_name}" -lock=false 2> /dev/null; then
+    log "Credential check OK..."
+  else
+    log ""
+    log "Credential check failed. Please login..."
+    gcloud auth application-default login
+    terraform init -backend-config "bucket=${bucket_name}" -lock=false # lock-free to prevent access fail
+  fi
 
   log "Apply Terraform automation"
   terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
+}
+
+authenticateCluster() {
+  CLUSTER_ZONE=$(gcloud container clusters list --filter="name:stackdriver-sandbox" --project $project_id --format="value(zone)")
+  gcloud container clusters get-credentials stackdriver-sandbox --zone "$CLUSTER_ZONE"
+}
+
+installMonitoring() {
+  log "Retrieving the external IP address of the application..."
+  TRIES=0
+  external_ip="";
+  while [[ -z $external_ip && "${TRIES}" -lt 20 ]]; do
+     external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'); 
+     [ -z "$external_ip" ] && sleep 5; 
+     TRIES=$((TRIES + 1))
+  done;
+
+  if [[ -z $external_ip ]]; then
+    log "Could not retrieve external IP... skipping monitoring configuration."
+    return 1
+  fi
+
+  acct=$(gcloud info --format="value(config.account)")
+
+  gcp_monitoring_path="https://console.cloud.google.com/monitoring?project=$project_id"
+  log "Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
+  read -p "When you are done, please press enter to continue"
+
+  log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
+  pushd monitoring/
+  terraform init -lock=false
+  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}"
+  popd
 }
 
 getExternalIp() {
@@ -245,6 +282,23 @@ displaySuccessMessage() {
     log "********************************************************************************"
 }
 
+checkAuthentication() {
+    TRIES=0
+    AUTH_ACCT=$(gcloud auth list --format="value(account)")
+    if [[ -z $AUTH_ACCT ]]; then
+        log "Authentication failed"
+        log "Please allow gcloud and Cloud Shell to access your GCP account"
+    fi
+    while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 10  ]]; do
+        AUTH_ACCT=$(gcloud auth list --format="value(account)")
+        sleep 3;
+        TRIES=$((TRIES + 1))
+    done
+    if [[ -z $AUTH_ACCT ]]; then
+        exit 1
+    fi
+}
+
 parseArguments() {
 while (( "$#" )); do
   case "$1" in
@@ -281,6 +335,9 @@ done
 # check for command line arguments
 parseArguments $*;
 
+# ensure gcloud and cloudshell are authenticated
+checkAuthentication;
+
 # prompt user for missing information
 if [[ -z "$billing_id" || -z "$billing_acct" ]]; then
   promptForBillingAccount;
@@ -289,10 +346,14 @@ if [[ -z "$project_id" ]]; then
   promptForProject;
 fi
 
+
 # deploy
 installTerraform
 getOrCreateBucket;
 applyTerraform;
+authenticateCluster;
+# || true to prevent errors during monitoring setup from stopping the installation script
+installMonitoring || true;
 getExternalIp;
 loadGen;
 displaySuccessMessage;

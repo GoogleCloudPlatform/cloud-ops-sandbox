@@ -35,17 +35,15 @@ For more information, see ["Create a new billing account"](https://cloud.google.
 
 In a new browser tab, navigate to the Stackdriver Sandbox [website](https://stackdriver-sandbox.dev/) and follow the instructions there:
 
-1. Click the **Open in Google Cloud Shell** button. You might have to click Proceed on a second dialog if you haven't run Cloud Shell before.
+Click the **Open in Google Cloud Shell** button. You might have to click Proceed on a second dialog if you haven't run Cloud Shell before.
 
-After the shell starts, the Stackdriver Sandbox repository is cloned to your shell container, and you are placed in the `stackdriver-sandbox/terraform` directory.
+Additionally, there will be a window that opens asking whether you trust the custom container. Check the "Trust" box in order to authenticate.
 
-2. Run the installer script:
+![image](./images/user-guide/TrustImage.png)
 
-```
-$ ./install.sh
-```
+After the shell starts, the Stackdriver Sandbox repository is cloned to your shell container, and you are placed in the `stackdriver-sandbox/terraform` directory. The installer script should start running automatically.
 
-The `install.sh` script performs the following tasks:
+The installer script performs the following tasks:
 
 -  Enables the necessary GCP features
 -  Creates a GCP project named "Stackdriver Sandbox Demo"

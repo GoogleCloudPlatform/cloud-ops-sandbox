@@ -27,7 +27,7 @@ provider "google" {
   version = ">=3.23.0"
 
   # credentials = "/path/to/creds.json"
-  # project = "project-id"
+  project = "${var.project_id}"
   # region = "default-region"
   # zone = "default-zone"
 } 
