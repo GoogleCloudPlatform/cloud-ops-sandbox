@@ -305,6 +305,7 @@ while (( "$#" )); do
     -p|--project|--project-id)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
         project_id=$2
+        gcloud config set project "$project_id"
         shift 2
       else
         log "Error: Argument for $1 is missing" >&2
@@ -345,7 +346,6 @@ fi
 if [[ -z "$project_id" ]]; then
   promptForProject;
 fi
-
 
 # deploy
 installTerraform
