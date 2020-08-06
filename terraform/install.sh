@@ -346,10 +346,9 @@ fi
 if [[ -z "$project_id" ]]; then
   promptForProject;
 fi
+getOrCreateBucket;
 
 # deploy
-installTerraform
-getOrCreateBucket;
 applyTerraform;
 authenticateCluster;
 # || true to prevent errors during monitoring setup from stopping the installation script
