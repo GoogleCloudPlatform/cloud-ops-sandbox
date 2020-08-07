@@ -59,9 +59,9 @@ jobs:
         # copy over local git repo
         docker cp ../stackdriver-sandbox test-runner:/sandbox
         # copy over service account
-        cat $SERVICE_ACCOUNT > /dev/shm/service-account.json
-        docker cp /dev/shm/service-account.json test-runner:/service-account.json
-        rm /dev/shm/service-account.json
+        #cat $SERVICE_ACCOUNT > /dev/shm/service-account.json
+        #docker cp /dev/shm/service-account.json test-runner:/service-account.json
+        #rm /dev/shm/service-account.json
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
         BILLING_ID: ${{ secrets.E2E_BILLING_ID  }}
