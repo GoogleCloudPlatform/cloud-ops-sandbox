@@ -23,7 +23,7 @@ from concurrent import futures
 import googleclouddebugger
 import grpc
 from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
-from opencensus.ext.grpc import server_interceptor
+from opencensus.ext.grpc import server_interceptor as oc_server_interceptor
 from opencensus.trace import samplers
 
 import demo_pb2
@@ -64,12 +64,13 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
+    # TODO: remove OpenCensus after conversion to OpenTelemetry
     try:
         sampler = samplers.AlwaysOnSampler()
         exporter = stackdriver_exporter.StackdriverExporter()
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+        oc_interceptor = oc_server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
     except:
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+        oc_interceptor = oc_server_interceptor.OpenCensusServerInterceptor()
 
     try:
         googleclouddebugger.enable(
@@ -90,7 +91,7 @@ if __name__ == "__main__":
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
     # create gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10)) # ,interceptors=(tracer_interceptor,))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
     # add class to gRPC server
     service = RecommendationService()
