@@ -31,7 +31,11 @@ jobs:
     - uses: actions/checkout@v2
     - name: Clean Project State
       run: |
+        # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
+        # clean docker containers
+        docker stop test-runner | true
+        docker rm test-runner | true
     - name: Check Project State
       run: |
         .github/workflows/e2e_scripts/check.sh
