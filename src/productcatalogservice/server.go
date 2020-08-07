@@ -173,21 +173,35 @@ func initOpenCensusStats() {
 func initTraceProvider() {
 	// Initialize exporter OTel Trace -> Google Cloud Trace
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
-	if err != nil {
-		log.Fatalf("failed to initialize exporter: %v", err)
+	if len(projectID) == 0 {
+		log.Warn("GOOGLE_CLOUD_PROJECT not set")
 	}
-
-	// Create trace provider with the exporter.
-	tp, err := sdktrace.NewProvider(sdktrace.WithConfig(
-		sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		sdktrace.WithSyncer(exporter),
-		// TODO: replace with predefined constant for GKE or autodetection when available
-		sdktrace.WithResource(resource.New(standard.ServiceNameKey.String("GKE"))))
-	if err != nil {
-		log.Fatal("failed to initialize trace provider: %v", err)
+	for i := 1; i <= 3; i++ {
+		exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
+		if err != nil {
+			log.Infof("failed to initialize exporter: %v", err)
+		} else {
+			// Create trace provider with the exporter.
+			// The AlwaysSample sampling policy is used here for demonstration
+			// purposes and should not be used in production environments.
+			tp, err := sdktrace.NewProvider(sdktrace.WithConfig(
+				sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+				sdktrace.WithSyncer(exporter),
+				// TODO: replace with predefined constant for GKE or autodetection when available
+				sdktrace.WithResource(resource.New(standard.ServiceNameKey.String("GKE"))))
+			if err == nil {
+				log.Info("initialized trace provider")
+				global.SetTraceProvider(tp)
+				return
+			} else {
+				d := time.Second * 10 * time.Duration(i)
+				log.Infof("sleeping %v to retry initializing trace provider", d)
+				time.Sleep(d)
+			}
+		}
+		
 	}
-	global.SetTraceProvider(tp)
+	log.Warn("failed to initialize trace provider")
 }
 
 func initProfiling(service, version string) {
