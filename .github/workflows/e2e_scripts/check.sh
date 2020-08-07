@@ -1,6 +1,7 @@
 #!/bin/bash
+set -ex
 
-export PROJECT_ID=stackdriver-sandbox-4058352480 
+export PROJECT_ID=$(gcloud config get-value project)
 
 check_resource() {
     if [ ! -z "$2" ]; then

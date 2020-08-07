@@ -1,7 +1,7 @@
 #!/bin/bash
-set -x
+set -ex
 
-export PROJECT_ID=stackdriver-sandbox-e2e
+export PROJECT_ID=$(gcloud config get-value project)
 
 # delete cluster
 CLUSTER_ZONE=$(gcloud container clusters list \
