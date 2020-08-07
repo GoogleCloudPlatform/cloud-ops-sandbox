@@ -30,7 +30,7 @@ from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
 from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
-from opencensus.ext.grpc import server_interceptor
+from opencensus.ext.grpc import server_interceptor as oc_server_interceptor
 from opencensus.common.transports.async_ import AsyncTransport
 from opencensus.trace import samplers
 
@@ -122,7 +122,7 @@ class HealthCheck():
 
 def start(dummy_mode):
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                       interceptors=(tracer_interceptor,))
+                       interceptors=(oc_tracer_interceptor,))
   service = None
   if dummy_mode:
     service = DummyEmailService()
@@ -181,7 +181,7 @@ if __name__ == '__main__':
   except KeyError:
       logger.info("Profiler disabled.")
 
-  # Tracing
+  # TODO: remove OpenCensus after conversion to OpenTelemetry
   try:
     if "DISABLE_TRACING" in os.environ:
       raise KeyError()
@@ -191,9 +191,9 @@ if __name__ == '__main__':
       exporter = stackdriver_exporter.StackdriverExporter(
         project_id=os.environ.get('GCP_PROJECT_ID'),
         transport=AsyncTransport)
-      tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+      oc_tracer_interceptor = oc_server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
   except (KeyError, DefaultCredentialsError):
       logger.info("Tracing disabled.")
-      tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+      oc_tracer_interceptor = oc_server_interceptor.OpenCensusServerInterceptor()
 
   start(dummy_mode = True)
