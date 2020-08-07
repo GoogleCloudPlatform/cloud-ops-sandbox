@@ -53,18 +53,11 @@ jobs:
         set -x
         # build cloud shell image
         docker build -t cloud-shell-$GITHUB_SHA ./cloud-shell
-        docker create \
-            --env PROJECT_ID=$PROJECT_ID \
-            --env BILLING_ID=$BILLING_ID \
-            --name test-runner \
+        docker create --rm --name test-runner \
             -v ~/.config:/root/.config \
-            --rm \
             cloud-shell-$GITHUB_SHA
         # copy over local git repo
         docker cp ../stackdriver-sandbox test-runner:/sandbox
-      env:
-        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
-        BILLING_ID: ${{ secrets.E2E_BILLING_ID  }}
     - name: Run Install Script
       run: |
         set -x
