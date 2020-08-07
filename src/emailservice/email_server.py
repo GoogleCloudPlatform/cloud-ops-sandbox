@@ -34,6 +34,11 @@ from opencensus.ext.grpc import server_interceptor as oc_server_interceptor
 from opencensus.common.transports.async_ import AsyncTransport
 from opencensus.trace import samplers
 
+from opentelemetry import trace
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleExportSpanProcessor
+
 # import googleclouddebugger
 import googlecloudprofiler
 
@@ -195,5 +200,12 @@ if __name__ == '__main__':
   except (KeyError, DefaultCredentialsError):
       logger.info("Tracing disabled.")
       oc_tracer_interceptor = oc_server_interceptor.OpenCensusServerInterceptor()
+  
+  trace.set_tracer_provider(TracerProvider())
+
+  cloud_trace_exporter = CloudTraceSpanExporter()
+  trace.get_tracer_provider().add_span_processor(
+      SimpleExportSpanProcessor(cloud_trace_exporter)
+  )
 
   start(dummy_mode = True)
