@@ -16,16 +16,17 @@ name: "End to End Tests"
 on:
   push:
     # run on pushes to master or release/*
-    branches:    
+    branches:
       - master
       - release/*
+      - e2e-tests
   pull_request:
     # run on pull requests targeting master
     branches:
       - master
 jobs:
   end-to-end:
-    runs-on: [self-hosted, test-project-worker]
+    runs-on: [self-hosted, e2e-worker]
     steps:
     - uses: actions/checkout@v2
     - name: Clean Project State
@@ -34,10 +35,10 @@ jobs:
     - name: Check Project State
       run: |
         .github/workflows/check-e2e-project.sh
-    - name: Run Install Script
-      run: |
-        set -x
-        terraform/install.sh -p $PROJECT_ID -b $BILLING_ID
-      env:
-        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
-        BILLING_ID: ${{ secrets.E2E_BILLING_ID  }}
+    #- name: Run Install Script
+    #  run: |
+    #    set -x
+    #    terraform/install.sh -p $PROJECT_ID -b $BILLING_ID
+    #  env:
+    #    PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
+    #    BILLING_ID: ${{ secrets.E2E_BILLING_ID  }}
