@@ -20,15 +20,15 @@
 #
 # If productized we'd drop this and use the default billing account instead.
 data "google_billing_account" "acct" {
-  display_name = "${var.billing_account}"
+  display_name = var.billing_account
 }
 
 data "google_project" "project" {
-  project_id = "${var.project_id}"
+  project_id = var.project_id
 }
 
 resource "google_project_service" "iam" {
-  project = "${data.google_project.project.id}"
+  project = data.google_project.project.id
 
   service = "iam.googleapis.com"
 
@@ -36,7 +36,7 @@ resource "google_project_service" "iam" {
 }
 
 resource "google_project_service" "compute" {
-  project = "${data.google_project.project.id}"
+  project = data.google_project.project.id
 
   service = "compute.googleapis.com"
 
@@ -44,7 +44,7 @@ resource "google_project_service" "compute" {
 }
 
 resource "google_project_service" "clouddebugger" {
-  project = "${data.google_project.project.id}"
+  project = data.google_project.project.id
 
   service = "clouddebugger.googleapis.com"
 
@@ -53,7 +53,7 @@ resource "google_project_service" "clouddebugger" {
 
 
 resource "google_project_service" "cloudtrace" {
-  project = "${data.google_project.project.id}"
+  project = data.google_project.project.id
 
   service = "cloudtrace.googleapis.com"
 
@@ -61,7 +61,7 @@ resource "google_project_service" "cloudtrace" {
 }
 
 resource "google_project_service" "errorreporting" {
-  project = "${data.google_project.project.id}"
+  project = data.google_project.project.id
 
   service = "clouderrorreporting.googleapis.com"
 
@@ -88,7 +88,7 @@ resource "google_project_service" "gke" {
   # and then we don't have to specify this on every resource any more.
   #
   # Anyway, expect to see a lot more of these. I won't explain every time.
-  project = "${data.google_project.project.id}"
+  project = data.google_project.project.id
 
   # the service URI we want to enable
   service = "container.googleapis.com"

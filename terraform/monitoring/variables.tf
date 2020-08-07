@@ -18,16 +18,16 @@
 # Currently we need the user to provide some basic information to set up the monitoring examples
 # These will be gone when we merge the monitoring terraform with the provisioning terraform
 variable "external_ip" {
-  type        = "string"
+  type        = string
   description = "The external IP of the kubernetes cluster. Can be revealed by running \"kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'\" in the Google Cloud CLI."
 }
 
 variable "project_id" {
-  type        = "string"
+  type        = string
   description = "The project id that was created by Stackdriver Sandbox. Can be revealed by running \"gcloud config get-value project\" in the Google Cloud CLI."
 }
 
 variable "project_owner_email" {
-	type	      = "string"
+	type	      = string
 	description = "The email to receive alerts caused by violations of alerting policies."
 }
