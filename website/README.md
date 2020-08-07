@@ -1,6 +1,6 @@
 # Stackdriver Sandbox Website
 
-The Stackdriver Sandbox website is currently deployed at [stackdriver-sandbox.dev](stackdriver-sandbox.dev).
+The Stackdriver Sandbox website is currently deployed at [stackdriver-sandbox.dev](www.stackdriver-sandbox.dev).
 
 ## Website Architecture
 
@@ -22,4 +22,4 @@ The website is automatically deployed by App Engine using Cloud Build. Every tim
 $ gcloud app deploy app.yaml
 $ gcloud app browse
 ```
-**Note:** In order to run these commands, it is important to install gcloud tools. Documentation on that can be found [here](cloud.google.com/source-repositories/docs/quickstart-deploying-from-source-repositories-to-app-engine).
+**Note:** In order to run these commands, it is important to install gcloud tools. Documentation on that can be found [here](www.cloud.google.com/source-repositories/docs/quickstart-deploying-from-source-repositories-to-app-engine).
