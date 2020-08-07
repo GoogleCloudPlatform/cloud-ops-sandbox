@@ -35,6 +35,10 @@ jobs:
     - name: Check Project State
       run: |
         .github/workflows/e2e_scripts/check.sh
+    - name: Build Cloud Shell Image
+      run: |
+        set -x
+        docker build -t cloud-shell-$GITHUB_SHA ./cloud-shell
     #- name: Run Install Script
     #  run: |
     #    set -x
