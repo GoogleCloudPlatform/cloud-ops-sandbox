@@ -65,9 +65,11 @@ jobs:
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
         BILLING_ID: ${{ secrets.E2E_BILLING_ID  }}
-    #- name: Run Install Script
-    #  run: |
-    #    set -x
-
-    #    docker start test-runner
-        #terraform/install.sh -p $PROJECT_ID -b $BILLING_ID
+    - name: Run Install Script
+      run: |
+        set -x
+        docker start test-runner
+        docker exec test-runner /bin/bash ./sandbox/terraform/install.sh  -p $PROJECT_ID -b $BILLING_ID --skip-workspace-prompt
+      env:
+        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
+        BILLING_ID: ${{ secrets.E2E_BILLING_ID  }}
