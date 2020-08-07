@@ -327,6 +327,16 @@ parseArguments() {
       skip_workspace_prompt=1
       shift
       ;;
+    -h|--help)
+      log "Deploy Stackdriver Sandbox to a GCP project"
+      log ""
+      log "options:"
+      log "-p|--project|--project-id     GCP project to deploy Stackdriver Sandbox to"
+      log "-b|--billing|--billing-id     GCP billing id to use"
+      log "--skip-workspace-prompt       Don't ask user to set up Stackdriver workspace"
+      log ""
+      exit 0
+      ;;
     -*|--*=) # unsupported flags
       log "Error: Unsupported flag $1" >&2
       exit 1
