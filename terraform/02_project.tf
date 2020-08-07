@@ -19,9 +19,9 @@
 # name it a certain way) so we can pass its ID on later.
 #
 # If productized we'd drop this and use the default billing account instead.
-data "google_billing_account" "acct" {
-  display_name = var.billing_account
-}
+#data "google_billing_account" "acct" {
+#  display_name = var.billing_account
+#}
 
 data "google_project" "project" {
   project_id = var.project_id
