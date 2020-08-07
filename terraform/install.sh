@@ -333,7 +333,7 @@ parseArguments() {
       log "options:"
       log "-p|--project|--project-id     GCP project to deploy Stackdriver Sandbox to"
       log "-b|--billing|--billing-id     GCP billing id to use"
-      log "--skip-workspace-prompt       Don't ask user to set up Stackdriver workspace"
+      log "--skip-workspace-prompt       Don't pause for Stackdriver workspace set up"
       log ""
       exit 0
       ;;
