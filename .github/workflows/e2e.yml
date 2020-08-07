@@ -36,6 +36,7 @@ jobs:
       run: |
         .github/workflows/e2e_scripts/check.sh
     - name: Build Sandbox Services
+      run: |
         set -x
         skaffold config set --global local-cluster false
         # tag with git hash
