@@ -54,7 +54,7 @@ jobs:
             --env PROJECT_ID=$PROJECT_ID \
             --env BILLING_ID=$BILLING_ID \
             --name test-runner \
-            --rm
+            --rm \
             cloud-shell-$GITHUB_SHA
         # copy over local git repo
         docker cp ../stackdriver-sandbox test-runner:/sandbox
