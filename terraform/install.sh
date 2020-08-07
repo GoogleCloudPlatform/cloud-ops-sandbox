@@ -213,9 +213,9 @@ installMonitoring() {
   acct=$(gcloud info --format="value(config.account)")
 
   gcp_monitoring_path="https://console.cloud.google.com/monitoring?project=$project_id"
-  log "Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
   if [[ -z $skip_workspace_prompt ]]; then
-      read -p "When you are done, please press enter to continue"
+    log "Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
+    read -p "When you are done, please press enter to continue"
   fi
 
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
