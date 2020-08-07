@@ -54,27 +54,20 @@ jobs:
         # build cloud shell image
         docker build -t cloud-shell-$GITHUB_SHA ./cloud-shell
         docker create \
-            --env GOOGLE_APPLICATION_CREDENTIALS=/service-account.json \
             --env PROJECT_ID=$PROJECT_ID \
             --env BILLING_ID=$BILLING_ID \
             --name test-runner \
+            -v ~/.config:/root/.config \
             --rm \
             cloud-shell-$GITHUB_SHA
         # copy over local git repo
         docker cp ../stackdriver-sandbox test-runner:/sandbox
-        # copy over service account
-        #cat $SERVICE_ACCOUNT > /dev/shm/service-account.json
-        #docker cp /dev/shm/service-account.json test-runner:/service-account.json
-        #rm /dev/shm/service-account.json
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
         BILLING_ID: ${{ secrets.E2E_BILLING_ID  }}
-        SERVICE_ACCOUNT: ${{ secrets.E2E_SERVICE_ACCOUNT  }}
-
     #- name: Run Install Script
     #  run: |
     #    set -x
-    #    terraform/install.sh -p $PROJECT_ID -b $BILLING_ID
-    #  env:
-    #    PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
-    #    BILLING_ID: ${{ secrets.E2E_BILLING_ID  }}
+
+    #    docker start test-runner
+        #terraform/install.sh -p $PROJECT_ID -b $BILLING_ID
