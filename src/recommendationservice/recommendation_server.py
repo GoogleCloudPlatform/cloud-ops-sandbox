@@ -28,6 +28,8 @@ from opencensus.trace import samplers
 
 from opentelemetry import trace
 from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from opentelemetry.ext.grpc import client_interceptor, server_interceptor
+from opentelemetry.ext.grpc.grpcext import intercept_server, intercept_channel
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleExportSpanProcessor
 
@@ -75,7 +77,6 @@ if __name__ == "__main__":
     trace.get_tracer_provider().add_span_processor(
         SimpleExportSpanProcessor(cloud_trace_exporter)
     )
-    tracer = trace.get_tracer(__name__)
 
     # TODO: remove OpenCensus after conversion to OpenTelemetry
     try:
@@ -100,11 +101,17 @@ if __name__ == "__main__":
     if catalog_addr == "":
         raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
     logger.info("product catalog address: " + catalog_addr)
+
+    # create gRPC channel to ProductCatalog service
     channel = grpc.insecure_channel(catalog_addr)
+    # add OpenTelemetry interceptor
+    channel = intercept_channel(channel, client_interceptor(trace.get_tracer_provider()))
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
-    # create gRPC server
+    # create gRPC server for ListRecommendations Requests
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    # add OpenTelemetry interceptor
+    server = intercept_server(server, server_interceptor(trace.get_tracer_provider()))
 
     # add class to gRPC server
     service = RecommendationService()
