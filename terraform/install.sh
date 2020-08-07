@@ -316,7 +316,7 @@ parseArguments() {
     -b|--billing|--billing-id)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
         billing_id=$2
-        billing_acct=$(gcloud beta billing accounts describe $billing_id --format="value(displayName)")
+        #billing_acct=$(gcloud beta billing accounts describe $billing_id --format="value(displayName)")
         shift 2
       else
         log "Error: Argument for $1 is missing" >&2
