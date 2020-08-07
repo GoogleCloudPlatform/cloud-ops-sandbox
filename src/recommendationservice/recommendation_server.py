@@ -26,6 +26,11 @@ from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
 from opencensus.ext.grpc import server_interceptor as oc_server_interceptor
 from opencensus.trace import samplers
 
+from opentelemetry import trace
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleExportSpanProcessor
+
 import demo_pb2
 import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
@@ -63,6 +68,14 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
+
+    trace.set_tracer_provider(TracerProvider())
+
+    cloud_trace_exporter = CloudTraceSpanExporter()
+    trace.get_tracer_provider().add_span_processor(
+        SimpleExportSpanProcessor(cloud_trace_exporter)
+    )
+    tracer = trace.get_tracer(__name__)
 
     # TODO: remove OpenCensus after conversion to OpenTelemetry
     try:
