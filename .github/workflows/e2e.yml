@@ -19,7 +19,7 @@ on:
     branches:
       - master
       - release/*
-      - e2e-tests
+      - e2e-test
   pull_request:
     # run on pull requests targeting master
     branches:
