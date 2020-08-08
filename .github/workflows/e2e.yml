@@ -33,9 +33,6 @@ jobs:
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
-        # clean docker containers
-        docker stop test-runner | true
-        docker rm test-runner | true
     - name: Check Project State
       run: |
         .github/workflows/e2e_scripts/check.sh
@@ -48,21 +45,17 @@ jobs:
     #                   --tag=$GITHUB_SHA
     #  env:
     #    PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
-    - name: Build Cloud Shell Image
-      run: |
-        set -x
-        # build cloud shell image
-        docker build -t cloud-shell-$GITHUB_SHA ./cloud-shell
-        docker create --name test-runner \
-            -v ~/.config:/root/.config \
-            cloud-shell-$GITHUB_SHA
-        # copy over local git repo
-        docker cp ../stackdriver-sandbox test-runner:/sandbox
     - name: Run Install Script
       run: |
         set -x
-        docker start test-runner
-        docker exec test-runner /bin/bash ./sandbox/terraform/install.sh  -p $PROJECT_ID -b $BILLING_ID --skip-workspace-prompt
+        # build cloud shell image
+        docker build -t customcloud-shell:$GITHUB_SHA ./cloud-shell
+        # run install script
+        docker run -it --rm \
+          --entrypoint /bin/bash ./sandbox/terraform/install.sh  -p $PROJECT_ID -b $BILLING_ID --skip-workspace-prompt \
+          -v ~/.config:/root/.config \
+          -v ../stackdriver-sandbox:/sandbox \
+          custom-cloud-shell:$GITHUB_SHA
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
         BILLING_ID: ${{ secrets.E2E_BILLING_ID  }}
@@ -71,6 +64,3 @@ jobs:
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
-        # clean docker containers
-        docker stop test-runner | true
-        docker rm test-runner | true
