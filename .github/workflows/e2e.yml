@@ -51,11 +51,12 @@ jobs:
         # build cloud shell image
         docker build -t customcloud-shell:$GITHUB_SHA ./cloud-shell
         # run install script
-        docker run -it --rm \
-          --entrypoint /bin/bash ./sandbox/terraform/install.sh  -p $PROJECT_ID -b $BILLING_ID --skip-workspace-prompt \
+        docker run --rm \
+          --entrypoint /sandbox/terraform/install.sh \
           -v ~/.config:/root/.config \
           -v ../stackdriver-sandbox:/sandbox \
           custom-cloud-shell:$GITHUB_SHA
+          -p $PROJECT_ID -b $BILLING_ID --skip-workspace-prompt \
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
         BILLING_ID: ${{ secrets.E2E_BILLING_ID  }}
