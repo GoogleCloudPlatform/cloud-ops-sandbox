@@ -53,7 +53,7 @@ jobs:
         set -x
         # build cloud shell image
         docker build -t cloud-shell-$GITHUB_SHA ./cloud-shell
-        docker create --rm --name test-runner \
+        docker create --name test-runner \
             -v ~/.config:/root/.config \
             cloud-shell-$GITHUB_SHA
         # copy over local git repo
@@ -66,3 +66,11 @@ jobs:
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
         BILLING_ID: ${{ secrets.E2E_BILLING_ID  }}
+    - name: Clean Project State
+      if: ${{ always()  }}
+      run: |
+        # clean GCP resources
+        .github/workflows/e2e_scripts/clean.sh
+        # clean docker containers
+        docker stop test-runner | true
+        docker rm test-runner | true
