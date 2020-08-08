@@ -36,6 +36,8 @@ from opencensus.trace import samplers
 
 from opentelemetry import trace
 from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from opentelemetry.ext.grpc import server_interceptor
+from opentelemetry.ext.grpc.grpcext import intercept_server
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleExportSpanProcessor
 
@@ -128,6 +130,9 @@ class HealthCheck():
 def start(dummy_mode):
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
                        interceptors=(oc_tracer_interceptor,))
+  # Add OpenTelemetry interceptor to receive trace contexts from client
+  server = intercept_server(server, server_interceptor(trace.get_tracer_provider()))
+
   service = None
   if dummy_mode:
     service = DummyEmailService()
