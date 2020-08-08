@@ -54,7 +54,7 @@ jobs:
         docker run --rm \
           --entrypoint /sandbox/terraform/install.sh \
           -v ~/.config:/root/.config \
-          -v ../stackdriver-sandbox:/sandbox \
+          -v `pwd`:/sandbox \
           custom-cloud-shell:$GITHUB_SHA
           -p $PROJECT_ID -b $BILLING_ID --skip-workspace-prompt \
       env:
