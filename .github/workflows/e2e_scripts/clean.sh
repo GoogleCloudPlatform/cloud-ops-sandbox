@@ -9,8 +9,11 @@ CLUSTER_ZONE=$(gcloud container clusters list \
                  --project $PROJECT_ID --format="value(zone)")
 if [ ! -z "$CLUSTER_ZONE" ]; then
     echo "deleting cluster"
-    gcloud container clusters delete stackdriver-sandbox \
-        --project $PROJECT_ID --zone $CLUSTER_ZONE --quiet
+    # keep trying if there is an error
+    while ! gcloud container clusters delete stackdriver-sandbox \
+        --project $PROJECT_ID --zone $CLUSTER_ZONE --quiet; do
+      sleep 5
+    done
 fi
 
 # delete loadgenerator
