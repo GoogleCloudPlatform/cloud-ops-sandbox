@@ -55,8 +55,8 @@ jobs:
           --entrypoint /sandbox/terraform/install.sh \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox \
-          custom-cloud-shell:$GITHUB_SHA
-          -p $PROJECT_ID -b $BILLING_ID --skip-workspace-prompt \
+          custom-cloud-shell:$GITHUB_SHA \
+          -p $PROJECT_ID -b $BILLING_ID --skip-workspace-prompt
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
         BILLING_ID: ${{ secrets.E2E_BILLING_ID  }}
