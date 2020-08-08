@@ -49,7 +49,7 @@ jobs:
       run: |
         set -x
         # build cloud shell image
-        docker build -t customcloud-shell:$GITHUB_SHA ./cloud-shell
+        docker build -t custom-cloud-shell:$GITHUB_SHA ./cloud-shell
         # run install script
         docker run --rm \
           --entrypoint /sandbox/terraform/install.sh \
