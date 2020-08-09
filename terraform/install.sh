@@ -25,9 +25,9 @@ cd $SCRIPT_DIR
 
 log() { echo "$1" >&2; }
 
-getBillingAccount() {
+promptForBillingAccount() {
   log "Checking for billing accounts..."
-  found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true)
+  found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true --sort-by=displayName)
   if [ -z "$found_accounts" ] || [[ ${#found_accounts[@]} -eq 0 ]]; then
     log "error: no active billing accounts were detected. In order to create a sandboxed environment,"
     log "the script needs to create a new GCP project and associate it with an active billing account"
@@ -42,7 +42,7 @@ getBillingAccount() {
   # store (name:id) info in a map
   IFS_bak=$IFS
   declare -A map
-  acc_ids=$(gcloud beta billing accounts list --format="value(displayName,name)" --filter open=true)
+  acc_ids=$(gcloud beta billing accounts list --format="value(displayName,name)" --filter open=true --sort-by=displayName)
   IFS=$'\n'
   acc_ids=($acc_ids)
   for acc in ${acc_ids[@]}
@@ -74,7 +74,7 @@ getBillingAccount() {
   IFS=$IFS_bak
 }
 
-getProject() {
+promptForProject() {
   log "Checking for project list..."
   acct=$(gcloud info --format="value(config.account)")
   # get projects associated with the billing account
@@ -111,19 +111,43 @@ getProject() {
           IFS=$' |'
           opt=($opt)
           project_id=${opt[0]}
-          bucket_name="$project_id-bucket"
           break
         fi
       done
       IFS=$IFS_bak
   fi
+  # attach to project
   gcloud config set project "$project_id"
+}
+
+getOrCreateBucket() {
+  # bucket name should be globally unique
+  bucket_name="$project_id-bucket"
+
+  # check if bucket already exists
+  gcloud config set project "$project_id"
+  if [[ -n "$(gsutil ls | grep gs://$bucket_name/)" ]]; then
+    log "Bucket $bucket already exists"
+  else
+    # create new bucket
+    TRIES=0
+    while [[ $(gsutil mb -p "$project_id" "gs://$bucket_name") || "${TRIES}" -lt 5 ]]; do
+      log "Checking if bucket $bucket_name exists..."
+      if [[ -n "$(gsutil ls | grep gs://$bucket_name/)" ]]; then
+        log "Bucket $bucket_name created"
+        break;
+      else
+        log "Bucket creation failed. retrying..."
+        sleep 1
+        TRIES=$((TRIES + 1))
+      fi
+    done
+  fi
 }
 
 createProject() {
     # generate random id
     project_id="stackdriver-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
-    bucket_name="$project_id-bucket" # bucket name should be globally unique
     # create project
     if [[ $acct == *"google.com"* ]];
     then
@@ -146,20 +170,6 @@ createProject() {
     fi;
     # link billing account
     gcloud beta billing projects link "$project_id" --billing-account="$billing_id"
-    # create bucket
-    gcloud config set project "$project_id"
-    TRIES=0
-    while [[ $(gsutil mb -p "$project_id" "gs://$bucket_name") || "${TRIES}" -lt 5 ]]; do
-      log "Check if bucket is created..."
-      if [[ -n "$(gsutil ls)" ]]; then
-        log "It's created!"
-        break;
-      else
-        log "Creating bucket failed. Try to create it again..."
-        sleep 1
-        TRIES=$((TRIES + 1))
-      fi
-    done    
 }
 
 applyTerraform() {
@@ -180,7 +190,7 @@ applyTerraform() {
   terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
 }
 
-authGCloud() {
+authenticateCluster() {
   CLUSTER_ZONE=$(gcloud container clusters list --filter="name:stackdriver-sandbox" --project $project_id --format="value(zone)")
   gcloud container clusters get-credentials stackdriver-sandbox --zone "$CLUSTER_ZONE"
 }
@@ -203,8 +213,10 @@ installMonitoring() {
   acct=$(gcloud info --format="value(config.account)")
 
   gcp_monitoring_path="https://console.cloud.google.com/monitoring?project=$project_id"
-  log "Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
-  read -p "When you are done, please press enter to continue"
+  if [[ -z $skip_workspace_prompt ]]; then
+    log "Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
+    read -p "When you are done, please press enter to continue"
+  fi
 
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
@@ -278,9 +290,9 @@ checkAuthentication() {
         log "Authentication failed"
         log "Please allow gcloud and Cloud Shell to access your GCP account"
     fi
-    while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 10  ]]; do
+    while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 30  ]]; do
         AUTH_ACCT=$(gcloud auth list --format="value(account)")
-        sleep 3;
+        sleep 1;
         TRIES=$((TRIES + 1))
     done
     if [[ -z $AUTH_ACCT ]]; then
@@ -288,22 +300,72 @@ checkAuthentication() {
     fi
 }
 
-log "Checking Prerequisites..."
+parseArguments() {
+  while (( "$#" )); do
+    case "$1" in
+    -p|--project|--project-id)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        project_id=$2
+        gcloud config set project "$project_id"
+        shift 2
+      else
+        log "Error: Argument for $1 is missing" >&2
+        exit 1
+      fi
+      ;;
+    -b|--billing|--billing-id)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        billing_id=$2
+        billing_acct=$(gcloud beta billing accounts describe $billing_id --format="value(displayName)")
+        shift 2
+      else
+        log "Error: Argument for $1 is missing" >&2
+        exit 1
+      fi
+      ;;
+    --skip-workspace-prompt)
+      skip_workspace_prompt=1
+      shift
+      ;;
+    -h|--help)
+      log "Deploy Stackdriver Sandbox to a GCP project"
+      log ""
+      log "options:"
+      log "-p|--project|--project-id     GCP project to deploy Stackdriver Sandbox to"
+      log "-b|--billing|--billing-id     GCP billing id to use"
+      log "--skip-workspace-prompt       Don't pause for Stackdriver workspace set up"
+      log ""
+      exit 0
+      ;;
+    -*|--*=) # unsupported flags
+      log "Error: Unsupported flag $1" >&2
+      exit 1
+      ;;
+    *) # ignore positional arguments
+      shift
+      ;;
+    esac
+  done
+}
+
+# check for command line arguments
+parseArguments $*;
+
+# ensure gcloud and cloudshell are authenticated
 checkAuthentication;
-getBillingAccount;
 
-# Make sure we use Application Default Credentials for authentication
-# For that we need to unset GOOGLE_APPLICATION_CREDENTIALS and generate
-# new default credentials by re-authenticating. Re-authentication
-# is needed so we don't assume what's the current state on the machine that runs
-# this script for Sandbox automation with terraform (idempotent automation)
-#export GOOGLE_APPLICATION_CREDENTIALS=""
-#gcloud auth application-default login
+# prompt user for missing information
+if [[ -z "$billing_id" || -z "$billing_acct" ]]; then
+  promptForBillingAccount;
+fi
+if [[ -z "$project_id" ]]; then
+  promptForProject;
+fi
+getOrCreateBucket;
 
-# Provision Stackdriver Sandbox cluster
-getProject;
+# deploy
 applyTerraform;
-authGCloud;
+authenticateCluster;
 # || true to prevent errors during monitoring setup from stopping the installation script
 installMonitoring || true;
 getExternalIp;
