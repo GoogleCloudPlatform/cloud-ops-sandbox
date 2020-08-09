@@ -35,7 +35,7 @@ requests==2.24.0          # via -r requirements.in, google-api-core, google-clou
 rsa==4.6                  # via google-auth
 six==1.15.0               # via google-api-core, google-api-python-client, google-auth, google-auth-httplib2, grpcio, protobuf
 uritemplate==3.0.1        # via google-api-python-client
-urllib3==1.24.2           # via requests
+urllib3==1.25.10           # via requests
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
