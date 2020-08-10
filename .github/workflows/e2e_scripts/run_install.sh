@@ -17,11 +17,18 @@
 # This file sets up and executes an installation inside the
 # custom Cloud Shell container
 
-# copy sandbox files into a new directory outside the
-# docker volume, to avoid persisting tfstate between runs
-mkdir /sandbox
-cp -r /sandbox-shared/. /sandbox
-cd /sandbox/terraform
+if [[ -n "$release_repo" ]]; then
+  # pull down repo in the same way the Open in Cloud Shell button would
+  git clone $release_repo /sandbox
+  cd /sandbox
+  if [[ -n "$release_branch" ]]; then git checkout $release_branch; fi
+  if [[ -n "$release_dir" ]]; then cd $release_dir; fi
+else
+  # use latest code
+  mkdir /sandbox
+  cp -r /sandbox-shared/. /sandbox
+  cd /sandbox/terraform
+fi
 # trigger install script through cloudshell_open function
 # environment variables project_id and skip_workspace_prompt
 # must be set properly to run in headless mode
