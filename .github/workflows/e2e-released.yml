@@ -1,0 +1,54 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "End to End - Released"
+on:
+  schedule:
+    # run every day at 8pm
+    - cron:  '* 20 * * *'
+jobs:
+  end-to-end-released:
+    runs-on: [self-hosted, e2e-worker]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Clean Project State
+      run: |
+        # clean GCP resources
+        .github/workflows/e2e_scripts/clean.sh
+    - name: Extract Website Values
+      run: |
+        set -x
+        BTN_CONTENT=$(curl https://stackdriver-sandbox.dev/ | grep console-btn)
+        REPO=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_repo\=).*?(?=&)')
+        BRANCH=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_branch\=).*?(?=&)')
+        WORKING_DIR=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_working_dir\=).*?(?=&)')
+        CLOUDSHELL_IMAGE=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_image\=).*?(?=")')
+    - name: Run Install Script
+      run: |
+        set -x
+        # run install script
+        docker run --rm \
+          -e project_id=$PROJECT_ID \
+          -e skip_workspace_prompt=1 \
+          -v ~/.config:/root/.config \
+          -v `pwd`:/sandbox-shared \
+          --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
+          custom-cloud-shell:$GITHUB_SHA
+      env:
+        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
+    - name: Clean Project State
+      if: ${{ always()  }}
+      run: |
+        # clean GCP resources
+        .github/workflows/e2e_scripts/clean.sh
