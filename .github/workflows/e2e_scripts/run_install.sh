@@ -22,4 +22,4 @@
 mkdir /sandbox
 cp -r /sandbox-shared/. /sandbox
 # run install script
-/sandbox/terraform/install.sh $*
+bash -x /sandbox/terraform/install.sh $*

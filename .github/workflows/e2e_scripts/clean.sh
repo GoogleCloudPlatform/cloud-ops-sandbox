@@ -71,25 +71,31 @@ done
 DASHBOARD_LIST="first_run"
 while [ -n "$DASHBOARD_LIST" ]; do
   DASHBOARD_LIST=$(gcloud monitoring dashboards list --format="value(name)")
-  for DASHBOARD in $DASHBOARD_LIST; do
-    gcloud monitoring dashboards delete $DASHBOARD --quiet
-  done
+  if [ -n "$DASHBOARD_LIST" ]; then
+    for DASHBOARD in $DASHBOARD_LIST; do
+      gcloud monitoring dashboards delete $DASHBOARD --quiet
+    done
+  fi
 done
 
 # clear policies
 POLICY_LIST="first_run"
 while [ -n "$POLICY_LIST" ]; do
   POLICY_LIST=$(gcloud alpha monitoring policies list --format="value(name)")
-  for POLICY in $POLICY_LIST; do
-    gcloud alpha monitoring policies delete $POLICY --quiet
-  done
+  if [ -n "$POLICY_LIST" ]; then
+    for POLICY in $POLICY_LIST; do
+      gcloud alpha monitoring policies delete $POLICY --quiet
+    done
+  fi
 done
 
 # clear notification channels
 CHANNEL_LIST="first_run"
 while [ -n "$CHANNEL_LIST" ]; do
   CHANNEL_LIST=$(gcloud alpha monitoring channels list --format="value(name)")
-  for CHANNEL in $CHANNEL_LIST; do
-    gcloud alpha monitoring channels delete $CHANNEL --quiet
-  done
+  if [ -n "$CHANNEL_LIST" ]; then
+    for CHANNEL in $CHANNEL_LIST; do
+      gcloud alpha monitoring channels delete $CHANNEL --quiet
+    done
+  fi
 done
