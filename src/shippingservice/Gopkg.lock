@@ -25,20 +25,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d3a57cdbaefaceca4ebe6258ed86a992bdcfc93a8442dbda5343e2d43a8f8a6a"
-  name = "git.apache.org/thrift.git"
-  packages = ["lib/go/thrift"]
-  pruneopts = "UT"
-  revision = "67df34afa782be67154034b31e4ad7cb3834fed1"
-  source = "github.com/apache/thrift"
-
-[[projects]]
-  branch = "master"
   digest = "1:27490301253ac5063d502480ef3794b95222eea6cb997ae6e689a058b1cd5253"
   name = "github.com/GoogleCloudPlatform/microservices-demo"
   packages = ["src/shippingservice/genproto"]
   pruneopts = "UT"
   revision = "10dfd04ab174cc680ed6ffef26cc4fb09ec40404"
+
+[[projects]]
+  digest = "1:9fe8532210bb4a51753c8b783bb6ff4bf03da370b2440a05f5686b3b440ce930"
+  name = "github.com/GoogleCloudPlatform/opentelemetry-operations-go"
+  packages = ["exporter/trace"]
+  pruneopts = "UT"
+  revision = "a1393affee9a13ed21974ae1d791da1b3189f4a0"
+  version = "v0.2.1"
 
 [[projects]]
   digest = "1:72856926f8208767b837bf51e3373f49139f61889b67dc7fd3c2a0fd711e3f7a"
@@ -94,7 +93,7 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:a5154dfd6b37bef5a3eab759e13296348e639dc8c7604f538368167782b08ccd"
+  digest = "1:1bb914cfb78f68f488a91cd7872d3d06a5f83c5bbacf0296dbef44e120b00a91"
   name = "go.opencensus.io"
   packages = [
     ".",
@@ -115,6 +114,38 @@
   pruneopts = "UT"
   revision = "b11f239c032624b045c4c2bfd3d1287b4012ce89"
   version = "v0.16.0"
+
+[[projects]]
+  digest = "1:d756b2b40d48038459c1fdb1068a834c0f6aa839f8260e961dd1862531a63226"
+  name = "go.opentelemetry.io/otel"
+  packages = [
+    "api/correlation",
+    "api/global",
+    "api/global/internal",
+    "api/internal",
+    "api/kv",
+    "api/kv/value",
+    "api/label",
+    "api/metric",
+    "api/metric/registry",
+    "api/oterror",
+    "api/propagation",
+    "api/standard",
+    "api/trace",
+    "api/unit",
+    "instrumentation/grpctrace",
+    "internal/trace/parent",
+    "sdk",
+    "sdk/export/trace",
+    "sdk/instrumentation",
+    "sdk/internal",
+    "sdk/resource",
+    "sdk/trace",
+    "sdk/trace/internal",
+  ]
+  pruneopts = "UT"
+  revision = "58e50e249fe4c57f64e421e300b5d2316ae96811"
+  version = "v0.9.0"
 
 [[projects]]
   branch = "master"
@@ -302,11 +333,17 @@
     "cloud.google.com/go/profiler",
     "contrib.go.opencensus.io/exporter/stackdriver",
     "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto",
+    "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace",
     "github.com/golang/protobuf/proto",
     "github.com/sirupsen/logrus",
     "go.opencensus.io/plugin/ocgrpc",
     "go.opencensus.io/stats/view",
-    "go.opencensus.io/trace",
+    "go.opentelemetry.io/otel/api/global",
+    "go.opentelemetry.io/otel/api/standard",
+    "go.opentelemetry.io/otel/api/trace",
+    "go.opentelemetry.io/otel/instrumentation/grpctrace",
+    "go.opentelemetry.io/otel/sdk/resource",
+    "go.opentelemetry.io/otel/sdk/trace",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
     "google.golang.org/grpc/health/grpc_health_v1",
