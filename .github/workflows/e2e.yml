@@ -36,15 +36,23 @@ jobs:
     - name: Check Project State
       run: |
         .github/workflows/e2e_scripts/check.sh
-    #- name: Build Sandbox Services
-    #  run: |
-    #    set -x
-    #    skaffold config set --global local-cluster false
-    #    # tag with git hash
-    #    skaffold build --default-repo=gcr.io/$PROJECT_ID \
-    #                   --tag=$GITHUB_SHA
-    #  env:
-    #    PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
+    - name: Build Sandbox Services
+      run: |
+        set -x
+        skaffold config set --global local-cluster false
+        # tag with git hash
+        skaffold build --default-repo=gcr.io/$PROJECT_ID \
+                       --tag=$GITHUB_SHA
+      env:
+        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
+    - name: Rewrite Manifests
+      run: |
+        set -x
+        OLD_PATH=gcr.io/stackdriver-sandbox-230822
+        NEW_PATH=gcr.io/stackdriver-sandbox-e2e/$OLD_PATH
+        # use newly built containers instead of latest pushed
+        find "./kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s#$OLD_PATH#$NEW_PATH#g" {} \;
+        find "./kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s#:latest#:$GITHUB_SHA#g" {} \;
     - name: Run Install Script
       run: |
         set -x
