@@ -187,7 +187,11 @@ applyTerraform() {
   fi
 
   log "Apply Terraform automation"
-  terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
+  tf_args="-var=project_id=${project_id} -var=bucket_name=${bucket_name}"
+  if [[ -n "$billing_id" ]]; then
+    tf_args="$tf_args -var=billing_account=${billing_id}"
+  fi
+  terraform apply -auto-approve $tf_args
 }
 
 authenticateCluster() {
@@ -313,17 +317,6 @@ parseArguments() {
         exit 1
       fi
       ;;
-    -b|--billing|--billing-id)
-      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-        billing_id=$2
-        #billing_acct=$(gcloud beta billing accounts describe $billing_id --format="value(displayName)")
-        billing_acct="none"
-        shift 2
-      else
-        log "Error: Argument for $1 is missing" >&2
-        exit 1
-      fi
-      ;;
     --skip-workspace-prompt)
       skip_workspace_prompt=1
       shift
@@ -333,7 +326,6 @@ parseArguments() {
       log ""
       log "options:"
       log "-p|--project|--project-id     GCP project to deploy Stackdriver Sandbox to"
-      log "-b|--billing|--billing-id     GCP billing id to use"
       log "--skip-workspace-prompt       Don't pause for Stackdriver workspace set up"
       log ""
       exit 0
@@ -356,10 +348,8 @@ parseArguments $*;
 checkAuthentication;
 
 # prompt user for missing information
-if [[ -z "$billing_id" || -z "$billing_acct" ]]; then
-  promptForBillingAccount;
-fi
 if [[ -z "$project_id" ]]; then
+  promptForBillingAccount;
   promptForProject;
 fi
 getOrCreateBucket;
