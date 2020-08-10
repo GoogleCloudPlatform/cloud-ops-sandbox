@@ -19,10 +19,7 @@ on:
     branches:
       - master
       - release/*
-  pull_request:
-    # run on pull requests targeting master
-    branches:
-      - master
+      - e2e-test
 jobs:
   end-to-end:
     runs-on: [self-hosted, e2e-worker]

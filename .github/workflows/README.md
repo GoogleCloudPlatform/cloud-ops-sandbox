@@ -31,6 +31,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
     - `compute admin`
     - `monitoring admin`
     - `logging admin`
+    - `service account user`
     - `storage admin` access to the GCR and terraform data buckets
   - requires `E2E_PROJECT_ID` to be set properly in the [repo's secrets](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/secrets)
 
