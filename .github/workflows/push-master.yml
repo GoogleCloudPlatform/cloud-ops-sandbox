@@ -36,7 +36,6 @@ jobs:
                        --tag=latest
       env:
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
-        
      - name: Push Cloud Shell Image to GCR
       timeout-minutes: 20
       run: |
