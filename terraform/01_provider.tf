@@ -24,7 +24,7 @@
 
 provider "google" {
   # pin provider to 2.x
-  version = "~> 2.1"
+  version = "~> 3.0"
 
   # credentials = "/path/to/creds.json"
   # project = "project-id"
