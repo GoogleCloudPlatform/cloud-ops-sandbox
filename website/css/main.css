@@ -121,16 +121,6 @@ nav {
   position: relative;
 }
 
-.step.step-2 {
-  width: 100%;
-  max-width: 100%;
-  flex: 1 1 auto;
-}
-
-.step.step-2 p {
-  max-width: 320px;
-}
-
 .step label {
   font-size: 14px;
   line-height: 28px;
@@ -179,28 +169,6 @@ img.cloud-shell {
   top: -115px;
   right: 0px;
 }
-
-.step-2 .line {
-  position: absolute;
-  left: 60px;
-  right: 150px;
-  height: 1px;
-  top: 14px;
-  background: var(--blue600);
-}
-
-.step-2 .line::before {
-  content: '';
-  display: block;
-  width: 7px;
-  height: 7px;
-  border-radius: 7px;
-  background: var(--blue600);
-  position: absolute;
-  left: -4px;
-  top: -3px;
-}
-
 
 
 /* FOOTER */

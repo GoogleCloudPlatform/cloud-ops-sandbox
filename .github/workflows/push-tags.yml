@@ -47,3 +47,10 @@ jobs:
         docker push $IMAGE_PATH
       env:
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
+
+    - name: Deploy Website to App Engine
+      timeout-minutes: 20
+      run: |
+        set -x
+        gcloud app deploy app.yaml
+
