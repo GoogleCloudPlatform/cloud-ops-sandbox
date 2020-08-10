@@ -22,16 +22,16 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
     - should have no service account for security reasons
 - `push-privilege`
   - image push worker
-  - requires permissions to push images to GCR repo, and deploy to App Engine
+  - requires permissions to push images to GCR storage bucket, and deploy to App Engine
   - requires `PROJECT_ID` to be set properly in the [repo's secrets](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/secrets)
 - `e2e-worker`
   - end to end test worker
   - requires the following permissions on the end-to-end test project:
     - `kubernetes engine admin`
     - `compute admin`
-    - `storage object admin`
     - `monitoring admin`
     - `logging admin`
+    - `storage admin` access to the GCR and terraform data buckets
   - requires `E2E_PROJECT_ID` to be set properly in the [repo's secrets](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/secrets)
 
 ---
