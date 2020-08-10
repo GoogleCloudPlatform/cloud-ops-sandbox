@@ -6,29 +6,38 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 
 1. Create a GCE instance for running tests
     - VM should be at least n1-standard-4 with 100GB persistent disk
-    - VM should be created with no service account
+    - VM should be created with appropriate service account for desired [worker tag](#Tags)
 2. SSH into new VM through Google Cloud Console
 3. Follow the instructions to add a new runner on the [Actions Settings page](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/actions) to authenticate the new runner
-4. Attach the `kind-cluster` tag to the new runner
+4. Attach the [appropriate tag(s)](#Tags) to the new runner
 5. Set GitHub Actions as a background service
     - `sudo ~/actions-runner/svc.sh install ; sudo ~/actions-runner/svc.sh start`
 6. Run the following command to install dependencies
     - `wget -O - https://raw.githubusercontent.com/GoogleCloudPlatform/stackdriver-sandbox/master/.github/workflows/install-dependencies.sh | bash`
 
-## Setup - Push Enabled
-
-Some actions require authentication to GCP to push container images. These workers need extra setup
-
-**Note:** only one worker in the pool requires this additional setup. Try to avoid granting privileges to workers that don't need them
-
-1. Provision the VM with a service account with write access to your GCR data bucket
-2. Ensure `PROJECT_ID` is set properly in the [repo's secrets](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/secrets)
-3. Tag the new worker with `push-privilege` on the [Actions Settings page](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/actions)
+## Tags
+- `kind-cluster`
+  - default worker
+  - needs no special privileges
+    - should have no service account for security reasons
+- `push-privilege`
+  - image push worker
+  - requires permissions to push images to GCR repo, and deploy to App Engine
+  - requires `PROJECT_ID` to be set properly in the [repo's secrets](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/secrets)
+- `e2e-worker`
+  - end to end test worker
+  - requires the following permissions on the end-to-end test project:
+    - `kubernetes engine admin`
+    - `compute admin`
+    - `storage object admin`
+    - `monitoring admin`
+    - `logging admin`
+  - requires `E2E_PROJECT_ID` to be set properly in the [repo's secrets](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/secrets)
 
 ---
 ## Workflows
 
-### ci.yaml
+### CI.yaml
 
 #### Triggers
 
@@ -44,7 +53,8 @@ Some actions require authentication to GCP to push container images. These worke
   - ensures all pods reach ready state
   - ensures HTTP request to frontend returns HTTP status 200
 
-### push-master.yaml
+
+### Push-Master.yaml
 
 #### Triggers
 - commits pushed to master
@@ -53,11 +63,27 @@ Some actions require authentication to GCP to push container images. These worke
 - builds and pushes images to official GCR repo tagged with git commit
 - builds and pushes images to official GCR repo tagged as latest
 
-### push-tags.yaml
+
+### Push-Tags.yaml
 
 #### Triggers
 - tags pushed to repo
 
 #### Actions
 - builds and pushes images to official GCR repo tagged with git tag name
+
+
+### E2E.yaml
+
+#### Triggers
+- on each commit to master
+- on each commit to a release branch
+- on each PR into master
+
+#### Actions
+- ensure end-to-end test project has deleted all test resources
+- build fresh containers for all services and the custom cloud shell image
+- rewrite the kubernetes manifests to test with local images
+- run install.sh script against end-to-end test project
+- clean up resources in test project
 
