@@ -15,6 +15,7 @@
     "@grpc/proto-loader": "0.5.5",
     "@opentelemetry/api": "^0.10.2",
     "@opentelemetry/node": "^0.10.2",
+    "@opentelemetry/plugin-grpc": "^0.10.2",
     "@opentelemetry/tracing": "^0.10.2",
     "async": "1.5.2",
     "google-protobuf": "3.12.4",
