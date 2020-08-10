@@ -16,7 +16,7 @@ name: "Push Tagged Images"
 on:
   push:
     tags:
-      - v*
+      - 'v*'
 jobs:
   push-tags:
     runs-on: [self-hosted, push-privilege]
