@@ -21,5 +21,10 @@
 # docker volume, to avoid persisting tfstate between runs
 mkdir /sandbox
 cp -r /sandbox-shared/. /sandbox
-# run install script
-bash -x /sandbox/terraform/install.sh $*
+cd /sandbox/terraform
+# trigger install script through cloudshell_open function
+# environment variables project_id and skip_workspace_prompt
+# must be set properly to run in headless mode
+echo "running install.sh"
+source /google/devshell/bashrc.google.d/cloudshell_open.sh
+cloudshell_open
