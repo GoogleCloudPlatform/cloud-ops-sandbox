@@ -27,6 +27,19 @@ require('@google-cloud/debug-agent').start({
   }
 });
 
+const opentelemetry = require('@opentelemetry/api');
+const {NodeTracerProvider} = require('@opentelemetry/node');
+const {SimpleSpanProcessor} = require('@opentelemetry/tracing');
+const { TraceExporter } = require('@google-cloud/opentelemetry-cloud-trace-exporter');
+
+// OpenTelemetry tracing with exporter to Google Cloud Trace
+const provider = new NodeTracerProvider();
+// Cloud Trace Exporter handles credentials.
+const exporter = new TraceExporter();
+provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+opentelemetry.trace.setGlobalTracerProvider(provider);
+const tracer = opentelemetry.trace.getTracer('currency');
+
 const path = require('path');
 const grpc = require('grpc');
 const request = require('request');
