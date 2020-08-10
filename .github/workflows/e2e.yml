@@ -56,7 +56,7 @@ jobs:
         docker run --rm \
           --entrypoint /bin/bash \
           -v ~/.config:/root/.config \
-          -v `pwd`:/sandbox:ro \
+          -v `pwd`:/sandbox \
           custom-cloud-shell:$GITHUB_SHA \
           -e /sandbox/terraform/install.sh -p $PROJECT_ID --skip-workspace-prompt
       env:
