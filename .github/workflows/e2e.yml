@@ -33,6 +33,8 @@ jobs:
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
+        # clean terraform files
+        rm -rf ./terraform/.terraform
     - name: Check Project State
       run: |
         .github/workflows/e2e_scripts/check.sh
@@ -64,3 +66,5 @@ jobs:
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
+        # clean terraform files
+        rm -rf ./terraform
