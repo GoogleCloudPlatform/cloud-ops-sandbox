@@ -24,11 +24,6 @@ data "google_billing_account" "acct" {
   display_name = var.billing_account
 }
 
-variable "billing_account" {
-  default     = null
-  type        = string
-}
-
 data "google_project" "project" {
   project_id = var.project_id
 }
