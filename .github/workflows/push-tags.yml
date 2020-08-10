@@ -14,11 +14,9 @@
 
 name: "Push Tagged Images"
 on:
-  create:
+  push:
     tags:
       - v*
-    branches-ignore:
-      - '*'
 jobs:
   push-tags:
     runs-on: [self-hosted, push-privilege]
