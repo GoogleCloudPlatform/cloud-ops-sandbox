@@ -33,9 +33,6 @@ jobs:
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
-    - name: Check Project State
-      run: |
-        .github/workflows/e2e_scripts/check.sh
     - name: Build Sandbox Services
       run: |
         set -x
