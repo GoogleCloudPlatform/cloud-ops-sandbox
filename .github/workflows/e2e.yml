@@ -33,8 +33,6 @@ jobs:
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
-        # clean terraform files
-        rm -rf ./terraform/.terraform
     - name: Check Project State
       run: |
         .github/workflows/e2e_scripts/check.sh
@@ -54,11 +52,11 @@ jobs:
         docker build -t custom-cloud-shell:$GITHUB_SHA ./cloud-shell
         # run install script
         docker run --rm \
-          --entrypoint /bin/bash \
           -v ~/.config:/root/.config \
-          -v `pwd`:/sandbox \
+          -v `pwd`:/sandbox-shared \
+          --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
           custom-cloud-shell:$GITHUB_SHA \
-          -e /sandbox/terraform/install.sh -p $PROJECT_ID --skip-workspace-prompt
+          -p $PROJECT_ID --skip-workspace-prompt
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Clean Project State
@@ -66,5 +64,3 @@ jobs:
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
-        # clean terraform files
-        rm -rf ./terraform
