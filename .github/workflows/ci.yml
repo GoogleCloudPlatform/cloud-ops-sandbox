@@ -90,5 +90,5 @@ jobs:
     - name: Test Custom Cloud Shell Image Build
       run: |
         set -x
-        # build cloud shell image
+        # build cloud shell image: it will automatically exit if there's an error in build
         docker build -t custom-cloud-shell:$GITHUB_SHA ./cloud-shell
