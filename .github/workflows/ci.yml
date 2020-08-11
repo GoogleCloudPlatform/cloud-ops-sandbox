@@ -87,3 +87,8 @@ jobs:
         if [[ "$ERROR_COUNT" -gt "0" ]]; then
           exit 1
         fi
+    - name: Test Custom Cloud Shell Image Build
+      run: |
+        set -x
+        # build cloud shell image
+        docker build -t custom-cloud-shell:$GITHUB_SHA ./cloud-shell
