@@ -74,17 +74,28 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 - builds and pushes images to official GCR repo tagged with git tag name
 
 
-### E2E.yaml
+### E2E-Master.yaml
 
 #### Triggers
 - on each commit to master
 - on each commit to a release branch
-- on each PR into master
 
 #### Actions
 - ensure end-to-end test project has deleted all test resources
 - build fresh containers for all services and the custom cloud shell image
 - rewrite the kubernetes manifests to test with local images
+- run install.sh script against end-to-end test project
+- clean up resources in test project
+
+### E2E-Release.yaml
+
+#### Triggers
+- daily at 8pm
+
+#### Actions
+- ensure end-to-end test project has deleted all test resources
+- scrape latest release information from https://stackdriver-sandbox.dev/
+- download 
 - run install.sh script against end-to-end test project
 - clean up resources in test project
 
