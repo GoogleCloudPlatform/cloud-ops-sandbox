@@ -27,4 +27,5 @@ cd /sandbox/terraform
 # must be set properly to run in headless mode
 echo "running install.sh"
 source /google/devshell/bashrc.google.d/cloudshell_open.sh
-bash -x cloudshell_open
+set -x
+cloudshell_open
