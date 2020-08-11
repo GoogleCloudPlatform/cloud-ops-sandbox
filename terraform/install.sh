@@ -328,11 +328,16 @@ parseArguments() {
       skip_workspace_prompt=1
       shift
       ;;
+    -v|--verbose)
+      set -x
+      shift
+      ;;
     -h|--help)
       log "Deploy Stackdriver Sandbox to a GCP project"
       log ""
       log "options:"
       log "-p|--project|--project-id     GCP project to deploy Stackdriver Sandbox to"
+      log "-v|--verbose                  print commands as they run (set -x)"
       log "--skip-workspace-prompt       Don't pause for Stackdriver workspace set up"
       log ""
       exit 0
