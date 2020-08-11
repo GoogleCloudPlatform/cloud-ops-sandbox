@@ -18,6 +18,7 @@
 #set -euo pipefail
 set -o errexit  # Exit on error
 #set -o nounset  # Trigger error when expanding unset variables
+if [[ -n "$DEBUG" ]]; then set -x; fi
 
 # ensure the working dir is the script's folder
 SCRIPT_DIR=$(realpath $(dirname "$0"))

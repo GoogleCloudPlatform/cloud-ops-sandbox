@@ -22,6 +22,10 @@
 mkdir /sandbox
 cp -r /sandbox-shared/. /sandbox
 cd /sandbox/terraform
+
+# enable debug mode
+export DEBUG=1
+
 # trigger install script through cloudshell_open function
 # environment variables project_id and skip_workspace_prompt
 # must be set properly to run in headless mode
