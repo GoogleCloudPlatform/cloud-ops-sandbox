@@ -17,6 +17,10 @@ on:
   schedule:
     # run every day at 8pm
     - cron:  '* 20 * * *'
+  push:
+    # run on pushes to master or release/*
+    branches:
+      - e2e-test
 jobs:
   end-to-end-released:
     runs-on: [self-hosted, e2e-worker]
@@ -27,13 +31,18 @@ jobs:
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
     - name: Extract Website Values
+      id: website_variables
       run: |
         set -x
         BTN_CONTENT=$(curl https://stackdriver-sandbox.dev/ | grep console-btn)
         REPO=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_repo\=).*?(?=&)')
+        echo ::set-output name=repo::${REPO}
         BRANCH=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_branch\=).*?(?=&)')
+        echo ::set-output name=branch::${BRANCH}
         WORKING_DIR=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_working_dir\=).*?(?=&)')
+        echo ::set-output name=dir::${WORKING_DIR}
         CLOUDSHELL_IMAGE=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_image\=).*?(?=")')
+        echo ::set-output name=cloudshell_image::${CLOUDSHELL_IMAGE}
     - name: Run Install Script
       run: |
         set -x
@@ -41,10 +50,13 @@ jobs:
         docker run --rm \
           -e project_id=$PROJECT_ID \
           -e skip_workspace_prompt=1 \
+          -e release_repo=${{ steps.website_variables.outputs.repo }} \
+          -e release_branch=${{ steps.website_variables.outputs.branch }} \
+          -e release_dir=${{ steps.website_variables.outputs.dir }} \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
-          custom-cloud-shell:$GITHUB_SHA
+          ${{ steps.website_variables.outputs.cloudshell_image }}
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Clean Project State
