@@ -218,8 +218,14 @@ installMonitoring() {
 
   gcp_monitoring_path="https://console.cloud.google.com/monitoring?project=$project_id"
   if [[ -z $skip_workspace_prompt ]]; then
-    log "Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
-    read -p "When you are done, please press enter to continue"
+    YELLOW=`tput setaf 3`
+    log ""
+    log ""
+    log "${YELLOW}********************************************************************************"
+    log ""
+    log "${YELLOW}⚠️ Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
+    log ""
+    read -p "${YELLOW}When you are done, please PRESS ENTER TO CONTINUE"
   fi
 
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
