@@ -188,11 +188,11 @@ applyTerraform() {
   fi
 
   log "Apply Terraform automation"
-  tf_args="-var=project_id=${project_id} -var=bucket_name=${bucket_name}"
   if [[ -n "$billing_id" ]]; then
-    tf_args="$tf_args -var=billing_account=${billing_id}"
+    terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
+  else
+    terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
   fi
-  terraform apply -auto-approve $tf_args
 }
 
 authenticateCluster() {
