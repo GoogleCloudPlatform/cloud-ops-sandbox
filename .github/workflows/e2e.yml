@@ -42,7 +42,7 @@ jobs:
       run: |
         set -x
         OLD_PATH=gcr.io/stackdriver-sandbox-230822
-        NEW_PATH=gcr.io/stackdriver-sandbox-e2e/$OLD_PATH
+        NEW_PATH=gcr.io/stackdriver-sandbox-e2e/tests/$OLD_PATH
         # use newly built containers instead of latest pushed
         find "./kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s#$OLD_PATH#$NEW_PATH#g" {} \;
         find "./kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s#:latest#:$GITHUB_SHA#g" {} \;
@@ -50,7 +50,7 @@ jobs:
       run: |
         set -x
         # build cloud shell image
-        docker build -t custom-cloud-shell:$GITHUB_SHA ./cloud-shell
+        docker build -t test-cloud-shell:$GITHUB_SHA ./cloud-shell
         # run install script
         docker run --rm \
           -e project_id=$PROJECT_ID \
@@ -58,7 +58,7 @@ jobs:
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
-          custom-cloud-shell:$GITHUB_SHA
+          test-cloud-shell:$GITHUB_SHA
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Clean Project State
