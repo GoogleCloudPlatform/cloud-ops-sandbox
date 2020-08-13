@@ -21,6 +21,8 @@ on:
     # run on pushes to master or release/*
     branches:
       - e2e-test
+  workflow_dispatch:
+    # trigger through UI or API
 jobs:
   end-to-end-released:
     runs-on: [self-hosted, e2e-worker]
