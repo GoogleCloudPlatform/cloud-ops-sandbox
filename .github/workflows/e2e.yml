@@ -34,7 +34,7 @@ jobs:
         set -x
         skaffold config set --global local-cluster false
         # tag with git hash
-        skaffold build --default-repo=gcr.io/$PROJECT_ID \
+        skaffold build --default-repo=gcr.io/$PROJECT_ID/tests \
                        --tag=$GITHUB_SHA
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
