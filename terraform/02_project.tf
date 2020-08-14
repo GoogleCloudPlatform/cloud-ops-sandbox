@@ -17,9 +17,10 @@
 # stanza. This gives a way to look stuff up and use it in other resources. Here
 # we're looking up the billing account by name (hence why the README has you
 # name it a certain way) so we can pass its ID on later.
-#
-# If productized we'd drop this and use the default billing account instead.
+
+# billing account is optional to allow deploying to existing projects
 data "google_billing_account" "acct" {
+  count        = "${var.billing_account != null ? 1 : 0}"
   display_name = var.billing_account
 }
 
