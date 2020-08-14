@@ -20,6 +20,7 @@ on:
       - master
       - release/*
       - e2e-test
+      - monitoring_tests_to_e2e
 jobs:
   end-to-end:
     runs-on: [self-hosted, e2e-worker]
