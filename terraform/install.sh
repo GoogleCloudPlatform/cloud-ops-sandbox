@@ -18,6 +18,7 @@
 #set -euo pipefail
 set -o errexit  # Exit on error
 #set -o nounset  # Trigger error when expanding unset variables
+if [[ -n "$DEBUG" ]]; then set -x; fi
 
 # ensure the working dir is the script's folder
 SCRIPT_DIR=$(realpath $(dirname "$0"))
@@ -187,7 +188,11 @@ applyTerraform() {
   fi
 
   log "Apply Terraform automation"
-  terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
+  if [[ -n "$billing_id" ]]; then
+    terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
+  else
+    terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
+  fi
 }
 
 authenticateCluster() {
@@ -319,18 +324,12 @@ parseArguments() {
         exit 1
       fi
       ;;
-    -b|--billing|--billing-id)
-      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-        billing_id=$2
-        billing_acct=$(gcloud beta billing accounts describe $billing_id --format="value(displayName)")
-        shift 2
-      else
-        log "Error: Argument for $1 is missing" >&2
-        exit 1
-      fi
-      ;;
     --skip-workspace-prompt)
       skip_workspace_prompt=1
+      shift
+      ;;
+    -v|--verbose)
+      set -x
       shift
       ;;
     -h|--help)
@@ -338,7 +337,7 @@ parseArguments() {
       log ""
       log "options:"
       log "-p|--project|--project-id     GCP project to deploy Stackdriver Sandbox to"
-      log "-b|--billing|--billing-id     GCP billing id to use"
+      log "-v|--verbose                  print commands as they run (set -x)"
       log "--skip-workspace-prompt       Don't pause for Stackdriver workspace set up"
       log ""
       exit 0
@@ -361,10 +360,8 @@ parseArguments $*;
 checkAuthentication;
 
 # prompt user for missing information
-if [[ -z "$billing_id" || -z "$billing_acct" ]]; then
-  promptForBillingAccount;
-fi
 if [[ -z "$project_id" ]]; then
+  promptForBillingAccount;
   promptForProject;
 fi
 getOrCreateBucket;
