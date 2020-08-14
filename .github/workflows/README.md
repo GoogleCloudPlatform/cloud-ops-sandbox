@@ -91,6 +91,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 
 #### Triggers
 - daily at 8pm
+- on demand (through UI)
 
 #### Actions
 - ensure end-to-end test project has deleted all test resources
@@ -98,4 +99,3 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 - download 
 - run install.sh script against end-to-end test project
 - clean up resources in test project
-

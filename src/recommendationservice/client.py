@@ -21,7 +21,14 @@ import demo_pb2_grpc
 
 from opencensus.trace.tracer import Tracer
 from opencensus.trace.exporters import stackdriver_exporter
-from opencensus.trace.ext.grpc import client_interceptor
+from opencensus.trace.ext.grpc import client_interceptor as oc_client_interceptor
+
+from opentelemetry import trace
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from opentelemetry.ext.grpc import client_interceptor
+from opentelemetry.ext.grpc.grpcext import intercept_channel
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleExportSpanProcessor
 
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
@@ -33,16 +40,25 @@ if __name__ == "__main__":
     else:
         port = "8080"
 
+    # TODO: remove OpenCensus after conversion to OpenTelemetry
     try:
         exporter = stackdriver_exporter.StackdriverExporter()
         tracer = Tracer(exporter=exporter)
-        tracer_interceptor = client_interceptor.OpenCensusClientInterceptor(tracer, host_port='localhost:'+port)
+        oc_interceptor = oc_client_interceptor.OpenCensusClientInterceptor(tracer, host_port='localhost:'+port)
     except:
-        tracer_interceptor = client_interceptor.OpenCensusClientInterceptor()
+        oc_interceptor = oc_client_interceptor.OpenCensusClientInterceptor()
+    
+    # OpenTelemetry Tracing
+    trace.set_tracer_provider(TracerProvider())
+
+    cloud_trace_exporter = CloudTraceSpanExporter()
+    trace.get_tracer_provider().add_span_processor(
+        SimpleExportSpanProcessor(cloud_trace_exporter)
+    )
 
     # set up server stub
     channel = grpc.insecure_channel('localhost:'+port)
-    channel = grpc.intercept_channel(channel, tracer_interceptor)
+    channel = intercept_channel(channel, client_interceptor(trace.get_tracer_provider()))
     stub = demo_pb2_grpc.RecommendationServiceStub(channel)
     # form request
     request = demo_pb2.ListRecommendationsRequest(user_id="test", product_ids=["test"])

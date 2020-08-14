@@ -37,14 +37,14 @@ done
 
 
 # delete loadgenerator
-LOADGENRATOR="first_run"
-while [ -n "$LOADGENRATOR" ]; do
-  read -r LOADGENRATOR ZONE <<< $(gcloud compute instances list \
+LOADGENERATOR="first_run"
+while [ -n "$LOADGENERATOR" ]; do
+  read -r LOADGENERATOR ZONE <<< $(gcloud compute instances list \
                                     --filter="name:loadgenerator*" \
                                     --project $PROJECT_ID --format="value(name, zone)")
-  if [ -n "$LOADGENRATOR" ]; then
+  if [ -n "$LOADGENERATOR" ]; then
       echo "deleting loadgenerator"
-      gcloud compute instances delete $LOADGENRATOR \
+      gcloud compute instances delete $LOADGENERATOR \
           --project $PROJECT_ID --zone $ZONE --quiet
       sleep 5
   fi

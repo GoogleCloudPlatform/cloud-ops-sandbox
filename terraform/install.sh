@@ -18,6 +18,7 @@
 #set -euo pipefail
 set -o errexit  # Exit on error
 #set -o nounset  # Trigger error when expanding unset variables
+if [[ -n "$DEBUG" ]]; then set -x; fi
 
 # ensure the working dir is the script's folder
 SCRIPT_DIR=$(realpath $(dirname "$0"))
@@ -187,11 +188,11 @@ applyTerraform() {
   fi
 
   log "Apply Terraform automation"
-  tf_args="-var=project_id=${project_id} -var=bucket_name=${bucket_name}"
   if [[ -n "$billing_id" ]]; then
-    tf_args="$tf_args -var=billing_account=${billing_id}"
+    terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
+  else
+    terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
   fi
-  terraform apply -auto-approve $tf_args
 }
 
 authenticateCluster() {
@@ -218,8 +219,14 @@ installMonitoring() {
 
   gcp_monitoring_path="https://console.cloud.google.com/monitoring?project=$project_id"
   if [[ -z $skip_workspace_prompt ]]; then
-    log "Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
-    read -p "When you are done, please press enter to continue"
+    YELLOW=`tput setaf 3`
+    log ""
+    log ""
+    log "${YELLOW}********************************************************************************"
+    log ""
+    log "${YELLOW}⚠️ Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
+    log ""
+    read -p "${YELLOW}When you are done, please PRESS ENTER TO CONTINUE"
   fi
 
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
@@ -321,11 +328,16 @@ parseArguments() {
       skip_workspace_prompt=1
       shift
       ;;
+    -v|--verbose)
+      set -x
+      shift
+      ;;
     -h|--help)
       log "Deploy Stackdriver Sandbox to a GCP project"
       log ""
       log "options:"
       log "-p|--project|--project-id     GCP project to deploy Stackdriver Sandbox to"
+      log "-v|--verbose                  print commands as they run (set -x)"
       log "--skip-workspace-prompt       Don't pause for Stackdriver workspace set up"
       log ""
       exit 0

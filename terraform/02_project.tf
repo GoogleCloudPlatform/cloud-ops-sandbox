@@ -29,7 +29,7 @@ data "google_project" "project" {
 }
 
 resource "google_project_service" "iam" {
-  project = data.google_project.project.id
+  project = data.google_project.project.project_id
 
   service = "iam.googleapis.com"
 
@@ -37,7 +37,7 @@ resource "google_project_service" "iam" {
 }
 
 resource "google_project_service" "compute" {
-  project = data.google_project.project.id
+  project = data.google_project.project.project_id
 
   service = "compute.googleapis.com"
 
@@ -45,7 +45,7 @@ resource "google_project_service" "compute" {
 }
 
 resource "google_project_service" "clouddebugger" {
-  project = data.google_project.project.id
+  project = data.google_project.project.project_id
 
   service = "clouddebugger.googleapis.com"
 
@@ -54,7 +54,7 @@ resource "google_project_service" "clouddebugger" {
 
 
 resource "google_project_service" "cloudtrace" {
-  project = data.google_project.project.id
+  project = data.google_project.project.project_id
 
   service = "cloudtrace.googleapis.com"
 
@@ -62,7 +62,7 @@ resource "google_project_service" "cloudtrace" {
 }
 
 resource "google_project_service" "errorreporting" {
-  project = data.google_project.project.id
+  project = data.google_project.project.project_id
 
   service = "clouderrorreporting.googleapis.com"
 
@@ -89,7 +89,7 @@ resource "google_project_service" "gke" {
   # and then we don't have to specify this on every resource any more.
   #
   # Anyway, expect to see a lot more of these. I won't explain every time.
-  project = data.google_project.project.id
+  project = data.google_project.project.project_id
 
   # the service URI we want to enable
   service = "container.googleapis.com"
