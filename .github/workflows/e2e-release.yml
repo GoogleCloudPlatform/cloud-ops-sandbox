@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "End to End - Released"
+name: "End to End - Release"
 on:
   schedule:
     # run every day at 8pm

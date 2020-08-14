@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "End to End Tests"
+name: "End to End - Latest"
 on:
   push:
     # run on pushes to master or release/*
@@ -21,7 +21,7 @@ on:
       - release/*
       - e2e-test
 jobs:
-  end-to-end:
+  end-to-end-latest:
     runs-on: [self-hosted, e2e-worker]
     steps:
     - uses: actions/checkout@v2

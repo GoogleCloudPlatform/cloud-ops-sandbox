@@ -74,7 +74,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 - builds and pushes images to official GCR repo tagged with git tag name
 
 
-### E2E-Master.yaml
+### E2E-Latest.yaml
 
 #### Triggers
 - on each commit to master
