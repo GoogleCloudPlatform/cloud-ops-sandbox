@@ -86,7 +86,7 @@ promptForProject() {
                  --flatten="bindings[].members" \
                  --format="table(bindings.members)" \
                  --filter="bindings.role:roles/owner" 2> /dev/null | grep $acct | cat)
-      if [[ -n "$iam_test" ]]; then
+    if [[ -n "$iam_test" ]]; then
       create_time=$(gcloud projects describe "$proj" --format="value(create_time.date(%b-%d-%Y))")
       found_projects+=("$proj | [$create_time]")
     fi
@@ -112,7 +112,14 @@ promptForProject() {
           IFS=$' |'
           opt=($opt)
           project_id=${opt[0]}
-          break
+          # check if this project has a bucket
+          bucket_name="$project_id-bucket"
+          gcloud config set project "$project_id"
+          if [[ -n "$(gsutil ls | grep gs://$bucket_name/)" ]]; then
+            break
+          else
+            log "This is an outdated project that doesn't support GCS. Please try to use a new one."
+          fi
         fi
       done
       IFS=$IFS_bak
