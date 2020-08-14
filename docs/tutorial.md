@@ -1,8 +1,8 @@
-# Stackdriver Sandbox User Guide
+# Cloud Operations Sandbox Tutorial
 
 ## Overview
 
-The Stackdriver Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the [Ops Management](http://cloud.google.com/products/operations) (formerly Stackdriver) product suite. Ops Management is a suite of tools that helps you gain full observability into your code and applications.
+The Cloud Operations Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the [Ops Management](http://cloud.google.com/products/operations) (formerly Stackdriver) product suite. Ops Management is a suite of tools that helps you gain full observability into your code and applications.
 
 The Hipster Shop application used in the sandbox is intended to be sufficiently complex such that you can meaningfully experiment with it, and the Sandbox automatically provisions a new demo cluster, configures and deploys Hipster Shop, and simulates real users.
 
@@ -94,15 +94,15 @@ Similarly, cloud-native, microservice-based applications complicate traditional 
 
 You can find the Ops Management products in the navigation panel on the GCP Console:
 
-## The Stackdriver APM products: Trace, Profiler, and Debugger
+## The Cloud APM products: Trace, Profiler, and Debugger
 
 Next, learn about the APM products!
 
 ## Cloud Trace Overview
 
-Stackdriver Trace ([documentation](https://cloud.google.com/trace/docs/)) enables developers to see distributed traces that visually expose latency bottleneck in requests. Developers instrument application code to collect trace information. You can also include environmental information in traces and trace information can be included in Stackdriver Logging logs. The Trace UI can then pull relevant log events into the trace timelines. 
+Cloud Trace ([documentation](https://cloud.google.com/trace/docs/)) enables developers to see distributed traces that visually expose latency bottleneck in requests. Developers instrument application code to collect trace information. You can also include environmental information in traces and trace information can be included in Cloud Logging logs. The Trace UI can then pull relevant log events into the trace timelines. 
 
-For instrumenting your applications, currently recommended solution is **OpenCensus.** [OpenCensus](https://opencensus.io/) is an open-source project that supports trace instrumentation in a variety of languages and that can export this data to Stackdriver. Then you can use the Stackdriver Trace UI to analyze the data. Note that OpenCensus is merging with another similar project, OpenTracing, to form OpenTelemetry. See **OpenCensus to become OpenTelemetry**  in this doc.
+For instrumenting your applications, currently recommended solution is **OpenCensus.** [OpenCensus](https://opencensus.io/) is an open-source project that supports trace instrumentation in a variety of languages and that can export this data to Cloud. Then you can use the Cloud Trace UI to analyze the data. Note that OpenCensus is merging with another similar project, OpenTracing, to form OpenTelemetry. See **OpenCensus to become OpenTelemetry**  in this doc.
 
 HipsterShop microservices are instrumented to collect trace data. In addition to distributed tracing, **OpenCensus (Stats)** provides the sink to send quantifiable data, such as database latency, open file descriptors, and so on, that helps to set up monitoring of [SLIs and SLOs](https://cloud.google.com/blog/products/gcp/sre-fundamentals-slis-slas-and-slos) for the service. This data is available in Cloud Monitoring, and HipsterShop microservices are also instrumented to collect this kind of data.
 
@@ -339,13 +339,13 @@ You can expand any of the messages that matches the filter to see the full stack
 
 ## Destroying your cluster
 
-Once you have finished exploring the Stackdriver Sandbox project, don't forget to destroy it to avoid incurring additional billing.
+Once you have finished exploring the Sandbox project, don't forget to destroy it to avoid incurring additional billing.
 
 Destroy your Sandbox project by opening the Cloud Shell and running the destroy script:
 ```
 $ ./destroy.sh
 ```
 
-This script destroys the current Stackdriver Sandbox project. If the install.sh script were run again, a Stackdriver Sandbox project with a new project id would be created.
+**Note:** This script destroys the current project. If the install.sh script were run again, a Sandbox project with a new project id would be created.
 
-### Congratulations on finishing the Stackdriver Sandbox tutorial!
+### Congratulations on finishing the Cloud Operations Sandbox tutorial!
