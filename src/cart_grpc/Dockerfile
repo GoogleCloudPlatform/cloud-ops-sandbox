@@ -15,16 +15,23 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine as builder
 WORKDIR /app
 COPY . .
+
+# Workaround for https://github.com/grpc/grpc/issues/18428
+# Also see https://github.com/sgerrand/alpine-pkg-glibc
+RUN apk update && apk --no-cache add ca-certificates wget
+RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.30-r0/glibc-2.30-r0.apk
+RUN apk add glibc-2.30-r0.apk
 RUN dotnet restore && \
     dotnet build && \
     dotnet publish -c release -r linux-musl-x64 -o /cart_grpc
 
 # cartservice
-FROM alpine:3.8
+FROM mcr.microsoft.com/dotnet/core/runtime:3.1-alpine
 
-RUN GRPC_HEALTH_PROBE_VERSION=v0.3.2 && \
-    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
-    chmod +x /bin/grpc_health_probe
+#RUN GRPC_HEALTH_PROBE_VERSION=v0.3.2 && \
+#    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+#    chmod +x /bin/grpc_health_probe
 
 # Dependencies for runtime
 # busybox-extras => telnet
@@ -39,5 +46,5 @@ RUN apk add --no-cache \
     openssl \
     icu
 WORKDIR /app
-COPY --from=builder /cartservice .
-ENTRYPOINT ["./cart_grpc.dll"]
+COPY --from=builder . .
+ENTRYPOINT ["./cart_grpc.dll", "start"]
