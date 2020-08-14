@@ -68,6 +68,14 @@ resource "google_project_service" "errorreporting" {
   disable_dependent_services = true
 }
 
+resource "google_project_service" "sourcerepo" {
+  project = data.google_project.project.id
+
+  service = "sourcerepo.googleapis.com"
+
+  disable_dependent_services = true
+}
+
 # Enable GKE in the project we created. If you look at the docs you might see
 # the `google_project_services` resource which allows you to specify a list of
 # resources to enable. This seems like a good idea but there's a gotcha: to use
