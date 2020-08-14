@@ -18,9 +18,9 @@ on:
     # run every day at 8pm
     - cron:  '* 20 * * *'
   push:
-    # run on pushes to master or release/*
+    # run on pushes to test branch
     branches:
-      - e2e-test
+      - e2e-test-release
   workflow_dispatch:
     # trigger through UI or API
 jobs:
