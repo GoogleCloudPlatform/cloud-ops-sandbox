@@ -34,6 +34,10 @@ fi
 # enable debug mode
 export DEBUG=1
 
+# print environment variables
+echo $skip_workspace_prompt
+echo $project_id
+
 # trigger install script through cloudshell_open function
 # environment variables project_id and skip_workspace_prompt
 # must be set properly to run in headless mode
