@@ -30,6 +30,7 @@ require('@google-cloud/debug-agent').start({
 });
 
 const path = require('path');
+const tracer = require('./tracer')();
 const HipsterShopServer = require('./server');
 
 const PORT = process.env['PORT'];
