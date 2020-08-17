@@ -71,8 +71,14 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
+    # OpenTelemetry Tracing
+    # TracerProvider provides global state and access to tracers.
     trace.set_tracer_provider(TracerProvider())
 
+    # Export traces to Google Cloud Trace
+    # When running on GCP, the exporter handles authentication
+    # using automatically default application credentials.
+    # When running locally, credentials may need to be set explicitly.
     cloud_trace_exporter = CloudTraceSpanExporter()
     trace.get_tracer_provider().add_span_processor(
         SimpleExportSpanProcessor(cloud_trace_exporter)
@@ -102,18 +108,20 @@ if __name__ == "__main__":
         raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
     logger.info("product catalog address: " + catalog_addr)
 
-    # create gRPC channel to ProductCatalog service
+    # Create the gRPC client channel to ProductCatalog (server).
     channel = grpc.insecure_channel(catalog_addr)
-    # add OpenTelemetry interceptor
+    
+    # OpenTelemetry client interceptor passes trace contexts to the server.
     channel = intercept_channel(channel, client_interceptor(trace.get_tracer_provider()))
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
-    # create gRPC server for ListRecommendations Requests
+    # Create the gRPC server for accepting ListRecommendations Requests from frontend (client).
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    # add OpenTelemetry interceptor
+
+    # OpenTelemetry interceptor receives trace contexts from clients.
     server = intercept_server(server, server_interceptor(trace.get_tracer_provider()))
 
-    # add class to gRPC server
+    # Add RecommendationService class to gRPC server.
     service = RecommendationService()
     demo_pb2_grpc.add_RecommendationServiceServicer_to_server(service, server)
     health_pb2_grpc.add_HealthServicer_to_server(service, server)
