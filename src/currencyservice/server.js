@@ -34,7 +34,7 @@ const {TraceExporter} = require('@google-cloud/opentelemetry-cloud-trace-exporte
 
 // OpenTelemetry tracing with exporter to Google Cloud Trace
 const provider = new NodeTracerProvider({
-  // Use grpc plugin to receive trace contexts from client
+  // Use grpc plugin to receive trace contexts from clients.
   plugins: {
     grpc: {
       enabled: true,
@@ -42,7 +42,12 @@ const provider = new NodeTracerProvider({
     }
   }
 });
-// Cloud Trace Exporter handles credentials.
+
+// Enable OpenTelemetry exporters to export traces to Google Cloud Trace.
+// Exporters use Application Default Credentials (ADCs) to authenticate.
+// See https://developers.google.com/identity/protocols/application-default-credentials
+// for more details. When your application is running on GCP,
+// you don't need to provide auth credentials or a project id.
 const exporter = new TraceExporter();
 provider.addSpanProcessor(new BatchSpanProcessor(exporter));
 provider.register();
@@ -136,10 +141,12 @@ function _carry (amount) {
  * Lists the supported currencies
  */
 function getSupportedCurrencies (call, callback) {
+  // Extract the span context received from the gRPC client.
+  // Create a child span and add an event.
   const currentSpan = tracer.getCurrentSpan();
   const span = tracer.startSpan('currencyservice:GetSupportedCurrencies()', {
     parent: currentSpan,
-    kind: 1, //server
+    kind: 1, // server
   });
   span.addEvent('Get Supported Currencies');
   logger.info('Getting supported currencies...');
@@ -153,10 +160,12 @@ function getSupportedCurrencies (call, callback) {
  * Converts between currencies
  */
 function convert (call, callback) {
+  // Extract the span context received from the gRPC client.
+  // Create a child span and add an event.
   const currentSpan = tracer.getCurrentSpan();
   const span = tracer.startSpan('currencyservice:Convert()', {
     parent: currentSpan,
-    kind: 1, //server
+    kind: 1, // server
   });
   logger.info('received conversion request');
   try {
@@ -214,4 +223,5 @@ function main () {
 }
 
 main();
+// Flush all traces and shut down the Cloud Trace exporter.
 exporter.shutdown();

@@ -128,9 +128,10 @@ class HealthCheck():
       status=health_pb2.HealthCheckResponse.SERVING)
 
 def start(dummy_mode):
+  # Create gRPC server channel to receive requests from checkout (client).
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                       interceptors=(oc_tracer_interceptor,))
-  # Add OpenTelemetry interceptor to receive trace contexts from client
+                       interceptors=(oc_tracer_interceptor,)) # TODO: remove OpenCensus interceptor
+  # OpenTelemetry interceptor receives trace contexts from clients.
   server = intercept_server(server, server_interceptor(trace.get_tracer_provider()))
 
   service = None
@@ -206,8 +207,14 @@ if __name__ == '__main__':
       logger.info("Tracing disabled.")
       oc_tracer_interceptor = oc_server_interceptor.OpenCensusServerInterceptor()
   
+  # OpenTelemetry Tracing
+  # TracerProvider provides global state and access to tracers.
   trace.set_tracer_provider(TracerProvider())
 
+  # Export traces to Google Cloud Trace
+  # When running on GCP, the exporter handles authentication
+  # using automatically default application credentials.
+  # When running locally, credentials may need to be set explicitly.
   cloud_trace_exporter = CloudTraceSpanExporter()
   trace.get_tracer_provider().add_span_processor(
       SimpleExportSpanProcessor(cloud_trace_exporter)
