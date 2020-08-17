@@ -12,15 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Initialize OpenTelemetry tracing for the payment service.
+// This tracer is needed in both server.js and index.js
 const opentelemetry = require('@opentelemetry/api');
 const {NodeTracerProvider} = require('@opentelemetry/node');
 const {BatchSpanProcessor} = require('@opentelemetry/tracing');
+
+// Enable OpenTelemetry exporters to export traces to Google Cloud Trace.
+// Exporters use Application Default Credentials (ADCs) to authenticate.
+// See https://developers.google.com/identity/protocols/application-default-credentials
+// for more details. When your application is running on GCP,
+// you don't need to provide auth credentials or a project id.
 const {TraceExporter} = require('@google-cloud/opentelemetry-cloud-trace-exporter');
 
 module.exports = () => {
-    // OpenTelemetry tracing with exporter to Google Cloud Trace
     const provider = new NodeTracerProvider({
-        // Use grpc plugin to receive trace contexts from client
+        // Use grpc plugin to receive trace contexts from client (checkout)
         plugins: {
             grpc: {
                 enabled: true,
@@ -28,7 +35,6 @@ module.exports = () => {
             }
         }
     });
-    // Cloud Trace Exporter handles credentials.
     provider.addSpanProcessor(new BatchSpanProcessor(new TraceExporter()));
 
     // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
