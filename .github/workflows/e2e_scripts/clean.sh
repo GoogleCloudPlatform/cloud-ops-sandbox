@@ -70,4 +70,4 @@ done
 
 # clear monitoring
 python3 -m pip install -r ${WORKDIR}/requirements.txt
-python3 ${WORKDIR}/cleanup_monitoring.py $PROJECT_ID
+python3 ${WORKDIR}/cleanup_monitoring.py "projects/$PROJECT_ID"
