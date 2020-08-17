@@ -13,7 +13,7 @@
 # limitations under the License.
 #!/bin/bash
 
-# This script provisions Hipster Shop Cluster for Cloud Ops Sandbox using Terraform
+# This script provisions Hipster Shop Cluster for Cloud Operations Sandbox using Terraform
 
 #set -euo pipefail
 set -o errexit  # Exit on error
@@ -165,9 +165,9 @@ createProject() {
         fi
       done
       folder_id="262044416022" # /experimental-gke  
-      gcloud projects create "$project_id" --name="Cloud Ops Sandbox Demo" --folder="$folder_id"    
+      gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo" --folder="$folder_id"    
     else
-      gcloud projects create "$project_id" --name="Cloud Ops Sandbox Demo"      
+      gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo"      
     fi;
     # link billing account
     gcloud beta billing projects link "$project_id" --billing-account="$billing_id"
@@ -285,7 +285,7 @@ displaySuccessMessage() {
     log ""
     log ""
     log "********************************************************************************"
-    log "Cloud Ops Sandbox deployed successfully!"
+    log "Cloud Operations Sandbox deployed successfully!"
     log ""
     log "     Google Cloud Console KBE Dashboard: $gcp_kubernetes_path"
     log "     Google Cloud Console Monitoring Workspace: $gcp_monitoring_path"
@@ -333,12 +333,12 @@ parseArguments() {
       shift
       ;;
     -h|--help)
-      log "Deploy Cloud Ops Sandbox to a GCP project"
+      log "Deploy Cloud Operations Sandbox to a GCP project"
       log ""
       log "options:"
-      log "-p|--project|--project-id     GCP project to deploy Cloud Ops Sandbox to"
+      log "-p|--project|--project-id     GCP project to deploy Cloud Operations Sandbox to"
       log "-v|--verbose                  print commands as they run (set -x)"
-      log "--skip-workspace-prompt       Don't pause for Cloud Ops workspace set up"
+      log "--skip-workspace-prompt       Don't pause for Cloud Monitoring workspace set up"
       log ""
       exit 0
       ;;

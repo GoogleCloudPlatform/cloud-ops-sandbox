@@ -13,7 +13,7 @@
 # limitations under the License.
 #!/bin/bash
 
-# This script deletes the GCP project provisioned by Cloud Ops Sandbox
+# This script deletes the GCP project provisioned by Cloud Operations Sandbox
 
 #set -euo pipefail
 set -o errexit  # Exit on error
@@ -25,13 +25,13 @@ log() { echo "$1" >&2;  }
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
-# find the cloud ops sandbox project id
-found=$(gcloud projects list --filter="id:cloud-ops-sandbox-* AND name='Cloud Ops Sandbox Demo'" --format="value(projectId)")
+# find the cloud operations sandbox project id
+found=$(gcloud projects list --filter="id:cloud-ops-sandbox-* AND name='Cloud Operations Sandbox Demo'" --format="value(projectId)")
 if [[ -z "${found}" ]]; then
-    log "error: no Cloud Ops Sandbox projects found"
+    log "error: no Cloud Operations Sandbox projects found"
     exit 1
 elif [[ $(echo ${found} | wc -w) -gt 1 ]]; then
-    log "which Cloud Ops Sandbox project do you want to delete?:"
+    log "which Cloud Operations Sandbox project do you want to delete?:"
     select opt in $found "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
             exit 0
@@ -61,4 +61,4 @@ fi
 # remove tfstate file so a new project id will be generated next time
 log "removing tfstate file"
 rm -f .terraform/terraform.tfstate
-log "Cloud Ops Sandbox resources deleted"
+log "Cloud Operations Sandbox resources deleted"
