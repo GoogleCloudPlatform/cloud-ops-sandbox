@@ -27,18 +27,16 @@ from google.cloud.monitoring_dashboard import v1
 project_name = 'projects/'
 
 def getProjectId():
-    """Retrieves the project id from the environment variable.
-    Raises:
-    MissingProjectIdError -- When not set.
+    """Retrieves the project id from the script arguments.
     Returns:
-    str -- the project name
+        str -- the project name
+    Exits when project id is not set
     """
-    project_id = os.environ['GOOGLE_CLOUD_PROJECT']
+    try:
+        project_id = sys.argv[1]
+    except:
+        exit('Missing Project ID. Usage: python3 cleanup_monitoring.py $PROJECT_ID')
 
-    if not project_id:
-        raise MissingProjectIdError(
-            'Set the environment variable ' +
-            'GOOGLE_CLOUD_PROJECT to your Google Cloud Project Id.')
     return project_id
 
 class TestUptimeCheck(unittest.TestCase):

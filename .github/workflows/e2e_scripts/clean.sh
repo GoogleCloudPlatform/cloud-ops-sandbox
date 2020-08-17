@@ -69,5 +69,5 @@ for LOG in $(gcloud logging logs list --project $PROJECT_ID --format="value(NAME
 done
 
 # clear monitoring
-pip3 install -r ${WORKDIR}/requirements.txt
-python3 ${WORKDIR}/cleanup_monitoring.py
+python3 -m pip install -r ${WORKDIR}/requirements.txt
+python3 ${WORKDIR}/cleanup_monitoring.py $PROJECT_ID
