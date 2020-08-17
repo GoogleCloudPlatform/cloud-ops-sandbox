@@ -22,9 +22,9 @@ project_name = 'projects/'
 def getProjectId():
     """Retrieves the project id from the environment variable.
     Raises:
-    MissingProjectIdError -- When not set.
+        MissingProjectIdError -- When not set.
     Returns:
-    str -- the project name
+        str -- the project name
     """
     project_id = os.environ['GOOGLE_CLOUD_PROJECT']
 
