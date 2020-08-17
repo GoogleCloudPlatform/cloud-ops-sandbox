@@ -59,7 +59,10 @@ def cleanupNotificationChannels():
     client = monitoring_v3.NotificationChannelServiceClient()
     channels = client.list_notification_channels(project_name)
     for channel in channels:
-        client.delete_notification_channel(channel.name)
+        try:
+            client.delete_notification_channel(channel.name)
+        except:
+            print('Could not delete notification channel: ' + channel.name)
 
 def cleanupServices():
     """ Deletes only custom services that are identified by a trailing 'srv' in the name. """
