@@ -43,7 +43,7 @@ resource "google_container_cluster" "gke" {
   project = data.google_project.project.project_id
 
   # Here's how you specify the name
-  name = "stackdriver-sandbox"
+  name = "cloud-ops-sandbox"
 
   # Set the zone by grabbing the result of the random_shuffle above. It
   # returns a list so we have to pull the first element off. If you're looking
@@ -75,7 +75,7 @@ resource "google_container_cluster" "gke" {
 
       labels = {
         environment = "dev",
-        cluster = "stackdriver-sandbox-main"   
+        cluster = "cloud-ops-sandbox-main"   
       }
     }
 
@@ -92,7 +92,7 @@ resource "google_container_cluster" "gke" {
     }
   }
 
-  # Specifies the use of "new" Stackdriver logging and monitoring
+  # Specifies the use of "new" Cloud Ops logging and monitoring
   # https://cloud.google.com/kubernetes-engine-monitoring/
   logging_service = "logging.googleapis.com/kubernetes"
   monitoring_service = "monitoring.googleapis.com/kubernetes"
@@ -128,7 +128,7 @@ resource "null_resource" "current_project" {
 # Setting kubectl context to currently deployed GKE cluster
 resource "null_resource" "set_gke_context" {
   provisioner "local-exec" {
-    command = "gcloud container clusters get-credentials stackdriver-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${data.google_project.project.project_id}"
+    command = "gcloud container clusters get-credentials cloud-ops-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${data.google_project.project.project_id}"
   }
 
   depends_on = [

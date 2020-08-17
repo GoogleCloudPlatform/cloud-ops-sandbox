@@ -70,7 +70,7 @@ resource "google_project_service" "errorreporting" {
 }
 
 resource "google_project_service" "sourcerepo" {
-  project = data.google_project.project.id
+  project = data.google_project.project.project_id
 
   service = "sourcerepo.googleapis.com"
 
