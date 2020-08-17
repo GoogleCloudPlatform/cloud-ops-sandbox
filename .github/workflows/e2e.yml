@@ -68,7 +68,9 @@ jobs:
         # install dependencies
         python3 -m pip install -r tests/requirements.txt
         # run tests
-        python3 tests/monitoring_integration_test.py ${{ secrets.E2E_PROJECT_ID }}
+        python3 tests/monitoring_integration_test.py $PROJECT_ID
+      env:
+        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
     - name: Clean Project State
       if: ${{ always()  }}
       run: |
