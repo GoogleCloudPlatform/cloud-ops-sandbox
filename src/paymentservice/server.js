@@ -18,6 +18,7 @@ const pino = require('pino');
 const protoLoader = require('@grpc/proto-loader');
 
 const charge = require('./charge');
+const tracer = require('./tracer')();
 
 const logger = pino({
   name: 'paymentservice-server',
@@ -46,6 +47,7 @@ class HipsterShopServer {
    */
   static ChargeServiceHandler (call, callback) {
     try {
+      tracer.getCurrentSpan().addEvent("Charge Credit Card");
       logger.info(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
       const response = charge(call.request);
       callback(null, response);
