@@ -46,7 +46,7 @@ resource "google_monitoring_slo" "frontend_availability_slo" {
       good_service_filter = join(" AND ", [
         "metric.type=\"istio.io/service/server/request_count\"",
         "resource.type=\"k8s_container\"",
-        "resource.label.\"cluster_name\"=\"stackdriver-sandbox\"",
+        "resource.label.\"cluster_name\"=\"cloud-ops-sandbox\"",
         "metadata.user_labels.\"app\"=\"frontend\"",
         "metric.label.\"response_code\"=\"200\""
       ])
@@ -57,7 +57,7 @@ resource "google_monitoring_slo" "frontend_availability_slo" {
       total_service_filter = join(" AND ", [
         "metric.type=\"istio.io/service/server/request_count\"",
         "resource.type=\"k8s_container\"",
-        "resource.label.\"cluster_name\"=\"stackdriver-sandbox\"",
+        "resource.label.\"cluster_name\"=\"cloud-ops-sandbox\"",
         "metadata.user_labels.\"app\"=\"frontend\"",
         join(" OR ", ["metric.label.\"response_code\"<\"400\"",
           "metric.label.\"response_code\">=\"500\""])
@@ -86,7 +86,7 @@ resource "google_monitoring_slo" "frontend_latency_slo" {
       distribution_filter = join(" AND ", [
         "metric.type=\"istio.io/service/server/response_latencies\"",
         "resource.type=\"k8s_container\"",
-        "resource.label.\"cluster_name\"=\"stackdriver-sandbox\"",
+        "resource.label.\"cluster_name\"=\"cloud-ops-sandbox\"",
         "metric.label.\"response_code\"=\"200\"",
         "metadata.user_labels.\"app\"=\"frontend\""
       ])

@@ -10,7 +10,7 @@
             {
               "timeSeriesQuery": {
                 "timeSeriesFilter": {
-                  "filter": "metric.type=\"kubernetes.io/container/cpu/limit_utilization\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"stackdriver-sandbox\" metadata.user_labels.\"app\"=\"recommendationservice\" resource.label.\"container_name\"=\"server\"",
+                  "filter": "metric.type=\"kubernetes.io/container/cpu/limit_utilization\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"cloud-ops-sandbox\" metadata.user_labels.\"app\"=\"recommendationservice\" resource.label.\"container_name\"=\"server\"",
                   "aggregation": {
                     "perSeriesAligner": "ALIGN_MEAN"
                   }
@@ -37,7 +37,7 @@
             {
               "timeSeriesQuery": {
                 "timeSeriesFilter": {
-                  "filter": "metric.type=\"istio.io/service/server/request_count\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"stackdriver-sandbox\" metadata.user_labels.\"app\"=\"recommendationservice\"",
+                  "filter": "metric.type=\"istio.io/service/server/request_count\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"cloud-ops-sandbox\" metadata.user_labels.\"app\"=\"recommendationservice\"",
                   "aggregation": {
                     "perSeriesAligner": "ALIGN_RATE"
                   }
@@ -118,7 +118,7 @@
             {
               "timeSeriesQuery": {
                 "timeSeriesFilter": {
-                  "filter": "metric.type=\"istio.io/service/server/response_latencies\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"stackdriver-sandbox\" metadata.user_labels.\"app\"=\"recommendationservice\"",
+                  "filter": "metric.type=\"istio.io/service/server/response_latencies\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"cloud-ops-sandbox\" metadata.user_labels.\"app\"=\"recommendationservice\"",
                   "aggregation": {
                     "perSeriesAligner": "ALIGN_PERCENTILE_99"
                   }
