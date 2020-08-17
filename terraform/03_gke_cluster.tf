@@ -92,7 +92,7 @@ resource "google_container_cluster" "gke" {
     }
   }
 
-  # Specifies the use of "new" Cloud Ops logging and monitoring
+  # Specifies the use of "new" Cloud logging and monitoring
   # https://cloud.google.com/kubernetes-engine-monitoring/
   logging_service = "logging.googleapis.com/kubernetes"
   monitoring_service = "monitoring.googleapis.com/kubernetes"
