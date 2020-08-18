@@ -20,6 +20,7 @@ on:
       - master
       - release/*
       - e2e-test
+      - provision_test
 jobs:
   end-to-end:
     runs-on: [self-hosted, e2e-worker]
@@ -61,6 +62,15 @@ jobs:
           test-cloud-shell:$GITHUB_SHA
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
+    - name: Run Provisioning Test
+      run: |
+        set -x
+        # install dependencies
+        python3 -m pip install -r tests/provisioning/requirements.txt
+        # run tests
+        python3 tests/provisioning/provision_test.py $PROJECT_ID
+      env:
+        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
     - name: Clean Project State
       if: ${{ always()  }}
       run: |
