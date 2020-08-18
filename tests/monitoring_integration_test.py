@@ -35,7 +35,7 @@ def getProjectId():
     try:
         project_id = sys.argv[1]
     except:
-        exit('Missing Project ID. Usage: python3 cleanup_monitoring.py $PROJECT_ID')
+        exit('Missing Project ID. Usage: python3 monitoring_integration_test.py $PROJECT_ID')
 
     return project_id
 
