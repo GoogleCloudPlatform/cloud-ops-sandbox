@@ -20,6 +20,7 @@ import pprint
 import unittest
 import tabulate
 import subprocess
+import sys
 
 from google.cloud import monitoring_v3
 from google.cloud.monitoring_dashboard import v1
@@ -27,18 +28,16 @@ from google.cloud.monitoring_dashboard import v1
 project_name = 'projects/'
 
 def getProjectId():
-    """Retrieves the project id from the environment variable.
-    Raises:
-    MissingProjectIdError -- When not set.
+    """Retrieves the project id from the script arguments.
     Returns:
-    str -- the project name
+        str -- the project name
+    Exits when project id is not set
     """
-    project_id = os.environ['GOOGLE_CLOUD_PROJECT']
+    try:
+        project_id = sys.argv[1]
+    except:
+        exit('Missing Project ID. Usage: python3 monitoring_integration_test.py $PROJECT_ID')
 
-    if not project_id:
-        raise MissingProjectIdError(
-            'Set the environment variable ' +
-            'GOOGLE_CLOUD_PROJECT to your Google Cloud Project Id.')
     return project_id
 
 class TestUptimeCheck(unittest.TestCase):
@@ -48,8 +47,10 @@ class TestUptimeCheck(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		""" Retrieve the external IP of the cluster """
-		process = subprocess.run(["kubectl", "-n", "istio-system", "get", "service", "istio-ingressgateway", "-o", "jsonpath='{.status.loadBalancer.ingress[0].ip}'"], encoding='utf-8', capture_output=True)
-		cls.external_ip = process.stdout.replace('\'', '')
+		with open('out.txt','w+') as fout:
+			out=subprocess.run(["kubectl", "-n", "istio-system", "get", "service", "istio-ingressgateway", "-o", "jsonpath='{.status.loadBalancer.ingress[0].ip}'"], stdout=fout)
+			fout.seek(0)
+			cls.external_ip=fout.read().replace('\'', '')
 
 	def testNumberOfUptimeChecks(self):
 		"""" Test that ensures there is only one uptime check created """
@@ -71,7 +72,7 @@ class TestUptimeCheck(unittest.TestCase):
 			config_list.append(config)
 
 		config = config_list[0]
-		self.assertEqual(config.monitored_resource.labels["host"], self.__class__.external_ip)
+		self.assertEqual(config.monitored_resource.labels["host"], self.external_ip)
 
 	def testUptimeCheckAlertingPolicy(self):
 		""" Test that an alerting policy was created. """
@@ -194,4 +195,4 @@ class TestSloAlertPolicy(unittest.TestCase):
 
 if __name__ == '__main__':
 	project_name = project_name + getProjectId()
-	unittest.main()
+	unittest.main(argv=['first-arg-is-ignored'])
