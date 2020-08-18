@@ -17,7 +17,7 @@ set -x
 set +e
 
 # This script is responsible for deleting resources out of a
-# stackdriver sandbox project in between test runs
+# Cloud Operations Sandbox project in between test runs
 
 export PROJECT_ID=$(gcloud config get-value project)
 
@@ -25,11 +25,11 @@ export PROJECT_ID=$(gcloud config get-value project)
 CLUSTER_ZONE="first_run"
 while [ -n "$CLUSTER_ZONE" ]; do
   CLUSTER_ZONE=$(gcloud container clusters list \
-                   --filter="name:stackdriver-sandbox" \
+                   --filter="name:cloud-ops-sandbox" \
                    --project $PROJECT_ID --format="value(zone)")
   if [ -n "$CLUSTER_ZONE" ]; then
       echo "deleting cluster"
-      gcloud container clusters delete stackdriver-sandbox \
+      gcloud container clusters delete cloud-ops-sandbox \
           --project $PROJECT_ID --zone $CLUSTER_ZONE --quiet
       sleep 20
   fi
