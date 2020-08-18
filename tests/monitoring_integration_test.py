@@ -193,4 +193,4 @@ class TestSloAlertPolicy(unittest.TestCase):
 
 if __name__ == '__main__':
 	project_name = project_name + getProjectId()
-	unittest.main()
+	unittest.main(argv=['first-arg-is-ignored'])
