@@ -47,7 +47,7 @@ class TestUptimeCheck(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		""" Retrieve the external IP of the cluster """
-		process = subprocess.run(["kubectl", "-n", "istio-system", "get", "service", "istio-ingressgateway", "-o", "jsonpath='{.status.loadBalancer.ingress[0].ip}'"], encoding='utf-8', capture_output=True)
+		process = subprocess.run(["kubectl", "-n", "istio-system", "get", "service", "istio-ingressgateway", "-o", "jsonpath='{.status.loadBalancer.ingress[0].ip}'"], capture_output=True)
 		cls.external_ip = process.stdout.replace('\'', '')
 
 	def testNumberOfUptimeChecks(self):
