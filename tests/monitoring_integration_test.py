@@ -47,8 +47,10 @@ class TestUptimeCheck(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		""" Retrieve the external IP of the cluster """
-		process = subprocess.run(["kubectl", "-n", "istio-system", "get", "service", "istio-ingressgateway", "-o", "jsonpath='{.status.loadBalancer.ingress[0].ip}'"], stdout=subprocess.PIPE, universal_newlines=True)
-		cls.external_ip = process.stdout.replace('\'', '')
+		with open('out.txt','w+') as fout:
+			out=subprocess.run(["kubectl", "-n", "istio-system", "get", "service", "istio-ingressgateway", "-o", "jsonpath='{.status.loadBalancer.ingress[0].ip}'"], stdout=fout)
+			fout.seek(0)
+			cls.external_ip=fout.read().replace('\'', '')
 
 	def testNumberOfUptimeChecks(self):
 		"""" Test that ensures there is only one uptime check created """
@@ -70,7 +72,7 @@ class TestUptimeCheck(unittest.TestCase):
 			config_list.append(config)
 
 		config = config_list[0]
-		self.assertEqual(config.monitored_resource.labels["host"], self.__class__.external_ip)
+		self.assertEqual(config.monitored_resource.labels["host"], self.external_ip)
 
 	def testUptimeCheckAlertingPolicy(self):
 		""" Test that an alerting policy was created. """
