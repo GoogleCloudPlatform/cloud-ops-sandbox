@@ -34,7 +34,7 @@ class TestGKECluster(unittest.TestCase):
         cls.location = str(result.stdout.replace('\n', ''))
         if cls.location == '':
             raise Exception('GKE cluster is not provisioned!')
-        cls.name = 'projects/' + getProjectId() + '/locations/' + cls.location + '/clusters/stackdriver-sandbox'
+        cls.name = 'projects/' + getProjectId() + '/locations/' + cls.location + '/clusters/cloud-ops-sandbox'
     
     def testNodeMachineType(self):
         """ Test if the machine type for the nodes is as specified """

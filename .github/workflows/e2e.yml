@@ -66,7 +66,7 @@ jobs:
       run: |
         set -x
         # install dependencies
-        python3 -m pip install -r tests/provisioning/requirements.txt
+        pip3 install -r tests/provisioning/requirements.txt
         # run tests
         python3 tests/provisioning/provision_test.py $PROJECT_ID
       env:
