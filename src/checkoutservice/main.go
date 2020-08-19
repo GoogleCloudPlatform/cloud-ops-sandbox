@@ -362,6 +362,7 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 		if err != nil {
 			return nil, fmt.Errorf("failed to get product #%q", item.GetProductId())
 		}
+		log.Infof("[CheckoutService] orderedItem=%q", product.Name)
 		price, err := cs.convertCurrency(ctx, product.GetPriceUsd(), userCurrency)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert price of %q to %s", item.GetProductId(), userCurrency)
