@@ -316,7 +316,6 @@ class TestSloAlertPolicy(unittest.TestCase):
 		found_latency_alert = self.checkForAlertingPolicy('Frontend Service Latency Alert Policy')
 		self.assertTrue(found_latency_alert)
 
-<<<<<<< HEAD
 	def testCheckoutServiceSloAlertExists(self):
 		""" Test that the Alerting Policies for the Checkout Service SLO get created. """
 		found_availability_alert = self.checkForAlertingPolicy('Checkout Service Availability Alert Policy')
@@ -343,7 +342,8 @@ class TestSloAlertPolicy(unittest.TestCase):
 		found_availability_alert = self.checkForAlertingPolicy('Shipping Service Availability Alert Policy')
 		self.assertTrue(found_availability_alert)
 		found_latency_alert = self.checkForAlertingPolicy('Shipping Service Latency Alert Policy')
-=======
+		self.assertTrue(found_latency_alert)
+
 	def testCartServiceSloAlertExists(self):
 		""" Test that the Alerting Policies for the Cart Service SLO get created. """
 		found_availability_alert = self.checkForAlertingPolicy('Cart Service Availability Alert Policy')
@@ -377,7 +377,6 @@ class TestSloAlertPolicy(unittest.TestCase):
 		found_availability_alert = self.checkForAlertingPolicy('Ad Service Availability Alert Policy')
 		self.assertTrue(found_availability_alert)
 		found_latency_alert = self.checkForAlertingPolicy('Ad Service Latency Alert Policy')
->>>>>>> 2a51b1b... rebased
 		self.assertTrue(found_latency_alert)
 
 if __name__ == '__main__':
