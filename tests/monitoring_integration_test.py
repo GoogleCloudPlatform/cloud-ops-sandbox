@@ -159,6 +159,26 @@ class TestCustomService(unittest.TestCase):
 		# check that we found an object
 		self.assertTrue(response)
 
+	def testCheckoutServiceExists(self):
+		""" Test that the Custom Checkout Service gets created. """
+		response = self.checkForService('checkoutservice-srv')
+		self.assertTrue(response)
+
+	def testPaymentServiceExists(self):
+		""" Test that the Custom Payment Service gets created. """
+		response = self.checkForService('paymentservice-srv')
+		self.assertTrue(response)
+
+	def testEmailServiceExists(self):
+		""" Test that the Custom Email Service gets created. """
+		response = self.checkForService('emailservice-srv')
+		self.assertTrue(response)
+
+	def testShippingServiceExists(self):
+		""" Test that the Custom Shipping Service gets created. """
+		response = self.checkForService('shippingservice-srv')
+		self.assertTrue(response)
+
 class TestServiceSlo(unittest.TestCase):
 	def setUp(self):
 		self.client = monitoring_v3.ServiceMonitoringServiceClient()
@@ -169,10 +189,38 @@ class TestServiceSlo(unittest.TestCase):
 		return self.client.get_service_level_objective(name)
 
 	def testFrontendServiceSloExists(self):
-		""" Test that for each service that two SLOs (availability, latency) get created. """
+		""" Test that for Frontend Service that two SLOs (availability, latency) get created. """
 		found_availability_slo = self.checkForSlo('frontend-srv', 'availability-slo')
 		self.assertTrue(found_availability_slo)
 		found_latency_slo = self.checkForSlo('frontend-srv', 'latency-slo')
+		self.assertTrue(found_latency_slo)
+
+	def testCheckoutServiceSloExists(self):
+		""" Test that for Checkout Service that two SLOs (availability, latency) get created. """
+		found_availability_slo = self.checkForSlo('checkoutservice-srv', 'availability-slo')
+		self.assertTrue(found_availability_slo)
+		found_latency_slo = self.checkForSlo('checkoutservice-srv', 'latency-slo')
+		self.assertTrue(found_latency_slo)
+
+	def testPaymentServiceSloExists(self):
+		""" Test that for Payment Service that two SLOs (availability, latency) get created. """
+		found_availability_slo = self.checkForSlo('paymentservice-srv', 'availability-slo')
+		self.assertTrue(found_availability_slo)
+		found_latency_slo = self.checkForSlo('paymentservice-srv', 'latency-slo')
+		self.assertTrue(found_latency_slo)
+
+	def testEmailServiceSloExists(self):
+		""" Test that for Email Service that two SLOs (availability, latency) get created. """
+		found_availability_slo = self.checkForSlo('emailservice-srv', 'availability-slo')
+		self.assertTrue(found_availability_slo)
+		found_latency_slo = self.checkForSlo('emailservice-srv', 'latency-slo')
+		self.assertTrue(found_latency_slo)
+
+	def testShippingServiceSloExists(self):
+		""" Test that for Shipping Service that two SLOs (availability, latency) get created. """
+		found_availability_slo = self.checkForSlo('shippingservice-srv', 'availability-slo')
+		self.assertTrue(found_availability_slo)
+		found_latency_slo = self.checkForSlo('shippingservice-srv', 'latency-slo')
 		self.assertTrue(found_latency_slo)
 
 class TestSloAlertPolicy(unittest.TestCase):
@@ -191,6 +239,34 @@ class TestSloAlertPolicy(unittest.TestCase):
 		found_availability_alert = self.checkForAlertingPolicy('Frontend Service Availability Alert Policy')
 		self.assertTrue(found_availability_alert)
 		found_latency_alert = self.checkForAlertingPolicy('Frontend Service Latency Alert Policy')
+		self.assertTrue(found_latency_alert)
+
+	def testCheckoutServiceSloAlertExists(self):
+		""" Test that the Alerting Policies for the Checkout Service SLO get created. """
+		found_availability_alert = self.checkForAlertingPolicy('Checkout Service Availability Alert Policy')
+		self.assertTrue(found_availability_alert)
+		found_latency_alert = self.checkForAlertingPolicy('Checkout Service Latency Alert Policy')
+		self.assertTrue(found_latency_alert)
+
+	def testPaymentServiceSloAlertExists(self):
+		""" Test that the Alerting Policies for the Payment Service SLO get created. """
+		found_availability_alert = self.checkForAlertingPolicy('Payment Service Availability Alert Policy')
+		self.assertTrue(found_availability_alert)
+		found_latency_alert = self.checkForAlertingPolicy('Payment Service Latency Alert Policy')
+		self.assertTrue(found_latency_alert)
+
+	def testEmailServiceSloAlertExists(self):
+		""" Test that the Alerting Policies for the Email Service SLO get created. """
+		found_availability_alert = self.checkForAlertingPolicy('Email Service Availability Alert Policy')
+		self.assertTrue(found_availability_alert)
+		found_latency_alert = self.checkForAlertingPolicy('Email Service Latency Alert Policy')
+		self.assertTrue(found_latency_alert)
+
+	def testShippingServiceSloAlertExists(self):
+		""" Test that the Alerting Policies for the Shipping Service SLO get created. """
+		found_availability_alert = self.checkForAlertingPolicy('Shipping Service Availability Alert Policy')
+		self.assertTrue(found_availability_alert)
+		found_latency_alert = self.checkForAlertingPolicy('Shipping Service Latency Alert Policy')
 		self.assertTrue(found_latency_alert)
 
 if __name__ == '__main__':
