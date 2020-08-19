@@ -87,7 +87,7 @@ resource "google_monitoring_custom_service" "custom_service" {
   display_name = var.custom_services[count.index].service_name
 }
 
-# Define services that will use the Istio service that is automatically detected
+# Specify services that will use the Istio service that is automatically detected
 # and created by installing Istio on the Kubernetes cluster.
 # The data members required are to successfully set up SLOs (goals and latency thresholds)
 # and burn rate limits for alerting policies
