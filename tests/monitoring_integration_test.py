@@ -21,11 +21,16 @@ import unittest
 import tabulate
 import subprocess
 import sys
+import json
 
 from google.cloud import monitoring_v3
 from google.cloud.monitoring_dashboard import v1
+from googleapiclient import discovery
+from oauth2client.client import GoogleCredentials
 
 project_name = 'projects/'
+project_id = ''
+zone = '-'
 
 def getProjectId():
     """Retrieves the project id from the script arguments.
@@ -39,6 +44,33 @@ def getProjectId():
         exit('Missing Project ID. Usage: python3 monitoring_integration_test.py $PROJECT_ID')
 
     return project_id
+
+def getZone():
+	"""Retrieves the zone of the Kubernetes cluster hosted on GKE.
+	Raises:
+	MissingZoneError -- When no cluster is found.
+	Returns:
+	str -- the zone
+	"""
+	credentials = GoogleCredentials.get_application_default()
+
+	service = discovery.build('container', 'v1', credentials=credentials)
+
+	zone = '-' # query for all zones
+
+	request = service.projects().zones().clusters().list(projectId=project_id, zone=zone)
+	response = request.execute()
+
+	# Retrieve the cluster for cloud-ops-sandbox and its zone
+	clusters = response['clusters']
+	for cluster in clusters:
+		if cluster['name'] == 'cloud-ops-sandbox':
+			zone = cluster['zone']
+
+	if zone == '-':
+		raise MissingZoneError('No zone for the cloud-ops-sandbox cluster was detected')
+
+	return zone
 
 class TestUptimeCheck(unittest.TestCase):
 
@@ -188,6 +220,9 @@ class TestServiceSlo(unittest.TestCase):
 		name = self.client.service_level_objective_path(self.project_id, service, slo)
 		return self.client.get_service_level_objective(name)
 
+	def getIstioService(self, service_name):
+		return 'ist:' + project_id + '-zone-' + zone + '-cloud-ops-sandbox-default-' + service_name
+
 	def testFrontendServiceSloExists(self):
 		""" Test that for Frontend Service that two SLOs (availability, latency) get created. """
 		found_availability_slo = self.checkForSlo('frontend-srv', 'availability-slo')
@@ -223,6 +258,46 @@ class TestServiceSlo(unittest.TestCase):
 		found_latency_slo = self.checkForSlo('shippingservice-srv', 'latency-slo')
 		self.assertTrue(found_latency_slo)
 
+	def testCartServiceSloExists(self):
+		""" Test that for each service that two SLOs (availability, latency) get created. """
+		cartservice_id = self.getIstioService('cartservice')
+		found_availability_slo = self.checkForSlo(cartservice_id, 'availability-slo')
+		self.assertTrue(found_availability_slo)
+		found_latency_slo = self.checkForSlo(cartservice_id, 'latency-slo')
+		self.assertTrue(found_latency_slo)
+
+	def testProductCatalogServiceSloExists(self):
+		""" Test that for each service that two SLOs (availability, latency) get created. """
+		productcatalogservice_id = self.getIstioService('productcatalogservice')
+		found_availability_slo = self.checkForSlo(productcatalogservice_id, 'availability-slo')
+		self.assertTrue(found_availability_slo)
+		found_latency_slo = self.checkForSlo(productcatalogservice_id, 'latency-slo')
+		self.assertTrue(found_latency_slo)
+
+	def testCurrencyServiceSloExists(self):
+		""" Test that for each service that two SLOs (availability, latency) get created. """
+		currencyservice_id = self.getIstioService('currencyservice')
+		found_availability_slo = self.checkForSlo(currencyservice_id, 'availability-slo')
+		self.assertTrue(found_availability_slo)
+		found_latency_slo = self.checkForSlo(currencyservice_id, 'latency-slo')
+		self.assertTrue(found_latency_slo)
+
+	def testRecommendationServiceSloExists(self):
+		""" Test that for each service that two SLOs (availability, latency) get created. """
+		recommendationservice_id = self.getIstioService('recommendationservice')
+		found_availability_slo = self.checkForSlo(recommendationservice_id, 'availability-slo')
+		self.assertTrue(found_availability_slo)
+		found_latency_slo = self.checkForSlo(recommendationservice_id, 'latency-slo')
+		self.assertTrue(found_latency_slo)
+
+	def testAdServiceSloExists(self):
+		""" Test that for each service that two SLOs (availability, latency) get created. """
+		adservice_id = self.getIstioService('adservice')
+		found_availability_slo = self.checkForSlo(adservice_id, 'availability-slo')
+		self.assertTrue(found_availability_slo)
+		found_latency_slo = self.checkForSlo(adservice_id, 'latency-slo')
+		self.assertTrue(found_latency_slo)
+
 class TestSloAlertPolicy(unittest.TestCase):
 	def setUp(self):
 		self.client = monitoring_v3.AlertPolicyServiceClient()
@@ -241,6 +316,7 @@ class TestSloAlertPolicy(unittest.TestCase):
 		found_latency_alert = self.checkForAlertingPolicy('Frontend Service Latency Alert Policy')
 		self.assertTrue(found_latency_alert)
 
+<<<<<<< HEAD
 	def testCheckoutServiceSloAlertExists(self):
 		""" Test that the Alerting Policies for the Checkout Service SLO get created. """
 		found_availability_alert = self.checkForAlertingPolicy('Checkout Service Availability Alert Policy')
@@ -267,8 +343,45 @@ class TestSloAlertPolicy(unittest.TestCase):
 		found_availability_alert = self.checkForAlertingPolicy('Shipping Service Availability Alert Policy')
 		self.assertTrue(found_availability_alert)
 		found_latency_alert = self.checkForAlertingPolicy('Shipping Service Latency Alert Policy')
+=======
+	def testCartServiceSloAlertExists(self):
+		""" Test that the Alerting Policies for the Cart Service SLO get created. """
+		found_availability_alert = self.checkForAlertingPolicy('Cart Service Availability Alert Policy')
+		self.assertTrue(found_availability_alert)
+		found_latency_alert = self.checkForAlertingPolicy('Cart Service Latency Alert Policy')
+		self.assertTrue(found_latency_alert)
+
+	def testProductCatalogServiceSloAlertExists(self):
+		""" Test that the Alerting Policies for the Product Catalog Service SLO get created. """
+		found_availability_alert = self.checkForAlertingPolicy('Product Catalog Service Availability Alert Policy')
+		self.assertTrue(found_availability_alert)
+		found_latency_alert = self.checkForAlertingPolicy('Product Catalog Service Latency Alert Policy')
+		self.assertTrue(found_latency_alert)
+
+	def testCurrencyServiceSloAlertExists(self):
+		""" Test that the Alerting Policies for the Currency Service SLO get created. """
+		found_availability_alert = self.checkForAlertingPolicy('Currency Service Availability Alert Policy')
+		self.assertTrue(found_availability_alert)
+		found_latency_alert = self.checkForAlertingPolicy('Currency Service Latency Alert Policy')
+		self.assertTrue(found_latency_alert)
+
+	def testRecommendationServiceSloAlertExists(self):
+		""" Test that the Alerting Policies for the Recommendation Service SLO get created. """
+		found_availability_alert = self.checkForAlertingPolicy('Recommendation Service Availability Alert Policy')
+		self.assertTrue(found_availability_alert)
+		found_latency_alert = self.checkForAlertingPolicy('Recommendation Service Latency Alert Policy')
+		self.assertTrue(found_latency_alert)
+
+	def testAdServiceSloAlertExists(self):
+		""" Test that the Alerting Policies for the Frontend Service SLO get created. """
+		found_availability_alert = self.checkForAlertingPolicy('Ad Service Availability Alert Policy')
+		self.assertTrue(found_availability_alert)
+		found_latency_alert = self.checkForAlertingPolicy('Ad Service Latency Alert Policy')
+>>>>>>> 2a51b1b... rebased
 		self.assertTrue(found_latency_alert)
 
 if __name__ == '__main__':
-	project_name = project_name + getProjectId()
+	project_id = getProjectId()
+	project_name = project_name + project_id
+	zone = getZone()
 	unittest.main(argv=['first-arg-is-ignored'])

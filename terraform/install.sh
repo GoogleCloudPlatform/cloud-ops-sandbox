@@ -232,7 +232,7 @@ installMonitoring() {
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
   terraform init -lock=false
-  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}"
+  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}" -var="zone=${CLUSTER_ZONE}"
   popd
 }
 
