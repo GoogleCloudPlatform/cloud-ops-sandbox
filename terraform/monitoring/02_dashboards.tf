@@ -88,18 +88,18 @@ variable "services" {
 # Iterate over the services that we defined and create a dashboard template file for each one using
 # the template file defined in the 'dashboards' folder.
 data "template_file" "dash_json" {
-  template = "${file("./dashboards/generic_dashboard.tmpl")}"
-  count    = "${length(var.services)}"
+  template = file("./dashboards/generic_dashboard.tmpl")
+  count    = length(var.services)
   vars     = {
-    service_name = "${var.services[count.index].service_name}"
-    service_id   = "${var.services[count.index].service_id}"
+    service_name = var.services[count.index].service_name
+    service_id   = var.services[count.index].service_id
   }
 }
 
 # Create GCP Monitoring Dashboards using the rendered template files that were created in the data
 # resource above. This produces one dashboard for each microservice that we defined above.
 resource "google_monitoring_dashboard" "service_dashboards" {
-  count = "${length(var.services)}"
+  count = length(var.services)
   dashboard_json = <<EOF
 ${data.template_file.dash_json[count.index].rendered}
 EOF
