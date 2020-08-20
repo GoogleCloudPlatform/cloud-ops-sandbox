@@ -24,10 +24,15 @@ variable "external_ip" {
 
 variable "project_id" {
   type        = string
-  description = "The project id that was created by Stackdriver Sandbox. Can be revealed by running \"gcloud config get-value project\" in the Google Cloud CLI."
+  description = "The project id that was created by Cloud Operations Sandbox. Can be revealed by running \"gcloud config get-value project\" in the Google Cloud CLI."
 }
 
 variable "project_owner_email" {
 	type	      = string
 	description = "The email to receive alerts caused by violations of alerting policies."
+}
+
+variable "zone" {
+  type        = string
+  description = "The Zone of the Cloud Operations Sandbox cluster."
 }
