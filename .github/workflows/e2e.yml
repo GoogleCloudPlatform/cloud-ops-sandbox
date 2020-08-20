@@ -65,10 +65,14 @@ jobs:
     - name: Run Provisioning Test
       run: |
         set -x
-        # install dependencies
-        python3 -m pip3 install -r tests/provisioning/requirements.txt
-        # run tests
-        python3 tests/provisioning/provision_test.py $PROJECT_ID
+        # authenticate cluster
+        CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $PROJECT_ID --format="value(zone)")
+        # build cloud shell image
+        docker build -t test-provisioning:$GITHUB_SHA .
+        docker run\
+          -e GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
+          -e ZONE=$CLUSTER_ZONE \
+          test-provisioning:$GITHUB_SHA
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
     - name: Run Monitoring Integration Tests
