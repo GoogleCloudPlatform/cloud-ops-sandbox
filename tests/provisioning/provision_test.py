@@ -101,19 +101,11 @@ class TestProjectResources(unittest.TestCase):
             self.fail("Error reporting not provisioned")        
 
 def getProjectId():
-    """Retrieves the project id from the environment variable.
-    Raises:
-    Exception -- When not set.
-    Returns:
-    str -- the project name
-    """
-    project_id = os.environ['GOOGLE_CLOUD_PROJECT']
-
-    if not project_id:
-        raise Exception(
-            'Set the environment variable ' +
-            'GOOGLE_CLOUD_PROJECT to your Google Cloud Project Id.')
-    return project_id
+    return os.environ['GOOGLE_CLOUD_PROJECT']
 
 if __name__ == '__main__':
-	unittest.main()
+    command = ('gcloud config set project {0}'.format(getProjectId()))
+    subprocess.run(split(command))
+    command = ('gcloud container clusters get-credentials cloud-ops-sandbox --zone {0}'.format(os.environ['ZONE']))
+    subprocess.run(split(command))
+    unittest.main()

@@ -5,7 +5,7 @@ FROM google/cloud-sdk:latest
 WORKDIR /code
 
 # copy the dependencies file to the working directory
-COPY provisioning/ .
+COPY . .
 
 # install dependencies
 RUN pip3 install -r requirements.txt

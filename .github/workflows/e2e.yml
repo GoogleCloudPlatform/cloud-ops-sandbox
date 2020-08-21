@@ -68,7 +68,7 @@ jobs:
         # authenticate cluster
         CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $PROJECT_ID --format="value(zone)")
         # build cloud shell image
-        docker build -t test-provisioning:$GITHUB_SHA .
+        docker build -t test-provisioning:$GITHUB_SHA tests/provisioning/.
         docker run\
           -e GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
           -e ZONE=$CLUSTER_ZONE \
