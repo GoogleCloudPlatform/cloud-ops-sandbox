@@ -73,8 +73,8 @@ jobs:
         docker run\
           -e GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
           -e ZONE=$CLUSTER_ZONE \
+          -e KUBECONFIG=/root/.kube/config \
           -v ~/.config:/root/.config \
-          -v ~/.kube:/root/.kube \
           test-provisioning:$GITHUB_SHA
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
