@@ -17,7 +17,6 @@ on:
   schedule:
     - cron: '0 0 * * *' # runs daily at midnight
   workflow_dispatch
-    
 jobs:
   build-trigger:
     runs-on: [self-hosted, push-privilege]
