@@ -72,12 +72,16 @@ class TestLoadGenerator(unittest.TestCase):
         """ Test if query load generator returns 200 """
         command = ('gcloud compute instances list --filter="name:loadgenerator*" --format="value(networkInterfaces[0].accessConfigs.natIP)"')
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
-        ip = result.stdout.split('\n')[0]
+        ip = result.stdout.replace('\n', '')
         url = 'http://{0}:8080'.format(ip)
         self.assertTrue(urllib.request.urlopen(url).getcode() == 200)
     
     def testDifferentZone(self):
-        pass
+        """ Test if load generator is in a different zone from the GKE cluster """
+        command = ('gcloud compute instances list --filter="name:loadgenerator" --format="value(ZONE)"')
+        result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
+        zone = result.stdout.replace('\n', '')
+        self.assertTrue(zone != getClusterZone())
 
 class TestProjectResources(unittest.TestCase):
     def testCloudTrace(self):
@@ -106,6 +110,9 @@ class TestProjectResources(unittest.TestCase):
 
 def getProjectId():
     return os.environ['GOOGLE_CLOUD_PROJECT']
+
+def getClusterZone():
+    return os.environ['ZONE']
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
