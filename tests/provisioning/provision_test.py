@@ -56,16 +56,15 @@ class TestGKECluster(unittest.TestCase):
         services = json.loads(result.stdout)
         for service in services['items']:
             self.assertTrue(int(service['status']['readyReplicas']) >= 1)
-    
-    def testReachOfFrontend(self):
-        """ Test if query frontend returns 200 """
-        command_ip = ("kubectl get svc frontend-external -o json")
-        result_ip = subprocess.run(split(command_ip), encoding='utf-8', capture_output=True)
-        info = json.loads(result_ip.stdout)
-        external_ip = info['status']['loadBalancer']['ingress'][0]['ip']
-        port = info['spec']['ports'][0]['port']
-        url = 'http://{0}:{1}'.format(external_ip, port)
+
+    def testReachOfHipsterShop(self):
+        """ Test if querying hipster shop returns 200 """
+        command = ("kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
+        result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
+        external_ip = result.stdout.replace('\n', '')
+        url = 'http://{0}'.format(external_ip)
         self.assertTrue(urllib.request.urlopen(url).getcode() == 200)
+
 
 class TestLoadGenerator(unittest.TestCase):
     def testReachOfLoadgen(self):
@@ -115,4 +114,9 @@ def getClusterZone():
     return os.environ['ZONE']
 
 if __name__ == '__main__':
-    unittest.main(verbosity=2)
+    command=('gcloud config set project cloud-ops-sandbox-336203338')
+    subprocess.run(split(command))
+    command=('gcloud container clusters get-credentials cloud-ops-sandbox --zone us-central1-c')
+    subprocess.run(split(command))
+    #unittest.main(verbosity=2)
+    unittest.main()
