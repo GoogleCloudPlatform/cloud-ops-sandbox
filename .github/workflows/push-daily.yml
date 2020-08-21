@@ -16,12 +16,14 @@ name: "Build Custom Cloud Shell Image"
 on:
   schedule:
     - cron: '0 0 * * *' # runs daily at midnight
+  workflow_dispatch
     
 jobs:
   build-trigger:
     runs-on: [self-hosted, push-privilege]
     steps:
     - name: Run Cloud Build Trigger
+    - uses: actions/checkout@v2
       timeout-minutes: 20
       run: |
         TAGS=$(git tags)
