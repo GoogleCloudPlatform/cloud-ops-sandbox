@@ -64,16 +64,20 @@ class TestGKECluster(unittest.TestCase):
         info = json.loads(result_ip.stdout)
         external_ip = info['status']['loadBalancer']['ingress'][0]['ip']
         port = info['spec']['ports'][0]['port']
-        url = "".join(["http://", external_ip, ':', str(port)])
+        url = 'http://{0}:{1}'.format(external_ip, port)
         self.assertTrue(urllib.request.urlopen(url).getcode() == 200)
 
 class TestLoadGenerator(unittest.TestCase):
     def testReachOfLoadgen(self):
         """ Test if query load generator returns 200 """
-        command_ip = ('gcloud compute instances list --filter="name:loadgenerator*" --format="value(networkInterfaces[0].accessConfigs.natIP)"')
-        result_ip = subprocess.run(split(command_ip), encoding='utf-8', capture_output=True)
-        url = "".join(['http://', result_ip.stdout.split('\n')[0], ':8080'])
+        command = ('gcloud compute instances list --filter="name:loadgenerator*" --format="value(networkInterfaces[0].accessConfigs.natIP)"')
+        result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
+        ip = result.stdout.split('\n')[0]
+        url = 'http://{0}:8080'.format(ip)
         self.assertTrue(urllib.request.urlopen(url).getcode() == 200)
+    
+    def testDifferentZone(self):
+        pass
 
 class TestProjectResources(unittest.TestCase):
     def testCloudTrace(self):
@@ -104,8 +108,4 @@ def getProjectId():
     return os.environ['GOOGLE_CLOUD_PROJECT']
 
 if __name__ == '__main__':
-    command = ('gcloud config set project {0}'.format(getProjectId()))
-    subprocess.run(split(command))
-    command = ('gcloud container clusters get-credentials cloud-ops-sandbox --zone {0}'.format(os.environ['ZONE']))
-    subprocess.run(split(command))
-    unittest.main()
+    unittest.main(verbosity=2)
