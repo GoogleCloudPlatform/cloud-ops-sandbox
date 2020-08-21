@@ -12,22 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Push Tagged Images"
+name: "Build Custom Cloud Shell Image"
 on:
-  push:
-    tags:
-      - 'v*'
+  schedule:
+    - cron: '0 0 * * *' # runs daily at midnight
+    
 jobs:
-  push-tags:
+  build-trigger:
     runs-on: [self-hosted, push-privilege]
     steps:
-    - uses: actions/checkout@v2
-    - name: Get the version
-      id: get_version
-      run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
-
     - name: Run Cloud Build Trigger
       timeout-minutes: 20
       run: |
-        set -x
-        gcloud beta builds triggers run --branch=build-trigger Build-CloudShell-Image
+        TAGS=$(git tags)
+        for TAG in $TAGS:
+            git checkout $TAG
+            gcloud beta builds triggers run --tag=$TAG Build-CloudShell-Image
