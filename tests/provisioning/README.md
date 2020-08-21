@@ -1,6 +1,6 @@
-# Tests for Stackdriver Sandbox Provisioning
+# Tests for Cloud Ops Sandbox Provisioning
 
-To run the integration test for the provisioning, follow the steps below.
+This test is integrated into the Github CI system. If you want to run it manually, please follow the steps below.
 
 1. Install the dependencies
 ```bash
