@@ -176,6 +176,26 @@ class TestMonitoringDashboard(unittest.TestCase):
 		found_dashboard = self.checkForDashboard('Shipping Service Dashboard')
 		self.assertTrue(found_dashboard)
 
+	def testCartServiceDashboard(self):
+		""" Test that the Cart Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Cart Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testCheckoutServiceDashboard(self):
+		""" Test that the Checkout Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Checkout Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testCurrencyServiceDashboard(self):
+		""" Test that the Currency Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Currency Service Dashboard')
+		self.assertTrue(found_dashboard)
+
+	def testProductCatalogServiceDashboard(self):
+		""" Test that the Product Catalog Service Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Product Catalog Service Dashboard')
+		self.assertTrue(found_dashboard)
+
 class TestCustomService(unittest.TestCase):
 	def setUp(self):
 		self.client = monitoring_v3.ServiceMonitoringServiceClient()
