@@ -25,7 +25,4 @@ jobs:
     - uses: actions/checkout@v2
       timeout-minutes: 20
       run: |
-        TAGS=$(git tags)
-        for TAG in $TAGS:
-            git checkout $TAG
-            gcloud beta builds triggers run --tag=$TAG Build-CloudShell-Image
+        gcloud beta builds triggers run --branch=build-trigger Build-CloudShell-Image
