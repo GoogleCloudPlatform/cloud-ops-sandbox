@@ -29,25 +29,21 @@ class TestGKECluster(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """ Get the location of GKE cluster for later queries """
-        command = ('gcloud container clusters list --format="value(location)"')
-        result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
-        cls.location = str(result.stdout.replace('\n', ''))
-        if cls.location == '':
-            raise Exception('GKE cluster is not provisioned!')
-        cls.name = 'projects/' + getProjectId() + '/locations/' + cls.location + '/clusters/cloud-ops-sandbox'
+        cls.name = 'projects/{0}/locations/{1}/clusters/cloud-ops-sandbox'.format(getProjectId(), getClusterZone())
     
     def testNodeMachineType(self):
         """ Test if the machine type for the nodes is as specified """
         client = cluster_manager.ClusterManagerClient()
-        cluster = client.get_cluster(name=self.__class__.name)
-        node_config = cluster.node_config
-        self.assertEqual(node_config.machine_type, 'n1-standard-2')
+        cluster_info = client.get_cluster(name=TestGKECluster.name)
+        machine_type = cluster_info.node_config.machine_type
+        self.assertEqual(machine_type, 'n1-standard-2')
 
     def testNumberOfNode(self):
         """ Test if the number of nodes in the node pool is in the specified range """
         client = cluster_manager.ClusterManagerClient()
-        cluster = client.get_cluster(name=self.__class__.name)
-        self.assertTrue(cluster.current_node_count == 4)
+        cluster_info = client.get_cluster(name=TestGKECluster.name)
+        node_count = cluster_info.current_node_count
+        self.assertTrue(node_count == 4)
     
     def testStatusOfServices(self):
         """ Test if all the service deployments are ready """
@@ -68,11 +64,11 @@ class TestGKECluster(unittest.TestCase):
 
 class TestLoadGenerator(unittest.TestCase):
     def testReachOfLoadgen(self):
-        """ Test if query load generator returns 200 """
+        """ Test if querying load generator returns 200 """
         command = ('gcloud compute instances list --filter="name:loadgenerator*" --format="value(networkInterfaces[0].accessConfigs.natIP)"')
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
-        ip = result.stdout.replace('\n', '')
-        url = 'http://{0}:8080'.format(ip)
+        external_ip = result.stdout.replace('\n', '')
+        url = 'http://{0}:8080'.format(external_ip)
         self.assertTrue(urllib.request.urlopen(url).getcode() == 200)
     
     def testDifferentZone(self):
@@ -114,9 +110,10 @@ def getClusterZone():
     return os.environ['ZONE']
 
 if __name__ == '__main__':
-    command=('gcloud config set project cloud-ops-sandbox-336203338')
+    # authenticate container cluster
+    command=('gcloud config set project {0}'.format(getProjectId()))
     subprocess.run(split(command))
-    command=('gcloud container clusters get-credentials cloud-ops-sandbox --zone us-central1-c')
+    command=('gcloud container clusters get-credentials cloud-ops-sandbox --zone {0}'.format(getClusterZone()))
     subprocess.run(split(command))
-    #unittest.main(verbosity=2)
-    unittest.main()
+    # start tests
+    unittest.main(verbosity=2)
