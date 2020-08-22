@@ -21,8 +21,8 @@ jobs:
   build-trigger:
     runs-on: [self-hosted, push-privilege]
     steps:
-    - name: Run Cloud Build Trigger
     - uses: actions/checkout@v2
+    - name: Run Cloud Build Trigger
       timeout-minutes: 20
       run: |
         gcloud beta builds triggers run --branch=build-trigger Build-CloudShell-Image
