@@ -70,10 +70,9 @@ jobs:
         # build provisioning test image
         docker build -t test-provisioning:$GITHUB_SHA tests/provisioning/.
         # run provisioning tests
-        docker run\
+        docker run --rm \
           -e GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
           -e ZONE=$CLUSTER_ZONE \
-          -e KUBECONFIG=/root/.kube/config \
           -v ~/.config:/root/.config \
           test-provisioning:$GITHUB_SHA
       env:

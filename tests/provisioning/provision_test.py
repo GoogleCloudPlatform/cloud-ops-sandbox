@@ -22,8 +22,8 @@ import json
 import urllib.request
 
 from google.cloud.container_v1.services import cluster_manager
-from google.cloud.trace_v1 import trace_service_client
 from google.cloud import error_reporting
+from google.api_core import exceptions
 
 class TestGKECluster(unittest.TestCase):
     @classmethod
@@ -39,7 +39,7 @@ class TestGKECluster(unittest.TestCase):
         self.assertEqual(machine_type, 'n1-standard-2')
 
     def testNumberOfNode(self):
-        """ Test if the number of nodes in the node pool is in the specified range """
+        """ Test if the number of nodes in the node pool is as specified """
         client = cluster_manager.ClusterManagerClient()
         cluster_info = client.get_cluster(name=TestGKECluster.name)
         node_count = cluster_info.current_node_count
@@ -61,8 +61,15 @@ class TestGKECluster(unittest.TestCase):
         url = 'http://{0}'.format(external_ip)
         self.assertTrue(urllib.request.urlopen(url).getcode() == 200)
 
-
 class TestLoadGenerator(unittest.TestCase):
+    def testNumberOfLoadgen(self):
+        """ Test if there's only one load generator instance """
+        command = ('gcloud compute instances list --filter="name:loadgenerator*" --format="value(name)"')
+        result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
+        instances = result.stdout.strip().split('\n')
+        num_instances = len(instances)
+        self.assertTrue(num_instances == 1)
+
     def testReachOfLoadgen(self):
         """ Test if querying load generator returns 200 """
         command = ('gcloud compute instances list --filter="name:loadgenerator*" --format="value(networkInterfaces[0].accessConfigs.natIP)"')
@@ -79,29 +86,28 @@ class TestLoadGenerator(unittest.TestCase):
         self.assertTrue(zone != getClusterZone())
 
 class TestProjectResources(unittest.TestCase):
-    def testCloudTrace(self):
-        """ Test if Cloud Trace is provisioned """
-        try:
-            command = ('gcloud alpha trace sinks list --project={0}'.format(getProjectId()))
-            result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
-        except:
-            self.fail("Trace not provisioned")
-    
-    def testCloudDebugger(self):
-        """ Test if Cloud Debugger is provisioned """
-        try:
-            command = ('gcloud debug targets list')
-            result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
-        except:
-            self.fail("Debugger not provisioned")
+    def testAPIEnabled(self):
+        """ Test if all APIs requested are enabled """
+        api_requested = ['iam.googleapis.com', 'compute.googleapis.com', 'clouddebugger.googleapis.com',
+                         'cloudtrace.googleapis.com', 'clouderrorreporting.googleapis.com', 'sourcerepo.googleapis.com',
+                         'container.googleapis.com']
+        command = ('gcloud services list --format="value(config.name)"')
+        result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
+        api_enabled = result.stdout.strip().split('\n')
+        for api in api_requested:
+            self.assertTrue(api in api_enabled)
     
     def testErrorReporting(self):
-        """ Test if Error Reporting API is provisioned """
+        """ Test if we can report error using Error Reporting API """
         client = error_reporting.Client(project=getProjectId())
         try:
             client.report("Testing reachability!")
-        except:
-            self.fail("Error reporting not provisioned")        
+        except exceptions.NotFound as e:
+            # Error Reporting API is not enabled, so we can't report errors
+            raise e      
+        except Exception as e:
+            # unexpected error
+            raise e
 
 def getProjectId():
     return os.environ['GOOGLE_CLOUD_PROJECT']
@@ -116,4 +122,5 @@ if __name__ == '__main__':
     command=('gcloud container clusters get-credentials cloud-ops-sandbox --zone {0}'.format(getClusterZone()))
     subprocess.run(split(command))
     # start tests
-    unittest.main(verbosity=2)
+    #unittest.main(verbosity=2)
+    unittest.main()

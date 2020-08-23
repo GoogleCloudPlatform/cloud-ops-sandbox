@@ -2,12 +2,12 @@
 
 This test is integrated into the Github CI system. If you want to run it manually, please follow the steps below.
 
-1. Install the dependencies
+1. Build docker
 ```bash
-pip3 install -r requirements.txt
+docker build -t $image_name .
 ```
 
-2. Run the tests
+2. Run docker
 ```bash
-python3 provision_test.py
+docker run -rm -e GOOGLE_CLOUD_PROJECT=$project_id -e ZONE=$gke_zone $image_name
 ```
