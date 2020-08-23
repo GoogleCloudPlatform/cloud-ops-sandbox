@@ -122,5 +122,4 @@ if __name__ == '__main__':
     command=('gcloud container clusters get-credentials cloud-ops-sandbox --zone {0}'.format(getClusterZone()))
     subprocess.run(split(command))
     # start tests
-    #unittest.main(verbosity=2)
-    unittest.main()
+    unittest.main(verbosity=2)
