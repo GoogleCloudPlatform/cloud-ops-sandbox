@@ -29,6 +29,7 @@ steps:
     - |-
     git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git
     cd cloud-ops-sandbox
+    
     for TAG in $(git tag); do
         echo $$TAG
         git checkout $$TAG
