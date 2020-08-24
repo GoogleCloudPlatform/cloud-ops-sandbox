@@ -14,7 +14,10 @@
 
 name: "Build Custom Cloud Shell Image"
 on:
-  workflow_dispatch
+  # for testing purposes, runs on builds to this branch
+  push:
+    branches:
+      -build-trigger
   #schedule:
   #  - cron: '0 0 * * *' # runs daily at midnight
   
