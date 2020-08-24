@@ -23,7 +23,7 @@
 # starting point for building all images re: Dan's comment
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  entrypoint: '/bin/bash'
+  entrypoint: 'bash'
   args:
     - '-c'
     - |-
