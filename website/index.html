@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Stackdriver Sandbox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" media="screen" href="css/main.css" />
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-137862890-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-137862890-1');
+  </script>
+  <!-- End of Google Analytics -->
+</head>
+<body>
+  <section class="page">
+
+    <section class="title-row">
+      <img src="images/logo_stackdriver.svg" class="stackdriver-logo" width="64" alt="Stackdriver logo">
+      <h1>Stackdriver Sandbox</h1>
+      <div class="badge alpha">Alpha</div>
+    </section>
+    <section class="content">
+      <h3>Stackdriver Sandbox is an open source tool* that helps practitioners to learn Stackdriver. It offers:</h3>
+      <ul>
+        <li><b>Demo Service</b> - an application built using microservices architecture on modern, cloud native stack.</li>
+        <li><b>One-click deployment script</b> of the service to Google Cloud Platform</li>
+        <li><b>Load Generator</b> - a component that produces synthetic traffic on a demo service</li>
+        <li><b>(Soon) SRE Runbook</b> - for operating deployed sample service that follows best SRE practices</li>
+      </ul>
+      <a class="github-btn" href="https://github.com/GoogleCloudPlatform/stackdriver-sandbox" target="_blank">View source code</a>
+    </section>
+    <section class="cta">
+      <h2>Get started now</h2>
+      <div class="steps">
+        <div class="step step-1">
+          <!--label>Step 1</label-->
+          <a class="console-btn" href="https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/stackdriver-sandbox.git&cloudshell_git_branch=master&cloudshell_working_dir=terraform&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image:latest&cloudshell_tutorial=../docs/tutorial.md" target="_blank" onclick="metrics.recordCustomTime('stackdriver-demo-open-in-cloud-shell')">Open in Google Cloud Shell</a>
+        </div>
+        <img src="images/bg_02.png" class="cloud-shell" alt="cloud shell">
+      </div>
+    </section>
+    <section class="cta">
+      <h2>Next steps</h2>
+      <div class="steps">
+        <div class="step step-2">
+          <label>Follow along with our User Guide.</label>
+	  <a class="github-btn" href="https://github.com/GoogleCloudPlatform/stackdriver-sandbox/blob/master/docs/README.md">View on GitHub</a>
+	</div>
+      </div>
+    </section>
+  </section>
+
+  <footer>
+    <p class="fineprint">* Note: This is <b>NOT</b> an official Google product. Customers will be billed for using cloud resources when creating a sandbox cluster.
+      </p>
+  </footer>
+</body>
+</html>
