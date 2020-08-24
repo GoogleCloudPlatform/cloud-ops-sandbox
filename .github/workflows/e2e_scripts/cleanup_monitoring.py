@@ -15,6 +15,7 @@ import os
 import sys
 
 from google.cloud import monitoring_v3
+from google.cloud import logging_v2
 from google.cloud.monitoring_dashboard import v1
 
 def cleanupDashboards(project_name):
@@ -28,6 +29,18 @@ def cleanupDashboards(project_name):
                 client.delete_dashboard(dashboard.name)
             except:
                 print('Could not delete dashboard: ' + dashboard.name)
+
+def cleanupLogBasedMetrics(project_name):
+    """ Deletes all log-based metrics. """
+    client = logging_v2.MetricsServiceV2Client()
+    metrics = True
+    while metrics:
+        metrics = list(client.list_log_metrics(project_name))
+        for metric in metrics:
+            try:
+                client.delete_log_metric(metric.name)
+            except:
+                print('Could not delete metric: ' + metric.name)
 
 def cleanupPolicies(project_name):
     """ Delete all alerting policies for both uptime checks and SLOs. """
@@ -95,6 +108,7 @@ def cleanupUptimeCheck(project_name):
 def doCleanup(project_name):
     """ Ensures that resources are deleted in the proper order so no exceptions are thrown. """
     cleanupDashboards(project_name)
+    cleanupLogBasedMetrics(project_name)
     cleanupPolicies(project_name)
     cleanupNotificationChannels(project_name)
     cleanupSlos(project_name)

@@ -24,6 +24,7 @@ import sys
 import json
 
 from google.cloud import monitoring_v3
+from google.cloud import logging_v2
 from google.cloud.monitoring_dashboard import v1
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
@@ -195,6 +196,22 @@ class TestMonitoringDashboard(unittest.TestCase):
 		""" Test that the Product Catalog Service Dashboard gets created. """
 		found_dashboard = self.checkForDashboard('Product Catalog Service Dashboard')
 		self.assertTrue(found_dashboard)
+
+	def testLogBasedMetricDashboard(self):
+		""" Test that the Log Based Metric Dashboard gets created. """
+		found_dashboard = self.checkForDashboard('Log Based Metric Dashboard')
+		self.assertTrue(found_dashboard)
+
+class TestLogBasedMetric(unittest.TestCase):
+	def setUp(self):
+		self.client = logging_v2.MetricsServiceV2Client()
+		self.project_id = getProjectId()
+
+	def testCheckoutServiceLogMetric(self):
+		""" Test that the log based metric for the Checkout Service gets created. """
+		metric_name = self.client.metric_path(self.project_id, "checkoutservice_log_metric")
+		response = self.client.get_log_metric(metric_name)
+		self.assertTrue(response)
 
 class TestCustomService(unittest.TestCase):
 	def setUp(self):
