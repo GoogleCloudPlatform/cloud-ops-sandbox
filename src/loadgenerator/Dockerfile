@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3 as base
+FROM python:3-slim as base
 
 FROM base as builder
 
@@ -22,11 +22,16 @@ RUN apt-get -qq update \
 
 COPY requirements.txt .
 
-RUN pip install --install-option="--prefix=/install" -r requirements.txt
+RUN pip install --prefix="/install" -r requirements.txt
 
 FROM base
 COPY --from=builder /install /usr/local
 
 COPY . .
+RUN chmod +x ./loadgenerator-entrypoint.sh
+RUN apt-get -qq update \
+    && apt-get install -y --no-install-recommends \
+        curl
+
 ENTRYPOINT ["./loadgenerator-entrypoint.sh"]
-CMD ["--no-web", "--clients=100", "--hatch-rate=10"]
+
