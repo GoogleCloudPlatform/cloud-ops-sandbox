@@ -22,6 +22,7 @@ set -o errexit  # Exit on error
 log() { echo "$1" >&2;  }
 
 IFS=$'\n'
+acct=$(gcloud info --format="value(config.account)")
 
 # ensure the working dir is the script's folder
 SCRIPT_DIR=$(realpath $(dirname "$0"))
@@ -30,13 +31,27 @@ cd $SCRIPT_DIR
 # find the cloud operations sandbox project id
 found=$(gcloud projects list \
           --filter="(id:cloud-ops-sandbox-* AND name='Cloud Operations Sandbox Demo') OR (id:stackdriver-sandbox-* AND name='Stackdriver Sandbox Demo')" \
-          --format="value[separator=' | '](projectId, create_time.date(%b-%d-%Y))")
-if [[ -z "${found}" ]]; then
+          --format="value(projectId)")
+
+# find projects owned by current user
+for proj in ${found[@]}; do
+  iam_test=$(gcloud projects get-iam-policy "$proj" \
+               --flatten="bindings[].members" \
+               --format="table(bindings.members)" \
+               --filter="bindings.role:roles/owner" 2> /dev/null | grep $acct | cat)
+  if [[ -n "$iam_test" ]]; then
+    create_time=$(gcloud projects describe "$proj" --format="value(create_time.date(%b-%d-%Y))")
+    owned_projects+=("$proj | [$create_time]")
+  fi
+done
+
+# prompt user for a project to delete
+if [[ -z "${owned_projects}" ]]; then
     log "error: no Cloud Operations Sandbox projects found"
     exit 1
 else
     log "which Cloud Operations Sandbox project do you want to delete?:"
-    select opt in $found "cancel"; do
+    select opt in $owned_projects "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
             exit 0
         elif [[ -z "${opt}" ]]; then
