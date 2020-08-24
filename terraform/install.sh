@@ -228,7 +228,7 @@ installMonitoring() {
     log ""
     read -p "${YELLOW}When you are done, please PRESS ENTER TO CONTINUE"
   else
-    sleep 20 # sleep to allow for services to be detected by Cloud Monitoring
+    sleep 30 # sleep to allow for services to be detected by Cloud Monitoring
   fi
 
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
