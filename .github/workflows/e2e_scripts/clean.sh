@@ -17,19 +17,20 @@ set -x
 set +e
 
 # This script is responsible for deleting resources out of a
-# stackdriver sandbox project in between test runs
+# Cloud Operations Sandbox project in between test runs
 
 export PROJECT_ID=$(gcloud config get-value project)
+export WORKDIR=$(dirname $(realpath $0))
 
 # delete cluster
 CLUSTER_ZONE="first_run"
 while [ -n "$CLUSTER_ZONE" ]; do
   CLUSTER_ZONE=$(gcloud container clusters list \
-                   --filter="name:stackdriver-sandbox" \
+                   --filter="name:cloud-ops-sandbox" \
                    --project $PROJECT_ID --format="value(zone)")
   if [ -n "$CLUSTER_ZONE" ]; then
       echo "deleting cluster"
-      gcloud container clusters delete stackdriver-sandbox \
+      gcloud container clusters delete cloud-ops-sandbox \
           --project $PROJECT_ID --zone $CLUSTER_ZONE --quiet
       sleep 20
   fi
@@ -67,35 +68,6 @@ for LOG in $(gcloud logging logs list --project $PROJECT_ID --format="value(NAME
     gcloud logging logs delete $LOG --project $PROJECT_ID --quiet
 done
 
-# clear dashboards
-DASHBOARD_LIST="first_run"
-while [ -n "$DASHBOARD_LIST" ]; do
-  DASHBOARD_LIST=$(gcloud monitoring dashboards list --format="value(name)")
-  if [ -n "$DASHBOARD_LIST" ]; then
-    for DASHBOARD in $DASHBOARD_LIST; do
-      gcloud monitoring dashboards delete $DASHBOARD --quiet
-    done
-  fi
-done
-
-# clear policies
-POLICY_LIST="first_run"
-while [ -n "$POLICY_LIST" ]; do
-  POLICY_LIST=$(gcloud alpha monitoring policies list --format="value(name)")
-  if [ -n "$POLICY_LIST" ]; then
-    for POLICY in $POLICY_LIST; do
-      gcloud alpha monitoring policies delete $POLICY --quiet
-    done
-  fi
-done
-
-# clear notification channels
-CHANNEL_LIST="first_run"
-while [ -n "$CHANNEL_LIST" ]; do
-  CHANNEL_LIST=$(gcloud alpha monitoring channels list --format="value(name)")
-  if [ -n "$CHANNEL_LIST" ]; then
-    for CHANNEL in $CHANNEL_LIST; do
-      gcloud alpha monitoring channels delete $CHANNEL --quiet
-    done
-  fi
-done
+# clear monitoring
+python3 -m pip install -r ${WORKDIR}/requirements.txt
+python3 ${WORKDIR}/cleanup_monitoring.py "projects/$PROJECT_ID"

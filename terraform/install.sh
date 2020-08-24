@@ -13,7 +13,7 @@
 # limitations under the License.
 #!/bin/bash
 
-# This script provisions Hipster Shop Cluster for Stackdriver Sandbox using Terraform
+# This script provisions Hipster Shop Cluster for Cloud Operations Sandbox using Terraform
 
 #set -euo pipefail
 set -o errexit  # Exit on error
@@ -79,7 +79,7 @@ promptForProject() {
   log "Checking for project list..."
   acct=$(gcloud info --format="value(config.account)")
   # get projects associated with the billing account
-  billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="project_id:stackdriver-sandbox-*" --format="value(projectId)")
+  billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="project_id:cloud-ops-sandbox-*" --format="value(projectId)")
   for proj in ${billed_projects[@]}; do
     # check if user is owner
     iam_test=$(gcloud projects get-iam-policy "$proj" \
@@ -148,7 +148,7 @@ getOrCreateBucket() {
 
 createProject() {
     # generate random id
-    project_id="stackdriver-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
+    project_id="cloud-ops-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
     # create project
     if [[ $acct == *"google.com"* ]];
     then
@@ -165,9 +165,9 @@ createProject() {
         fi
       done
       folder_id="262044416022" # /experimental-gke  
-      gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo" --folder="$folder_id"    
+      gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo" --folder="$folder_id"    
     else
-      gcloud projects create "$project_id" --name="Stackdriver Sandbox Demo"      
+      gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo"      
     fi;
     # link billing account
     gcloud beta billing projects link "$project_id" --billing-account="$billing_id"
@@ -196,8 +196,8 @@ applyTerraform() {
 }
 
 authenticateCluster() {
-  CLUSTER_ZONE=$(gcloud container clusters list --filter="name:stackdriver-sandbox" --project $project_id --format="value(zone)")
-  gcloud container clusters get-credentials stackdriver-sandbox --zone "$CLUSTER_ZONE"
+  CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $project_id --format="value(zone)")
+  gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
 }
 
 installMonitoring() {
@@ -232,7 +232,7 @@ installMonitoring() {
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
   terraform init -lock=false
-  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}"
+  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}" -var="zone=${CLUSTER_ZONE}"
   popd
 }
 
@@ -285,7 +285,7 @@ displaySuccessMessage() {
     log ""
     log ""
     log "********************************************************************************"
-    log "Stackdriver Sandbox deployed successfully!"
+    log "Cloud Operations Sandbox deployed successfully!"
     log ""
     log "     Google Cloud Console KBE Dashboard: $gcp_kubernetes_path"
     log "     Google Cloud Console Monitoring Workspace: $gcp_monitoring_path"
@@ -333,12 +333,12 @@ parseArguments() {
       shift
       ;;
     -h|--help)
-      log "Deploy Stackdriver Sandbox to a GCP project"
+      log "Deploy Cloud Operations Sandbox to a GCP project"
       log ""
       log "options:"
-      log "-p|--project|--project-id     GCP project to deploy Stackdriver Sandbox to"
+      log "-p|--project|--project-id     GCP project to deploy Cloud Operations Sandbox to"
       log "-v|--verbose                  print commands as they run (set -x)"
-      log "--skip-workspace-prompt       Don't pause for Stackdriver workspace set up"
+      log "--skip-workspace-prompt       Don't pause for Cloud Monitoring workspace set up"
       log ""
       exit 0
       ;;

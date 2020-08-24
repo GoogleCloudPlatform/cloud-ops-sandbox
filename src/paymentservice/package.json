@@ -12,14 +12,18 @@
   "license": "ISC",
   "dependencies": {
     "@google-cloud/debug-agent": "^4.0.1",
+    "@google-cloud/opentelemetry-cloud-trace-exporter": "^0.4.1",
     "@google-cloud/profiler": "^4.0.0",
-    "@google-cloud/trace-agent": "4.2.5",
     "@grpc/proto-loader": "^0.5.0",
+    "@opentelemetry/api": "^0.10.2",
+    "@opentelemetry/node": "^0.10.2",
+    "@opentelemetry/plugin-grpc": "^0.10.2",
+    "@opentelemetry/tracing": "^0.10.2",
+    "axios": "0.20.0",
     "grpc": "^1.22.2",
     "pino": "^5.6.2",
     "simple-card-validator": "^1.1.0",
-    "uuid": "^3.2.1",
-    "axios": "0.19.2"
+    "uuid": "^3.2.1"
   },
   "devDependencies": {
     "semistandard": "12.0.1"

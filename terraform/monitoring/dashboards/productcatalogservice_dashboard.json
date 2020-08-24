@@ -1,16 +1,16 @@
 {
-  "displayName": "${service_name} Dashboard",
+  "displayName": "Product Catalog Service Dashboard",
   "gridLayout": {
     "columns": "2",
     "widgets": [
       {
-        "title": "CPU Limit Utilization - ${service_name}",
+        "title": "Memory Limit Utilization - Product Catalog Service",
         "xyChart": {
           "dataSets": [
             {
               "timeSeriesQuery": {
                 "timeSeriesFilter": {
-                  "filter": "metric.type=\"kubernetes.io/container/cpu/limit_utilization\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"cloud-ops-sandbox\" metadata.user_labels.\"app\"=\"${service_id}\"",
+                  "filter": "metric.type=\"kubernetes.io/container/memory/limit_utilization\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"cloud-ops-sandbox\" metadata.user_labels.\"app\"=\"productcatalogservice\"",
                   "aggregation": {
                     "perSeriesAligner": "ALIGN_MEAN"
                   }
@@ -31,13 +31,13 @@
         }
       },
       {
-        "title": "Server Request Count - ${service_name}",
+        "title": "Server Request Count - Product Catalog Service",
         "xyChart": {
           "dataSets": [
             {
               "timeSeriesQuery": {
                 "timeSeriesFilter": {
-                  "filter": "metric.type=\"istio.io/service/server/request_count\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"cloud-ops-sandbox\" metadata.user_labels.\"app\"=\"${service_id}\"",
+                  "filter": "metric.type=\"istio.io/service/server/request_count\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"cloud-ops-sandbox\" metadata.user_labels.\"app\"=\"productcatalogservice\"",
                   "aggregation": {
                     "perSeriesAligner": "ALIGN_RATE"
                   }
@@ -58,13 +58,13 @@
         }
       },
       {
-        "title": "Server Request Count, Errors - ${service_name}",
+        "title": "gRPC Calls OK Status - Product Catalog Service",
         "xyChart": {
           "dataSets": [
             {
               "timeSeriesQuery": {
                 "timeSeriesFilter": {
-                  "filter": "metric.type=\"istio.io/service/server/request_count\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"cloud-ops-sandbox\" metadata.user_labels.\"app\"=\"${service_id}\" metric.label.\"response_code\"!=\"200\"",
+                  "filter": "metric.type=\"custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs\" metric.label.\"grpc_client_method\"=starts_with(\"hipstershop.ProductCatalogService\") metric.label.\"grpc_client_status\"=\"OK\"",
                   "aggregation": {
                     "perSeriesAligner": "ALIGN_RATE"
                   }
@@ -85,15 +85,43 @@
         }
       },
       {
-        "title": "Server Response Latencies, 99th Percentile - ${service_name}",
+        "title": "gRPC Calls Errors - Product Catalog Service",
         "xyChart": {
           "dataSets": [
             {
               "timeSeriesQuery": {
                 "timeSeriesFilter": {
-                  "filter": "metric.type=\"istio.io/service/server/response_latencies\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"cloud-ops-sandbox\" metadata.user_labels.\"app\"=\"${service_id}\"",
+                  "filter": "metric.type=\"custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs\" metric.label.\"grpc_client_method\"=starts_with(\"hipstershop.ProductCatalogService\") metric.label.\"grpc_client_status\"!=\"OK\"",
                   "aggregation": {
-                    "perSeriesAligner": "ALIGN_PERCENTILE_99"
+                    "perSeriesAligner": "ALIGN_RATE"
+                  }
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "Server Response Latencies, 99th Percentile - Product Catalog Service",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"istio.io/service/server/response_latencies\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"cloud-ops-sandbox\" metadata.user_labels.\"app\"=\"productcatalogservice\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_DELTA",
+                    "crossSeriesReducer": "REDUCE_PERCENTILE_99"
                   }
                 },
                 "unitOverride": "ms"

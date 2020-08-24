@@ -17,7 +17,7 @@
 # of requests, distribution of types of requests, and response types. The JSON object
 # containing the exact details of the dashboard can be found in the 'dashboards' folder.
 resource "google_monitoring_dashboard" "userexp_dashboard" {
-	dashboard_json = file("./dashboards/userexp_dashboard.json")
+  dashboard_json = file("./dashboards/userexp_dashboard.json")
 }
 
 # Creates a dashboard for the frontend service. The details of the charts
@@ -32,10 +32,30 @@ resource "google_monitoring_dashboard" "adservice_dashboard" {
   dashboard_json = file("./dashboards/adservice_dashboard.json")
 }
 
-# Ceates a dashboard for the recommendationservice. The details of the charts
+# Creates a dashboard for the recommendationservice. The details of the charts
 # in the dashboard can be found in the JSON specification file.
 resource "google_monitoring_dashboard" "recommendationservice_dashboard" {
   dashboard_json = file("./dashboards/recommendationservice_dashboard.json")
+}
+
+# Creates a dashboard for the cartservice.
+resource "google_monitoring_dashboard" "cartservice_dashboard" {
+  dashboard_json = file("./dashboards/cartservice_dashboard.json")
+}
+
+# Creates a dashboard for the checkoutservice.
+resource "google_monitoring_dashboard" "checkoutservice_dashboard" {
+  dashboard_json = file("./dashboards/checkoutservice_dashboard.json")
+}
+
+# Creates a dashboard for the currencyservice.
+resource "google_monitoring_dashboard" "currencyservice_dashboard" {
+  dashboard_json = file("./dashboards/currencyservice_dashboard.json")
+}
+
+# Creates a dashboard for the productcatalogservice.
+resource "google_monitoring_dashboard" "productcatalogservice_dashboard" {
+  dashboard_json = file("./dashboards/productcatalogservice_dashboard.json")
 }
 
 # Create generic dashboards for three of the microservices. Since all three microservices
@@ -71,8 +91,8 @@ data "template_file" "dash_json" {
   template = file("./dashboards/generic_dashboard.tmpl")
   count    = length(var.services)
   vars     = {
-    service_name = "${var.services[count.index].service_name}"
-    service_id   = "${var.services[count.index].service_id}"
+    service_name = var.services[count.index].service_name
+    service_id   = var.services[count.index].service_id
   }
 }
 
