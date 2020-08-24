@@ -14,6 +14,7 @@
 
 # Creates a log-based metric by extracting a specific log written by the Checkout Service. 
 # The log being used for the metric is from the Checkout Service and has the format:
+#
 # orderedItem="Vintage Typewriter", id="OLJCESPC7Z"
 #
 # The label and Regex extractor are used to create filters on the metric
