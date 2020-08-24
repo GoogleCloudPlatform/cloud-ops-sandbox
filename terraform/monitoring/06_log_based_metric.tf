@@ -13,34 +13,40 @@
 # limitations under the License.
 
 # Creates a log-based metric by extracting a specific log written by the Checkout Service. 
-# The log being used for metric is from the Checkout Service and has the format:
-# [CheckoutService] orderedItem="Vintage Typewriter"
+# The log being used for the metric is from the Checkout Service and has the format:
+# orderedItem="Vintage Typewriter", id="OLJCESPC7Z"
 #
-# The label and Regex extractor is used to create filters on the metric
+# The label and Regex extractor are used to create filters on the metric
 # This resource creates only the metric
 resource "google_logging_metric" "checkoutservice_logging_metric" {
-  name   = "checkoutservice_custom_metric"
-  filter = "resource.type=k8s_container AND resource.labels.cluster_name=cloud-ops-sandbox AND resource.labels.namespace_name=default AND resource.labels.container_name=server AND [CheckoutService]"
+  name   = "checkoutservice_log_metric"
+  filter = "resource.type=k8s_container AND resource.labels.cluster_name=cloud-ops-sandbox AND resource.labels.namespace_name=default AND resource.labels.container_name=server AND orderedItem"
   metric_descriptor {
-    metric_kind = "DELTA"
-    value_type  = "INT64"  # specifies our metric to be a counter-based metric
+    metric_kind = "DELTA"  # set to DELTA for counter-based metric
+    value_type  = "INT64"  # set to INT64 for counter-based metric
     unit        = "1"
     labels {
       key         = "product_name"
       description = "Filters by Product Name"
     }
+    labels {
+      key         = "product_id"
+      description = "Filters by Product Id"
+    }
     display_name = "Ordered Products Metric"
   }
   label_extractors = {
-    # Regex extractor has matching group to match the product name. Example: [CheckoutService] orderedItem="Terrarium" matches Terrarium
-    "filter" = "REGEXP_EXTRACT(jsonPayload.message, \"\\\\[CheckoutService\\\\] orderedItem=\\\\\\\"([^\\\"]+)\\\\\\\"\")"
+    # Regex extractor has matching group to match the product name or product id. Example: orderedItem="Terrarium", id="L9ECAV7KIM" 
+    # matches Terrarium for product name and L9ECAV7KIM for product id.
+    "product_name" = "REGEXP_EXTRACT(jsonPayload.message, \"orderedItem=\\\\\\\"([^\\\"]+)\\\\\\\"\")"
+    "product_id"   = "REGEXP_EXTRACT(jsonPayload.message, \"id=\\\\\\\"([^\\\"]+)\\\\\\\"\")"
   }
 }
 
 # Creates a dashboard and chart for the log-based metric defined above.
 # Uses the label to group by the product name
 resource "google_monitoring_dashboard" "log_based_metric_dashboard" {
-	dashboard_json = <<EOF
+  dashboard_json = <<EOF
 {
   "displayName": "Log Based Metric Dashboard",
   "gridLayout": {
