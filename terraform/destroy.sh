@@ -21,16 +21,20 @@ set -o errexit  # Exit on error
 
 log() { echo "$1" >&2;  }
 
+IFS=$'\n'
+
 # ensure the working dir is the script's folder
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
 # find the cloud operations sandbox project id
-found=$(gcloud projects list --filter="id:cloud-ops-sandbox-* AND name='Cloud Operations Sandbox Demo'" --format="value(projectId)")
+found=$(gcloud projects list \
+          --filter="(id:cloud-ops-sandbox-* AND name='Cloud Operations Sandbox Demo') OR (id:stackdriver-sandbox-* AND name='Stackdriver Sandbox Demo')" \
+          --format="value[separator=' | '](projectId, create_time.date(%b-%d-%Y))")
 if [[ -z "${found}" ]]; then
     log "error: no Cloud Operations Sandbox projects found"
     exit 1
-elif [[ $(echo ${found} | wc -w) -gt 1 ]]; then
+else
     log "which Cloud Operations Sandbox project do you want to delete?:"
     select opt in $found "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
@@ -38,12 +42,10 @@ elif [[ $(echo ${found} | wc -w) -gt 1 ]]; then
         elif [[ -z "${opt}" ]]; then
             log "invalid response"
         else
-            PROJECT_ID=$opt
+            PROJECT_ID=$(echo $opt | awk '{print $1}')
             break
         fi
     done
-else
-    PROJECT_ID=$found
 fi
 
 # attempt deletion (tool will prompt user for confirmation)
