@@ -14,8 +14,9 @@
 
 name: "Build Custom Cloud Shell Image"
 on:
-  schedule:
-    - cron: '0 0 * * *' # runs daily at midnight
+  workflow_dispatch
+  #schedule:
+  #  - cron: '0 0 * * *' # runs daily at midnight
   
 jobs:
   build-trigger:
