@@ -362,6 +362,7 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 		if err != nil {
 			return nil, fmt.Errorf("failed to get product #%q", item.GetProductId())
 		}
+		// Note: This log line is used in a log-based metric. Changes to the log line will not be compatible with the metric. 
 		log.Infof("orderedItem=%q, id=%q", product.Name, product.Id)
 		price, err := cs.convertCurrency(ctx, product.GetPriceUsd(), userCurrency)
 		if err != nil {
