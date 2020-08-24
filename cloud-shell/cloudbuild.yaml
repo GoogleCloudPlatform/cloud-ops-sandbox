@@ -25,6 +25,8 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: '/bin/bash'
   args:
+    - '-c'
+    - |-
     git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git
     cd cloud-ops-sandbox
     for TAG in $(git tag); do
