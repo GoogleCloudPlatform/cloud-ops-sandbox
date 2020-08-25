@@ -1,6 +1,6 @@
 # Tests for Cloud Ops Sandbox Provisioning
 
-This test is integrated into the Github CI system. If you want to run it manually, please follow the steps below and *make sure you are running on the Cloud Shell*.
+This test is integrated into the Github CI system. If you want to run it manually, please follow the steps below and **make sure you are running on the Cloud Shell**.
 
 1. Build docker
 ```bash
