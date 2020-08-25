@@ -1,8 +1,8 @@
-# Stackdriver Sandbox User Guide
+# Cloud Operations Sandbox User Guide
 
 # Overview
 
-The Stackdriver Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the [Ops Management](http://cloud.google.com/products/operations) (formerly Stackdriver) product suite. Ops Management is a suite of tools that helps you gain full observability into your code and applications.
+The Cloud Operations Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the [Ops Management](http://cloud.google.com/products/operations) (formerly Stackdriver) product suite. Ops Management is a suite of tools that helps you gain full observability into your code and applications.
 
 The Hipster Shop application used in the sandbox is intended to be sufficiently complex such that you can meaningfully experiment with it, and the Sandbox automatically provisions a new demo cluster, configures and deploys Hipster Shop, and simulates real users.
 
@@ -16,7 +16,7 @@ The Hipster Shop application consists of a number of microservices, written in a
 
 **Note:** We are not endorsing this architecture as the best way to build a real online store. This application is optimized for demonstration and learning purposes.  It illustrates a large number of cloud-native technologies, uses a variety of programming languages, and provides an environment that can be explored productively with Ops Management tools.
 
-The Git repository you cloned has all the source code, so you can explore the implementation details of the application. See the repository [README](https://github.com/GoogleCloudPlatform/stackdriver-sandbox) for a guided tour.
+The Git repository you cloned has all the source code, so you can explore the implementation details of the application. See the repository [README](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox) for a guided tour.
 
 # Prerequisites
 
@@ -33,7 +33,7 @@ For more information, see ["Create a new billing account"](https://cloud.google.
 
 ## Deploy the Sandbox
 
-In a new browser tab, navigate to the Stackdriver Sandbox [website](https://stackdriver-sandbox.dev/) and follow the instructions there:
+In a new browser tab, navigate to the Cloud Operations Sandbox [website](https://stackdriver-sandbox.dev/) and follow the instructions there:
 
 Click the **Open in Google Cloud Shell** button. You might have to click Proceed on a second dialog if you haven't run Cloud Shell before.
 
@@ -41,12 +41,12 @@ Additionally, there will be a window that opens asking whether you trust the cus
 
 ![image](./images/user-guide/TrustImage.png)
 
-After the shell starts, the Stackdriver Sandbox repository is cloned to your shell container, and you are placed in the `stackdriver-sandbox/terraform` directory. The installer script should start running automatically.
+After the shell starts, the Cloud Operations Sandbox repository is cloned to your shell container, and you are placed in the `cloud-ops-sandbox/terraform` directory. The installer script should start running automatically.
 
 The installer script performs the following tasks:
 
 -  Enables the necessary GCP features
--  Creates a GCP project named "Stackdriver Sandbox Demo"
+-  Creates a GCP project named "Cloud Operations Sandbox Demo"
 -  Creates and configures a GKE cluster and deploys the microservices that make up the Hipster Shop application
 -  Starts a Compute Engine instance and runs [Locust](https://locust.io/), a load-generator application
 
@@ -54,7 +54,7 @@ The installation process takes a few minutes. When it completes, you see a messa
 
 ```bash
 ********************************************************************************
-Stackdriver Sandbox deployed successfully!
+Cloud Operations Sandbox deployed successfully!
 
      Google Cloud Console GKE Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project ID>
      Google Cloud Console Monitoring Workspace: https://console.cloud.google.com/monitoring?project=<project ID>
@@ -125,15 +125,15 @@ You can find the Ops Management products in the navigation panel on the GCP Cons
 
 ![image](./images/user-guide/5-operations-products.png)
 
-## The Stackdriver APM products: Trace, Profiler, and Debugger
+## The Cloud Operations APM products: Trace, Profiler, and Debugger
 
 ### Cloud Trace
 
 #### Trace Overview
 
-Stackdriver Trace ([documentation](https://cloud.google.com/trace/docs/)) enables developers to see distributed traces that visually expose latency bottleneck in requests. Developers instrument application code to collect trace information. You can also include environmental information in traces and trace information can be included in Stackdriver Logging logs. The Trace UI can then pull relevant log events into the trace timelines. 
+Cloud Trace ([documentation](https://cloud.google.com/trace/docs/)) enables developers to see distributed traces that visually expose latency bottleneck in requests. Developers instrument application code to collect trace information. You can also include environmental information in traces and trace information can be included in Cloud Logging logs. The Trace UI can then pull relevant log events into the trace timelines. 
 
-For instrumenting your applications, currently recommended solution is **OpenCensus.** [OpenCensus](https://opencensus.io/) is an open-source project that supports trace instrumentation in a variety of languages and that can export this data to Stackdriver. Then you can use the Stackdriver Trace UI to analyze the data. Note that OpenCensus is merging with another similar project, OpenTracing, to form OpenTelemetry. See **OpenCensus to become OpenTelemetry**  in this doc.
+For instrumenting your applications, currently recommended solution is **OpenCensus.** [OpenCensus](https://opencensus.io/) is an open-source project that supports trace instrumentation in a variety of languages and that can export this data to Cloud Operations. Then you can use the Cloud Trace UI to analyze the data. Note that OpenCensus is merging with another similar project, OpenTracing, to form OpenTelemetry. See **OpenCensus to become OpenTelemetry**  in this doc.
 
 HipsterShop microservices are instrumented to collect trace data. In addition to distributed tracing, **OpenCensus (Stats)** provides the sink to send quantifiable data, such as database latency, open file descriptors, and so on, that helps to set up monitoring of [SLIs and SLOs](https://cloud.google.com/blog/products/gcp/sre-fundamentals-slis-slas-and-slos) for the service. This data is available in Cloud Monitoring, and HipsterShop microservices are also instrumented to collect this kind of data.
 
@@ -229,9 +229,9 @@ In **Cloud Shell**, issue these **commands** to download a release of the Sandbo
 
 ```bash
 cd ~
-wget https://github.com/GoogleCloudPlatform/stackdriver-sandbox/archive/next19.tar.gz
+wget https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/archive/next19.tar.gz
 tar -xvf next19.tar.gz
-cd stackdriver-sandbox-next19
+cd cloud-ops-sandbox-next19
 ```
 
 ##### Create and configure source repository
@@ -253,7 +253,7 @@ In the Debugger home page, **copy** the command (_don't click the button!_) in t
 Paste the command into your Cloud Shell prompt and add a space and a period:
 
 ```bash
-gcloud beta debug source upload --project=stackdriver-sandbox-68291054 --branch=6412930C2492B84D99F3 .
+gcloud beta debug source upload --project=cloud-ops-sandbox-68291054 --branch=6412930C2492B84D99F3 .
 ```
 
 Enter _RETURN_ to execute the command.
@@ -334,7 +334,7 @@ This example creates a logs-based metric that counts the number of times a user 
 
 First, create a logs query that finds the relevant set of log entries:
 
-1. For the resource type, select **Kubernetes Container > stackdriver-sandbox > default > server**
+1. For the resource type, select **Kubernetes Container > cloud-ops-sandbox > default > server**
 2. In the box with default text "Filter by label or text search", enter "AddItemAsync" (the method used to add an item to the cart), and hit return.
 
 The Logs Viewer display shows the resulting entries:
@@ -371,7 +371,7 @@ The Logs Viewer allows you to view logs emitted by resources in the project usin
 
 To view all container logs emitted by pods running in the default namespace, use the Resources and Logs filter fields (these default to **Audited Resources** and **All logs**):
 
-1. For the resource type, select **GKE Container -> stackdriver-sandbox -> default**
+1. For the resource type, select **GKE Container -> cloud-ops-sandbox -> default**
 2. For the log type,  select **server**
 
 The Logs Viewer now displays  the logs generated by pods running in the default namespace:
@@ -436,17 +436,17 @@ You can expand any of the messages that matches the filter to see the full stack
 
 # Destroying your cluster
 
-Once you have finished exploring the Stackdriver Sandbox project, don't forget to destroy it to avoid incurring additional billing.
+Once you have finished exploring the Cloud Operations Sandbox project, don't forget to destroy it to avoid incurring additional billing.
 
 Destroy your Sandbox project by opening the Cloud Shell and running the destroy script:
 ```
 $ ./destroy.sh
 ```
 
-This script destroys the current Stackdriver Sandbox project. If the install.sh script were run again, a Stackdriver Sandbox project with a new project id would be created.
+This script destroys the current Cloud Operations Sandbox project. If the install.sh script were run again, a Cloud Operations Sandbox project with a new project id would be created.
 
 # OpenCensus to become OpenTelemetry
 
-The Stackdriver Sandbox project uses the [OpenCensus libraries](https://opencensus.io/) for collection of traces and metrics. OpenCensus provides a set of open-source libraries for a variety of languages, and the trace/metric data collected with these libraries can be exported to a variety of backends, including Stackdriver.
+The Cloud Operations Sandbox project uses the [OpenCensus libraries](https://opencensus.io/) for collection of traces and metrics. OpenCensus provides a set of open-source libraries for a variety of languages, and the trace/metric data collected with these libraries can be exported to a variety of backends, including Cloud Monitoring.
 
 For the next major release, OpenCensus is combining with the [OpenTracing project](https://opentracing.io/) to create a single solution, called [OpenTelemetry](https://opentelemetry.io/). OpenTelemetry will support basic context propagation, distributed traces, metrics, and other signals in the future, superseding both OpenCensus and OpenTracing.
