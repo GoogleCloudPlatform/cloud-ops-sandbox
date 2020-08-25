@@ -18,7 +18,7 @@ import sys
 from google.cloud import monitoring_v3
 
 def getIstioServiceName(service_name, project_id, zone):
-	return 'ist:' + project_id + '-zone-' + zone + '-stackdriver-sandbox-default-' + service_name
+	return 'ist:' + project_id + '-zone-' + zone + '-cloud-ops-sandbox-default-' + service_name
 
 def findService(client, service_name, project_id, zone):
 	found_service = False
