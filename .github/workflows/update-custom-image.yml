@@ -31,4 +31,4 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run Cloud Build Trigger to Rebuild All Tagged Images
       run: |
-        gcloud beta builds triggers run --branch=build-trigger Build-CloudShell-Image
+        gcloud beta builds triggers run --branch=master Build-CloudShell-Image
