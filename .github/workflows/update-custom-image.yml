@@ -14,10 +14,7 @@
 
 name: "Rebuild All Tagged Custom Cloud Shell Images"
 on:
-  # for testing purposes, runs manually
-  workflow_dispatch:
-    tags:
-      description: 'Test build trigger'
+  workflow_dispatch  # for testing purposes, runs manually
   #schedule:
   #  - cron: '0 0 * * *' # runs daily at midnight
   
