@@ -56,6 +56,7 @@ jobs:
         docker run --rm \
           -e project_id=$PROJECT_ID \
           -e skip_workspace_prompt=1 \
+          -e service_wait=1 \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \

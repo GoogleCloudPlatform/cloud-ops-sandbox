@@ -231,7 +231,7 @@ installMonitoring() {
 
   log "Checking to make sure necessary Istio services are ready for monitoring"
   python3 -m pip install google-cloud-monitoring
-  python3 monitoring/istio_service_setup.py $project_id $CLUSTER_ZONE
+  python3 monitoring/istio_service_setup.py $project_id $CLUSTER_ZONE $service-wait
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
   terraform init -lock=false
@@ -329,6 +329,10 @@ parseArguments() {
       ;;
     --skip-workspace-prompt)
       skip_workspace_prompt=1
+      shift
+      ;;
+    --service-wait)
+      service_wait=1
       shift
       ;;
     -v|--verbose)
