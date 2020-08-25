@@ -73,7 +73,6 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 #### Actions
 - builds and pushes images to official GCR repo tagged with git tag name
 
-
 ### E2E.yaml
 
 #### Triggers
@@ -88,3 +87,13 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 - run install.sh script against end-to-end test project
 - clean up resources in test project
 
+### Update-Custom-Image.yaml
+
+#### Triggers
+- on each commit to a test branch: Build-Trigger
+- every 24 hours
+
+#### Actions
+- runs Cloud Build trigger, which runs the logic in `../../cloudshell-image/Cloudbuild.yaml`. This logic:
+    - rebuilds tagged versions of the custom cloud shell image from the base cloud shell image (including the latest version)
+- prints logs from Cloud Build trigger run
