@@ -11,21 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: Rebuild All Tagged Custom Cloud Shell Images
+
+name: "Rebuild All Tagged Custom Cloud Shell Images"
 on:
+ schedule:
+    # run every day at midnight
+    - cron:  '* 0 * * *'
+  push:
+    # run on pushes to test branch
+    branches:
+      - build-trigger
   workflow_dispatch:
-    inputs:
-      test:
-        description: 'Whether this is a test'
-        required: true
+    # trigger through UI or API
   
 jobs:
   build-trigger:
     runs-on: [self-hosted, push-privilege]
     steps:
     - uses: actions/checkout@v2
-    - name: Run Cloud Build Trigger
-      timeout-minutes: 20
+    - name: Run Cloud Build Trigger to Rebuild All Tagged Images
       run: |
         gcloud beta builds triggers run --branch=build-trigger Build-CloudShell-Image
-        echo Testing is ${{ github.event.inputs.test }}
