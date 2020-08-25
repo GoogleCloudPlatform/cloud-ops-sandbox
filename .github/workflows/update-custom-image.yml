@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Rebuild All Tagged Custom Cloud Shell Images"
+name: "Rebuild Latest and Tagged Custom Cloud Shell Images"
 on:
   schedule:
   # run daily at midnight
@@ -31,4 +31,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run Cloud Build Trigger to Rebuild All Tagged Images
       run: |
-        gcloud beta builds triggers run --branch=master Build-CloudShell-Image
+        run_info=$(gcloud beta builds triggers run --branch=master Build-CloudShell-Image)
+        run_id=$(echo $run_info | grep -oP "id: \K(\w+-){4}\w+")
+        gcloud beta builds log --stream "$run_id"
