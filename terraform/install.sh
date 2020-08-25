@@ -301,7 +301,7 @@ checkAuthentication() {
         log "Authentication failed"
         log "Please allow gcloud and Cloud Shell to access your GCP account"
     fi
-    while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 30  ]]; do
+    while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 300  ]]; do
         AUTH_ACCT=$(gcloud auth list --format="value(account)")
         sleep 1;
         TRIES=$((TRIES + 1))
