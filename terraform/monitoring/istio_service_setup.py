@@ -59,7 +59,7 @@ def waitForIstioServicesDetection(project_id, zone, timeout):
 	client = monitoring_v3.ServiceMonitoringServiceClient()
 
 	# wait for each Istio service to be detected by Cloud Monitoring
-	for service in ["cartservice", "productcatalogservice", "currencyservice", "recommendationservice", "adservice"]:
+	for service in ["cartservice", "productcatalogservice", "currencyservice", "recommendationservice", "adservice", "frontend", "checkoutservice", "paymentservice", "emailservice", "shippingservice"]:
 		findService(client, service, project_id, zone, timeout)
 
 if __name__ == '__main__':
