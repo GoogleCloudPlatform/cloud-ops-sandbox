@@ -29,9 +29,13 @@ SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
 # find the cloud operations sandbox project id
-found=$(gcloud projects list \
-          --filter="(id:cloud-ops-sandbox-* AND name='Cloud Operations Sandbox Demo') OR (id:stackdriver-sandbox-* AND name='Stackdriver Sandbox Demo')" \
-          --format="value(projectId)")
+filter=$(cat <<-END
+  (id:cloud-ops-sandbox-* AND name='Cloud Operations Sandbox Demo')
+  OR
+  (id:stackdriver-sandbox-* AND name='Stackdriver Sandbox Demo')
+END
+)
+found=$(gcloud projects list --filter="$filter" --format="value(projectId)")
 
 # find projects owned by current user
 for proj in ${found[@]}; do
