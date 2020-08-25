@@ -298,6 +298,11 @@ displaySuccessMessage() {
     log "     Google Cloud Console Monitoring Workspace: $gcp_monitoring_path"
     log "     Hipstershop web app address: http://$external_ip"
     log "     Load generator web interface: $loadgen_addr"
+    log ""
+    log "To remove the Sandbox once finished using it, run"
+    log ""
+    log "     ./destroy.sh"
+    log ""
     log "********************************************************************************"
 }
 
