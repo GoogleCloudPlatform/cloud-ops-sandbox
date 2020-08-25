@@ -32,7 +32,7 @@ steps:
     git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git
     cd cloud-ops-sandbox
     for TAG in $(git tag); do
-        echo $$TAG
+        echo "checking out $$TAG"
         git checkout $$TAG
         # if cloud-build directory exists, build new container
         if [[ -d "./cloud-shell" ]]; then
@@ -40,6 +40,8 @@ steps:
             docker build -t gcr.io/$PROJECT_ID/cloudshell-image:$$TAG ./cloud-shell
             # the following step validates the image
             docker run -t gcr.io/cloudshell-images/custom-image-validation image_test.py --image gcr.io/$PROJECT_ID/cloud-shell:$$TAG
-            docker push gcr.io/$PROJECT_ID/cloudshell-image:$$TAG 
+            docker push gcr.io/$PROJECT_ID/cloudshell-image:$$TAG
+        else
+            echo "No cloud-shell directory in tag $$TAG"
         fi
     done
