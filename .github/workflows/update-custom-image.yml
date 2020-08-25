@@ -16,11 +16,11 @@ name: "Rebuild All Tagged Custom Cloud Shell Images"
 on:
   schedule:
   # run daily at midnight
-    - cron: `0 0 * * *`
-    push:
+    - cron: '0 0 * * *'
+  push:
     # run on pushes to test branch
-      branches:
-        - build-trigger
+    branches:
+      - build-trigger
   workflow_dispatch:
   # trigger through UI or API
   
