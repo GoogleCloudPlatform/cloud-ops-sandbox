@@ -45,9 +45,9 @@ def findService(client, service_name, project_id, zone, timeout):
 			found_service = False
 
 	if not found_service:
-		print("{} was not found in Cloud Monitoring".format(service_name))
+		print("{} was not found in Cloud Monitoring. There may be errors while provisioning Monitoring examples.".format(service_name))
 	else:
-		print("Found {} in Cloud Monitoring".format(service_name))
+		print("Found {} in Cloud Monitoring.".format(service_name))
 
 def waitForIstioServicesDetection(project_id, zone, timeout):
 	""" Waits for Istio services to be detected in Cloud Monitoring as a prerequisite for Terraform monitoring provisioning
