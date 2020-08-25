@@ -22,6 +22,10 @@ set +e
 export PROJECT_ID=$(gcloud config get-value project)
 export WORKDIR=$(dirname $(realpath $0))
 
+# clear monitoring
+python3 -m pip install -r ${WORKDIR}/requirements.txt
+python3 ${WORKDIR}/cleanup_monitoring.py "projects/$PROJECT_ID"
+
 # delete cluster
 CLUSTER_ZONE="first_run"
 while [ -n "$CLUSTER_ZONE" ]; do
@@ -67,7 +71,3 @@ for LOG in $(gcloud logging logs list --project $PROJECT_ID --format="value(NAME
     echo "deleting $LOG..."
     gcloud logging logs delete $LOG --project $PROJECT_ID --quiet
 done
-
-# clear monitoring
-python3 -m pip install -r ${WORKDIR}/requirements.txt
-python3 ${WORKDIR}/cleanup_monitoring.py "projects/$PROJECT_ID"
