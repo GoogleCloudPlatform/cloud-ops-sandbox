@@ -14,40 +14,53 @@
 
 import os
 import sys
+import time
 
 from google.cloud import monitoring_v3
 
 def getIstioServiceName(service_name, project_id, zone):
-	return 'ist:' + project_id + '-zone-' + zone + '-cloud-ops-sandbox-default-' + service_name
+	""" Returns the Istio service name of a certain service. """
+	return "ist:{}-zone-{}-stackdriver-sandbox-default-{}".format(project_id, zone, service_name)
 
-def findService(client, service_name, project_id, zone):
+def findService(client, service_name, project_id, zone, timeout):
+	""" Checks to see if a service exists in Cloud Monitoring 
+	Arguments:
+	client - the API client
+	service_name - the Istio service name, returned from getIstioServiceName
+	project_id - the Sandbox project id
+	zone - the zone of the Sandbox cluster
+	timeout - whether to timeout after 1 minute or wait indefinitely for the service
+	"""
 	found_service = False
 	full_service_name = getIstioServiceName(service_name, project_id, zone)
 	service = client.service_path(project_id, full_service_name)
-	while not found_service:
+	num_tries = 0
+	while not found_service and num_tries <= 20:
 		try:
 			found_service = client.get_service(service)
 		except:
+			if timeout:
+				num_tries += 1
+			time.sleep(3)
 			found_service = False
-	print("Found " + service_name)
 
-def waitForIstioServices(project_id, zone):
+	if not found_service:
+		print("{} was not found in Cloud Monitoring".format(service_name))
+	else:
+		print("Found {} in Cloud Monitoring".format(service_name))
+
+def waitForIstioServicesDetection(project_id, zone, timeout):
+	""" Waits for Istio services to be detected in Cloud Monitoring as a prerequisite for Terraform monitoring provisioning
+	Arguments:
+	project_id - the Sandbox project id (cloud-ops-sandbox-###)
+	zone - the zone of the Sandbox cluster
+	timeout - whether to timeout after 1 minute or wait indefinitely for the service
+	"""
 	client = monitoring_v3.ServiceMonitoringServiceClient()
-	# wait for cart service
-	findService(client, "cartservice", project_id, zone)
 
-	# wait for product catalog service
-	findService(client, "productcatalogservice", project_id, zone)
-
-	# wait for currency service
-	findService(client, "currencyservice", project_id, zone)
-
-	# wait for recommendation service
-	findService(client, "recommendationservice", project_id, zone)
-
-	# wait for ad service
-	findService(client, "adservice", project_id, zone)
-
+	# wait for each Istio service to be detected by Cloud Monitoring
+	for service in ["cartservice", "productcatalogservice", "currencyservice", "recommendationservice", "adservice"]:
+		findService(client, service, project_id, zone, timeout)
 
 if __name__ == '__main__':
     project_id = ''
@@ -55,6 +68,12 @@ if __name__ == '__main__':
     try:
         project_id = sys.argv[1]
         zone = sys.argv[2]
-    except:
-        exit('Missing Project Name. Usage: python3 istio_service_setup.py $project_id $zone')
-    waitForIstioServices(project_id, zone)
+    except IndexError:
+        exit('Missing Project Name or Zone. Usage: python3 istio_service_setup.py $project_id $zone')	
+
+    # optional timeout parameter, default = True
+    if len(sys.argv) == 4:
+    	timeout = False
+    else:
+    	timeout = True
+    waitForIstioServicesDetection(project_id, zone, timeout)
