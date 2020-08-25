@@ -11,10 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-name: "Rebuild All Tagged Custom Cloud Shell Images"
+name: Rebuild All Tagged Custom Cloud Shell Images
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      test:
+        description: 'Whether this is a test'
+        required: true
   
 jobs:
   build-trigger:
@@ -25,3 +28,4 @@ jobs:
       timeout-minutes: 20
       run: |
         gcloud beta builds triggers run --branch=build-trigger Build-CloudShell-Image
+        echo Testing is ${{ github.event.inputs.test }}
