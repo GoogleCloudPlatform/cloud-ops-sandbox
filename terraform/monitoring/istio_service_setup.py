@@ -20,7 +20,7 @@ from google.cloud import monitoring_v3
 
 def getIstioServiceName(service_name, project_id, zone):
 	""" Returns the Istio service name of a certain service. """
-	return "ist:{}-zone-{}-stackdriver-sandbox-default-{}".format(project_id, zone, service_name)
+	return "ist:{}-zone-{}-cloud-ops-sandbox-default-{}".format(project_id, zone, service_name)
 
 def findService(client, service_name, project_id, zone, timeout):
 	""" Checks to see if a service exists in Cloud Monitoring 
