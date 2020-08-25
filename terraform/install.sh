@@ -227,10 +227,10 @@ installMonitoring() {
     log "${YELLOW}⚠️ Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
     log ""
     read -p "${YELLOW}When you are done, please PRESS ENTER TO CONTINUE"
-  else
-    sleep 30 # sleep to allow for services to be detected by Cloud Monitoring
   fi
 
+  log "Checking to make sure necessary Istio services are ready for monitoring"
+  python3 monitoring/istio_service_setup.py $project_id $CLUSTER_ZONE
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
   terraform init -lock=false
