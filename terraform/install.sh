@@ -256,6 +256,13 @@ getExternalIp() {
 # Install Load Generator service and start generating synthetic traffic to Sandbox
 loadGen() {
   log "Running load generator"
+  # remove existing load generator
+  old_loadgen=$(gcloud compute instances list --project $project_id --filter="name:loadgenerator*" --format="value(name)")
+  if [[ -n "$old_loadgen" ]]; then
+    loadgen_zone=$(gcloud compute instances list --project $project_id --filter="name:loadgenerator*" --format="value(zone)")
+    gcloud compute instances delete $old_loadgen --zone $loadgen_zone --quiet
+  fi
+  # launch a new load generator
   ../loadgenerator/loadgen autostart $external_ip
   # find the IP of the load generator web interface
   TRIES=0
@@ -294,6 +301,11 @@ displaySuccessMessage() {
     log "     Google Cloud Console Monitoring Workspace: $gcp_monitoring_path"
     log "     Hipstershop web app address: http://$external_ip"
     log "     Load generator web interface: $loadgen_addr"
+    log ""
+    log "To remove the Sandbox once finished using it, run"
+    log ""
+    log "     ./destroy.sh"
+    log ""
     log "********************************************************************************"
 }
 
