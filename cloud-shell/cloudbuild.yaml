@@ -33,6 +33,7 @@ steps:
         if [[ -d "./cloud-shell" ]]; then
             echo "building $$TAG"
             docker build -t gcr.io/$PROJECT_ID/cloudshell-image:$$TAG ./cloud-shell
+            docker push gcr.io/$PROJECT_ID/cloudshell-image:$$TAG
         else
             echo "No cloud-shell directory in tag $$TAG"
         fi
