@@ -47,6 +47,7 @@ else
     git checkout -b "release/${NEW_VERSION}"
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
     git add "${REPO_ROOT}/docs/index.html"
+    git add "${REPO_ROOT}/README.md"
     git commit -m "release/${NEW_VERSION}"
 
     # add git tag
