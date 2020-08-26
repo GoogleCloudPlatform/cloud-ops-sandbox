@@ -257,7 +257,7 @@ loadGen() {
   old_loadgen=$(gcloud compute instances list --project $project_id --filter="name:loadgenerator*" --format="value(name)")
   if [[ -n "$old_loadgen" ]]; then
     loadgen_zone=$(gcloud compute instances list --project $project_id --filter="name:loadgenerator*" --format="value(zone)")
-    $(gcloud compute instances delete $old_loadgen --zone $loadgen_zone --quiet)
+    gcloud compute instances delete $old_loadgen --zone $loadgen_zone --quiet
   fi
   # launch a new load generator
   ../loadgenerator/loadgen autostart $external_ip
