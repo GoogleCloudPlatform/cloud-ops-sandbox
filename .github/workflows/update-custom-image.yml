@@ -15,15 +15,17 @@
 name: "Rebuild Latest and Tagged Custom Cloud Shell Images"
 on:
   schedule:
-  # run daily at midnight
+    # run daily at midnight
     - cron: '0 0 * * *'
   push:
-    # run on pushes to test branch
+    # run on pushes to master
     branches:
-      - build-trigger
+      - master
+    # run after pushing new tags
+    tags:
+      - 'v*'
   workflow_dispatch:
-  # trigger through UI or API
-  
+    # trigger through UI or API
 jobs:
   build-trigger:
     runs-on: [self-hosted, push-privilege]
