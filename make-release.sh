@@ -30,6 +30,10 @@ fi
 # temporarily pin manifests to :$NEW_VERSION
 find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:latest/:${NEW_VERSION}/g" {} \;
 
+# update README
+sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/README.md;
+sed -i -e "s/cloudshell-image:v\([0-9\.]\+\)/cloudshell-image:${NEW_VERSION}/g" ${REPO_ROOT}/README.md;
+
 # update website deployment tag
 sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/docs/index.html;
 sed -i -e "s/cloudshell-image:v\([0-9\.]\+\)/cloudshell-image:${NEW_VERSION}/g" ${REPO_ROOT}/docs/index.html;
@@ -43,6 +47,7 @@ else
     git checkout -b "release/${NEW_VERSION}"
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
     git add "${REPO_ROOT}/docs/index.html"
+    git add "${REPO_ROOT}/README.md"
     git commit -m "release/${NEW_VERSION}"
 
     # add git tag

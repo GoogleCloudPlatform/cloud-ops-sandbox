@@ -22,7 +22,6 @@ require('@google-cloud/profiler').start({
     version: '1.0.0'
   }
 });
-require('@google-cloud/trace-agent').start();
 require('@google-cloud/debug-agent').start({
   serviceContext: {
     service: 'paymentservice',
@@ -31,6 +30,7 @@ require('@google-cloud/debug-agent').start({
 });
 
 const path = require('path');
+const tracer = require('./tracer')();
 const HipsterShopServer = require('./server');
 
 const PORT = process.env['PORT'];

@@ -121,6 +121,7 @@ func main() {
 	}
 	srv := grpc.NewServer(
 		grpc.StatsHandler(&ocgrpc.ServerHandler{}), // TODO: replace with OTel grpc metrics collector
+		// OpenTelemetry gRPC server channel interceptors receive trace contexts from clients.
 		grpc.UnaryInterceptor(grpctrace.UnaryServerInterceptor(global.TraceProvider().Tracer("checkout"))),
 		grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(global.TraceProvider().Tracer("checkout"))),
 	)
@@ -158,6 +159,12 @@ func initOpenCensusStats() {
 
 // Initialize OTel trace provider that exports to Cloud Trace
 func initTraceProvider() {
+	// When running on GCP, authentication is handled automatically
+	// using default credentials. This environment variable check
+	// is to help debug projects running locally. It's possible for this
+	// warning to be printed while the exporter works normally. See
+	// https://developers.google.com/identity/protocols/application-default-credentials
+	// for more details.
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	if len(projectID) == 0 {
 		log.Warn("GOOGLE_CLOUD_PROJECT not set")
@@ -168,8 +175,9 @@ func initTraceProvider() {
 			log.Infof("failed to initialize exporter: %v", err)
 		} else {
 			// Create trace provider with the exporter.
-			// The AlwaysSample sampling policy is used here for demonstration
-			// purposes and should not be used in production environments.
+			// This is a demo app with low QPS. AlwaysSample() is used here
+			// to make sure traces are available for observation and analysis.
+			// It should not be used in production environments.
 			tp, err := sdktrace.NewProvider(sdktrace.WithConfig(
 				sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 				sdktrace.WithSyncer(exporter),
@@ -354,6 +362,8 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 		if err != nil {
 			return nil, fmt.Errorf("failed to get product #%q", item.GetProductId())
 		}
+		// Note: This log line is used in a log-based metric. Changes to the log line will not be compatible with the metric. 
+		log.Infof("orderedItem=%q, id=%q", product.Name, product.Id)
 		price, err := cs.convertCurrency(ctx, product.GetPriceUsd(), userCurrency)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert price of %q to %s", item.GetProductId(), userCurrency)
@@ -367,7 +377,7 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 
 // Acting as gPRC client
 func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, toCurrency string) (*pb.Money, error) {
-	result, err := pb.NewCurrencyServiceClient(cs.currencySvcConn).Convert(context.TODO(), &pb.CurrencyConversionRequest{
+	result, err := pb.NewCurrencyServiceClient(cs.currencySvcConn).Convert(ctx, &pb.CurrencyConversionRequest{
 		From:   from,
 		ToCode: toCurrency})
 	if err != nil {
@@ -412,6 +422,7 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 		grpc.WithInsecure(),
 		grpc.WithTimeout(time.Second*3),
 		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}), // TODO: replace with OTel grpc metrics collector
+		// OpenTelemetry gRPC client channel interceptors pass trace contexts to the server.
 		grpc.WithUnaryInterceptor(grpctrace.UnaryClientInterceptor(global.TraceProvider().Tracer("checkout"))),
 		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(global.TraceProvider().Tracer("checkout"))))
 	if err != nil {

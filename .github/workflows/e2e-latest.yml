@@ -19,7 +19,8 @@ on:
     branches:
       - master
       - release/*
-      - e2e-test
+      - provision_test
+      - e2e*
 jobs:
   end-to-end-latest:
     runs-on: [self-hosted, e2e-worker]
@@ -55,10 +56,38 @@ jobs:
         docker run --rm \
           -e project_id=$PROJECT_ID \
           -e skip_workspace_prompt=1 \
+          -e service_wait=1 \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
           test-cloud-shell:$GITHUB_SHA
+      env:
+        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
+    - name: Run Provisioning Test
+      run: |
+        set -x
+        # get cluster zone
+        CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $PROJECT_ID --format="value(zone)")
+        # build provisioning test image
+        docker build -t test-provisioning:$GITHUB_SHA tests/provisioning/.
+        # run provisioning tests
+        docker run --rm \
+          -e GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
+          -e ZONE=$CLUSTER_ZONE \
+          -v ~/.config:/root/.config \
+          test-provisioning:$GITHUB_SHA
+      env:
+        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
+    - name: Run Monitoring Integration Tests
+      run: |
+        set -x
+        # install dependencies
+        python3 -m pip install -r tests/requirements.txt
+        # authenticate cluster
+        CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $PROJECT_ID --format="value(zone)")
+        gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
+        # run tests
+        python3 tests/monitoring_integration_test.py $PROJECT_ID
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Clean Project State
