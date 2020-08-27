@@ -180,7 +180,6 @@ def create(args):
     print('To start load from this job use this tool\'s "update" command.')
     print('To access this job\'s web interface, navigate to http://{0}:{1}'.format(address, JOB_WEB_PORT))
 
-
 def _generate_job_name():
     uuid = ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(4))
     return 'loadgenerator-' + uuid
@@ -400,6 +399,36 @@ def _check_prereqs():
     except subprocess.CalledProcessError:
         return False
 
+#####################################
+# CLOUD RUN LOAD GENERATOR COMMANDS #
+#####################################
+
+def run_auto(args):
+    """Create automatic load generator and Web UI for normal traffic pattern.
+    Use Cloud Run to host the container and serve the Locust Web UI.
+    args.target_address -- the IP address to send load (frontend)
+    """
+    name = _generate_job_name()
+    logger.info('Creating load generation job {0}...'.format(name))
+
+    if not _is_address_accessible(args.target_address):
+        logger.error('Could not access target address {0}'.format(args.target_address))
+        print('Please double check the target address and try again.')
+        return
+
+    command = (
+        'gcloud run deploy {0}'
+        ' --image gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator:gz'
+        ' --update-env-vars="FRONTEND_ADDR={1}"'
+    ).format(name, args.target_address)
+
+    subprocess.call(['echo'] + split(command))
+    try:
+        output = subprocess.check_output(split(command)).decode('utf-8')
+        print(output)
+    except subprocess.CalledProcessError:
+        return
+
 
 def _get_parser():
     parser = ArgumentParser(prog='loadgen')
@@ -457,6 +486,13 @@ def _get_parser():
             help='Show the status of all load generator jobs',
             description='Show the status of all load generator jobs whether running or not')
     subparser.set_defaults(func=status)
+
+    subparser = subparsers.add_parser('autorun',
+            help='Create load generator with Cloud Run',
+            description='automatically starts a load generation job for a target address with Cloud Run')
+    subparser.add_argument('target_address', type=str,
+            help='The target address (without http/s prefix) to send laod to')
+    subparser.set_defaults(func=run_auto)
 
     return parser
 
