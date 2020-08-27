@@ -46,7 +46,7 @@ jobs:
       run: |
         set -x
         STATUS="QUEUED"
-        while [[ "$STATUS" == "WORKING" || "$STATUS" == "$QUEUED" || "$STATUS" == "STATUS_UNKNOWN" ]]; do
+        while [[ "$STATUS" == "WORKING" || "$STATUS" == "QUEUED" || "$STATUS" == "STATUS_UNKNOWN" ]]; do
             sleep 5
             STATUS=$(gcloud beta builds describe ${{ steps.cloud_build.outputs.run_id }} \
                         | grep status | head -n 1 | awk 'NF>1{print $NF}')
