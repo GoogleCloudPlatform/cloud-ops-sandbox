@@ -33,4 +33,4 @@ if test $STATUSCODE -ne 200; then
 fi
 
 # run locust
-locust --host="http://${FRONTEND_ADDR}" --web-port=$PORT --web-host=0.0.0.0
+locust --host="http://${FRONTEND_ADDR}" --web-port=$PORT

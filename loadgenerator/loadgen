@@ -408,6 +408,7 @@ def run_auto(args):
     Use Cloud Run to host the container and serve the Locust Web UI.
     args.target_address -- the IP address to send load (frontend)
     """
+    _setup_cloud_run()
     name = _generate_job_name()
     logger.info('Creating load generation job {0}...'.format(name))
 
@@ -420,6 +421,7 @@ def run_auto(args):
         'gcloud run deploy {0}'
         ' --image gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator:gz'
         ' --update-env-vars="FRONTEND_ADDR={1}"'
+        ' --allow-unauthenticated'
     ).format(name, args.target_address)
 
     subprocess.call(['echo'] + split(command))
@@ -429,6 +431,13 @@ def run_auto(args):
     except subprocess.CalledProcessError:
         return
 
+def _setup_cloud_run():
+    """Configure Cloud Run with default settings so that the user isn't
+    prompted every time a command runs.
+    """
+    logger.info('Setting default platform and region')
+    subprocess.run(split('gcloud config set run/platform managed'))
+    subprocess.run(split('gcloud config set run/region us-central1'))
 
 def _get_parser():
     parser = ArgumentParser(prog='loadgen')
