@@ -22,7 +22,12 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
     - should have no service account for security reasons
 - `push-privilege`
   - image push worker
-  - requires permissions to push images to GCR storage bucket, and deploy to App Engine
+  - requires the following permissions on the CI test project:
+    - `App Engine Admin`
+    - `Cloud Build Service Account`
+    - `Cloud Build Editor`
+    - `read permissions on GCS bucket holding cloud build logs`
+    - `write permissons on GCS bucket holding GCR images`
   - requires `PROJECT_ID` to be set properly in the [repo's secrets](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/settings/secrets)
 - `e2e-worker`
   - end to end test worker
