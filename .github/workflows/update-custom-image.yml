@@ -21,7 +21,6 @@ on:
     # run on pushes to master
     branches:
       - master
-      - fix-cloudshell-automation
     # run after pushing new tags
     tags:
       - 'v*'
@@ -35,7 +34,7 @@ jobs:
     - name: Run Cloud Build Trigger
       id: cloud_build
       run: |
-        run_info=$(gcloud beta builds triggers run --branch=fix-cloudshell-automation Build-CloudShell-Image)
+        run_info=$(gcloud beta builds triggers run --branch=master Build-CloudShell-Image)
         run_id=$(echo $run_info | grep -oP "id: \K(\w+-){4}\w+")
         echo ::set-output name=run_id::${run_id}
     - name: Display Logs
