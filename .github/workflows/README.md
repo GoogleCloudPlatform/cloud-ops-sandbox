@@ -95,7 +95,8 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 ### Update-Custom-Image.yaml
 
 #### Triggers
-- on each commit to a test branch: Build-Trigger
+- on each commit to master
+- on each new tag pushed to repo
 - every 24 hours
 
 #### Actions
