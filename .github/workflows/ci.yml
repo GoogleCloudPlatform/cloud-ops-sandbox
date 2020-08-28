@@ -19,7 +19,7 @@ on:
     branches:    
       - master
       - release/*
-      - fix-smoke-test
+      - remove-smoke-test
   pull_request:
     # run on pull requests targeting master
     branches:
