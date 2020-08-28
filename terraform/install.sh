@@ -154,10 +154,15 @@ createProject() {
     then
 
       # TODO: remove after resolving issue
-      log "Due to changes in /experimental-gke folder policy,"
-      log "Google.com accounts are currently not supported by Stackdriver Sandbox.";
-      log "We hope to restore functionality soon."
-      log "b/166170813"
+      YELLOW=`tput setaf 3`
+      log ""
+      log ""
+      log "${YELLOW}********************************************************************************"
+      log "${YELLOW}Error:"
+      log "${YELLOW}Due to changes in /experimental-gke folder policy,"
+      log "${YELLOW}Google.com accounts are currently not supported by Stackdriver Sandbox.";
+      log "${YELLOW}We hope to restore functionality soon."
+      log "${YELLOW}b/166170813"
       exit;
 
       log ""
