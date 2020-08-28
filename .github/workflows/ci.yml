@@ -83,7 +83,7 @@ jobs:
       run: |
         set -x
         # wait for status code 200
-        while [[ -z curl -I localhost:3000 | grep 200 ]]; then
+        while [[ -z "$(curl -I localhost:3000 | grep 200)" ]]; do
             sleep 5
         done
         # ping homepage
