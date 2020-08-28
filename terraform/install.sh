@@ -158,11 +158,11 @@ createProject() {
       log ""
       log ""
       log "${YELLOW}********************************************************************************"
-      log "${YELLOW}Error:"
-      log "${YELLOW}Due to changes in /experimental-gke folder policy,"
+      log "${YELLOW}⚠️ Due to changes in /experimental-gke folder policy,"
       log "${YELLOW}Google.com accounts are currently not supported by Stackdriver Sandbox.";
       log "${YELLOW}We hope to restore functionality soon."
       log "${YELLOW}b/166170813"
+      log ""
       exit;
 
       log ""
