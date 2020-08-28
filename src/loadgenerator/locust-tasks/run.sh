@@ -1,6 +1,6 @@
-#!/bin/sh -eu
-#
-# Copyright 2018 Google LLC
+#!/bin/bash
+
+# Copyright 2020 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/bin/bash
-set -e
-trap "exit" TERM
 
-if [[ -z "${FRONTEND_ADDR}" ]]; then
-    echo >&2 "FRONTEND_ADDR not specified"
-    exit 1
+LOCUST="/usr/local/bin/locust"
+LOCUS_OPTS="-f /locust-tasks/locustfile.py --host=$TARGET_HOST"
+LOCUST_MODE=${LOCUST_MODE:-standalone}
+
+if [[ "$LOCUST_MODE" = "master" ]]; then
+    LOCUS_OPTS="$LOCUS_OPTS --master"
+elif [[ "$LOCUST_MODE" = "worker" ]]; then
+    LOCUS_OPTS="$LOCUS_OPTS --slave --master-host=$LOCUST_MASTER"
 fi
 
-set -x
-locust --host="http://${FRONTEND_ADDR}" "$@"
+echo "$LOCUST $LOCUS_OPTS"
+
+$LOCUST $LOCUS_OPTS
