@@ -153,7 +153,7 @@ createProject() {
     if [[ $acct == *"google.com"* ]];
     then
 
-      # TODO: remove after resolving issue
+      # TODO: remove after resolving b/166170813
       YELLOW=`tput setaf 3`
       log ""
       log ""
