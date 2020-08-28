@@ -38,3 +38,4 @@ steps:
             echo "No cloud-shell directory in tag $$TAG"
         fi
     done
+logsBucket: 'gs://sandbox-cloud-build-logs'

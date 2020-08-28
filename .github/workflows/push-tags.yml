@@ -35,17 +35,6 @@ jobs:
                        --tag=${{ steps.get_version.outputs.VERSION  }}
       env:
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
-    - name: Push Cloud Shell Image to GCR
-      timeout-minutes: 20
-      run: |
-        set -x
-        gcloud auth configure-docker --quiet
-        IMAGE_PATH=gcr.io/$PROJECT_ID/cloudshell-image:${{ steps.get_version.outputs.VERSION }}
-        docker build -t $IMAGE_PATH ./cloud-shell
-        docker push $IMAGE_PATH
-      env:
-        PROJECT_ID: ${{ secrets.PROJECT_ID }}
-
     - name: Deploy Website to App Engine
       timeout-minutes: 20
       run: |

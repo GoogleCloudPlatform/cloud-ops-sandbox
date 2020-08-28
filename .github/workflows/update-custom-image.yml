@@ -12,23 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Rebuild Latest and Tagged Custom Cloud Shell Images"
+name: "Rebuild Cloud Shell Images"
 on:
   schedule:
-  # run daily at midnight
+    # run daily at midnight
     - cron: '0 0 * * *'
   push:
-    # run on pushes to test branch
+    # run on pushes to master
     branches:
-      - build-trigger
+      - master
+    # run after pushing new tags
+    tags:
+      - 'v*'
   workflow_dispatch:
-  # trigger through UI or API
-  
+    # trigger through UI or API
 jobs:
   build-trigger:
     runs-on: [self-hosted, push-privilege]
     steps:
     - uses: actions/checkout@v2
-    - name: Run Cloud Build Trigger to Rebuild All Tagged Images
+    - name: Run Cloud Build Trigger
+      id: cloud_build
       run: |
-        gcloud beta builds triggers run --branch=master Build-CloudShell-Image
+        run_info=$(gcloud beta builds triggers run --branch=master Build-CloudShell-Image)
+        run_id=$(echo $run_info | grep -oP "id: \K(\w+-){4}\w+")
+        echo ::set-output name=run_id::${run_id}
+    - name: Display Logs
+      continue-on-error: true
+      run: |
+        gcloud beta builds log --stream ${{ steps.cloud_build.outputs.run_id }}
+    - name: Check Completion Status
+      run: |
+        set -x
+        STATUS="QUEUED"
+        while [[ "$STATUS" == "WORKING" || "$STATUS" == "QUEUED" || "$STATUS" == "STATUS_UNKNOWN" ]]; do
+            sleep 5
+            STATUS=$(gcloud beta builds describe ${{ steps.cloud_build.outputs.run_id }} \
+                        | grep status | head -n 1 | awk 'NF>1{print $NF}')
+        done
+        test "$STATUS" = "SUCCESS"
