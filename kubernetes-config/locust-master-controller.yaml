@@ -36,7 +36,10 @@ spec:
             - name: LOCUST_MODE
               value: master
             - name: TARGET_HOST
-              value: http://34.82.87.53
+              valueFrom:
+                configMapKeyRef:
+                  name: address-config
+                  key: FRONTEND_ADDR
           ports:
             - name: loc-master-web
               containerPort: 8089

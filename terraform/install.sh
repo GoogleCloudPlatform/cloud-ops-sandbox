@@ -256,28 +256,27 @@ getExternalIp() {
 # Install Load Generator service and start generating synthetic traffic to Sandbox
 loadGen() {
   log "Running load generator"
-  # remove existing load generator
-  old_loadgen=$(gcloud compute instances list --project $project_id --filter="name:loadgenerator*" --format="value(name)")
-  if [[ -n "$old_loadgen" ]]; then
-    loadgen_zone=$(gcloud compute instances list --project $project_id --filter="name:loadgenerator*" --format="value(zone)")
-    gcloud compute instances delete $old_loadgen --zone $loadgen_zone --quiet
-  fi
   # launch a new load generator
-  ../loadgenerator/loadgen autostart $external_ip
+  pushd loadgen/
+  terraform init -lock=false
+  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}"
+  popd
+
   # find the IP of the load generator web interface
   TRIES=0
-  while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null --max-time 1) -ne 200  && \
+  while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8089" -o /dev/null --max-time 1) -ne 200  && \
       "${TRIES}" -lt 20  ]]; do
     log "waiting for load generator instance..."
     sleep 1
-    loadgen_ip=$(gcloud compute instances list --project "$project_id" \
-                                               --filter="name:loadgenerator*" \
-                                               --format="value(networkInterfaces[0].accessConfigs.natIP)")
+    loadgen_ip=$(kubectl get service locust-master -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
+     [ -z "$loadgen_ip" ] && sleep 10;
     TRIES=$((TRIES + 1))
   done
-  if [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null  --max-time 1) -ne 200 ]]; then
+  if [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8089" -o /dev/null  --max-time 1) -ne 200 ]]; then
     log "error: load generator unreachable"
   fi
+
+  # TODO: return kubectl context to the main cluster
 }
 
 displaySuccessMessage() {
@@ -288,7 +287,7 @@ displaySuccessMessage() {
     fi
 
     if [[ -n "${loadgen_ip}" ]]; then
-        loadgen_addr="http://$loadgen_ip:8080"
+        loadgen_addr="http://$loadgen_ip:8089"
     else
         loadgen_addr="[not found]"
     fi
