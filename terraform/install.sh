@@ -152,6 +152,14 @@ createProject() {
     # create project
     if [[ $acct == *"google.com"* ]];
     then
+
+      # TODO: remove after resolving issue
+      log "Due to changes in /experimental-gke folder policy,"
+      log "Google.com accounts are currently not supported by Stackdriver Sandbox.";
+      log "We hope to restore functionality soon."
+      log "b/166170813"
+      exit;
+
       log ""
       log "Note: your project will be created in the /experimental-gke folder."
       log "If you don't have access to this folder, please make sure to request at:"
@@ -375,17 +383,6 @@ parseArguments() {
 
 # check for command line arguments
 parseArguments $*;
-
-# TODO: remove after resolving issue
-acct=$(gcloud info --format="value(config.account)")
-if [[ $acct == *"google.com"*  ]];
-then
-    log "Due to changes in /experimental-gke folder policy,"
-    log "Google.com accounts are currently not supported by Stackdriver Sandbox.";
-    log "We hope to restore functionality soon."
-    log "b/166170813"
-    exit;
-fi;
 
 # ensure gcloud and cloudshell are authenticated
 checkAuthentication;
