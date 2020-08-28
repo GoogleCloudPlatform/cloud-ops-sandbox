@@ -200,7 +200,7 @@ def _create_job(name, zone, target_address, scenario=None):
             ' --zone={2}'
             ' --machine-type=g1-small'
             ' --tags=locust-web'
-            ' --container-image=gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator:latest'
+            ' --container-image=gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator:0937c94' # from microservices-demo v0.2.0
             ' --container-env="FRONTEND_ADDR={1}"'
             ' --container-arg="--web-port={3}"' 
             ).format(name, target_address, zone, JOB_WEB_PORT)
@@ -419,7 +419,7 @@ def run_auto(args):
 
     command = (
         'gcloud run deploy {0}'
-        ' --image gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator:gz'
+        ' --image gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator:latest'
         ' --update-env-vars="FRONTEND_ADDR={1}"'
         ' --allow-unauthenticated'
     ).format(name, args.target_address)
