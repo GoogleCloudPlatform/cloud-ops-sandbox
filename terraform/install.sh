@@ -376,6 +376,17 @@ parseArguments() {
 # check for command line arguments
 parseArguments $*;
 
+# TODO: remove after resolving issue
+acct=$(gcloud info --format="value(config.account)")
+if [[ $acct == *"google.com"*  ]];
+then
+    log "Due to changes in /experimental-gke folder policy,"
+    log "Google.com accounts are currently not supported by Stackdriver Sandbox.";
+    log "We hope to restore functionality soon."
+    log "b/166170813"
+    exit;
+fi;
+
 # ensure gcloud and cloudshell are authenticated
 checkAuthentication;
 
