@@ -19,6 +19,7 @@ on:
     branches:    
       - master
       - release/*
+      - fix-smoke-test
   pull_request:
     # run on pull requests targeting master
     branches:
@@ -75,20 +76,25 @@ jobs:
         kubectl wait --for=condition=available --timeout=500s deployment/productcatalogservice
         kubectl wait --for=condition=available --timeout=500s deployment/recommendationservice
         kubectl wait --for=condition=available --timeout=500s deployment/shippingservice
-    - name: Smoke Test
+    - name: Port Forward frontend
+      run: |
+        set -x
+        port_forward() {
+            # get name of frontend pod
+            local frontend_pod=$(kubectl get pods -l=app=frontend -o=jsonpath='{.items[0].metadata.name}')
+            kubectl port-forward $frontend_pod 3000:8080
+        }
+        port_forward &
+    - name: Ping Frontend
       timeout-minutes: 5
       run: |
         set -x
-        # start fresh loadgenerator pod
-        kubectl delete pod -l app=loadgenerator
-        # wait for requests to come in
-        REQUEST_COUNT="0"
-        while [[ "$REQUEST_COUNT"  -lt "100"  ]]; do
+        # wait for status code 200
+        while [[ -z curl -I localhost:3000 | grep 200 ]]; then
             sleep 5
-            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Total | awk '{print $2}')
         done
-        # ensure there are no errors hitting endpoints
-        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Total | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
-        if [[ "$ERROR_COUNT" -gt "0" ]]; then
-          exit 1
-        fi
+        # ping homepage
+        # should contain "Hipster Shop"
+        curl --show-error --fail localhost:3000 | grep "Hipster Shop"
+        # ping cart page
+        curl --silent --output /dev/null --show-error --fail localhost:3000/cart
