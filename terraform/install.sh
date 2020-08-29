@@ -153,9 +153,9 @@ createProject() {
     if [[ $acct == *"google.com"* ]];
     then
       log ""
-      log "Note: your project will be created in the /experimental-gke folder."
+      log "Note: your project will be created in the /untrusted/demos/cloud-ops-sandboxes folder."
       log "If you don't have access to this folder, please make sure to request at:"
-      log "go/experimental-folder-access"
+      log "go/cloud-ops-sandbox-access"
       log ""
       select opt in "continue" "cancel"; do
         if [[ "$opt" == "continue" ]]; then
@@ -164,7 +164,7 @@ createProject() {
           exit 0;
         fi
       done
-      folder_id="262044416022" # /experimental-gke  
+      folder_id="470827991545" # /cloud-ops-sandboxes  
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo" --folder="$folder_id"    
     else
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo"      
