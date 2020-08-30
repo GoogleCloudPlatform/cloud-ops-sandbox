@@ -1,0 +1,10 @@
+# [START gae_python38_cloudsql_config]
+runtime: python38
+
+env_variables:
+  CLOUD_SQL_USERNAME: postgres
+  CLOUD_SQL_PASSWORD: 520jiang
+  CLOUD_SQL_DATABASE_NAME: postgres
+  CLOUD_SQL_CONNECTION_NAME: cloud-ops-sandbox-406964100:us-west2:rating
+
+# [END gae_python38_cloudsql_config]
