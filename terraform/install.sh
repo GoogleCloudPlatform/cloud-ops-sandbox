@@ -153,9 +153,9 @@ createProject() {
     if [[ $acct == *"google.com"* ]];
     then
       log ""
-      log "Note: your project will be created in the /experimental-gke folder."
+      log "Note: your project will be created in the /untrusted/demos/cloud-ops-sandboxes folder."
       log "If you don't have access to this folder, please make sure to request at:"
-      log "go/experimental-folder-access"
+      log "go/cloud-ops-sandbox-access"
       log ""
       select opt in "continue" "cancel"; do
         if [[ "$opt" == "continue" ]]; then
@@ -164,7 +164,7 @@ createProject() {
           exit 0;
         fi
       done
-      folder_id="262044416022" # /experimental-gke  
+      folder_id="470827991545" # /cloud-ops-sandboxes  
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo" --folder="$folder_id"    
     else
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo"      
@@ -229,6 +229,9 @@ installMonitoring() {
     read -p "${YELLOW}When you are done, please PRESS ENTER TO CONTINUE"
   fi
 
+  log "Checking to make sure necessary Istio services are ready for monitoring"
+  python3 -m pip install google-cloud-monitoring
+  python3 monitoring/istio_service_setup.py $project_id $CLUSTER_ZONE $service_wait
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
   terraform init -lock=false
@@ -253,6 +256,13 @@ getExternalIp() {
 # Install Load Generator service and start generating synthetic traffic to Sandbox
 loadGen() {
   log "Running load generator"
+  # remove existing load generator
+  old_loadgen=$(gcloud compute instances list --project $project_id --filter="name:loadgenerator*" --format="value(name)")
+  if [[ -n "$old_loadgen" ]]; then
+    loadgen_zone=$(gcloud compute instances list --project $project_id --filter="name:loadgenerator*" --format="value(zone)")
+    gcloud compute instances delete $old_loadgen --zone $loadgen_zone --quiet
+  fi
+  # launch a new load generator
   ../loadgenerator/loadgen autostart $external_ip
   # find the IP of the load generator web interface
   TRIES=0
@@ -291,6 +301,11 @@ displaySuccessMessage() {
     log "     Google Cloud Console Monitoring Workspace: $gcp_monitoring_path"
     log "     Hipstershop web app address: http://$external_ip"
     log "     Load generator web interface: $loadgen_addr"
+    log ""
+    log "To remove the Sandbox once finished using it, run"
+    log ""
+    log "     ./destroy.sh"
+    log ""
     log "********************************************************************************"
 }
 
@@ -301,7 +316,7 @@ checkAuthentication() {
         log "Authentication failed"
         log "Please allow gcloud and Cloud Shell to access your GCP account"
     fi
-    while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 30  ]]; do
+    while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 300  ]]; do
         AUTH_ACCT=$(gcloud auth list --format="value(account)")
         sleep 1;
         TRIES=$((TRIES + 1))
@@ -328,6 +343,10 @@ parseArguments() {
       skip_workspace_prompt=1
       shift
       ;;
+    --service-wait)
+      service_wait=1
+      shift
+      ;;
     -v|--verbose)
       set -x
       shift
@@ -339,6 +358,7 @@ parseArguments() {
       log "-p|--project|--project-id     GCP project to deploy Cloud Operations Sandbox to"
       log "-v|--verbose                  print commands as they run (set -x)"
       log "--skip-workspace-prompt       Don't pause for Cloud Monitoring workspace set up"
+      log "--service-wait                Wait indefinitely for services to be detected by Cloud Monitoring"
       log ""
       exit 0
       ;;

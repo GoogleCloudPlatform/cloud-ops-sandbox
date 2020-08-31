@@ -16,7 +16,7 @@ The Hipster Shop application consists of a number of microservices, written in a
 
 **Note:** We are not endorsing this architecture as the best way to build a real online store. This application is optimized for demonstration and learning purposes.  It illustrates a large number of cloud-native technologies, uses a variety of programming languages, and provides an environment that can be explored productively with Ops Management tools.
 
-The Git repository you cloned has all the source code, so you can explore the implementation details of the application. See the repository [README](https://github.com/GoogleCloudPlatform/stackdriver-sandbox) for a guided tour.
+The Git repository you cloned has all the source code, so you can explore the implementation details of the application. See the repository [README](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox) for a guided tour.
 
 # Prerequisites
 
@@ -41,7 +41,7 @@ Additionally, there will be a window that opens asking whether you trust the cus
 
 ![image](./images/user-guide/TrustImage.png)
 
-After the shell starts, the Cloud Operations Sandbox repository is cloned to your shell container, and you are placed in the `stackdriver-sandbox/terraform` directory. The installer script should start running automatically.
+After the shell starts, the Cloud Operations Sandbox repository is cloned to your shell container, and you are placed in the `cloud-ops-sandbox/terraform` directory. The installer script should start running automatically.
 
 The installer script performs the following tasks:
 
@@ -229,9 +229,9 @@ In **Cloud Shell**, issue these **commands** to download a release of the Sandbo
 
 ```bash
 cd ~
-wget https://github.com/GoogleCloudPlatform/stackdriver-sandbox/archive/next19.tar.gz
+wget https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/archive/next19.tar.gz
 tar -xvf next19.tar.gz
-cd stackdriver-sandbox-next19
+cd cloud-ops-sandbox-next19
 ```
 
 ##### Create and configure source repository
@@ -253,7 +253,7 @@ In the Debugger home page, **copy** the command (_don't click the button!_) in t
 Paste the command into your Cloud Shell prompt and add a space and a period:
 
 ```bash
-gcloud beta debug source upload --project=stackdriver-sandbox-68291054 --branch=6412930C2492B84D99F3 .
+gcloud beta debug source upload --project=cloud-ops-sandbox-68291054 --branch=6412930C2492B84D99F3 .
 ```
 
 Enter _RETURN_ to execute the command.
@@ -436,17 +436,17 @@ You can expand any of the messages that matches the filter to see the full stack
 
 # Destroying your cluster
 
-Once you have finished exploring the Sandbox project, don't forget to destroy it to avoid incurring additional billing.
+Once you have finished exploring the Cloud Operations Sandbox project, don't forget to destroy it to avoid incurring additional billing.
 
 Destroy your Sandbox project by opening the Cloud Shell and running the destroy script:
 ```
 $ ./destroy.sh
 ```
 
-This script destroys the current Cloud Operations Sandbox project. If the install.sh script were run again, a Sandbox project with a new project id would be created.
+This script destroys the current Cloud Operations Sandbox project. If the install.sh script were run again, a Cloud Operations Sandbox project with a new project id would be created.
 
 # OpenCensus to become OpenTelemetry
 
-The Cloud Operations Sandbox project uses the [OpenCensus libraries](https://opencensus.io/) for collection of traces and metrics. OpenCensus provides a set of open-source libraries for a variety of languages, and the trace/metric data collected with these libraries can be exported to a variety of backends, including Cloud Operations.
+The Cloud Operations Sandbox project uses the [OpenCensus libraries](https://opencensus.io/) for collection of traces and metrics. OpenCensus provides a set of open-source libraries for a variety of languages, and the trace/metric data collected with these libraries can be exported to a variety of backends, including Cloud Monitoring.
 
 For the next major release, OpenCensus is combining with the [OpenTracing project](https://opentracing.io/) to create a single solution, called [OpenTelemetry](https://opentelemetry.io/). OpenTelemetry will support basic context propagation, distributed traces, metrics, and other signals in the future, superseding both OpenCensus and OpenTracing.
