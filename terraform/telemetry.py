@@ -18,11 +18,14 @@ def get_datetime_str():
     return data
 
 def send_message(args, debug=False):
-    data = "date: " + get_datetime_str()
+    # send in json format
+    data = "{\n\"date\":\"" + get_datetime_str() + "\","
     
     # First arg in args is name of script, 'telemetry.py', so we skip it
     for i in range(len(args) - 1):
-        data += " " + args[i + 1]
+        key_value = args[i + 1].split("=")
+        data += "\n\"" + key_value[0] + "\":\"" + key_value[1]  + "\""
+    data += "\n}"
 
     # Data must be a bytestring
     if (debug): print("sending data", data)
