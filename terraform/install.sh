@@ -37,6 +37,7 @@ promptForBillingAccount() {
     log ""
     log "To list active billing accounts, run:"
     log "gcloud beta billing accounts list --filter open=true"
+    python telemetry.py event=no-active-billing
     exit 1;
   fi
 
@@ -157,6 +158,7 @@ createProject() {
       log "If you don't have access to this folder, please make sure to request at:"
       log "go/experimental-folder-access"
       log ""
+      python telemetry.py event=googler-project project=$project_id
       select opt in "continue" "cancel"; do
         if [[ "$opt" == "continue" ]]; then
           break;
@@ -167,6 +169,7 @@ createProject() {
       folder_id="262044416022" # /experimental-gke  
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo" --folder="$folder_id"    
     else
+      python telemetry.py event=non-googler-project project=$project_id
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo"      
     fi;
     # link billing account
@@ -248,8 +251,10 @@ getExternalIp() {
   done;
   if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
       log "Hipster Shop app is available at http://$external_ip"
+      python telemetry.py event=hipstershop-up project=$project_id
   else
       log "error: Hipsterhop app at http://$external_ip is unreachable"
+      python telemetry.py event=hipstershop-unavailable project=$project_id
   fi
 }
 
@@ -277,6 +282,7 @@ loadGen() {
   done
   if [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null  --max-time 1) -ne 200 ]]; then
     log "error: load generator unreachable"
+    python telemetry.py event=loadgen-unavailable project=$project_id
   fi
 }
 
@@ -289,8 +295,10 @@ displaySuccessMessage() {
 
     if [[ -n "${loadgen_ip}" ]]; then
         loadgen_addr="http://$loadgen_ip:8080"
+        python telemetry.py event=loadgen-up project=$project_id
     else
         loadgen_addr="[not found]"
+        python telemetry.py event=loadgen-unavailable project=$project_id
     fi
     log ""
     log ""
