@@ -28,7 +28,7 @@ opencensus-ext-stackdriver==0.7.3  # via -r requirements.in
 opencensus==0.7.10        # via -r requirements.in, opencensus-ext-grpc, opencensus-ext-stackdriver
 opentelemetry-api==0.11b0  # via -r requirements.in, opentelemetry-exporter-google-cloud, opentelemetry-ext-grpc, opentelemetry-instrumentation, opentelemetry-sdk
 opentelemetry-exporter-google-cloud==0.11b0  # via -r requirements.in
-opentelemetry-ext-grpc==0.11b0  # via -r requirements.in
+opentelemetry-ext-grpc==0.11b1  # via -r requirements.in
 opentelemetry-instrumentation==0.11b0  # via -r requirements.in
 opentelemetry-sdk==0.11b0  # via -r requirements.in, opentelemetry-exporter-google-cloud
 protobuf==3.12.4          # via google-api-core, google-cloud-profiler, googleapis-common-protos, grpcio-health-checking
