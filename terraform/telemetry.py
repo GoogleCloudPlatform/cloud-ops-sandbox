@@ -24,7 +24,7 @@ def send_message(args, debug=False):
     # First arg in args is name of script, 'telemetry.py', so we skip it
     for i in range(len(args) - 1):
         key_value = args[i + 1].split("=")
-        data += "\n\"" + key_value[0] + "\":\"" + key_value[1]  + "\""
+        data += "\n\"" + key_value[0] + "\":\"" + key_value[1]  + "\","
     data += "\n}"
 
     # Data must be a bytestring
@@ -36,4 +36,4 @@ def send_message(args, debug=False):
     if (debug): print(future.result())
 
 # send messages
-send_message(sys.argv)
+send_message(sys.argv, True)
