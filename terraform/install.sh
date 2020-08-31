@@ -152,19 +152,6 @@ createProject() {
     # create project
     if [[ $acct == *"google.com"* ]];
     then
-
-      # TODO: remove after resolving b/166170813
-      YELLOW=`tput setaf 3`
-      log ""
-      log ""
-      log "${YELLOW}********************************************************************************"
-      log "${YELLOW}⚠️ Due to changes in /experimental-gke folder policy,"
-      log "${YELLOW}Google.com accounts are currently not supported by Stackdriver Sandbox.";
-      log "${YELLOW}We hope to restore functionality soon."
-      log "${YELLOW}b/166170813"
-      log ""
-      exit;
-
       log ""
       log "Note: your project will be created in the /untrusted/demos/cloud-ops-sandboxes folder."
       log "If you don't have access to this folder, please make sure to request at:"
