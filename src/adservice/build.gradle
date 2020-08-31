@@ -14,7 +14,7 @@ description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def opencensusVersion = "0.26.0"
+def opencensusVersion = "0.27.0"
 def grpcVersion = "1.31.1"
 def jacksonVersion = "2.11.2"
 def protocVersion = "3.12.3"
@@ -51,7 +51,7 @@ dependencies {
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
                 "io.opencensus:opencensus-contrib-log-correlation-log4j2:${opencensusVersion}",
                 "io.opencensus:opencensus-impl:${opencensusVersion}",
-                "io.netty:netty-tcnative-boringssl-static:2.0.31.Final"
+                "io.netty:netty-tcnative-boringssl-static:2.0.34.Final"
     }
 }
 
