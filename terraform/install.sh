@@ -198,6 +198,8 @@ applyTerraform() {
 authenticateCluster() {
   CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $project_id --format="value(zone)")
   gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
+  # Make alias for this kubectl context
+  kubectx main=.
 }
 
 installMonitoring() {
@@ -267,7 +269,7 @@ loadGen() {
   while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8089" -o /dev/null --max-time 1) -ne 200  && \
       "${TRIES}" -lt 20  ]]; do
     log "waiting for load generator instance..."
-    sleep 1
+    sleep 10
     loadgen_ip=$(kubectl get service locust-master -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
      [ -z "$loadgen_ip" ] && sleep 10;
     TRIES=$((TRIES + 1))
@@ -276,7 +278,10 @@ loadGen() {
     log "error: load generator unreachable"
   fi
 
-  # TODO: return kubectl context to the main cluster
+  # Make kubectx alias for this kubectl context
+  kubectx loadgenerator=.
+  # Return kubectl context to the main cluster and show this to the user
+  log $(kubectx main)
 }
 
 displaySuccessMessage() {
