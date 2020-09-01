@@ -57,9 +57,9 @@ This file contains the definitions of [Service Level Objectives] (SLOs) for each
 
 [Service Level Objectives]: https://landing.google.com/sre/sre-book/chapters/service-level-objectives
 ### 05_alerting_policies.tf
-This file contains the definitions of alerting policies for each SLO defined in 04_slos.tf. The alerting policies are fired when the error budget burn rate is exceeded. The burn rates are configured for each service in the file 03_services.tf. More on [alerting on service level objectives] can be found here.
+This file contains the definitions of alerting policies for each SLO defined in 04_slos.tf. The alerting policies are fired when the error budget burn rate is exceeded. The burn rates are configured for each service in the file 03_services.tf. More on alerting on service level objectives can be found [here].
 
-[alerting on service level objectives]: https://landing.google.com/sre/workbook/chapters/alerting-on-slos/
+[here]: https://landing.google.com/sre/workbook/chapters/alerting-on-slos/
 
 ### 06_log_based_metric.tf
 This file contains the specification of a metric using Cloud Logging's [log-based metric feature]. The metric is defined on a custom log being written to Cloud Logging by the Checkout Service. This log-based metric can then be used for a multitude of monitoring resources, and a custom dashboard is created using this metric in its chart. 
