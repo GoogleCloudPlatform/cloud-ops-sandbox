@@ -2,7 +2,7 @@ Hipster Shop Monitoring Terraform
 ================================================================================
 
 ## What's included
-Note: the contents of this directory are automatically installed when creating a Cloud Operations Sandbox
+> **Note:** the contents of this directory are automatically installed when creating a Cloud Operations Sandbox
 
 This directory contains documented [Terraform] for provisioning monitoring examples
 for the microservices contained in the demo application provisioned by Cloud Operations Sandbox.
@@ -10,7 +10,7 @@ for the microservices contained in the demo application provisioned by Cloud Ope
 Please note that in order to provision these monitoring examples a [Monitoring Workspace] 
 must be associated with your project.
 
-Note: the monitoring examples created in this directory are an opinionated example. It demonstrates best-practice methods 
+> **Note:** the monitoring examples created in this directory are an opinionated example. It demonstrates best-practice methods for configuring monitoring for the demo application.
 
 [Terraform]: https://www.terraform.io/
 [Monitoring Workspace]: https://cloud.google.com/monitoring/workspaces/create
