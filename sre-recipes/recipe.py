@@ -40,4 +40,3 @@ class Recipe(abc.ABC):
         Verifies that the user of the recipe found the root cause
         of the breakage
         """
-    
