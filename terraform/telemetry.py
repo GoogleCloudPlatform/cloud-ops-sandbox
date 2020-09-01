@@ -1,6 +1,27 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+# File usage:
+# python3 telemetry.py session project event version
+
 from google.cloud import pubsub_v1
 from datetime import datetime
 import sys
+import json
+import hashlib
+import uuid
 
 project_id = "stackdriver-sandbox-230822"
 topic_id = "telemetry"
@@ -10,6 +31,9 @@ publisher = pubsub_v1.PublisherClient()
 # in the form `projects/{project_id}/topics/{topic_id}`
 topic_path = publisher.topic_path(project_id, topic_id)
 
+def get_uuid():
+    return uuid.uuid4()
+
 # define the following helper functions
 def get_datetime_str():
     # send current date and time for end of installation script
@@ -17,15 +41,25 @@ def get_datetime_str():
     data = now.strftime("%m/%d/%Y %H:%M:%S")
     return data
 
-def send_message(args, debug=False):
+def get_id_hash(project_id):
+    m = hashlib.sha256()
+    m.update(project_id.encode('utf-8'))
+    hashed = m.hexdigest()
+    print("hashed: ", hashed)
+    print("id: ", project_id)
+    return hashed
+
+def send_message(session, project, event, datetime, version, debug=False):
     # send in json format
-    data = "{\n\"date\":\"" + get_datetime_str() + "\","
-    
-    # First arg in args is name of script, 'telemetry.py', so we skip it
-    for i in range(len(args) - 1):
-        key_value = args[i + 1].split("=")
-        data += "\n\"" + key_value[0] + "\":\"" + key_value[1]  + "\","
-    data += "\n}"
+    data = {
+        "session": session,
+        "project": project,
+        "event": event,
+        "datetime": datetime,
+        "version": version
+    }
+    data = json.dumps(data)
+    if (debug): print(data)
 
     # Data must be a bytestring
     if (debug): print("sending data", data)
@@ -35,5 +69,15 @@ def send_message(args, debug=False):
     future = publisher.publish(topic_path, data=data)
     if (debug): print(future.result())
 
-# send messages
-send_message(sys.argv, True)
+def main():
+    # send messages
+    # schema: session UUID, project UUID, event, date-time, version
+    session=sys.argv[1]
+    project=get_id_hash(sys.argv[2])
+    event=sys.argv[3]
+    datetime=get_datetime_str()
+    version=sys.argv[4]
+    send_message(session, project, event, datetime, version, debug=True)
+
+if __name__ == "__main__":
+    main()
