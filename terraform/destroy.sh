@@ -28,7 +28,9 @@ acct=$(gcloud info --format="value(config.account)")
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
+# For the purposes of telemetry
 VERSION="v0.2.5"
+SESSION=$(python3 -c "import telemetry; print(telemetry.get_uuid())")
 
 # find the cloud operations sandbox project id
 filter=$(cat <<-END
@@ -78,11 +80,11 @@ gcloud projects delete $PROJECT_ID
 found=$(gcloud projects list --filter="${PROJECT_ID}" --format="value(projectId)")
 if [[ -n "${found}" ]]; then
     log "project $PROJECT_ID not deleted"
-    python telemetry.py event=not-deleted project=$PROJECT_ID version=$VERSION
+    python3 telemetry.py $SESSION $PROJECT_ID sandbox-not-destroyed $VERSION
     exit 1
 fi
 
-python telemetry.py event=deleted project=$PROJECT_ID version=$VERSION
+python3 telemetry.py $SESSION $PROJECT_ID sandbox-destroyed $VERSION
 # remove tfstate file so a new project id will be generated next time
 log "removing tfstate file"
 rm -f .terraform/terraform.tfstate
