@@ -23,6 +23,9 @@ if [[ -n "$DEBUG" ]]; then set -x; fi
 # ensure the working dir is the script's folder
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
+
+# create variables for telemetry purposes
+python3 pip install google-cloud-pubsub
 VERSION="v0.2.5"
 SESSION=$(python3 -c "import telemetry; print(telemetry.get_uuid())")
 
