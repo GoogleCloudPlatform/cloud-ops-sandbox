@@ -5,7 +5,7 @@
 #    pip-compile
 #
 cachetools==4.1.1         # via google-auth
-certifi==2018.11.29       # via requests
+certifi==2020.6.20       # via requests
 chardet==3.0.4            # via requests
 google-api-core[grpc]==1.22.0  # via -r requirements.in, google-api-python-client, google-cloud-core, google-cloud-monitoring, google-cloud-trace, opencensus
 google-api-python-client==1.11.0  # via google-cloud-profiler
