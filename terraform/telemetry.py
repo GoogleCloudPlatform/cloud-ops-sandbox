@@ -22,6 +22,7 @@ import sys
 import json
 import hashlib
 import uuid
+import click
 
 project_id = "stackdriver-sandbox-230822"
 topic_id = "telemetry"
@@ -45,11 +46,19 @@ def get_id_hash(project_id):
     m = hashlib.sha256()
     m.update(project_id.encode('utf-8'))
     hashed = m.hexdigest()
-    print("hashed: ", hashed)
-    print("id: ", project_id)
     return hashed
 
-def send_message(session, project, event, datetime, version, debug=False):
+@click.command()
+@click.option('--session', help='Current session (unique across projects).')
+@click.option('--project_id', prompt='Project id', help='Project name in Google Cloud Platform.')
+@click.option('--event', prompt='Event code', help='The  event that occurred.')
+@click.option('--version', default="v0.2.5", prompt='Version of Sandbox', help='Release version of Sandbox.')
+def send_message(session, project_id, event, version):
+    datetime=get_datetime_str()
+    project=get_id_hash(project_id)
+    error, message = validate_args()
+    if (error): print(message)
+    
     # send in json format
     data = {
         "session": session,
@@ -59,25 +68,13 @@ def send_message(session, project, event, datetime, version, debug=False):
         "version": version
     }
     data = json.dumps(data)
-    if (debug): print(data)
 
-    # Data must be a bytestring
-    if (debug): print("sending data", data)
+    # send data as a bytestring
     data = data.encode("utf-8")
+    publisher.publish(topic_path, data=data)
 
-    # When you publish a message, the client returns a future.
-    future = publisher.publish(topic_path, data=data)
-    if (debug): print(future.result())
-
-def main():
-    # send messages
-    # schema: session UUID, project UUID, event, date-time, version
-    session=sys.argv[1]
-    project=get_id_hash(sys.argv[2])
-    event=sys.argv[3]
-    datetime=get_datetime_str()
-    version=sys.argv[4]
-    send_message(session, project, event, datetime, version, debug=True)
+def validate_args():
+    return False, ""
 
 if __name__ == "__main__":
-    main()
+    send_message()

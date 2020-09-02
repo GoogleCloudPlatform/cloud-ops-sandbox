@@ -80,11 +80,11 @@ gcloud projects delete $PROJECT_ID
 found=$(gcloud projects list --filter="${PROJECT_ID}" --format="value(projectId)")
 if [[ -n "${found}" ]]; then
     log "project $PROJECT_ID not deleted"
-    python3 telemetry.py $SESSION $PROJECT_ID sandbox-not-destroyed $VERSION
+    python3 telemetry.py --session=$SESSION --project=$PROJECT_ID --event=sandbox-not-destroyed --version=$VERSION
     exit 1
 fi
 
-python3 telemetry.py $SESSION $PROJECT_ID sandbox-destroyed $VERSION
+python3 telemetry.py --session=$SESSION --project=$PROJECT_ID --event=sandbox-destroyed --version=$VERSION
 # remove tfstate file so a new project id will be generated next time
 log "removing tfstate file"
 rm -f .terraform/terraform.tfstate
