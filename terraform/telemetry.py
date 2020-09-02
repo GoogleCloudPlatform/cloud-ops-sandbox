@@ -37,7 +37,7 @@ def get_uuid():
 # define the following helper functions
 def get_datetime_str():
     # send current date and time for end of installation script
-    now = datetime.now()
+    now = datetime.utcnow()
     data = now.strftime("%m/%d/%Y %H:%M:%S")
     return data
 
