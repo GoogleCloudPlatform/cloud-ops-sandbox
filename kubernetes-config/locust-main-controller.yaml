@@ -16,18 +16,18 @@
 apiVersion: "extensions/v1beta1"
 kind: "Deployment"
 metadata:
-  name: locust-master
+  name: locust-main
   labels:
-    name: locust-master
+    name: locust-main
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: locust-master
+      app: locust-main
   template:
     metadata:
       labels:
-        app: locust-master
+        app: locust-main
     spec:
       containers:
         - name: locust-master

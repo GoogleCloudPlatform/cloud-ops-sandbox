@@ -141,7 +141,7 @@ resource "null_resource" "deploy_services" {
 # We wait for the load generator to become available on kubernetes
 resource "null_resource" "delay" {
   provisioner "local-exec" {
-    command = "kubectl wait --for=condition=available --timeout=600s deployment/locust-master"
+    command = "kubectl wait --for=condition=available --timeout=600s deployment/locust-main"
   }
 
   triggers = {

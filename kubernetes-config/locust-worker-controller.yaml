@@ -35,7 +35,7 @@ spec:
             - name: LOCUST_MODE
               value: worker
             - name: LOCUST_MASTER
-              value: locust-master
+              value: locust-main
             - name: TARGET_HOST
               valueFrom:
                 configMapKeyRef:
