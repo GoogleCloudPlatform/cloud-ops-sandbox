@@ -53,9 +53,7 @@ import (
 	"go.opentelemetry.io/otel/instrumentation/grpctrace"
 	apitrace "go.opentelemetry.io/otel/api/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-    "go.opentelemetry.io/otel/sdk/resource"
-    
-    "net/http"
+	"go.opentelemetry.io/otel/sdk/resource"
 )
 
 var (
@@ -290,11 +288,7 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 	}
 	if found == nil {
 		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
-    }
-    resp, err := http.Get("http://cloud-ops-sandbox-406964100.wl.r.appspot.com/getRating/66VCHSJNUP")
-    defer resp.Body.Close()
-    body, err := ioutil.ReadAll(resp.Body)
-    log.Info(body)
+	}
 	return found, nil
 }
 

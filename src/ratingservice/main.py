@@ -65,7 +65,3 @@ def rate(id, score):
         conn.close()    
     return 'Success'
 
-@app.route('/')
-def index():
-    return "Hello!"
-
