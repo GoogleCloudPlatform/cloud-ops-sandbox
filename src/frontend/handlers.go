@@ -72,8 +72,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		ps[i] = productView{p, price}
 	}
 
-	if os.Getenv("SRE_RECIPE_1") == "Active" {
-		//increase latency by mapping all products to currencies 100 times, each iteration taking 100 ms
+	if os.Getenv("CONVERT_CURRENCIES") == "Active" {
 		for i := 0 ; i < 100; i++ { 
 			for _, p := range products {
 				for _, c := range currencies {

@@ -61,7 +61,7 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
-          - name: SRE_RECIPE_1
+          - name: CONVERT_CURRENCIES
             valueFrom:
               configMapKeyRef:
                 # The ConfigMap containing the status of the recipe
