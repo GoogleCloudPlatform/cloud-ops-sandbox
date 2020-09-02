@@ -15,10 +15,10 @@
 # Let's create the GKE cluster! This one's pretty complicated so buckle up.
 
 # This is another example of the random provider. Here we're using it to pick a
-# zone in us-west1 at random - a different region from where we provisioned
+# zone at random - all different regions from where we provisioned
 # the Hipster Shop.
 resource "random_shuffle" "zone" {
-  input = ["us-west1-a", "us-west1-b", "us-west1-c"]
+  input = ["us-west1-a", "asia-east1-a", "europe-west2-a", "southamerica-east1-a"]
 
   # Seeding the RNG is technically optional but while building this we
   # found that it returned the same zone every time unless we seeded it. Here

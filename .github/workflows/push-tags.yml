@@ -40,7 +40,7 @@ jobs:
       run: |
         set -x
         gcloud auth configure-docker --quiet
-        IMAGE=gcr.io/$PROJECT_ID/sandbox/loadgenerator:${{ steps.get_version.outputs.VERSION }}
+        IMAGE=gcr.io/$PROJECT_ID/sandbox/loadgenerator/basic:${{ steps.get_version.outputs.VERSION }}
         docker build -t $IMAGE ./src/loadgenerator
         docker push $IMAGE
       env:
