@@ -43,6 +43,11 @@ jobs:
         set -x
         # build cloud shell image: it will automatically exit if there's an error in build
         docker build -t cloud-shell ./cloud-shell
+    - name: Build Load Generator Image
+      run: |
+        set -x
+        # build load generator image: it will automatically exit if there's an error in the build
+        docker build -t loadgenerator ./src/loadgenerator
     - name: Setup Cluster
       run: |
         set -x

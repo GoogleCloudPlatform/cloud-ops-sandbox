@@ -67,14 +67,16 @@ jobs:
     - name: Run Provisioning Test
       run: |
         set -x
-        # get cluster zone
+        # get cluster zones
         CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $PROJECT_ID --format="value(zone)")
+        LOADGEN_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox-loadgenerator" --project $PROJECT_ID --format="value(zone)")
         # build provisioning test image
         docker build -t test-provisioning:$GITHUB_SHA tests/provisioning/.
         # run provisioning tests
         docker run --rm \
           -e GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
           -e ZONE=$CLUSTER_ZONE \
+          -e LOADGEN_ZONE=$LOADGEN_ZONE \
           -v ~/.config:/root/.config \
           test-provisioning:$GITHUB_SHA
       env:

@@ -1,5 +1,7 @@
-#!/usr/bin/env python3
-# Copyright 2020 Google LLC
+#!/bin/bash
+
+# Copyright 2020 Google Inc. All rights reserved.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,17 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# set base image (host OS)
-FROM google/cloud-sdk:latest
 
-# set the working directory in the container
-WORKDIR /code
+LOCUST="/usr/local/bin/locust"
+LOCUS_OPTS="-f /locust-tasks/locustfile.py --host=$TARGET_HOST"
+LOCUST_MODE=${LOCUST_MODE:-standalone}
 
-# copy the dependencies file to the working directory
-COPY . .
+if [[ "$LOCUST_MODE" = "master" ]]; then
+    LOCUS_OPTS="$LOCUS_OPTS --master"
+elif [[ "$LOCUST_MODE" = "worker" ]]; then
+    LOCUS_OPTS="$LOCUS_OPTS --slave --master-host=$LOCUST_MASTER"
+fi
 
-# install dependencies
-RUN pip3 install -r requirements.txt
+echo "$LOCUST $LOCUS_OPTS"
 
-# command to run on container start
-CMD [ "python3", "test_runner.py" ]
+$LOCUST $LOCUS_OPTS
