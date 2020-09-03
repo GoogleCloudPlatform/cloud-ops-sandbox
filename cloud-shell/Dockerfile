@@ -20,5 +20,11 @@ RUN sudo apt-get install unzip && \
   unzip -o terraform.zip && \
   sudo install terraform /usr/local/bin
 
+RUN python3 -m pip install google-cloud-pubsub
+RUN python3 -m pip install click
+RUN python3 -m pip install google-cloud-monitoring
+
+ENV VERSION="v0.2.5" 
+
 # Change "Open in Cloudshell" script to run ./install.sh using local file and changing it
 COPY cloudshell_open_cp.sh /google/devshell/bashrc.google.d/cloudshell_open.sh
