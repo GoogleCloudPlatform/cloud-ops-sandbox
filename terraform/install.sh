@@ -25,12 +25,18 @@ SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
 # create variables for telemetry purposes
-python3 -m pip install google-cloud-pubsub
+python3 -m pip install google-cloud-storage
+python3 -m pip install google-api-core
 python3 -m pip install click
 VERSION="v0.2.5"
 SESSION=$(python3 -c "import telemetry; print(telemetry.get_uuid())")
+BUCKET_NAME="cloud-ops-sandbox-telemetry"
 
 log() { echo "$1" >&2; }
+
+sendTelemetry() {
+  python3 telemetry.py --session=$SESSION --bucket_name=$BUCKET_NAME --project_id=$project_id --event=$1 --version=$VERSION
+}
 
 promptForBillingAccount() {
   log "Checking for billing accounts..."
@@ -43,7 +49,8 @@ promptForBillingAccount() {
     log ""
     log "To list active billing accounts, run:"
     log "gcloud beta billing accounts list --filter open=true"
-    python3 telemetry.py --session=$SESSION --project_id="No project" --event=no-active-billing --version=$VERSION
+    project_id="No project"
+    sendTelemetry no-active-billing
     exit 1;
   fi
 
@@ -164,7 +171,7 @@ createProject() {
       log "If you don't have access to this folder, please make sure to request at:"
       log "go/experimental-folder-access"
       log ""
-      python3 telemetry.py --session=$SESSION --project_id=$project_id --event=new-sandbox-googler --version=$VERSION
+      sendTelemetry new-sandbox-googler
       select opt in "continue" "cancel"; do
         if [[ "$opt" == "continue" ]]; then
           break;
@@ -175,7 +182,7 @@ createProject() {
       folder_id="262044416022" # /experimental-gke  
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo" --folder="$folder_id"    
     else
-      python3 telemetry.py --session=$SESSION --project_id=$project_id --event=new-sandbox-non-googler --version=$VERSION
+      sendTelemetry new-sandbox-non-googler
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo"      
     fi;
     # link billing account
@@ -257,10 +264,10 @@ getExternalIp() {
   done;
   if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
       log "Hipster Shop app is available at http://$external_ip"
-      python3 telemetry.py --session=$SESSION --project_id=$project_id --event=hipstershop-available --version=$VERSION
+      python3 telemetry.py --session=$SESSION  --bucket_name=BUCKET_NAME --project_id=$project_id --event=hipstershop-available --version=$VERSION
   else
       log "error: Hipsterhop app at http://$external_ip is unreachable"
-      python3 telemetry.py --session=$SESSION --project_id=$project_id --event=hipstershop-unavailable --version=$VERSION
+      python3 telemetry.py --session=$SESSION --bucket_name=BUCKET_NAME --project_id=$project_id --event=hipstershop-unavailable --version=$VERSION
   fi
 }
 
@@ -288,7 +295,7 @@ loadGen() {
   done
   if [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null  --max-time 1) -ne 200 ]]; then
     log "error: load generator unreachable"
-    python3 telemetry.py --session=$SESSION --project_id=$project_id --event=loadgen-unavailable --version=$VERSION
+    python3 telemetry.py --session=$SESSION --bucket-name=BUCKET_NAME --project_id=$project_id --event=loadgen-unavailable --version=$VERSION
   fi
 }
 
@@ -301,7 +308,7 @@ displaySuccessMessage() {
 
     if [[ -n "${loadgen_ip}" ]]; then
         loadgen_addr="http://$loadgen_ip:8080"
-        python3 telemetry.py --session=$SESSION --project_id=$project_id --event=loadgen-available --version=$VERSION
+        python3 telemetry.py --session=$SESSION --bucket-name=BUCKET_NAME --project_id=$project_id --event=loadgen-available --version=$VERSION
     else
         loadgen_addr="[not found]"
     fi
