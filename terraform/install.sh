@@ -30,7 +30,7 @@ SESSION=$(python3 -c "import uuid; print(uuid.uuid4())")
 log() { echo "$1" >&2; }
 
 sendTelemetry() {
-  python3 telemetry.py --session=$SESSION --project-id=$project_id --event=$1 --version=$VERSION
+  python3 telemetry.py --session=$SESSION --project_id=$project_id --event=$1 --version=$VERSION
 }
 
 promptForBillingAccount() {

@@ -38,9 +38,9 @@ def get_id_hash(project_id):
     hashed = m.hexdigest()
     return hashed
 
-def get_telemetry_msg(session, project-id, event, version):
+def get_telemetry_msg(session, project_id, event, version):
     datetime=get_datetime_str()
-    project=get_id_hash(project-id)
+    project=get_id_hash(project_id)
     
     # send in json format
     data = {
@@ -55,12 +55,12 @@ def get_telemetry_msg(session, project-id, event, version):
 
 @click.command()
 @click.option('--session', help='Current session (unique across projects).')
-@click.option('--project-id', help='Project id in Google Cloud Platform.')
+@click.option('--project_id', help='Project id in Google Cloud Platform.')
 @click.option('--event', help='The  event that occurred.')
 @click.option('--version', default="v0.2.5", help='Release version of Sandbox.')
-def store_message(session, project-id, event, version):
+def store_message(session, project_id, event, version):
     # send data as a bytestring
-    msg = get_telemetry_msg(session, project-id, event, version)
+    msg = get_telemetry_msg(session, project_id, event, version)
     print("sending data", data)	
     data = data.encode("utf-8")
     
