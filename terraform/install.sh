@@ -43,7 +43,7 @@ promptForBillingAccount() {
     log ""
     log "To list active billing accounts, run:"
     log "gcloud beta billing accounts list --filter open=true"
-    sendTelemetry "No project" no-active-billing
+    sendTelemetry "none" no-active-billing
     exit 1;
   fi
 
