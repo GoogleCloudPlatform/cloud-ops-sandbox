@@ -68,7 +68,7 @@ def store_message(session, project_id, event, version):
     project_id = "stackdriver-sandbox-230822"
     topic_id = "telemetry"
     publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project_id, topic_id)	topic_path = publisher.topic_path(project_id, topic_id)
+    topic_path = publisher.topic_path(project_id, topic_id)
     publisher.publish(topic_path, data=data)
 
 if __name__ == "__main__":
