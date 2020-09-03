@@ -25,6 +25,7 @@ cd $SCRIPT_DIR
 
 # create variables for telemetry purposes
 SESSION=$(python3 -c "import uuid; print(uuid.uuid4())")
+project_id="No project"
 
 log() { echo "$1" >&2; }
 
@@ -43,7 +44,6 @@ promptForBillingAccount() {
     log ""
     log "To list active billing accounts, run:"
     log "gcloud beta billing accounts list --filter open=true"
-    project_id="No project"
     sendTelemetry no-active-billing
     exit 1;
   fi
