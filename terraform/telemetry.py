@@ -21,6 +21,8 @@ import hashlib
 import click
 import time
 
+from google.cloud import pubsub
+
 def get_id_hash(project_id):
     m = hashlib.sha256()
     m.update(project_id.encode('utf-8'))
