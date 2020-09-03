@@ -80,7 +80,7 @@ resource "google_container_cluster" "gke_loadgen" {
       }
     }
 
-    initial_node_count = 3
+    initial_node_count = 1
 
     autoscaling {
       min_node_count = 1
