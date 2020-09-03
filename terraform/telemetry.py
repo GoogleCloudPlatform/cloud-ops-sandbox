@@ -16,21 +16,15 @@
 # File usage:
 # python3 telemetry.py session project event version
 
-from google.cloud import pubsub_v1
+# from google.cloud import pubsub_v1
+from google.cloud import storage, exceptions
+#from google.api_core import exceptions
 from datetime import datetime
 import sys
 import json
 import hashlib
 import uuid
 import click
-
-project_id = "stackdriver-sandbox-230822"
-topic_id = "telemetry"
-
-publisher = pubsub_v1.PublisherClient()
-# The `topic_path` method creates a fully qualified identifier
-# in the form `projects/{project_id}/topics/{topic_id}`
-topic_path = publisher.topic_path(project_id, topic_id)
 
 def get_uuid():
     return uuid.uuid4()
@@ -48,16 +42,9 @@ def get_id_hash(project_id):
     hashed = m.hexdigest()
     return hashed
 
-@click.command()
-@click.option('--session', help='Current session (unique across projects).')
-@click.option('--project_id', prompt='Project id', help='Project name in Google Cloud Platform.')
-@click.option('--event', prompt='Event code', help='The  event that occurred.')
-@click.option('--version', default="v0.2.5", prompt='Version of Sandbox', help='Release version of Sandbox.')
-def send_message(session, project_id, event, version):
+def get_telemetry_file(session, project_id, event, version):
     datetime=get_datetime_str()
     project=get_id_hash(project_id)
-    error, message = validate_args()
-    if (error): print(message)
     
     # send in json format
     data = {
@@ -67,14 +54,42 @@ def send_message(session, project_id, event, version):
         "datetime": datetime,
         "version": version
     }
-    data = json.dumps(data)
+    
+    # file name should be descriptive but unique
+    file_name = 'telemetry-' + project + "-" + str(get_uuid())
+    with open(file_name, 'w') as file:
+        json.dump(data, file)
+        
+    return file_name
 
-    # send data as a bytestring
-    data = data.encode("utf-8")
-    publisher.publish(topic_path, data=data)
+@click.command()
+@click.option('--session', help='Current session (unique across projects).')
+@click.option('--bucket_name', help='Name of the bucket provisioned in user project for telemetry storage')
+@click.option('--project_id', help='Project name in Google Cloud Platform.')
+@click.option('--event', help='The  event that occurred.')
+@click.option('--version', default="v0.2.5", help='Release version of Sandbox.')
+def store_message(session, bucket_name, project_id, event, version):
+    file_name = get_telemetry_file(session, project_id, event, version)
+    
+    # create bucket if none created yet
+    storage_client = storage.Client()
+    bucket = None
+    try:
+        bucket = storage_client.get_bucket(bucket_name)
+    except exceptions.NotFound:
+        bucket = storage_client.create_bucket(bucket_name)
+        print("Bucket {} created.".format(bucket_name))
+    
+    blob = bucket.blob(file_name)
+    print(blob)
+    blob.upload_from_filename(file_name)
 
-def validate_args():
-    return False, ""
+    print(
+        "File {} uploaded to {}.".format(
+            file_name, file_name
+        )
+    )
+    
 
 if __name__ == "__main__":
-    send_message()
+    store_message()
