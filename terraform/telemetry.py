@@ -12,25 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # File usage:
 # python3 telemetry.py --session=$SESSION --project_id=$PROJECT_ID--event=$EVENT --version=$VERSION
 
-# from google.cloud import pubsub_v1
-from google.cloud import storage, exceptions
-#from google.api_core import exceptions
-from datetime import datetime
 import sys
 import json
 import hashlib
 import click
-
-# define the following helper functions
-def get_datetime_str():
-    # send current date and time for end of installation script
-    now = datetime.utcnow()
-    data = now.strftime("%m/%d/%Y %H:%M:%S")
-    return data
+import time
 
 def get_id_hash(project_id):
     m = hashlib.sha256()
@@ -39,7 +28,7 @@ def get_id_hash(project_id):
     return hashed
 
 def get_telemetry_msg(session, project_id, event, version):
-    datetime=get_datetime_str()
+    datetime=time.time() # Unix timestamp
     project=get_id_hash(project_id)
     
     # send in json format
