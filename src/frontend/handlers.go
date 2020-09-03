@@ -78,7 +78,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 				for _, c := range currencies {
 					_, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), c)
 					if err != nil {
-						log.Error("Failed converting product to all latencies.")
+						log.Error("Failed converting currencies for products.")
 						return
 					}
 				}

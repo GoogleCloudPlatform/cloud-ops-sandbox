@@ -62,11 +62,7 @@ spec:
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
           - name: CONVERT_CURRENCIES
-            valueFrom:
-              configMapKeyRef:
-                # The ConfigMap containing the status of the recipe
-                name: sre-recipe-config
-                key: recipe.status
+            value: "Active"
           resources:
             requests:
               cpu: 100m
