@@ -24,17 +24,12 @@ SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
 # create variables for telemetry purposes
-python3 -m pip install google-cloud-storage
-python3 -m pip install google-api-core
-python3 -m pip install click
-VERSION="v0.2.5"
-SESSION=$(python3 -c "import telemetry; print(telemetry.get_uuid())")
-BUCKET_NAME="cloud-ops-sandbox-telemetry"
+SESSION=$(python3 -c "import uuid; print(uuid.uuid4())")
 
 log() { echo "$1" >&2; }
 
 sendTelemetry() {
-  python3 telemetry.py --session=$SESSION --bucket_name=$BUCKET_NAME --project_id=$project_id --event=$1 --version=$VERSION
+  python3 telemetry.py --session=$SESSION --project-id=$project_id --event=$1 --version=$VERSION
 }
 
 promptForBillingAccount() {
@@ -265,10 +260,10 @@ getExternalIp() {
   done;
   if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
       log "Hipster Shop app is available at http://$external_ip"
-      python3 telemetry.py --session=$SESSION  --bucket_name=BUCKET_NAME --project_id=$project_id --event=hipstershop-available --version=$VERSION
+      sendTelemetry hipstershop-available
   else
       log "error: Hipsterhop app at http://$external_ip is unreachable"
-      python3 telemetry.py --session=$SESSION --bucket_name=BUCKET_NAME --project_id=$project_id --event=hipstershop-unavailable --version=$VERSION
+      sendTelemetry hipstershop-unavailable
   fi
 }
 
@@ -294,7 +289,7 @@ loadGen() {
   done
   if [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null  --max-time 1) -ne 200 ]]; then
     log "error: load generator unreachable"
-    python3 telemetry.py --session=$SESSION --bucket-name=BUCKET_NAME --project_id=$project_id --event=loadgen-unavailable --version=$VERSION
+    sendTelemetry loadgen-unavailable
   fi
 
 }
@@ -309,7 +304,7 @@ displaySuccessMessage() {
 
     if [[ -n "${loadgen_ip}" ]]; then
         loadgen_addr="http://$loadgen_ip:8080"
-        python3 telemetry.py --session=$SESSION --bucket-name=BUCKET_NAME --project_id=$project_id --event=loadgen-available --version=$VERSION
+        sendTelemetry loadgen-available
     else
         loadgen_addr="[not found]"
     fi
