@@ -14,7 +14,6 @@
 #!/bin/bash
 
 # This script provisions Hipster Shop Cluster for Cloud Operations Sandbox using Terraform
-
 #set -euo pipefail
 set -o errexit  # Exit on error
 #set -o nounset  # Trigger error when expanding unset variables
@@ -198,6 +197,8 @@ applyTerraform() {
 authenticateCluster() {
   CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $project_id --format="value(zone)")
   gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
+  # Make alias for this kubectl context
+  kubectx main=.
 }
 
 installMonitoring() {
@@ -256,31 +257,35 @@ getExternalIp() {
 # Install Load Generator service and start generating synthetic traffic to Sandbox
 loadGen() {
   log "Running load generator"
-  # remove existing load generator
-  old_loadgen=$(gcloud compute instances list --project $project_id --filter="name:loadgenerator*" --format="value(name)")
-  if [[ -n "$old_loadgen" ]]; then
-    loadgen_zone=$(gcloud compute instances list --project $project_id --filter="name:loadgenerator*" --format="value(zone)")
-    gcloud compute instances delete $old_loadgen --zone $loadgen_zone --quiet
-  fi
   # launch a new load generator
-  ../loadgenerator/loadgen autostart $external_ip
+  pushd loadgen/
+  terraform init -lock=false
+  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}"
+  popd
+
+  LOCUST_PORT="8089"
   # find the IP of the load generator web interface
   TRIES=0
-  while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null --max-time 1) -ne 200  && \
+  while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:$LOCUST_PORT" -o /dev/null --max-time 1) -ne 200  && \
       "${TRIES}" -lt 20  ]]; do
     log "waiting for load generator instance..."
-    sleep 1
-    loadgen_ip=$(gcloud compute instances list --project "$project_id" \
-                                               --filter="name:loadgenerator*" \
-                                               --format="value(networkInterfaces[0].accessConfigs.natIP)")
+    sleep 10
+    loadgen_ip=$(kubectl get service locust-main -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
+     [ -z "$loadgen_ip" ] && sleep 10;
     TRIES=$((TRIES + 1))
   done
-  if [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null  --max-time 1) -ne 200 ]]; then
-    log "error: load generator unreachable"
+  if [[ -v loadgen_ip ]]; then
+    # Make kubectx alias for this kubectl context
+    kubectx loadgenerator=.
+    # Return kubectl context to the main cluster and show this to the user
+    kubectx main
+    log $(kubectx)
   fi
+
 }
 
 displaySuccessMessage() {
+    LOCUST_PORT="8089"
     gcp_path="https://console.cloud.google.com"
     if [[ -n "${project_id}" ]]; then
         gcp_kubernetes_path="$gcp_path/kubernetes/workload?project=$project_id"
@@ -288,7 +293,7 @@ displaySuccessMessage() {
     fi
 
     if [[ -n "${loadgen_ip}" ]]; then
-        loadgen_addr="http://$loadgen_ip:8080"
+        loadgen_addr="http://$loadgen_ip:$LOCUST_PORT"
     else
         loadgen_addr="[not found]"
     fi

@@ -1,6 +1,5 @@
-#!/bin/sh -eu
-#
-# Copyright 2018 Google LLC
+#!/usr/bin/env python3
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,14 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/bin/bash
-set -e
-trap "exit" TERM
+import unittest
 
-if [[ -z "${FRONTEND_ADDR}" ]]; then
-    echo >&2 "FRONTEND_ADDR not specified"
-    exit 1
-fi
-
-set -x
-locust --host="http://${FRONTEND_ADDR}" "$@"
+test_suite = unittest.TestLoader().discover(pattern='*_test.py')
+unittest.TextTestRunner(verbosity=2, failfast=True).run(test_suite)
