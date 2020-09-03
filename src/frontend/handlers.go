@@ -367,7 +367,7 @@ func (fe *frontendServer) convertAllCurrencies(r *http.Request, products []*pb.P
 		for _, c := range currencies {
 			_, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), c)
 			if err != nil {
-				log.Error("Failed converting currencies for products.")
+				log.WithField("error", err).Warn("Failed converting currencies for products.")
 				return
 			}
 		}
