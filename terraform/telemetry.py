@@ -44,21 +44,22 @@ def get_telemetry_msg(session, project_id, event, version):
 
 @click.command()
 @click.option('--session', help='Current session (unique across projects).')
-@click.option('--project_id', help='Project id in Google Cloud Platform.')
+@click.option('--project_id', help='Sandbox project id in Google Cloud Platform.')
 @click.option('--event', help='The  event that occurred.')
 @click.option('--version', default="v0.2.5", help='Release version of Sandbox.')
 def store_message(session, project_id, event, version):
     # send data as a bytestring
     msg = get_telemetry_msg(session, project_id, event, version)
-    print("sending data", data)	
-    data = data.encode("utf-8")
+    print("sending data", msg)	
+    bytes = msg.encode("utf-8")
     
     # connect to pubsub and send message
     project_id = "stackdriver-sandbox-230822"
     topic_id = "telemetry"
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project_id, topic_id)
-    publisher.publish(topic_path, data=data)
+    
+    publisher.publish(topic_path, data=bytes)
 
 if __name__ == "__main__":
     store_message()
