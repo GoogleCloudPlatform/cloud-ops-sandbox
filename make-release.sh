@@ -29,6 +29,7 @@ fi
 
 # temporarily pin manifests to :$NEW_VERSION
 find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:latest/:${NEW_VERSION}/g" {} \;
+find "${REPO_ROOT}/kubernetes-manifests/loadgenerator" -name '*.yaml' -exec sed -i -e "s/:latest/:${NEW_VERSION}/g" {} \;
 
 # update README
 sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/README.md;
@@ -46,6 +47,7 @@ else
     # create release commit
     git checkout -b "release/${NEW_VERSION}"
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
+    git add "${REPO_ROOT}/kubernetes-manifests/loadgenerator/*.yaml"
     git add "${REPO_ROOT}/docs/index.html"
     git add "${REPO_ROOT}/README.md"
     git commit -m "release/${NEW_VERSION}"
@@ -56,7 +58,8 @@ else
     # change back manifests to :latest
     find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:${NEW_VERSION}/:latest/g" {} \;
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
-    git commit -m "revert to latest images"
+    git add "${REPO_ROOT}/kubernetes-manifests/loadgenerator/*.yaml"
+    git commit -m "revert images to latest"
 
     # if no-push mode, exit without pushing git branch or tags to origin
     if [[ "$*" == *nopush* || "$*" == *no-push* ]]; then
