@@ -32,7 +32,7 @@ cd $SCRIPT_DIR
 SESSION=$(python3 -c "import uuid; print(uuid.uuid4())")
 
 sendTelemetry() {
-  python3 telemetry.py --session=$SESSION --project-id=$PROJECT_ID --event=$1 --version=$VERSION
+  python3 telemetry.py --session=$SESSION --project_id=$PROJECT_ID --event=$1 --version=$VERSION
 }
 
 # find the cloud operations sandbox project id
