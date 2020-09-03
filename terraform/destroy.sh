@@ -32,7 +32,7 @@ cd $SCRIPT_DIR
 SESSION=$(python3 -c "import uuid; print(uuid.uuid4())")
 
 sendTelemetry() {
-  python3 telemetry.py --session=$SESSION --project_id=$PROJECT_ID --event=$1 --version=$VERSION
+  python3 telemetry.py --session=$SESSION --project_id=$1 --event=$2 --version=$VERSION
 }
 
 # find the cloud operations sandbox project id
@@ -83,11 +83,11 @@ gcloud projects delete $PROJECT_ID
 found=$(gcloud projects list --filter="${PROJECT_ID}" --format="value(projectId)")
 if [[ -n "${found}" ]]; then
     log "project $PROJECT_ID not deleted"
-    sendTelemetry sandbox-not-destroyed
+    sendTelemetry $PROJECT_ID sandbox-not-destroyed
     exit 1
 fi
 
-sendTelemetry sandbox-destroyed
+sendTelemetry $PROJECT_ID sandbox-destroyed
 # remove tfstate file so a new project id will be generated next time
 log "removing tfstate file"
 rm -f .terraform/terraform.tfstate

@@ -25,12 +25,11 @@ cd $SCRIPT_DIR
 
 # create variables for telemetry purposes
 SESSION=$(python3 -c "import uuid; print(uuid.uuid4())")
-project_id="No project"
 
 log() { echo "$1" >&2; }
 
 sendTelemetry() {
-  python3 telemetry.py --session=$SESSION --project_id=$project_id --event=$1 --version=$VERSION
+  python3 telemetry.py --session=$SESSION --project_id=$1 --event=$2 --version=$VERSION
 }
 
 promptForBillingAccount() {
@@ -44,7 +43,7 @@ promptForBillingAccount() {
     log ""
     log "To list active billing accounts, run:"
     log "gcloud beta billing accounts list --filter open=true"
-    sendTelemetry no-active-billing
+    sendTelemetry "No project" no-active-billing
     exit 1;
   fi
 
@@ -165,7 +164,7 @@ createProject() {
       log "If you don't have access to this folder, please make sure to request at:"
       log "go/cloud-ops-sandbox-access"
       log ""
-      sendTelemetry new-sandbox-googler
+      sendTelemetry $project_id new-sandbox-googler
       select opt in "continue" "cancel"; do
         if [[ "$opt" == "continue" ]]; then
           break;
@@ -176,7 +175,7 @@ createProject() {
       folder_id="470827991545" # /cloud-ops-sandboxes  
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo" --folder="$folder_id"    
     else
-      sendTelemetry new-sandbox-non-googler
+      sendTelemetry $project_id new-sandbox-non-googler
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo"      
     fi;
     # link billing account
@@ -260,10 +259,10 @@ getExternalIp() {
   done;
   if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
       log "Hipster Shop app is available at http://$external_ip"
-      sendTelemetry hipstershop-available
+      sendTelemetry $project_id hipstershop-available
   else
       log "error: Hipsterhop app at http://$external_ip is unreachable"
-      sendTelemetry hipstershop-unavailable
+      sendTelemetry $project_id hipstershop-unavailable
   fi
 }
 
@@ -289,7 +288,7 @@ loadGen() {
   done
   if [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null  --max-time 1) -ne 200 ]]; then
     log "error: load generator unreachable"
-    sendTelemetry loadgen-unavailable
+    sendTelemetry $project_id loadgen-unavailable
   fi
 
 }
@@ -304,7 +303,7 @@ displaySuccessMessage() {
 
     if [[ -n "${loadgen_ip}" ]]; then
         loadgen_addr="http://$loadgen_ip:8080"
-        sendTelemetry loadgen-available
+        sendTelemetry $project_id loadgen-available
     else
         loadgen_addr="[not found]"
     fi
