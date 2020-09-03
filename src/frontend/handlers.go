@@ -73,16 +73,8 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if os.Getenv("CONVERT_CURRENCIES") == "Active" {
-		for i := 0 ; i < 100; i++ { 
-			for _, p := range products {
-				for _, c := range currencies {
-					_, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), c)
-					if err != nil {
-						log.Error("Failed converting currencies for products.")
-						return
-					}
-				}
-			}
+		for i := 0 ; i < 10*len(currencies); i++ { 
+			fe.convertAllCurrencies(r, products, currencies)
 		}
 	}
 
@@ -369,6 +361,19 @@ func (fe *frontendServer) chooseAd(ctx context.Context, ctxKeys []string, log lo
 	return ads[rand.Intn(len(ads))]
 }
 
+func (fe *frontendServer) convertAllCurrencies(r *http.Request, products []*pb.Product, currencies []string) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	for _, p := range products {
+		for _, c := range currencies {
+			_, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), c)
+			if err != nil {
+				log.Error("Failed converting currencies for products.")
+				return
+			}
+		}
+	}
+}
+
 func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWriter, err error, code int) {
 	log.WithField("error", err).Error("request error")
 	errMsg := fmt.Sprintf("%+v", err)
@@ -409,3 +414,4 @@ func cartIDs(c []*pb.CartItem) []string {
 func renderMoney(money pb.Money) string {
 	return fmt.Sprintf("%s %d.%02d", money.GetCurrencyCode(), money.GetUnits(), money.GetNanos()/10000000)
 }
+
