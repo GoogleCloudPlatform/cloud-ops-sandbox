@@ -36,3 +36,18 @@ jobs:
                        --tag=latest
       env:
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
+    - name: Push Load Generator Image to GCR
+      timeout-minutes: 20
+      run: |
+        set -x
+        gcloud auth configure-docker --quiet
+        # build and tag with git hash
+        IMAGE_SHA=gcr.io/$PROJECT_ID/sandbox/loadgenerator/basic:$GITHUB_SHA
+        docker build -t $IMAGE_SHA ./src/loadgenerator
+        docker push $IMAGE_SHA
+        # build and tag with latest
+        IMAGE_LATEST=gcr.io/$PROJECT_ID/sandbox/loadgenerator/basic:latest
+        docker build -t $IMAGE_LATEST ./src/loadgenerator
+        docker push $IMAGE_LATEST
+      env:
+        PROJECT_ID: ${{ secrets.PROJECT_ID }}
