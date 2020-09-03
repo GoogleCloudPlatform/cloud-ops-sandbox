@@ -72,6 +72,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		ps[i] = productView{p, price}
 	}
 
+	// Feature: convert currency for product to all currencies
 	if os.Getenv("CONVERT_CURRENCIES") == "Active" {
 		for i := 0 ; i < 10*len(currencies); i++ { 
 			fe.convertAllCurrencies(r, products, currencies)
@@ -361,6 +362,8 @@ func (fe *frontendServer) chooseAd(ctx context.Context, ctxKeys []string, log lo
 	return ads[rand.Intn(len(ads))]
 }
 
+// convertAllCurrencies converts the currency for all products into every other currency
+// The error is logged as a warning since it is not critical.
 func (fe *frontendServer) convertAllCurrencies(r *http.Request, products []*pb.Product, currencies []string) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	for _, p := range products {
