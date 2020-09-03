@@ -45,7 +45,7 @@ deploy:
   statusCheckDeadlineSeconds: 120
   kubectl:
     manifests:
-    - ./kubernetes-manifests/**.yaml
+    - ./kubernetes-manifests/*.yaml
 profiles:
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker

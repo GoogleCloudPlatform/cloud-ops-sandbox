@@ -9,5 +9,5 @@ docker build -t $image_name .
 
 2. Run docker
 ```bash
-docker run --rm -e GOOGLE_CLOUD_PROJECT=$project_id -e ZONE=$gke_zone $image_name
+docker run --rm -e GOOGLE_CLOUD_PROJECT=$project_id -e ZONE=$gke_zone -e LOADGEN_ZONE=$loadgen_zone $image_name
 ```

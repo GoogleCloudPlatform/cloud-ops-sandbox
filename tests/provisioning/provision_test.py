@@ -30,6 +30,12 @@ class TestGKECluster(unittest.TestCase):
     def setUpClass(cls):
         """ Get the location of GKE cluster for later queries """
         cls.name = 'projects/{0}/locations/{1}/clusters/cloud-ops-sandbox'.format(getProjectId(), getClusterZone())
+        # authenticate container cluster
+        command=('gcloud config set project {0}'.format(getProjectId()))
+        subprocess.run(split(command))
+        # set kubectl context
+        command=('gcloud container clusters get-credentials cloud-ops-sandbox --zone {0}'.format(getClusterZone()))
+        subprocess.run(split(command))
     
     def testNodeMachineType(self):
         """ Test if the machine type for the nodes is as specified """
@@ -55,35 +61,11 @@ class TestGKECluster(unittest.TestCase):
 
     def testReachOfHipsterShop(self):
         """ Test if querying hipster shop returns 200 """
-        command = ("kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
+        command = ("kubectl -n istio-system get service istio-ingressgateway --context=cloud-ops-sandbox -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
         external_ip = result.stdout.replace('\n', '')
         url = 'http://{0}'.format(external_ip)
         self.assertTrue(urllib.request.urlopen(url).getcode() == 200)
-
-class TestLoadGenerator(unittest.TestCase):
-    def testNumberOfLoadgen(self):
-        """ Test if there's only one load generator instance """
-        command = ('gcloud compute instances list --filter="name:loadgenerator*" --format="value(name)"')
-        result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
-        instances = result.stdout.strip().split('\n')
-        num_instances = len(instances)
-        self.assertTrue(num_instances == 1)
-
-    def testReachOfLoadgen(self):
-        """ Test if querying load generator returns 200 """
-        command = ('gcloud compute instances list --filter="name:loadgenerator*" --format="value(networkInterfaces[0].accessConfigs.natIP)"')
-        result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
-        external_ip = result.stdout.replace('\n', '')
-        url = 'http://{0}:8080'.format(external_ip)
-        self.assertTrue(urllib.request.urlopen(url).getcode() == 200)
-    
-    def testDifferentZone(self):
-        """ Test if load generator is in a different zone from the GKE cluster """
-        command = ('gcloud compute instances list --filter="name:loadgenerator" --format="value(ZONE)"')
-        result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
-        zone = result.stdout.replace('\n', '')
-        self.assertTrue(zone != getClusterZone())
 
 class TestProjectResources(unittest.TestCase):
     def testAPIEnabled(self):
@@ -116,10 +98,4 @@ def getClusterZone():
     return os.environ['ZONE']
 
 if __name__ == '__main__':
-    # authenticate container cluster
-    command=('gcloud config set project {0}'.format(getProjectId()))
-    subprocess.run(split(command))
-    command=('gcloud container clusters get-credentials cloud-ops-sandbox --zone {0}'.format(getClusterZone()))
-    subprocess.run(split(command))
-    # start tests
-    unittest.main(verbosity=2)
+    unittest.main()
