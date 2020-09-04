@@ -29,7 +29,8 @@ spec:
       volumes:
       - name: google-cloud-key
         secret:
-          secretName: my-key
+          secretName: service-key
+          optional: true
       containers:
       - name: server
         image: gcr.io/stackdriver-sandbox-230822/sandbox/recommendationservice:latest

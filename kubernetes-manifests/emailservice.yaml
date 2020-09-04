@@ -26,13 +26,16 @@ spec:
         app: emailservice
     spec:
       terminationGracePeriodSeconds: 5
+      # Pod specifies what volumes to provide for this pod
       volumes:
       - name: google-cloud-key
         secret:
-          secretName: my-key
+          secretName: service-key
+          optional: true
       containers:
       - name: server
         image: gcr.io/stackdriver-sandbox-230822/sandbox/emailservice:latest
+        # Where to mount storage inside of the container
         volumeMounts:
         - name: google-cloud-key
           mountPath: /var/secrets/google
