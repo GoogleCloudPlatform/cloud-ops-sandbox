@@ -52,7 +52,6 @@ def get_telemetry_msg(session, project_id, event, version):
 def store_message(session, project_id, event, version):
     # send data as a bytestring
     msg = get_telemetry_msg(session, project_id, event, version)
-    print("sending data", msg)	
     bytes = msg.encode("utf-8")
     
     # connect to pubsub and send message
