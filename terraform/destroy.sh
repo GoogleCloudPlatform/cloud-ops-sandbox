@@ -29,6 +29,7 @@ SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
 # For the purposes of telemetry
+# session is defined as the current time the user runs destroy.sh file
 SESSION=$(python3 -c "import uuid; print(uuid.uuid4())")
 
 sendTelemetry() {
