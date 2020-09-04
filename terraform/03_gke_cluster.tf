@@ -146,13 +146,33 @@ resource "null_resource" "install_istio" {
   depends_on = [null_resource.set_gke_context]
 }
 
+# Get GKE cluster's default service credentials through project_number
+# Solves Issue #372. When upstream bug is resolved, remove this.
+resource "null_resource" "get_credentials" {
+  provisioner "local-exec" {
+    command = "gcloud iam service-accounts keys create key.json --iam-account $(gcloud projects list --filter='${data.google_project.project.project_id}' --format='value(PROJECT_NUMBER)')-compute@developer.gserviceaccount.com"
+  }
+
+  depends_on = [null_resource.install_istio]
+}
+
+# Forwards credentials as a secret called "my-key"
+# Accessible to containers via GOOGLE_APP_CREDENTIALS env variable.
+resource "null_resource" "forward_credentials" {
+  provisioner "local-exec" {
+    command = "kubectl create secret generic my-key --from-file=key.json=key.json"
+  }
+
+  depends_on = [null_resource.get_credentials]
+}
+
 # Deploy microservices into GKE cluster 
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
     command = "kubectl apply -f ../kubernetes-manifests"
   }
 
-  depends_on = [null_resource.install_istio]
+  depends_on = [null_resource.forward_credentials]
 }
 
 # We wait for all of our microservices to become available on kubernetes

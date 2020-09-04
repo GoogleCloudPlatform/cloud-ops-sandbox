@@ -26,9 +26,19 @@ spec:
         app: emailservice
     spec:
       terminationGracePeriodSeconds: 5
+      volumes:
+      - name: google-cloud-key
+        secret:
+          secretName: my-key
       containers:
       - name: server
         image: gcr.io/stackdriver-sandbox-230822/sandbox/emailservice:latest
+        volumeMounts:
+        - name: google-cloud-key
+          mountPath: /var/secrets/google
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/secrets/google/key.json
         ports:
         - containerPort: 8080
         readinessProbe:
