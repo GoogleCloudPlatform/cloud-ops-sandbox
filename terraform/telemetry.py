@@ -23,7 +23,7 @@ import time
 
 from google.cloud import pubsub_v1
 
-def get_id_hash(project_id):
+def obfuscate_project_id(project_id):
     m = hashlib.sha256()
     m.update(project_id.encode('utf-8'))
     hashed = m.hexdigest()
@@ -31,7 +31,7 @@ def get_id_hash(project_id):
 
 def get_telemetry_msg(session, project_id, event, version):
     datetime=time.time() # Unix timestamp
-    project=get_id_hash(project_id)
+    project=obfuscate_project_id(project_id)
     
     # send in json format
     data = {
@@ -49,7 +49,7 @@ def get_telemetry_msg(session, project_id, event, version):
 @click.option('--project_id', help='Sandbox project id in Google Cloud Platform.')
 @click.option('--event', help='The  event that occurred.')
 @click.option('--version', default="v0.2.5", help='Release version of Sandbox.')
-def store_message(session, project_id, event, version):
+def send_telemetry_message(session, project_id, event, version):
     # send data as a bytestring
     msg = get_telemetry_msg(session, project_id, event, version)
     bytes = msg.encode("utf-8")
@@ -63,4 +63,4 @@ def store_message(session, project_id, event, version):
     publisher.publish(topic_path, data=bytes)
 
 if __name__ == "__main__":
-    store_message()
+    send_telmetry_message()

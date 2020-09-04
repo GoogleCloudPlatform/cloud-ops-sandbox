@@ -23,7 +23,8 @@ if [[ -n "$DEBUG" ]]; then set -x; fi
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
-# create variables for telemetry purposes
+# create variable for telemetry purposes
+# session is defined as the current time user runs install.sh file
 SESSION=$(python3 -c "import uuid; print(uuid.uuid4())")
 
 log() { echo "$1" >&2; }
