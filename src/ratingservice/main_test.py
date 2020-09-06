@@ -16,36 +16,39 @@ from __future__ import print_function
 
 import os
 import unittest
-import subprocess
-from shlex import split
-import json
-import urllib.request
+import requests
 
 class TestEndpoints(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        """ Get the location of GKE cluster for later queries """
-        cls.name = 'projects/{0}/locations/{1}/clusters/cloud-ops-sandbox'.format(getProjectId(), getClusterZone())
 
     def testRate(self):
         """ Test if rating a product returns success """
         products = ['OLJCESPC7Z','66VCHSJNUP','1YMWWN1N4O','L9ECAV7KIM','2ZYFJ3GM2N','0PUK6V6EV0','LS4PSXUNUM','9SIQT8TOJO', '6E92ZMYYFZ']
         for product in products:
-            url = "https://{0}.wl.r.appspot.com/rate/{1}".format(getProjectId(), product)
-            res = urllib.request.urlopen(url)
-            self.assertEqual(res, 'success')
-
+            url = "https://{0}.wl.r.appspot.com/rate/{1}/{2}".format(getProjectId(), product, 5)
+            res = requests.get(url)
+            self.assertEqual(res.json()['status'], 'success')
+    
     def testGetRating(self):
+        """ Test if getting the rating of a product returns success """
+        products = ['OLJCESPC7Z','66VCHSJNUP','1YMWWN1N4O','L9ECAV7KIM','2ZYFJ3GM2N','0PUK6V6EV0','LS4PSXUNUM','9SIQT8TOJO', '6E92ZMYYFZ']
+        for product in products:
+            url = "https://{0}.wl.r.appspot.com/getRating/{1}".format(getProjectId(), product)
+            res = requests.get(url)
+            self.assertEqual(res.json()['status'], 'success')
+
+    
+    def testGetRatingCorrect(self):
         """ Test if getting the rating of a product returns a correct number """
         url_get = "https://{0}.wl.r.appspot.com/getRating/{1}".format(getProjectId(), "OLJCESPC7Z")
         url_post = "https://{0}.wl.r.appspot.com/rate/{1}/{2}".format(getProjectId(), "OLJCESPC7Z", 5)
-        rating, count = urllib.request.urlopen(url_get)
-        urllib.request.urlopen(url_post)
-        rating2, count2 = urllib.request.urlopen(url_get)
-        self.assertEqual(rating * count + 5, rating2 * count2)
-
+        res1 = requests.get(url_get).json()
+        requests.get(url_post)
+        res2 = requests.get(url_get).json()
+        self.assertTrue(abs(float(res1['rating']) * float(res1['count']) + 5 
+                        - float(res2['rating']) * float(res2['count'])) < 1e-5)
+    
 def getProjectId():
     return os.environ['GOOGLE_CLOUD_PROJECT']
 
-if __name__ == '__main__':  
+if __name__ == '__main__':
     unittest.main(verbosity=2)
