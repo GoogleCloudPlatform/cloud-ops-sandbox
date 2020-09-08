@@ -29,6 +29,8 @@ SESSION=$(python3 -c "import uuid; print(uuid.uuid4())")
 
 log() { echo "$1" >&2; }
 
+# this function sends de-identified information to the Google Cloud Platform database
+# on what events occur in users' Sandbox projects for development purposes
 sendTelemetry() {
   python3 telemetry.py --session=$SESSION --project_id=$1 --event=$2 --version=$VERSION
 }

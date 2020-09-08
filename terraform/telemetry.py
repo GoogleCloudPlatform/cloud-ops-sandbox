@@ -24,12 +24,15 @@ import re
 
 from google.cloud import pubsub_v1
 
+# This function hashes the project_id in order to preserve user privacy
+# The telemetry system should not have access to the user's actual project_id
 def obfuscate_project_id(project_id):
     m = hashlib.sha256()
     m.update(project_id.encode('utf-8'))
     hashed = m.hexdigest()
     return hashed
 
+# formats JSON object and re-forms project argument
 def get_telemetry_msg(session, project_id, event, version):
     datetime=time.time() # Unix timestamp
     project=obfuscate_project_id(project_id)
