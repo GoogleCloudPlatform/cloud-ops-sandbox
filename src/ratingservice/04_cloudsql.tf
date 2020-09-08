@@ -16,6 +16,11 @@ resource "google_sql_database_instance" "master" {
   }
 }
 
+resource "google_sql_database" "database" {
+  name     = "rating-databse"
+  instance = google_sql_database_instance.master.name
+}
+
 resource "google_sql_user" "default" {
   name     = "postgres"
   password = random_id.db_password.hex
