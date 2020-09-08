@@ -114,7 +114,7 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 * **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to
   communicate to each other.
 * **[OpenTelemetry](https://opentelemetry.io/) Tracing:** Most services are
-  instrumented using OpenTelemetry trace interceptors for gRPC/HTTP.
+  instrumented using OpenTelemetry tracers and interceptors which handle trace context propagation through gRPC and HTTP.
 * **[Ops Management APM and SRE](https://cloud.google.com/products/operations):** Many services
   are instrumented with **Profiling**, **Tracing**, **Debugging**, **Monitoring**, **Logging** and **Error Reporting**.
 * **[Skaffold](https://github.com/GoogleContainerTools/skaffold):** A tool used for doing repeatable deployments. You can deploy to Kubernetes with a single command using Skaffold.
