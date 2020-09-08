@@ -24,7 +24,7 @@ SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
 # create variable for telemetry purposes
-# session is defined as the current time user runs install.sh file
+# session is defined as the current event that the user runs install.sh file
 SESSION=$(python3 -c "import uuid; print(uuid.uuid4())")
 
 log() { echo "$1" >&2; }
