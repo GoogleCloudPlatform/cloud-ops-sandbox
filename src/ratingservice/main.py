@@ -13,9 +13,13 @@
 # limitations under the License.
 
 import os
+import json
 from flask import Flask,Response,jsonify
 from psycopg2 import pool,extensions
 
+connpool = None
+
+# connect to cloud sql
 def initConnection():
     db_user = os.environ.get('CLOUD_SQL_USERNAME')
     db_password = os.environ.get('CLOUD_SQL_PASSWORD')
@@ -31,8 +35,34 @@ def initConnection():
     connpool = pool.ThreadedConnectionPool(minconn=1, maxconn=10, **db_config)
     return connpool
 
+# read product ids
+def read_products():
+    res = []
+    with open('products.json') as f:
+        data = json.load(f)
+        for product in data['products']:
+            res.append(product['id'])
+    return res
+
+# create and populate table
+def populate_database():
+    try:
+        products = read_products()
+        conn = connpool.getconn()
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT EXISTS(SELECT * FROM information_schema.tables WHERE table_name = 'ratings');")
+            result = cursor.fetchone()
+            if not result[0]:
+                cursor.execute("CREATE TABLE ratings (id SERIAL PRIMARY KEY, product_id varchar(20) NOT NULL, score int DEFAULT 0);")
+                for product in products:
+                    cursor.execute("INSERT INTO ratings (product_id, score) VALUES ('{}', 5);".format(product))
+        conn.commit()
+    finally:
+        connpool.putconn(conn)
+
 app = Flask(__name__)
 connpool = initConnection()
+populate_database()
 
 @app.route('/getRating/<id>')
 def getRating(id):
@@ -94,3 +124,7 @@ def rate(id, score):
     finally:
         connpool.putconn(conn)
     return resp
+
+@app.route('/')
+def hello():
+    return 'hello!'
