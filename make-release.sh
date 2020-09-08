@@ -44,7 +44,7 @@ sed -i -e "s/VERSION=v\([0-9\.]\+\)/VERSION=${NEW_VERSION}/g" ${REPO_ROOT}/cloud
 
 # update telemetry Pub/Sub topic in telemetry.py from "Test" topic to "Production" topic
 PROD_TOPIC="telemetry_prod"
-TEST_TOPIC="telemetry"
+TEST_TOPIC="telemetry_test"
 sed -i -e "s/topic_id = \"${TEST_TOPIC}\"/topic_id = \"${PROD_TOPIC}\"/g" ${REPO_ROOT}/terraform/telemetry.py;
 
 # if dry-run mode, exit directly after modifying files
@@ -69,12 +69,12 @@ else
     find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:${NEW_VERSION}/:latest/g" {} \;
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
     git add "${REPO_ROOT}/kubernetes-manifests/loadgenerator/*.yaml"
-    git commit -m "revert images to latest"
-    
+
     # change back telemetry Pub/Sub topic to "Test" topic
     sed -i -e "s/topic_id = \"${PROD_TOPIC}\"/topic_id = \"${TEST_TOPIC}\"/g" ${REPO_ROOT}/terraform/telemetry.py;
     git add "${REPO_ROOT}/terraform/telemetry.py"
-    git commit -m "revert telemetry pipeline to 'test'"
+    
+    git commit -m "revert images to latest and telemetry pipeline to 'test'"
 
     # if no-push mode, exit without pushing git branch or tags to origin
     if [[ "$*" == *nopush* || "$*" == *no-push* ]]; then
