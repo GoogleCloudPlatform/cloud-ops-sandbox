@@ -28,9 +28,9 @@ acct=$(gcloud info --format="value(config.account)")
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
-# For the purposes of telemetry
-# session is defined as the current event that the user runs destroy.sh file
-SESSION=$(python3 -c "import uuid; print(uuid.uuid4())")
+# create variable for telemetry purposes if SESSION is not already set
+# session is defined as the current "instance" in which the user is logged-in to Cloud Shell terminal, working with Sandbox
+if [[ -z "$SESSION" ]]; then export SESSION=$(python3 -c "import uuid; print(uuid.uuid4())"); fi
 
 # this function sends de-identified information to the Google Cloud Platform database
 # on what events occur in users' Sandbox projects for development purposes

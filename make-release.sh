@@ -42,6 +42,11 @@ sed -i -e "s/cloudshell-image:v\([0-9\.]\+\)/cloudshell-image:${NEW_VERSION}/g" 
 # update custom Cloud Shell image variable
 sed -i -e "s/VERSION=v\([0-9\.]\+\)/VERSION=${NEW_VERSION}/g" ${REPO_ROOT}/cloud-shell/Dockerfile;
 
+# update telemetry Pub/Sub topic in telemetry.py from "Test" topic to "Production" topic
+PROD_TOPIC="telemetry_prod"
+TEST_TOPIC="telemetry"
+sed -i -e "s/topic_id = \"${TEST_TOPIC}\"/topic_id = \"${PROD_TOPIC}\"/g" ${REPO_ROOT}/terraform/telemetry.py;
+
 # if dry-run mode, exit directly after modifying files
 if [[ "$*" == *dryrun*  || "$*" == *dry-run* ]]; then
     exit 0
@@ -53,6 +58,8 @@ else
     git add "${REPO_ROOT}/kubernetes-manifests/loadgenerator/*.yaml"
     git add "${REPO_ROOT}/docs/index.html"
     git add "${REPO_ROOT}/README.md"
+    git add "${REPO_ROOT}/cloud-shell/Dockerfile"
+    git add "${REPO_ROOT}/terraform/telemetry.py"
     git commit -m "release/${NEW_VERSION}"
 
     # add git tag
