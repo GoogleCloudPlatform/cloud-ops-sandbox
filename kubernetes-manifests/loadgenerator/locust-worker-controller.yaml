@@ -31,6 +31,7 @@ spec:
       containers:
         - name: locust-worker
           image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/basic:latest
+          imagePullPolicy: Always
           env:
             - name: LOCUST_MODE
               value: worker
