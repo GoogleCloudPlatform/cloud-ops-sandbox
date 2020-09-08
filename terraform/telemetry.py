@@ -90,7 +90,7 @@ def send_telemetry_message(session, project_id, event, version):
     
     # connect to pubsub and send message
     project_id = "stackdriver-sandbox-230822"
-    topic_id = "telemetry"
+    topic_id = "telemetry_test"
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project_id, topic_id)
     
