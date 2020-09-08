@@ -53,7 +53,7 @@ def get_telemetry_msg(session, project_id, event, version):
 def validate_args(session, project_id, event, version):
     args_exp = {
         "version": r"^v\d.\d.\d$",
-        "project_id": r"^cloud-ops-sandbox-(\d){9}$",
+        "project_id": r"^cloud-ops-sandbox-(\d){6,12}$",
         "v4uuid": r"^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}$"
     }
     
@@ -63,10 +63,9 @@ def validate_args(session, project_id, event, version):
         return False, "An argument passed to telemetry was an invalid type."
     
     # check format
-    if (re.fullmatch(args_exp["version"], version) is None or
-        re.fullmatch(args_exp["project_id"], project_id) is None or
-        re.fullmatch(args_exp["session"], session) is None):
-        return False, "An argument passed to telemetry was an invalid format."
+    if (re.fullmatch(args_exp["version"], version) is None): return False, ("Version argument " + version + " was an invalid format.")
+    if (re.fullmatch(args_exp["project_id"], project_id) is None): return False, ("Project id argument " + project_id + " was an invalid format.")
+    if (re.fullmatch(args_exp["v4uuid"], session) is None): return False, ("Session argument " + session + " was an invalid format.")
     
     return True, ""
 
