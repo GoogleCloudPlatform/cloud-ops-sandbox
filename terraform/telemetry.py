@@ -69,6 +69,8 @@ def validate_args(session, project_id, event, version):
     
     return True, ""
 
+# IF TESTING THIS FUNCTION, USE TOPIC ID = "telemetry"
+# IF USING THIS FUNCTION IN PRODUCTION, USE TOPIC ID = "telemetry_prod"
 @click.command()
 @click.option('--session', help='Current session (unique across projects).')
 @click.option('--project_id', help='Sandbox project id in Google Cloud Platform.')
@@ -88,7 +90,7 @@ def send_telemetry_message(session, project_id, event, version):
     
     # connect to pubsub and send message
     project_id = "stackdriver-sandbox-230822"
-    topic_id = "telemetry"
+    topic_id = "telemetry_prod"
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project_id, topic_id)
     

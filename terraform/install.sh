@@ -23,9 +23,9 @@ if [[ -n "$DEBUG" ]]; then set -x; fi
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
-# create variable for telemetry purposes
-# session is defined as the current event that the user runs install.sh file
-SESSION=$(python3 -c "import uuid; print(uuid.uuid4())")
+# create variable for telemetry purposes if SESSION is not already set
+# session is defined as the current "instance" in which the user is logged-in to Cloud Shell terminal, working with Sandbox
+if [[ -z "$SESSION" ]]; then export SESSION=$(python3 -c "import uuid; print(uuid.uuid4())"); fi
 
 log() { echo "$1" >&2; }
 
