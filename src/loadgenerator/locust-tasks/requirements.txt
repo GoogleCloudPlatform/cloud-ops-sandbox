@@ -13,11 +13,11 @@ greenlet==0.4.15          # via gevent
 idna==2.8                 # via requests
 itsdangerous==1.1.0       # via flask
 jinja2==2.10.1            # via flask
-locustio==0.8.1           # via -r locust-tasks/requirements.in
+locustio==0.8.1           # via -r requirements.in
 markupsafe==1.1.1         # via jinja2
 msgpack-python==0.5.6     # via locustio
 pyzmq==18.0.1             # via locustio
 requests==2.21.0          # via locustio
 six==1.12.0               # via locustio
 urllib3==1.24.2           # via requests
-werkzeug==0.15.1          # via flask
+werkzeug==0.15.3          # via flask
