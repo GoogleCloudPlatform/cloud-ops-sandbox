@@ -4,7 +4,7 @@
 #
 #    pip-compile locust-tasks/requirements.in
 #
-certifi==2019.3.9         # via requests
+certifi==2019.11.28         # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via flask
 flask==1.0.2              # via locustio
