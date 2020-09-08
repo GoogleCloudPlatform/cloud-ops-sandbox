@@ -23,6 +23,7 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -73,7 +74,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Feature: convert currency for product to all currencies
-	if os.Getenv("CONVERT_CURRENCIES") == "Active" {
+	if strings.ToLower(os.Getenv("CONVERT_CURRENCIES")) == "true" {
 		for i := 0 ; i < 10*len(currencies); i++ { 
 			fe.convertAllCurrencies(r, products, currencies)
 		}
@@ -362,18 +363,23 @@ func (fe *frontendServer) chooseAd(ctx context.Context, ctxKeys []string, log lo
 	return ads[rand.Intn(len(ads))]
 }
 
-// convertAllCurrencies converts the currency for all products into every other currency
+// Converts a product's currency to every other currency
 // The error is logged as a warning since it is not critical.
-func (fe *frontendServer) convertAllCurrencies(r *http.Request, products []*pb.Product, currencies []string) {
+func (fe *frontendServer) convertCurrenciesForProduct(r *http.Request, product *pb.Product, currencies [] string) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
-	for _, p := range products {
-		for _, c := range currencies {
-			_, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), c)
-			if err != nil {
-				log.WithField("error", err).Warn("Failed converting currencies for products.")
-				return
-			}
+	for _, c := range currencies {
+		_, err := fe.convertCurrency(r.Context(), product.GetPriceUsd(), c)
+		if err != nil {
+			log.WithField("error", err).Warn("Failed converting currencies for products.")
+			return
 		}
+	}
+}
+
+// Converts the currency for all products into every other currency
+func (fe *frontendServer) convertAllCurrencies(r *http.Request, products []*pb.Product, currencies []string) {
+	for _, p := range products {
+		fe.convertCurrenciesForProduct(r, p, currencies)
 	}
 }
 
