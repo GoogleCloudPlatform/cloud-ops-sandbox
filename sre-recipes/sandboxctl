@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+#
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# -*- coding: utf-8 -*-
+"""
+This CLI is the interface for sre recipes. It deploys and rolls back
+broken services as well as verifies that the user found the correct
+cause of the broken service.
+
+For information on how to run the CLI, run the following:
+`python3 sandboxctl --help`
+"""
+
+import logging
+import os
+from os.path import dirname, abspath
+from pkgutil import iter_modules
+from pathlib import Path
+from importlib import import_module
+from inspect import isclass
+import click
+from recipe import Recipe
+
+def get_valid_recipes(attributes):
+    """
+    Gets all valid recipes from the given list of tuples of attribute names
+    and attributes, and returns a map containing recipe names and recipe objects
+    """
+
+    recipe_objs = {}
+    recipe_num = 1
+    for attribute_name, attribute in attributes:
+        if isclass(attribute) and attribute is not Recipe and issubclass(attribute, Recipe):
+            globals()[attribute_name] = attribute
+            try:
+                recipe_obj = attribute()
+                recipe_objs[f"recipe{recipe_num}"] = recipe_obj
+                recipe_num += 1
+            except TypeError:
+                logging.warning('%s needs to implement all abstract methods', \
+                    attribute_name)
+                pass
+            except:
+                logging.warning('Unexpected error: %s', sys.exc_info()[0])
+                pass
+    return recipe_objs
+
+
+def get_recipes():
+    """
+    Gets all valid recipes in sre-recipes/recipes, and returns
+    a map containing recipe names and recipe objects
+    """
+
+    root_dir = Path(dirname(abspath(__file__))) / 'recipes'
+    modules = [f"recipes.{subdir}.{name}" 
+                    for subdir in os.listdir(root_dir)
+                    for _, name, _ in iter_modules([root_dir / subdir])]
+    recipe_modules = [import_module(module) for module in modules]
+    attributes = [(attribute_name, getattr(recipe_module, attribute_name))
+                    for recipe_module in recipe_modules
+                    for attribute_name in dir(recipe_module)]
+    recipes = get_valid_recipes(attributes)
+    return recipes
+
+
+RECIPES = get_recipes()
+@click.command()
+@click.argument('action', type=click.Choice(['break', 'restore', 'verify']))
+@click.argument('recipe_name', type=click.Choice(RECIPES.keys()))
+def main(action, recipe_name):
+    """Performs an action on a recipe."""
+    logging.basicConfig(filename='srerecipes.log', level=logging.INFO, \
+        format='%(asctime)s %(message)s')
+    recipe = RECIPES[recipe_name]
+    if action == 'break':
+        logging.info('Breaking %s', recipe_name)
+        recipe.break_service()
+    elif action == 'restore':
+        logging.info('Restoring %s', recipe_name)
+        recipe.restore_service()
+    elif action == 'verify':
+        logging.info('Verifying %s', recipe_name)
+        recipe.verify()
+
+
+if __name__ == "__main__":
+    main()
