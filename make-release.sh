@@ -70,6 +70,11 @@ else
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
     git add "${REPO_ROOT}/kubernetes-manifests/loadgenerator/*.yaml"
     git commit -m "revert images to latest"
+    
+    # change back telemetry Pub/Sub topic to "Test" topic
+    sed -i -e "s/topic_id = \"${PROD_TOPIC}\"/topic_id = \"${TEST_TOPIC}\"/g" ${REPO_ROOT}/terraform/telemetry.py;
+    git add "${REPO_ROOT}/terraform/telemetry.py"
+    git commit -m "revert telemetry pipeline to 'test'"
 
     # if no-push mode, exit without pushing git branch or tags to origin
     if [[ "$*" == *nopush* || "$*" == *no-push* ]]; then
