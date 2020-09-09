@@ -277,6 +277,11 @@ loadGen() {
   terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}"
   popd
 
+  # authenticate to load generator cluster
+  LOADGEN_ZONE=$(gcloud container clusters list --filter="name:loadgenerator" --project $project_id --format="value(zone)")
+  gcloud container clusters get-credentials loadgenerator --zone "$LOADGEN_ZONE"
+  kubectx loadgenerator=.
+
   LOCUST_PORT="8089"
   # find the IP of the load generator web interface
   TRIES=0
@@ -288,11 +293,9 @@ loadGen() {
      [ -z "$loadgen_ip" ] && sleep 10;
     TRIES=$((TRIES + 1))
   done
-  if [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:8080" -o /dev/null  --max-time 1) -ne 200 ]]; then
-    log "error: load generator unreachable"
-    sendTelemetry $project_id loadgen-unavailable
-  fi
-
+  # Return kubectl context to the main cluster and show this to the user
+  kubectx main
+  log $(kubectx)
 }
 
 displaySuccessMessage() {
