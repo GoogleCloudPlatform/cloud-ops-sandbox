@@ -65,7 +65,7 @@ connpool = initConnection()
 populate_database()
 
 # get rating of a product
-@app.route('/getRating/<id>')
+@app.route('/rating/<id>', methods=['GET'])
 def getRating(id):
     conn = connpool.getconn()
     resp = None
@@ -84,18 +84,18 @@ def getRating(id):
                 resp.status_code = 200
             else:
                 # product not exists
-                resp = jsonify({'status' : 'fail'})
+                resp = jsonify({'error' : 'Product not found'.format(id)})
                 resp.status_code = 404   
         conn.commit()    
     except:
-        resp = jsonify({'status'  : 'fail'})
+        resp = jsonify({'error' : 'Unexpected error in database'})
         resp.status_code = 500
     finally:
         connpool.putconn(conn)
     return resp
 
 # rate a product
-@app.route('/rate', methods=['POST'])
+@app.route('/rating', methods=['POST'])
 def rate():
     conn = connpool.getconn()
     resp = None
@@ -108,7 +108,7 @@ def rate():
             resp.status_code = 200
         conn.commit()
     except:
-        resp = jsonify({'status' : 'fail'})
+        resp = jsonify({'error' : 'Unexpected error in database'})
         resp.status_code = 500
     finally:
         connpool.putconn(conn)

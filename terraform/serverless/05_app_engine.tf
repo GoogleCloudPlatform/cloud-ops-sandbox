@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,8 +23,7 @@ resource "google_app_engine_standard_app_version" "ratingservice_v1" {
 
   deployment {
     zip {
-      # Need to zip source code and upload to GCS
-      source_url = "https://storage.googleapis.com/${var.bucket_name}/ratingservice_code.zip"
+      source_url = "https://storage.googleapis.com/${var.bucket_name}/ratingservice_code:latest.zip"
     }
   }
 
@@ -36,6 +35,7 @@ resource "google_app_engine_standard_app_version" "ratingservice_v1" {
   }
 
   basic_scaling {
+    # maximum instance to create for this version when requests come
     max_instances = 5
   }
 

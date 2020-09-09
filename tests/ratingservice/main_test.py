@@ -24,13 +24,13 @@ class TestEndpoints(unittest.TestCase):
         """ Test if getting the rating of a product returns success """
         products = read_products()
         for product in products:
-            url = "https://ratingservice-dot-{0}.wl.r.appspot.com/getRating/{1}".format(getProjectId(), product)
+            url = "https://ratingservice-dot-{0}.wl.r.appspot.com/rating/{1}".format(getProjectId(), product)
             res = requests.get(url)
             self.assertEqual(res.status_code, 200)
 
     def testGetRatingNotExist(self):
         """ Test if getting non-existing product returns 404 """
-        url = "https://ratingservice-dot-{0}.wl.r.appspot.com/getRating/{1}".format(getProjectId(), "random")
+        url = "https://ratingservice-dot-{0}.wl.r.appspot.com/rating/{1}".format(getProjectId(), "random")
         res = requests.get(url)
         self.assertEqual(res.status_code, 404)
     
@@ -38,7 +38,7 @@ class TestEndpoints(unittest.TestCase):
         """ Test if rating a product returns success """
         products = read_products()
         for product in products:
-            url = "https://ratingservice-dot-{}.wl.r.appspot.com/rate".format(getProjectId())
+            url = "https://ratingservice-dot-{}.wl.r.appspot.com/rating".format(getProjectId())
             res = requests.post(url, data={
                 'score' : 5,
                 'id' : product
@@ -47,12 +47,13 @@ class TestEndpoints(unittest.TestCase):
     
     def testGetRatingCorrect(self):
         """ Test if getting the rating of a product returns a correct number """
-        url_get = "https://ratingservice-dot-{0}.wl.r.appspot.com/getRating/{1}".format(getProjectId(), "OLJCESPC7Z")
-        url_post = "https://ratingservice-dot-{0}.wl.r.appspot.com/rate".format(getProjectId())
+        products = read_products()
+        url_get = "https://ratingservice-dot-{0}.wl.r.appspot.com/rating/{1}".format(getProjectId(), products[0])
+        url_post = "https://ratingservice-dot-{0}.wl.r.appspot.com/rating".format(getProjectId())
         res1 = requests.get(url_get).json()
         requests.post(url_post, data={
             'score' : 5,
-            'id' : 'OLJCESPC7Z'
+            'id' : products[0]
         })
         res2 = requests.get(url_get).json()
         # The original total score (count * rating) plus the current score 5 must equal to the current total score
@@ -66,7 +67,7 @@ def getProjectId():
 # read product ids
 def read_products():
     res = []
-    with open('products.json') as f:
+    with open('../../src/productcatalogservice/products.json') as f:
         data = json.load(f)
         for product in data['products']:
             res.append(product['id'])
