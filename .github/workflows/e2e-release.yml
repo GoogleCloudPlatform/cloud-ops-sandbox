@@ -77,19 +77,25 @@ jobs:
           ${{ steps.website_variables.outputs.cloudshell_image }}
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
+    - name: Checkout Release Code
+      run: |
+        set -x
+        git clone ${{ steps.website_variables.outputs.repo  }} ./release-code
+        cd ./release-code
+        git checkout ${{ steps.website_variables.outputs.branch }}
     - name: Run Provisioning Test
       run: |
         set -x
         # get cluster zone
         CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $PROJECT_ID --format="value(zone)")
         # build provisioning test image
-        docker build -t test-provisioning:$GITHUB_SHA tests/provisioning/.
+        docker build -t test-provisioning:$GITHUB_SHA-release tests/provisioning/.
         # run provisioning tests
         docker run --rm \
           -e GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
           -e ZONE=$CLUSTER_ZONE \
           -v ~/.config:/root/.config \
-          test-provisioning:$GITHUB_SHA
+          test-provisioning:$GITHUB_SHA-release
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
     - name: Run Monitoring Integration Tests
