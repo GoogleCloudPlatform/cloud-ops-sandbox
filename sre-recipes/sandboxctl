@@ -41,14 +41,11 @@ def get_valid_recipes(attributes):
     """
 
     recipe_objs = {}
-    recipe_num = 1
-    for attribute_name, attribute in attributes:
+    for recipe_num, (attribute_name, attribute) in enumerate(attributes):
         if isclass(attribute) and attribute is not Recipe and issubclass(attribute, Recipe):
-            globals()[attribute_name] = attribute
             try:
                 recipe_obj = attribute()
                 recipe_objs[f"recipe{recipe_num}"] = recipe_obj
-                recipe_num += 1
             except TypeError:
                 logging.warning('%s needs to implement all abstract methods', \
                     attribute_name)
