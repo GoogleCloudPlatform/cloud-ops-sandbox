@@ -73,12 +73,13 @@ def getRating(id):
         with conn.cursor() as cursor:
             cursor.execute("SELECT AVG(score), COUNT(*) FROM ratings WHERE product_id='{}';".format(id))
             result = cursor.fetchone()
-            if result[1] > 0:
+            rating, count = result[0], result[1]
+            if count > 0:
                 # product exists
                 resp = jsonify({
                     'status' : 'success',
-                    'rating' : str(result[0]),
-                    'count'  : str(result[1])
+                    'rating' : str(rating),
+                    'count'  : str(count)
                 })
                 resp.status_code = 200
             else:
