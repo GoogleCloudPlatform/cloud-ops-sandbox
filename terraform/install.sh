@@ -23,7 +23,17 @@ if [[ -n "$DEBUG" ]]; then set -x; fi
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
+# create variable for telemetry purposes if SESSION is not already set
+# session is defined as the current "instance" in which the user is logged-in to Cloud Shell terminal, working with Sandbox
+if [[ -z "$SESSION" ]]; then export SESSION=$(python3 -c "import uuid; print(uuid.uuid4())"); fi
+
 log() { echo "$1" >&2; }
+
+# this function sends de-identified information to the Google Cloud Platform database
+# on what events occur in users' Sandbox projects for development purposes
+sendTelemetry() {
+  python3 telemetry.py --session=$SESSION --project_id=$1 --event=$2 --version=$VERSION
+}
 
 promptForBillingAccount() {
   log "Checking for billing accounts..."
@@ -36,6 +46,7 @@ promptForBillingAccount() {
     log ""
     log "To list active billing accounts, run:"
     log "gcloud beta billing accounts list --filter open=true"
+    sendTelemetry "none" no-active-billing
     exit 1;
   fi
 
@@ -156,6 +167,7 @@ createProject() {
       log "If you don't have access to this folder, please make sure to request at:"
       log "go/cloud-ops-sandbox-access"
       log ""
+      sendTelemetry $project_id new-sandbox-googler
       select opt in "continue" "cancel"; do
         if [[ "$opt" == "continue" ]]; then
           break;
@@ -166,6 +178,7 @@ createProject() {
       folder_id="470827991545" # /cloud-ops-sandboxes  
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo" --folder="$folder_id"    
     else
+      sendTelemetry $project_id new-sandbox-non-googler
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo"      
     fi;
     # link billing account
@@ -231,7 +244,6 @@ installMonitoring() {
   fi
 
   log "Checking to make sure necessary Istio services are ready for monitoring"
-  python3 -m pip install google-cloud-monitoring
   python3 monitoring/istio_service_setup.py $project_id $CLUSTER_ZONE $service_wait
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
@@ -249,8 +261,10 @@ getExternalIp() {
   done;
   if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
       log "Hipster Shop app is available at http://$external_ip"
+      sendTelemetry $project_id hipstershop-available
   else
       log "error: Hipsterhop app at http://$external_ip is unreachable"
+      sendTelemetry $project_id hipstershop-unavailable
   fi
 }
 
@@ -294,8 +308,10 @@ displaySuccessMessage() {
 
     if [[ -n "${loadgen_ip}" ]]; then
         loadgen_addr="http://$loadgen_ip:$LOCUST_PORT"
+        sendTelemetry $project_id loadgen-available
     else
         loadgen_addr="[not found]"
+        sendTelemetry $project_id loadgen-unavailable
     fi
     log ""
     log ""
