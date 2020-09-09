@@ -88,7 +88,7 @@ def getRating(id):
                 resp.status_code = 404   
         conn.commit()    
     except:
-        resp = jsonify({'error' : 'Unexpected error in database'})
+        resp = jsonify({'error' : 'Error in database: Fail to get the rating of product {}'.format(id)})
         resp.status_code = 500
     finally:
         connpool.putconn(conn)
@@ -108,7 +108,7 @@ def rate():
             resp.status_code = 200
         conn.commit()
     except:
-        resp = jsonify({'error' : 'Unexpected error in database'})
+        resp = jsonify({'error' : 'Error in database: Fail to add a rating of product {}'.format(id)})
         resp.status_code = 500
     finally:
         connpool.putconn(conn)

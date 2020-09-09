@@ -23,7 +23,7 @@ resource "google_app_engine_standard_app_version" "ratingservice_v1" {
 
   deployment {
     zip {
-      source_url = "https://storage.googleapis.com/${var.bucket_name}/ratingservice_code:latest.zip"
+      source_url = "https://storage.googleapis.com/${var.bucket_name}/ratingservice_code:${var.code_tag}.zip"
     }
   }
 
@@ -40,4 +40,10 @@ resource "google_app_engine_standard_app_version" "ratingservice_v1" {
   }
 
   delete_service_on_destroy = true
+}
+
+variable "code_tag" {
+  type        = string
+  description = "The release tag of the source code. Case-sensitive."
+  default     = "latest"
 }

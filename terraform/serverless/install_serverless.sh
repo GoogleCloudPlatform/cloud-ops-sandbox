@@ -14,9 +14,13 @@
 #!/bin/bash
 
 upload_source_code(){
-    source_name="ratingservice_code:latest.zip"
+    if [[ -n $1 ]]; then
+        source_name="ratingservice_code:$1.zip"
+    else
+        source_name="ratingservice_code:latest.zip"
+    fi
     zip -j ${source_name} ../../src/ratingservice/main.py ../../src/ratingservice/requirements.txt ../../src/productcatalogservice/products.json
     gsutil cp ${source_name} "gs://$GOOGLE_CLOUD_PROJECT-bucket/${source_name}"
 }
 
-upload_source_code;
+upload_source_code $1;
