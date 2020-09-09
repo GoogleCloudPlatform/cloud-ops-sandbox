@@ -65,7 +65,7 @@ class CurrenciesRecipe(Recipe):
         zone_command = "gcloud container clusters list --filter name:cloud-ops-sandbox --project {} --format value(zone)".format(project_id)
         zone, error = CurrenciesRecipe._run_command(zone_command)
         zone = zone.decode("utf-8").replace('"', '')
-        auth_command = "gcloud container clusters get-credentials cloud-ops-sandbox --zone {}".format(zone)
+        auth_command = "gcloud container clusters get-credentials cloud-ops-sandbox --project {} --zone {}".format(project_id, zone)
         CurrenciesRecipe._run_command(auth_command)
         logging.info('Cluster has been authenticated')
 
