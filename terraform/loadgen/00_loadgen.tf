@@ -76,7 +76,7 @@ resource "google_container_cluster" "gke_loadgen" {
 
       labels = {
         environment = "dev",
-        cluster = "loadgenerator"
+        cluster = "loadgenerator-main"
       }
     }
 
