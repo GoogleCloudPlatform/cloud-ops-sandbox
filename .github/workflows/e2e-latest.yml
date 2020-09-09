@@ -42,6 +42,16 @@ jobs:
                        --tag=$GITHUB_SHA
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
+    - name: Build Load Generator
+      run: |
+        set -x
+        gcloud auth configure-docker --quiet
+        # push latest load generator to test image repository
+        IMAGE_PATH=gcr.io/$PROJECT_ID/gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/basic:$GITHUB_SHA
+        docker build -t $IMAGE_PATH ./src/loadgenerator
+        docker push $IMAGE_PATH
+      env:
+        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Rewrite Manifests
       run: |
         set -x
