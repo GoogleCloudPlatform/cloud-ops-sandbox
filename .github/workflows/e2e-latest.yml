@@ -28,6 +28,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Clean Project State
+      timeout-minutes: 30
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
@@ -49,6 +50,7 @@ jobs:
         find "./kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s#$OLD_PATH#$NEW_PATH#g" {} \;
         find "./kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s#:latest#:$GITHUB_SHA#g" {} \;
     - name: Run Install Script
+      timeout-minutes: 30
       run: |
         set -x
         # build cloud shell image
@@ -65,6 +67,7 @@ jobs:
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Run Provisioning Test
+      timeout-minutes: 30
       run: |
         set -x
         # get cluster zones
@@ -82,6 +85,7 @@ jobs:
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
     - name: Test Using Existing Project
+      timeout-minutes: 30
       run: |
         set -x
         # get cluster zones
@@ -97,6 +101,7 @@ jobs:
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
     - name: Run Monitoring Integration Tests
+      timeout-minutes: 30
       run: |
         set -x
         # install dependencies
@@ -110,6 +115,7 @@ jobs:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Clean Project State
       if: ${{ always()  }}
+      timeout-minutes: 30
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh

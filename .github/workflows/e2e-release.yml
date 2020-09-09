@@ -29,10 +29,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Clean Project State
+      timeout-minutes: 30
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
     - name: Extract Website Values
+      timeout-minutes: 30
       id: website_variables
       run: |
         set -x
@@ -46,6 +48,7 @@ jobs:
         CLOUDSHELL_IMAGE=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_image\=).*?(?=")')
         echo ::set-output name=cloudshell_image::${CLOUDSHELL_IMAGE}
     - name: Run Install Script
+      timeout-minutes: 30
       run: |
         set -x
         # run install script
@@ -62,6 +65,7 @@ jobs:
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name:  Test Using Existing Project
+      timeout-minutes: 30
       run: |
         set -x
         # run install script
@@ -78,12 +82,14 @@ jobs:
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Checkout Release Code
+      timeout-minutes: 30
       run: |
         set -x
         git clone ${{ steps.website_variables.outputs.repo  }} ./release-code
         cd ./release-code
         git checkout ${{ steps.website_variables.outputs.branch }}
     - name: Run Provisioning Test
+      timeout-minutes: 30
       run: |
         set -x
         # get cluster zone
@@ -99,6 +105,7 @@ jobs:
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
     - name: Run Monitoring Integration Tests
+      timeout-minutes: 30
       run: |
         set -x
         # install dependencies
@@ -111,6 +118,7 @@ jobs:
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Clean Project State
+      timeout-minutes: 30
       if: ${{ always()  }}
       run: |
         # clean GCP resources
