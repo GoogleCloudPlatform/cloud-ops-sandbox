@@ -20,6 +20,7 @@ on:
       - master
       - release/*
       - e2e*
+      - loadgen_integration # will remove before merging
   workflow_dispatch:
     # trigger through UI or API
 jobs:
