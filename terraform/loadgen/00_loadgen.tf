@@ -130,7 +130,7 @@ resource "null_resource" "set_env_vars" {
 # Deploy loadgenerator into GKE cluster 
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/../kubernetes-manifests/loadgenerator"
+    command = "kubectl apply -f ${path.module}/../../kubernetes-manifests/loadgenerator"
   }
 
   depends_on = [
