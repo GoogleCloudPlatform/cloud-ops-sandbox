@@ -55,12 +55,27 @@ class CurrenciesRecipe(Recipe):
         logging.info('Deleting pod: %s', delete_pod_command)
         CurrenciesRecipe._run_command(delete_pod_command)
 
+    @staticmethod
+    def _auth_cluster():
+        """ Authenticates for kubectl commands. """
+        logging.info('Authenticating cluster')
+        get_project_command = "gcloud config list --format value(core.project)"
+        project_id, error = CurrenciesRecipe._run_command(get_project_command)
+        project_id = project_id.decode("utf-8").replace('"', '')
+        zone_command = "gcloud container clusters list --filter name:cloud-ops-sandbox --project {} --format value(zone)".format(project_id)
+        zone, error = CurrenciesRecipe._run_command(zone_command)
+        zone = zone.decode("utf-8").replace('"', '')
+        auth_command = "gcloud container clusters get-credentials cloud-ops-sandbox --project {} --zone {}".format(project_id, zone)
+        CurrenciesRecipe._run_command(auth_command)
+        logging.info('Cluster has been authenticated')
+
     def break_service(self):
         """
         Rolls back the working version of the given service and deploys the
         broken version of the given service
         """
         print("Deploying broken service...")
+        self._auth_cluster()
         self._deploy_state(True)
         print("Done")
         logging.info('Deployed broken service')
@@ -71,6 +86,7 @@ class CurrenciesRecipe(Recipe):
         working version of the given service
         """
         print("Deploying working service...")
+        self._auth_cluster()
         self._deploy_state(False)
         print("Done")
         logging.info('Deployed working service')
