@@ -128,11 +128,11 @@ resource "null_resource" "current_project" {
   }
 }
 
-# Configure kubectl to communicate with the cluster
-resource "null_resource" "set_gke_context" {
-  provisioner "local-exec" {
-    command = "gcloud container clusters get-credentials cloud-ops-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${data.google_project.project.project_id}"
-  }
+# Create GSA to allow K8S services to access Google APIs
+resource "google_service_account" "set_gsa" {
+  account_id   = "gke-sa"
+  display_name = "gsa"
+  project = data.google_project.project.project_id
 
   depends_on = [
     google_container_cluster.gke,
@@ -140,16 +140,7 @@ resource "null_resource" "set_gke_context" {
   ]
 }
 
-# Create GSA to allow K8S services to access Google APIs
-resource "google_service_account" "set_gsa" {
-  account_id   = "gke-sa"
-  display_name = "gsa"
-  project = data.google_project.project.project_id
-
-  depends_on = [null_resource.set_gke_context]
-}
-
-# Create GSA/KSA binding
+# Create GSA/KSA binding: let IAM auth KSAs as a svc.id.goog member name
 resource "google_service_account_iam_binding" "set_gsa_binding" {
   service_account_id = google_service_account.set_gsa.name
   role = "roles/iam.workloadIdentityUser"
@@ -163,11 +154,27 @@ resource "google_service_account_iam_binding" "set_gsa_binding" {
 
 # Annotate KSA
 resource "null_resource" "annotate_ksa" {
+  triggers = {
+    cluster_ep = google_container_cluster.gke.endpoint  #kubernetes cluster endpoint
+  }
+
   provisioner "local-exec" {
-    command = "kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-service-account=${google_service_account.set_gsa.email}"
+    command = <<EOT
+      gcloud container clusters get-credentials cloud-ops-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${data.google_project.project.project_id}
+      kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-service-account=${google_service_account.set_gsa.email}
+    EOT
   }
 
   depends_on = [google_service_account_iam_binding.set_gsa_binding]
+}
+
+# Set editor role for GSA to enable Cloud Trace functionality in cluster
+resource "null_resource" "set_editor" {
+  provisioner "local-exec" {
+    command = "gcloud projects add-iam-policy-binding ${data.google_project.project.project_id} --member serviceAccount:${google_service_account.set_gsa.email} --role roles/editor"
+  }
+
+  depends_on = [null_resource.annotate_ksa]
 }
 
 # Install Istio into the GKE cluster
@@ -176,7 +183,7 @@ resource "null_resource" "install_istio" {
     command = "./istio/install_istio.sh"
   }
 
-  depends_on = [null_resource.annotate_ksa]
+  depends_on = [null_resource.set_editor]
 }
 
 # Deploy microservices into GKE cluster 
