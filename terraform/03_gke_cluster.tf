@@ -178,4 +178,5 @@ resource "null_resource" "delay" {
 
 data "external" "terraform_vars" {
   program = ["/bin/bash", "${path.module}/get_terraform_vars.sh"]
+  depends_on = [null_resource.delay]
 }
