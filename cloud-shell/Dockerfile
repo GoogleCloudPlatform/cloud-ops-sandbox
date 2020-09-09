@@ -28,5 +28,8 @@ RUN python3 -m pip install google-cloud-monitoring
 # set env var
 RUN echo "VERSION=v0.2.5" >> /etc/environment
 
+# add sre-recipe CLI to PATH
+ENV PATH="/cloud-ops-sandbox/sre-recipes/sandboxctl:${PATH}"
+
 # Change "Open in Cloudshell" script to run ./install.sh using local file and changing it
 COPY cloudshell_open_cp.sh /google/devshell/bashrc.google.d/cloudshell_open.sh
