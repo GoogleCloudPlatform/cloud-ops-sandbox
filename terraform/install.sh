@@ -271,11 +271,6 @@ getExternalIp() {
 # Install Load Generator service and start generating synthetic traffic to Sandbox
 loadGen() {
   log "Running load generator"
-  # launch a new load generator
-  pushd loadgen/
-  terraform init -lock=false
-  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}"
-  popd
 
   # authenticate to load generator cluster
   LOADGEN_ZONE=$(gcloud container clusters list --filter="name:loadgenerator" --project $project_id --format="value(zone)")
