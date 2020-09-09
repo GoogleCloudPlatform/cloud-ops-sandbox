@@ -62,6 +62,7 @@ class CurrenciesRecipe(Recipe):
         """
         print("Deploying broken service...")
         self._deploy_state(True)
+        print("Done")
         logging.info('Deployed broken service')
 
     def restore_service(self):
@@ -71,32 +72,27 @@ class CurrenciesRecipe(Recipe):
         """
         print("Deploying working service...")
         self._deploy_state(False)
+        print("Done")
         logging.info('Deployed working service')
-
-    @staticmethod
-    def _get_user_input():
-        """Prompts users for an answer"""
-        answer = input('Your answer: ')
-        return answer
 
     def _service_multiple_choice(self):
         """
         Displays a multiple choice quiz to the user about which service
         broke and prompts the user for an answer
         """
-        print('Which service broke?')
-        print('\t[a] ad service')
-        print('\t[b] cart service')
-        print('\t[c] checkout service')
-        print('\t[d] currency service')
-        print('\t[e] email service')
-        print('\t[f] frontend service')
-        print('\t[g] payment service')
-        print('\t[h] product catalog service')
-        print('\t[i] recommendation service')
-        print('\t[j] redis')
-        print('\t[k] shipping service')
-        answer = self._get_user_input()
+        print("Which service broke?\n"
+                "\t[a] ad service \n"
+                "\t[b] cart service \n"
+                "\t[c] checkout service \n"
+                "\t[d] currency service \n"
+                "\t[e] email service \n"
+                "\t[f] frontend service \n"
+                "\t[g] payment service \n"
+                "\t[h] product catalog service \n"
+                "\t[i] recommendation service \n"
+                "\t[j] redis \n"
+                "\t[k] shipping service")
+        answer = input('Your answer: ')
         return answer
 
     def _cause_multiple_choice(self):
@@ -109,28 +105,28 @@ class CurrenciesRecipe(Recipe):
         print('\t[b] high memory usage')
         print('\t[c] high latency')
         print('\t[d] dropped requests')
-        answer = self._get_user_input()
+        answer = input('Your answer: ')
         return answer
 
     def _verify_broken_service(self):
         """Verifies the user found which service broke"""
         answer = self._service_multiple_choice()
-        while answer not in ('f', 'F'):
+        while answer.lower() != 'f':
             print('Incorrect. Please try again.')
-            answer = self._get_user_input()
+            answer = input('Your answer: ')
         print('Correct! The frontend service is broken.')
 
     def _verify_broken_cause(self):
         """Verifies the user found the root cause of the breakage"""
         answer = self._cause_multiple_choice()
-        while answer not in ('c', 'C'):
+        while answer.lower() != 'c':
             print('Incorrect. Please try again.')
-            answer = self._get_user_input()
+            answer = input('Your answer: ')
         print('Correct! High latency caused the breakage.')
 
     def verify(self):
         """Verifies the user found the root cause of the broken service"""
-        print('This is a multiple choice quiz to verify that you\'ve')
+        print("This is a multiple choice quiz to verify that you've")
         print('found the root cause of the break')
         self._verify_broken_service()
         self._verify_broken_cause()
