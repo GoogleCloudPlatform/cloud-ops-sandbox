@@ -238,7 +238,8 @@ installMonitoring() {
     log ""
     log "${YELLOW}********************************************************************************"
     log ""
-    log "${YELLOW}⚠️ Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
+    log "${YELLOW}⚠️ Please create a monitoring workspace for the project by clicking on the following link:"
+    log "${YELLOW}  $gcp_monitoring_path"
     log ""
     read -p "${YELLOW}When you are done, please PRESS ENTER TO CONTINUE"
   fi
