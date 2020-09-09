@@ -120,6 +120,7 @@ resource "google_container_cluster" "gke" {
   depends_on = [google_project_service.gke]
 }
 
+
 # Set current project 
 resource "null_resource" "current_project" {
   provisioner "local-exec" {
@@ -160,25 +161,13 @@ resource "google_service_account_iam_binding" "set_gsa_binding" {
   depends_on = [google_service_account.set_gsa]
 }
 
-# Give GSA editor role to have read-write access to the Trace console and read access to traces.
-resource "google_service_account_iam_binding" "set_editor" {
-  service_account_id = google_service_account.set_gsa.name
-  role = "roles/editor"
-
-  members = [
-    "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[default/default]"
-  ]
-
-  depends_on = [google_service_account_iam_binding.set_gsa_binding]
-}
-
 # Annotate KSA
 resource "null_resource" "annotate_ksa" {
   provisioner "local-exec" {
     command = "kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-service-account=${google_service_account.set_gsa.email}"
   }
 
-  depends_on = [google_service_account_iam_binding.set_editor]
+  depends_on = [google_service_account_iam_binding.set_gsa_binding]
 }
 
 # Install Istio into the GKE cluster
