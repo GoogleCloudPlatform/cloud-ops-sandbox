@@ -13,14 +13,37 @@
 # limitations under the License.
 #!/bin/bash
 
+# step1: create an App Engine app and deploy the first 'default' version
+create_app(){
+    gcloud app create --region="us-west2"
+    (cd ../../src/ratingservice && gcloud app deploy --quiet)
+}
+
+# step2: zip the source code and upload it to GCS
 upload_source_code(){
-    if [[ -n $1 ]]; then
-        source_name="ratingservice_code:$1.zip"
+    if [[ -n "$code_tag" ]]; then
+        source_name="ratingservice_code:${code_tag}.zip"
     else
         source_name="ratingservice_code:latest.zip"
     fi
     zip -j ${source_name} ../../src/ratingservice/main.py ../../src/ratingservice/requirements.txt ../../src/productcatalogservice/products.json
-    gsutil cp ${source_name} "gs://$GOOGLE_CLOUD_PROJECT-bucket/${source_name}"
+    gsutil cp ${source_name} "gs://${bucket_name}/${source_name}"
 }
 
-upload_source_code $1;
+# step3: deploy the rating service with Terraform
+deploy_ratingservice() {
+  # get parameters
+  project_id=$1
+  bucket_name="${project_id}-bucket"
+  code_tag=$2
+  # upload the source code
+  upload_source_code
+  # remove states and apply terraform
+  rm -f .terraform/terraform.tfstate
+  rm -f *.tfstate
+  terraform init -lock=false
+  terraform apply --auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}" -var="code_tag=${code_tag}"
+}
+
+create_app;
+deploy_ratingservice $1 $2;
