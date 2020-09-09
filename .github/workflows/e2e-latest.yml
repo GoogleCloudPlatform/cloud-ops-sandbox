@@ -81,6 +81,21 @@ jobs:
           test-provisioning:$GITHUB_SHA
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
+    - name: Test Using Existing Project
+      run: |
+        set -x
+        # get cluster zones
+        CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $PROJECT_ID --format="value(zone)")
+        LOADGEN_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox-loadgenerator" --project $PROJECT_ID --format="value(zone)")
+        # run provisioning tests
+        docker run --rm \
+          -e GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
+          -e ZONE=$CLUSTER_ZONE \
+          -e LOADGEN_ZONE=$LOADGEN_ZONE \
+          -v ~/.config:/root/.config \
+          test-provisioning:$GITHUB_SHA
+      env:
+        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
     - name: Run Monitoring Integration Tests
       run: |
         set -x
