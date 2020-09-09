@@ -163,10 +163,6 @@ resource "google_service_account_iam_binding" "gsa_ksa_binding" {
 
 # Annotate KSA
 resource "null_resource" "annotate_ksa" {
-  triggers = {
-    cluster_ep = google_container_cluster.gke.endpoint  #kubernetes cluster endpoint
-  }
-
   provisioner "local-exec" {
     command = "kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-service-account=${google_service_account.set_gsa.email}"
   }
