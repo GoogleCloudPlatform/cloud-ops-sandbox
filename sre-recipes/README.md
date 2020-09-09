@@ -7,19 +7,19 @@ SRE Recipes is a tool to help users familiarize themselves with finding the root
 To view which recipes exist, run the command below in this directory:
 
 ```
-$ python3 sandboxctl --help
+$ ./sandboxctl --help
 ```
 To simulate a break in a specific recipe, run:
 ```
-$ python3 sandboxctl break <recipe_name>
+$ ./sandboxctl break <recipe_name>
 ```
 To restore the original condition after simulating a break in a specific recipe, run:
 ```
-$ python3 sandboxctl restore <recipe_name>
+$ ./sandboxctl restore <recipe_name>
 ```
 To verify the root cause of the breakage in specific recipe, run:
 ```
-$ python3 sandboxctl verify <recipe_name>
+$ ./sandboxctl verify <recipe_name>
 ```
 
 ## Contributing
