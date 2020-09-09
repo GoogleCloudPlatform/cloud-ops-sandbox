@@ -181,6 +181,10 @@ resource "null_resource" "authenticate_cluster" {
   provisioner "local-exec" {
     command = "gcloud container clusters get-credentials cloud-ops-sandbox --project ${data.google_project.project.project_id} --zone ${google_container_cluster.gke.location}"
   }
+
+  triggers = {
+    build_number = "${timestamp()}"
+  }
 }
 
 data "external" "terraform_vars" {
