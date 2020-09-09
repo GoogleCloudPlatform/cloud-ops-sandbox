@@ -41,7 +41,21 @@ while [ -n "$CLUSTER_ZONE" ]; do
 done
 
 
-# delete loadgenerator
+# delete GKE loadgenerator
+LOADGENERATOR_ZONE="first_run"
+while [ -n "$LOADGENERATOR_ZONE" ]; do
+  LOADGENERATOR_ZONE=$(gcloud container clusters list \
+                   --filter="name:loadgenerator" \
+                   --project $PROJECT_ID --format="value(zone)")
+  if [ -n "$LOADGENERATOR_ZONE" ]; then
+      echo "deleting load generator cluster"
+      gcloud container clusters delete loadgenerator \
+          --project $PROJECT_ID --zone $LOADGENERATOR_ZONE --quiet
+      sleep 20
+  fi
+done
+
+# delete legacy GCE loadgenerator
 LOADGENERATOR="first_run"
 while [ -n "$LOADGENERATOR" ]; do
   read -r LOADGENERATOR ZONE <<< $(gcloud compute instances list \
