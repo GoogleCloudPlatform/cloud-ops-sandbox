@@ -14,8 +14,8 @@
 
 import os
 import json
-from flask import Flask,Response,jsonify
-from psycopg2 import pool,extensions
+from flask import Flask,Response,jsonify,request
+from psycopg2 import pool
 
 connpool = None
 
@@ -64,6 +64,7 @@ app = Flask(__name__)
 connpool = initConnection()
 populate_database()
 
+# get rating of a product
 @app.route('/getRating/<id>')
 def getRating(id):
     conn = connpool.getconn()
@@ -73,58 +74,41 @@ def getRating(id):
             cursor.execute("SELECT AVG(score), COUNT(*) FROM ratings WHERE product_id='{}';".format(id))
             result = cursor.fetchone()
             if result[1] > 0:
-                data = {
+                # product exists
+                resp = jsonify({
                     'status' : 'success',
                     'rating' : str(result[0]),
                     'count'  : str(result[1])
-                }
-                resp = jsonify(data)
+                })
                 resp.status_code = 200
             else:
-                data = {
-                    'status' : 'fail',
-                    'message' : 'Product does not exist: {}'.format(id)
-                }     
-                resp = jsonify(data)
+                # product not exists
+                resp = jsonify({'status' : 'fail'})
                 resp.status_code = 404   
         conn.commit()    
     except:
-        data = {
-            'status'  : 'fail',
-            'message' : 'Internal server error'
-        }
-        resp = jsonify(data)
+        resp = jsonify({'status'  : 'fail'})
         resp.status_code = 500
-        return resp
     finally:
         connpool.putconn(conn)
     return resp
 
-@app.route('/rate/<id>/<score>')
-def rate(id, score):
+# rate a product
+@app.route('/rate', methods=['POST'])
+def rate():
     conn = connpool.getconn()
     resp = None
+    product_id = request.form['id']
+    score = request.form['score']
     try:
         with conn.cursor() as cursor:
-            cursor.execute("INSERT INTO ratings (product_id, score) VALUES ('{0}', {1});".format(id, score))
-            data = {
-                'status' : 'success'
-            }
-            resp = jsonify(data)
+            cursor.execute("INSERT INTO ratings (product_id, score) VALUES ('{0}', {1});".format(product_id, score))
+            resp = jsonify({'status' : 'success'})
             resp.status_code = 200
         conn.commit()
     except:
-        data = {
-            'status'  : 'fail',
-            'message' : 'Internal server error'
-        }
-        resp = jsonify(data)
+        resp = jsonify({'status' : 'fail'})
         resp.status_code = 500
-        return resp
     finally:
         connpool.putconn(conn)
     return resp
-
-@app.route('/')
-def hello():
-    return 'hello!'

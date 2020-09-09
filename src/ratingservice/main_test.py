@@ -17,38 +17,60 @@ from __future__ import print_function
 import os
 import unittest
 import requests
+import json
 
-class TestEndpoints(unittest.TestCase):
-
-    def testRate(self):
-        """ Test if rating a product returns success """
-        products = ['OLJCESPC7Z','66VCHSJNUP','1YMWWN1N4O','L9ECAV7KIM','2ZYFJ3GM2N','0PUK6V6EV0','LS4PSXUNUM','9SIQT8TOJO', '6E92ZMYYFZ']
-        for product in products:
-            url = "https://{0}.wl.r.appspot.com/rate/{1}/{2}".format(getProjectId(), product, 5)
-            res = requests.get(url)
-            self.assertEqual(res.json()['status'], 'success')
-    
+class TestEndpoints(unittest.TestCase):    
     def testGetRating(self):
         """ Test if getting the rating of a product returns success """
-        products = ['OLJCESPC7Z','66VCHSJNUP','1YMWWN1N4O','L9ECAV7KIM','2ZYFJ3GM2N','0PUK6V6EV0','LS4PSXUNUM','9SIQT8TOJO', '6E92ZMYYFZ']
+        products = read_products()
         for product in products:
-            url = "https://{0}.wl.r.appspot.com/getRating/{1}".format(getProjectId(), product)
+            url = "https://ratingservice-dot-{0}.wl.r.appspot.com/getRating/{1}".format(getProjectId(), product)
             res = requests.get(url)
-            self.assertEqual(res.json()['status'], 'success')
+            self.assertEqual(res.status_code, 200)
 
+    def testGetRatingNotExist(self):
+        """ Test if getting non-existing product returns 404 """
+        url = "https://ratingservice-dot-{0}.wl.r.appspot.com/getRating/{1}".format(getProjectId(), "random")
+        res = requests.get(url)
+        self.assertEqual(res.status_code, 404)
+    
+    def testRate(self):
+        """ Test if rating a product returns success """
+        products = read_products()
+        for product in products:
+            url = "https://ratingservice-dot-{}.wl.r.appspot.com/rate".format(getProjectId())
+            res = requests.post(url, data={
+                'score' : 5,
+                'id' : product
+            })
+            self.assertEqual(res.status_code, 200)
     
     def testGetRatingCorrect(self):
         """ Test if getting the rating of a product returns a correct number """
-        url_get = "https://{0}.wl.r.appspot.com/getRating/{1}".format(getProjectId(), "OLJCESPC7Z")
-        url_post = "https://{0}.wl.r.appspot.com/rate/{1}/{2}".format(getProjectId(), "OLJCESPC7Z", 5)
+        url_get = "https://ratingservice-dot-{0}.wl.r.appspot.com/getRating/{1}".format(getProjectId(), "OLJCESPC7Z")
+        url_post = "https://ratingservice-dot-{0}.wl.r.appspot.com/rate".format(getProjectId())
         res1 = requests.get(url_get).json()
-        requests.get(url_post)
+        requests.post(url_post, data={
+            'score' : 5,
+            'id' : 'OLJCESPC7Z'
+        })
         res2 = requests.get(url_get).json()
+        # The original total score (count * rating) plus the current score 5 must equal to the current total score
         self.assertTrue(abs(float(res1['rating']) * float(res1['count']) + 5 
                         - float(res2['rating']) * float(res2['count'])) < 1e-5)
     
+
 def getProjectId():
     return os.environ['GOOGLE_CLOUD_PROJECT']
+
+# read product ids
+def read_products():
+    res = []
+    with open('products.json') as f:
+        data = json.load(f)
+        for product in data['products']:
+            res.append(product['id'])
+    return res
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
