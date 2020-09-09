@@ -20,7 +20,7 @@ on:
   push:
     # run on pushes to test branch
     branches:
-      - e2e-test-release
+      - e2e*
   workflow_dispatch:
     # trigger through UI or API
 jobs:
@@ -29,14 +29,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Clean Project State
+      timeout-minutes: 30
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
     - name: Extract Website Values
+      timeout-minutes: 30
       id: website_variables
       run: |
         set -x
-        BTN_CONTENT=$(curl https://stackdriver-sandbox.dev/ | grep console-btn)
+        BTN_CONTENT=$(curl https://cloud-ops-sandbox.dev/ | grep console-btn)
         REPO=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_repo\=).*?(?=&)')
         echo ::set-output name=repo::${REPO}
         BRANCH=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_branch\=).*?(?=&)')
@@ -46,6 +48,7 @@ jobs:
         CLOUDSHELL_IMAGE=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_image\=).*?(?=")')
         echo ::set-output name=cloudshell_image::${CLOUDSHELL_IMAGE}
     - name: Run Install Script
+      timeout-minutes: 30
       run: |
         set -x
         # run install script
@@ -61,24 +64,54 @@ jobs:
           ${{ steps.website_variables.outputs.cloudshell_image }}
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
-    - name: Run Provisioning Test
+    - name:  Test Using Existing Project
+      timeout-minutes: 30
       run: |
         set -x
+        # run install script
+        docker run --rm \
+          -e project_id=$PROJECT_ID \
+          -e skip_workspace_prompt=1 \
+          -e release_repo=${{ steps.website_variables.outputs.repo }} \
+          -e release_branch=${{ steps.website_variables.outputs.branch }} \
+          -e release_dir=${{ steps.website_variables.outputs.dir }} \
+          -v ~/.config:/root/.config \
+          -v `pwd`:/sandbox-shared \
+          --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
+          ${{ steps.website_variables.outputs.cloudshell_image }}
+      env:
+        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
+    - name: Checkout Release Code
+      timeout-minutes: 30
+      run: |
+        set -x
+        git clone ${{ steps.website_variables.outputs.repo  }} ./release-code
+        cd ./release-code
+        git checkout ${{ steps.website_variables.outputs.branch }}
+    - name: Run Provisioning Test
+      timeout-minutes: 30
+      run: |
+        set -x
+        # change to previous release code state
+        cd ./release-code
         # get cluster zone
         CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $PROJECT_ID --format="value(zone)")
         # build provisioning test image
-        docker build -t test-provisioning:$GITHUB_SHA tests/provisioning/.
+        docker build -t test-provisioning:$GITHUB_SHA-release tests/provisioning/.
         # run provisioning tests
         docker run --rm \
           -e GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
           -e ZONE=$CLUSTER_ZONE \
           -v ~/.config:/root/.config \
-          test-provisioning:$GITHUB_SHA
+          test-provisioning:$GITHUB_SHA-release
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
     - name: Run Monitoring Integration Tests
+      timeout-minutes: 30
       run: |
         set -x
+        # change to previous release code state
+        cd ./release-code
         # install dependencies
         python3 -m pip install -r tests/requirements.txt
         # authenticate cluster
@@ -89,6 +122,7 @@ jobs:
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Clean Project State
+      timeout-minutes: 30
       if: ${{ always()  }}
       run: |
         # clean GCP resources

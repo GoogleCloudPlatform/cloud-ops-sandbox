@@ -42,7 +42,7 @@ resource "random_shuffle" "zone" {
 # is possible, check out the docs: https://www.terraform.io/docs/providers/google/r/container_cluster.html
 resource "google_container_cluster" "gke_loadgen" {
   # Here's how you specify the name of the cluster
-  name = "cloud-ops-sandbox-loadgenerator"
+  name = "loadgenerator"
 
   project = var.project_id
 
@@ -76,7 +76,7 @@ resource "google_container_cluster" "gke_loadgen" {
 
       labels = {
         environment = "dev",
-        cluster = "cloud-ops-sandbox-loadgenerator"
+        cluster = "loadgenerator-main"
       }
     }
 
@@ -110,7 +110,7 @@ resource "null_resource" "current_project" {
 # Setting kubectl context to currently deployed loadgenerator GKE cluster
 resource "null_resource" "set_gke_context" {
   provisioner "local-exec" {
-    command = "gcloud container clusters get-credentials cloud-ops-sandbox-loadgenerator --zone ${element(random_shuffle.zone.result, 0)} --project ${var.project_id}"
+    command = "gcloud container clusters get-credentials loadgenerator --zone ${element(random_shuffle.zone.result, 0)} --project ${var.project_id}"
   }
 
   depends_on = [
