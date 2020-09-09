@@ -41,7 +41,7 @@ With Sandbox, we provide a tool that automatically provisions a new demo cluster
 
 Click the Cloud Shell button for automated one-click installation of a new Sandbox cluster in a new Google Cloud Project.
 
-[![Open in Cloud Shell](http://www.gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=v0.2.5&cloudshell_working_dir=terraform&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image:v0.2.5)
+[![Open in Cloud Shell](http://www.gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=v0.2.6&cloudshell_working_dir=terraform&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image:v0.2.6)
 
 __Note__: If installation stops due to billing account errors, set up the billing account, and then in the `terraform/` diretory of the project created in Cloud Shell command prompt, type: `./install.sh`.
 
@@ -86,7 +86,7 @@ add them to the cart, and purchase them.
 **Hipster Shop** is composed of many microservices, written in different languages, that talk to each other over gRPC.
 >**We are not endorsing the architecture of Hipster Shop as the best way to build such a shop!**
 > The architecture is optimized for learning purposes and includes modern stack: Kubernetes, GKE, Istio,
-> Ops Management, gRPC, OpenCensus, and similar cloud-native technologies.
+> Ops Management, gRPC, OpenTelemetry, and similar cloud-native technologies.
 
 [![Architecture of
 microservices](./docs/img/architecture-diagram.png)](./docs/img/architecture-diagram.png)
@@ -113,8 +113,8 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
   The app is designed to run on Google Kubernetes Engine.
 * **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to
   communicate to each other.
-* **[OpenCensus](https://opencensus.io/) Tracing:** Most services are
-  instrumented using OpenCensus trace interceptors for gRPC/HTTP.
+* **[OpenTelemetry](https://opentelemetry.io/) Tracing:** Most services are
+  instrumented using OpenTelemetry tracers and interceptors which handle trace context propagation through gRPC and HTTP.
 * **[Ops Management APM and SRE](https://cloud.google.com/products/operations):** Many services
   are instrumented with **Profiling**, **Tracing**, **Debugging**, **Monitoring**, **Logging** and **Error Reporting**.
 * **[Skaffold](https://github.com/GoogleContainerTools/skaffold):** A tool used for doing repeatable deployments. You can deploy to Kubernetes with a single command using Skaffold.

@@ -29,6 +29,7 @@ fi
 
 # temporarily pin manifests to :$NEW_VERSION
 find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:latest/:${NEW_VERSION}/g" {} \;
+find "${REPO_ROOT}/kubernetes-manifests/loadgenerator" -name '*.yaml' -exec sed -i -e "s/:latest/:${NEW_VERSION}/g" {} \;
 
 # update README
 sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/README.md;
@@ -38,6 +39,14 @@ sed -i -e "s/cloudshell-image:v\([0-9\.]\+\)/cloudshell-image:${NEW_VERSION}/g" 
 sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/docs/index.html;
 sed -i -e "s/cloudshell-image:v\([0-9\.]\+\)/cloudshell-image:${NEW_VERSION}/g" ${REPO_ROOT}/docs/index.html;
 
+# update custom Cloud Shell image variable
+sed -i -e "s/VERSION=v\([0-9\.]\+\)/VERSION=${NEW_VERSION}/g" ${REPO_ROOT}/cloud-shell/Dockerfile;
+
+# update telemetry Pub/Sub topic in telemetry.py from "Test" topic to "Production" topic
+PROD_TOPIC="telemetry_prod"
+TEST_TOPIC="telemetry_test"
+sed -i -e "s/topic_id = \"${TEST_TOPIC}\"/topic_id = \"${PROD_TOPIC}\"/g" ${REPO_ROOT}/terraform/telemetry.py;
+
 # if dry-run mode, exit directly after modifying files
 if [[ "$*" == *dryrun*  || "$*" == *dry-run* ]]; then
     exit 0
@@ -46,8 +55,11 @@ else
     # create release commit
     git checkout -b "release/${NEW_VERSION}"
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
+    git add "${REPO_ROOT}/kubernetes-manifests/loadgenerator/*.yaml"
     git add "${REPO_ROOT}/docs/index.html"
     git add "${REPO_ROOT}/README.md"
+    git add "${REPO_ROOT}/cloud-shell/Dockerfile"
+    git add "${REPO_ROOT}/terraform/telemetry.py"
     git commit -m "release/${NEW_VERSION}"
 
     # add git tag
@@ -56,7 +68,13 @@ else
     # change back manifests to :latest
     find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:${NEW_VERSION}/:latest/g" {} \;
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
-    git commit -m "revert to latest images"
+    git add "${REPO_ROOT}/kubernetes-manifests/loadgenerator/*.yaml"
+
+    # change back telemetry Pub/Sub topic to "Test" topic
+    sed -i -e "s/topic_id = \"${PROD_TOPIC}\"/topic_id = \"${TEST_TOPIC}\"/g" ${REPO_ROOT}/terraform/telemetry.py;
+    git add "${REPO_ROOT}/terraform/telemetry.py"
+    
+    git commit -m "revert images to latest and telemetry pipeline to 'test'"
 
     # if no-push mode, exit without pushing git branch or tags to origin
     if [[ "$*" == *nopush* || "$*" == *no-push* ]]; then
