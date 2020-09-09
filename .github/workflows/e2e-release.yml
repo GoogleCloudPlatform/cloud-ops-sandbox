@@ -38,7 +38,7 @@ jobs:
       id: website_variables
       run: |
         set -x
-        BTN_CONTENT=$(curl https://stackdriver-sandbox.dev/ | grep console-btn)
+        BTN_CONTENT=$(curl https://cloud-ops-sandbox.dev/ | grep console-btn)
         REPO=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_repo\=).*?(?=&)')
         echo ::set-output name=repo::${REPO}
         BRANCH=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_branch\=).*?(?=&)')
