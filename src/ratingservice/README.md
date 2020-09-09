@@ -27,3 +27,4 @@ $ mv 04_cloudsql.tf ../04_cloudsql.tf && mv 05_app_engine.tf ../05_app_engine.tf
 
 Then move the functions in the installation script to install.sh. The install_serverless.sh does 3 things: create an App Engine app, upload the source code, then apply Terraform.
 
+Tests are in `tests/ratingservice` and they should also be integrated to the CI system.
