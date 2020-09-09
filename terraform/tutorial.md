@@ -33,10 +33,13 @@ The installation process takes a few minutes. When it completes, you see a messa
 
 ```bash
 ********************************************************************************
-Cloud Operations Sandbox deployed successfully!
+Cloud Operations Sandbox
+deployed successfully!
 
-     Google Cloud Console GKE Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project ID>
-     Google Cloud Console Monitoring Workspace: https://console.cloud.google.com/monitoring?project=<project ID>
+     Google Cloud Console GKE
+        Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project ID>
+     Google Cloud Console Monitoring
+        Workspace: https://console.cloud.google.com/monitoring?project=<project ID>
      Hipstershop web app address: http://XX.XX.XX.XX
      Load generator web interface: http://XX.XX.XX.XX
 ```
