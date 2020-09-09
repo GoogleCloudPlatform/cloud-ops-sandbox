@@ -69,7 +69,7 @@ jobs:
         set -x
         # get cluster zones
         CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $PROJECT_ID --format="value(zone)")
-        LOADGEN_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox-loadgenerator" --project $PROJECT_ID --format="value(zone)")
+        LOADGEN_ZONE=$(gcloud container clusters list --filter="name:loadgenerator" --project $PROJECT_ID --format="value(zone)")
         # build provisioning test image
         docker build -t test-provisioning:$GITHUB_SHA tests/provisioning/.
         # run provisioning tests
@@ -86,7 +86,7 @@ jobs:
         set -x
         # get cluster zones
         CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $PROJECT_ID --format="value(zone)")
-        LOADGEN_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox-loadgenerator" --project $PROJECT_ID --format="value(zone)")
+        LOADGEN_ZONE=$(gcloud container clusters list --filter="name:loadgenerator" --project $PROJECT_ID --format="value(zone)")
         # run provisioning tests
         docker run --rm \
           -e GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
