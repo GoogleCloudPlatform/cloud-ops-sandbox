@@ -24,6 +24,7 @@ For information on how to run the CLI, run the following:
 `python3 sandboxctl --help`
 """
 
+from enum import Enum
 import logging
 import os
 from os.path import dirname, abspath
@@ -33,6 +34,10 @@ from importlib import import_module
 from inspect import isclass
 import click
 from recipe import Recipe
+
+class LoadPattern(Enum):
+    BASIC = 1
+    STEP = 2
 
 def get_valid_recipes(attributes):
     """
@@ -73,10 +78,29 @@ def get_recipes():
     recipes = get_valid_recipes(attributes)
     return recipes
 
+def restart_loadgen(pattern=LoadPattern.BASIC):
+    """
+    Restarts the load generator with the intent of deploying a
+    particular load pattern.
+    """
+    DEVNULL = open(devnull, 'w')
+    command = (
+        'sed -i -e'
+        ' "s/(basic|step):latest/step:latest/g"'
+        ' ../kubernetes-manifest/loadgenerator/locust-main-controller.yaml'
+        ' ../kubernetes-manifest/loadgenerator/locust-worker-controller.yaml'
+    )
+    subprocess.call(split(command), stdout=DEVNULL)
+    command = (
+        'kubectl apply'
+        ' -f ../kubernetes-manifest/loadgenerator/'
+    )
+    subprocess.call(split(command), stdout=DEVNULL)
+
 
 RECIPES = get_recipes()
 @click.command()
-@click.argument('action', type=click.Choice(['break', 'restore', 'verify']))
+@click.argument('action', type=click.Choice(['break', 'restore', 'verify', "loadgen-step"]))
 @click.argument('recipe_name', type=click.Choice(RECIPES.keys()))
 def main(action, recipe_name):
     """Performs an action on a recipe."""
@@ -92,6 +116,9 @@ def main(action, recipe_name):
     elif action == 'verify':
         logging.info('Verifying %s', recipe_name)
         recipe.verify()
+    elif action == 'loadgen-step':
+        logging.info('Restarting Load Generator in Step Pattern')
+        restart_loadgen(pattern=LoadPattern.STEP)
 
 
 if __name__ == "__main__":
