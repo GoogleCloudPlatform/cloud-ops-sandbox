@@ -15,5 +15,5 @@
 
 import unittest
 
-test_suite = unittest.TestLoader().discover(pattern='*_test.py')
+test_suite = unittest.TestLoader().discover(pattern='*_test.py', start_dir='.')
 unittest.TextTestRunner(verbosity=2, failfast=True).run(test_suite)
