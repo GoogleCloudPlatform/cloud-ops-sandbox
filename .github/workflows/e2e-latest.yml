@@ -77,21 +77,6 @@ jobs:
           test-cloud-shell:$GITHUB_SHA
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
-    - name: Test Using Existing Project
-      timeout-minutes: 30
-      run: |
-        set -x
-        # run install script
-        docker run --rm \
-          -e project_id=$PROJECT_ID \
-          -e skip_workspace_prompt=1 \
-          -e service_wait=1 \
-          -v ~/.config:/root/.config \
-          -v `pwd`:/sandbox-shared \
-          --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
-          test-cloud-shell:$GITHUB_SHA
-      env:
-        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Run Provisioning Test
       timeout-minutes: 30
       run: |
@@ -121,6 +106,21 @@ jobs:
         gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
         # run tests
         python3 tests/monitoring_integration_test.py $PROJECT_ID
+      env:
+        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
+    - name: Test Using Existing Project
+      timeout-minutes: 30
+      run: |
+        set -x
+        # run install script
+        docker run --rm \
+          -e project_id=$PROJECT_ID \
+          -e skip_workspace_prompt=1 \
+          -e service_wait=1 \
+          -v ~/.config:/root/.config \
+          -v `pwd`:/sandbox-shared \
+          --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
+          test-cloud-shell:$GITHUB_SHA
       env:
         PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Clean Project State
