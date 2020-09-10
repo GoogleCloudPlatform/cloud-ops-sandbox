@@ -27,8 +27,8 @@ python3 -m pip install -r ${WORKDIR}/requirements.txt
 python3 ${WORKDIR}/cleanup_monitoring.py "projects/$PROJECT_ID"
 
 # delete service account
-CLUSTER_ZONE="first_run"
-while [ -n "$CLUSTER_ZONE" ]; do
+GSA_EMAIL="first_run"
+while [ -n "$GSA_EMAIL" ]; do
   GSA_EMAIL=$(gcloud iam service-accounts list \
                     --filter="name:gke-sa" \
                     --project $PROJECT_ID --format="value(email)")
