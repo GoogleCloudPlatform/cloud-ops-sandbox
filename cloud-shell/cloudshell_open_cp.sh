@@ -83,5 +83,11 @@ function cloudshell_open {
       try_envset "$line"
     done <<< "$output"
   fi
+  # add sandboxctl to path
+  export PATH="~/cloudshell_open/cloud-ops-sandbox/sre-recipes:$PATH"
+  export PATH="~/cloudshell_open/stackdriver-sandbox/sre-recipes:$PATH"
+  # add terraform directory to path
+  export PATH="~/cloudshell_open/cloud-ops-sandbox/terraform:$PATH"
+  export PATH="~/cloudshell_open/stackdriver-sandbox/terraform:$PATH"
   ./install.sh # This line automatically runs the install script when cloudshell button is pressed
 }
