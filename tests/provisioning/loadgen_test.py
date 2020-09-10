@@ -48,7 +48,7 @@ class TestLoadGenerator(unittest.TestCase):
         client = cluster_manager.ClusterManagerClient()
         cluster_info = client.get_cluster(name=TestLoadGenerator.name)
         node_count = cluster_info.current_node_count
-        self.assertTrue(node_count == 3)
+        self.assertTrue(node_count == 1)
 
     def testReachOfLoadgen(self):
         """Test if querying load generator returns 200"""
