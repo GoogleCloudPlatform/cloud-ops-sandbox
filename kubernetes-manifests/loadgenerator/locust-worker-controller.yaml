@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: locust-worker
-          image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/basic:latest
+          image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/basic:v0.3.0
           env:
             - name: LOCUST_MODE
               value: worker
