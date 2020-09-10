@@ -176,17 +176,6 @@ resource "null_resource" "delay" {
   }
 }
 
-# Authenticate cluster
-resource "null_resource" "authenticate_cluster" {
-  provisioner "local-exec" {
-    command = "gcloud container clusters get-credentials cloud-ops-sandbox --project ${data.google_project.project.project_id} --zone ${google_container_cluster.gke.location}"
-  }
-
-  triggers = {
-    build_number = "${timestamp()}"
-  }
-}
-
 data "external" "terraform_vars" {
   program = ["/bin/bash", "${path.module}/get_terraform_vars.sh"]
   depends_on = [null_resource.authenticate_cluster]
