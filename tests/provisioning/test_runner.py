@@ -16,4 +16,8 @@
 import unittest
 
 test_suite = unittest.TestLoader().discover(pattern='*_test.py', start_dir='.')
-unittest.TextTestRunner(verbosity=2, failfast=True).run(test_suite)
+result = unittest.TextTestRunner(verbosity=2, failfast=True).run(test_suite)
+if result.wasSuccessful():
+    exit(0)
+else:
+    exit(1)
