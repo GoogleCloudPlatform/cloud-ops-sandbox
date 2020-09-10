@@ -168,13 +168,10 @@ resource "null_resource" "annotate_ksa" {
   depends_on = [google_service_account_iam_binding.set_gsa_binding]
 }
 
-# Enable trace and monitoring roles for GSA
-resource "null_resource" "set_ops_roles" {
+# Enable editor level permissions for GSA
+resource "null_resource" "set_editor" {
   provisioner "local-exec" {
-    command = <<-EOT
-      gcloud projects add-iam-policy-binding ${data.google_project.project.project_id} --member serviceAccount:${google_service_account.set_gsa.email} --role roles/cloudtrace.admin
-      gcloud projects add-iam-policy-binding ${data.google_project.project.project_id} --member serviceAccount:${google_service_account.set_gsa.email} --role roles/roles/monitoring.editor
-    EOT
+    command = "gcloud projects add-iam-policy-binding ${data.google_project.project.project_id} --member serviceAccount:${google_service_account.set_gsa.email} --role roles/editor"
   }
 
   depends_on = [null_resource.annotate_ksa]
@@ -186,7 +183,7 @@ resource "null_resource" "install_istio" {
     command = "./istio/install_istio.sh"
   }
 
-  depends_on = [null_resource.set_ops_roles]
+  depends_on = [null_resource.set_editor]
 }
 
 # Deploy microservices into GKE cluster 
