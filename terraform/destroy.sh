@@ -28,6 +28,16 @@ acct=$(gcloud info --format="value(config.account)")
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
+# create variable for telemetry purposes if SESSION is not already set
+# session is defined as the current "instance" in which the user is logged-in to Cloud Shell terminal, working with Sandbox
+if [[ -z "$SESSION" ]]; then export SESSION=$(python3 -c "import uuid; print(uuid.uuid4())"); fi
+
+# this function sends de-identified information to the Google Cloud Platform database
+# on what events occur in users' Sandbox projects for development purposes
+sendTelemetry() {
+  python3 telemetry.py --session=$SESSION --project_id=$1 --event=$2 --version=$VERSION
+}
+
 # find the cloud operations sandbox project id
 filter=$(cat <<-END
   (id:cloud-ops-sandbox-* AND name='Cloud Operations Sandbox Demo')
@@ -76,9 +86,11 @@ gcloud projects delete $PROJECT_ID
 found=$(gcloud projects list --filter="${PROJECT_ID}" --format="value(projectId)")
 if [[ -n "${found}" ]]; then
     log "project $PROJECT_ID not deleted"
+    sendTelemetry $PROJECT_ID sandbox-not-destroyed
     exit 1
 fi
 
+sendTelemetry $PROJECT_ID sandbox-destroyed
 # remove tfstate file so a new project id will be generated next time
 log "removing tfstate file"
 rm -f .terraform/terraform.tfstate
