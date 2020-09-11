@@ -84,6 +84,8 @@ function cloudshell_open {
     done <<< "$output"
   fi
   # add sandboxctl to path
+  # the repo was previouly called stackdriver-sandbox. Now it's cloud-ops-sandbox
+  # we will add both directories to the path to support forks with either name
   export PATH="~/cloudshell_open/cloud-ops-sandbox/sre-recipes:$PATH"
   export PATH="~/cloudshell_open/stackdriver-sandbox/sre-recipes:$PATH"
   # add terraform directory to path
