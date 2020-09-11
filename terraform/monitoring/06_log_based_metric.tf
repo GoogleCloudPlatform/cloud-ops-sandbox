@@ -53,7 +53,7 @@ resource "google_monitoring_dashboard" "log_based_metric_dashboard" {
     "columns": "2",
     "widgets": [
       {
-        "title": "Number of Products Ordered grouped by Product Name",
+        "title": "Number of Products Ordered Per Day grouped by Product Name",
         "xyChart": {
           "dataSets": [
             {
@@ -61,7 +61,7 @@ resource "google_monitoring_dashboard" "log_based_metric_dashboard" {
                 "timeSeriesFilter": {
                   "filter": "metric.type=\"logging.googleapis.com/user/${google_logging_metric.checkoutservice_logging_metric.name}\" resource.type=\"k8s_container\"",
                   "aggregation": {
-                    "perSeriesAligner": "ALIGN_RATE",
+                    "perSeriesAligner": "ALIGN_SUM",
                     "crossSeriesReducer": "REDUCE_MEAN",
                     "groupByFields": [
                       "metric.label.\"product_name\""
@@ -70,7 +70,7 @@ resource "google_monitoring_dashboard" "log_based_metric_dashboard" {
                 }
               },
               "plotType": "LINE",
-              "minAlignmentPeriod": "60s"
+              "minAlignmentPeriod": "86400s"
             }
           ],
           "yAxis": {
