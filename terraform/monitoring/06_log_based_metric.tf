@@ -53,7 +53,7 @@ resource "google_monitoring_dashboard" "log_based_metric_dashboard" {
     "columns": "2",
     "widgets": [
       {
-        "title": "Number of Products Ordered Per Day grouped by Product Name",
+        "title": "Number of Products Ordered per day grouped by Product Name",
         "xyChart": {
           "dataSets": [
             {
