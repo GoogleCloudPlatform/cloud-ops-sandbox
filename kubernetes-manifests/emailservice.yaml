@@ -28,7 +28,7 @@ spec:
       terminationGracePeriodSeconds: 5
       initContainers:
       - name: wait-for-gke-metadata-server
-        image: busybox:latest
+        image: busybox:1.32
         command: ['sh', '-c', 'for i in {1..10}; do sleep 1; if nslookup metadata.google.internal; then exit 0; fi; done; exit 0']
       containers:
       - name: server
