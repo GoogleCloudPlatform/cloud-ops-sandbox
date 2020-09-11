@@ -28,12 +28,12 @@ class TestLoadGenerator(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Get the location of GKE cluster for later queries"""
-        cls.name = 'projects/{0}/locations/{1}/clusters/cloud-ops-sandbox-loadgenerator'.format(getProjectId(), getClusterZone())
+        cls.name = 'projects/{0}/locations/{1}/clusters/loadgenerator'.format(getProjectId(), getClusterZone())
         # authenticate container cluster
         command=('gcloud config set project {0}'.format(getProjectId()))
         subprocess.run(split(command))
-        # set kubectl context to cloud-ops-sandbox-loadgenerator
-        command=('gcloud container clusters get-credentials cloud-ops-sandbox-loadgenerator --zone {0}'.format(getClusterZone()))
+        # set kubectl context to loadgenerator
+        command=('gcloud container clusters get-credentials loadgenerator --zone {0}'.format(getClusterZone()))
         subprocess.run(split(command))
 
     def testNodeMachineType(self):
@@ -48,11 +48,11 @@ class TestLoadGenerator(unittest.TestCase):
         client = cluster_manager.ClusterManagerClient()
         cluster_info = client.get_cluster(name=TestLoadGenerator.name)
         node_count = cluster_info.current_node_count
-        self.assertTrue(node_count == 3)
+        self.assertTrue(node_count == 1)
 
     def testReachOfLoadgen(self):
         """Test if querying load generator returns 200"""
-        command = ("kubectl get service locust-main --context=cloud-ops-sandbox-loadgenerator -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
+        command = ("kubectl get service locust-main --context=loadgenerator -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
         loadgen_ip = result.stdout.replace('\n', '')
         url = 'http://{0}:8089'.format(loadgen_ip)

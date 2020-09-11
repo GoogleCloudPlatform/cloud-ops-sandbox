@@ -238,7 +238,8 @@ installMonitoring() {
     log ""
     log "${YELLOW}********************************************************************************"
     log ""
-    log "${YELLOW}⚠️ Please create a monitoring workspace for the project by clicking on the following link: $gcp_monitoring_path"
+    log "${YELLOW}⚠️ Please create a monitoring workspace for the project by clicking on the following link:"
+    log "${YELLOW}  $gcp_monitoring_path"
     log ""
     read -p "${YELLOW}When you are done, please PRESS ENTER TO CONTINUE"
   fi
@@ -271,11 +272,11 @@ getExternalIp() {
 # Install Load Generator service and start generating synthetic traffic to Sandbox
 loadGen() {
   log "Running load generator"
-  # launch a new load generator
-  pushd loadgen/
-  terraform init -lock=false
-  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}"
-  popd
+
+  # authenticate to load generator cluster
+  LOADGEN_ZONE=$(gcloud container clusters list --filter="name:loadgenerator" --project $project_id --format="value(zone)")
+  gcloud container clusters get-credentials loadgenerator --zone "$LOADGEN_ZONE"
+  kubectx loadgenerator=.
 
   LOCUST_PORT="8089"
   # find the IP of the load generator web interface
@@ -288,14 +289,9 @@ loadGen() {
      [ -z "$loadgen_ip" ] && sleep 10;
     TRIES=$((TRIES + 1))
   done
-  if [[ -v loadgen_ip ]]; then
-    # Make kubectx alias for this kubectl context
-    kubectx loadgenerator=.
-    # Return kubectl context to the main cluster and show this to the user
-    kubectx main
-    log $(kubectx)
-  fi
-
+  # Return kubectl context to the main cluster and show this to the user
+  kubectx main
+  log $(kubectx)
 }
 
 displaySuccessMessage() {

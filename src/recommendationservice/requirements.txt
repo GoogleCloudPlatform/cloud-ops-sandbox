@@ -10,7 +10,7 @@ chardet==3.0.4            # via requests
 google-api-core[grpc]==1.22.2  # via -r requirements.in, google-cloud-core, google-cloud-monitoring, google-cloud-trace, opencensus
 google-api-python-client==1.11.0  # via google-python-cloud-debugger
 google-auth-httplib2==0.0.4  # via google-api-python-client, google-python-cloud-debugger
-google-auth==1.21.0       # via google-api-core
+google-auth==1.21.1       # via google-api-core
 google-cloud-core==0.29.1  # via google-cloud-trace
 google-cloud-monitoring==0.36.0  # via opencensus-ext-stackdriver, opentelemetry-exporter-google-cloud
 google-cloud-trace==0.24.0  # via opencensus-ext-stackdriver, opentelemetry-exporter-google-cloud

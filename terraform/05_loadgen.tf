@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
+module "loadgen" {
+  source = "./loadgen"
 
-test_suite = unittest.TestLoader().discover(pattern='*_test.py', start_dir='.')
-unittest.TextTestRunner(verbosity=2, failfast=True).run(test_suite)
+  external_ip = data.external.terraform_vars.result.external_ip
+  project_id = data.google_project.project.project_id
+
+  depends_on = [null_resource.delay]
+}
