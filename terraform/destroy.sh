@@ -65,7 +65,7 @@ if [[ -z "${owned_projects}" ]]; then
     exit 1
 else
     log "which Cloud Operations Sandbox project do you want to delete?:"
-    select opt in $owned_projects "cancel"; do
+    select opt in ${owned_projects[@]} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
             exit 0
         elif [[ -z "${opt}" ]]; then
