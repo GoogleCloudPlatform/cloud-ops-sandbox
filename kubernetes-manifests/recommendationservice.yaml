@@ -26,6 +26,7 @@ spec:
         app: recommendationservice
     spec:
       terminationGracePeriodSeconds: 5
+      # Verify GKE-MDS DNS as it takes time to start up. Prevents auth race condition in Python container.
       initContainers:
       - name: wait-for-gke-metadata-server
         image: busybox:1.32
