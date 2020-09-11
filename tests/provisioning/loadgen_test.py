@@ -56,7 +56,7 @@ class TestLoadGenerator(unittest.TestCase):
 
     def testReachOfLoadgen(self):
         """Test if querying load generator returns 200"""
-        command = (f"kubectl get service locust-main --context=%s -o jsonpath='\{.status.loadBalancer.ingress[0].ip\}'" % TestLoadGenerator.context)
+        command = ("kubectl get service locust-main --context=%s -o jsonpath='\{.status.loadBalancer.ingress[0].ip\}'" % TestLoadGenerator.context)
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
         loadgen_ip = result.stdout.replace('\n', '')
         url = 'http://{0}:8089'.format(loadgen_ip)
