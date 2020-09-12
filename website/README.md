@@ -1,6 +1,6 @@
 # Cloud Operations Sandbox Website
 
-The Cloud Operations Sandbox website is currently deployed at [cloud-ops-sandbox.dev](https://cloud-ops-sandbox.dev) (formerly "stackdriver-sandbox.dev").
+The Cloud Operations Sandbox website is currently deployed at [cloud-ops-sandbox.dev](https://cloud-ops-sandbox.dev).
 
 ## Website Architecture
 

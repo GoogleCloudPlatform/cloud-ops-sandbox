@@ -35,8 +35,8 @@ The installation process takes a few minutes. When it completes, you see a messa
 ********************************************************************************
 Cloud Operations Sandbox deployed successfully!
 
-     Google Cloud Console GKE Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project ID>
-     Google Cloud Console Monitoring Workspace: https://console.cloud.google.com/monitoring?project=<project ID>
+     Google Cloud Console GKE Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project_ID>
+     Google Cloud Console Monitoring Workspace: https://console.cloud.google.com/monitoring?project=<project_ID>
      Hipstershop web app address: http://XX.XX.XX.XX
      Load generator web interface: http://XX.XX.XX.XX
 ```
@@ -55,11 +55,11 @@ Let's get started!
 
 ## Explore your project in GCP
 
-In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you to the Kubernetes Engine ([documentation](https://cloud.google.com/kubernetes-engine/docs/)) **Workloads** page for the project created by the installer.
+In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you to the [Kubernetes Engine **Workloads** page](https://console.cloud.google.com/projectselector2/kubernetes/workload) for the project created by the installer.
 
 ## Explore Cloud Monitoring
 
-Navigate to the GCP Monitoring Workspace URL, which takes you to the Cloud Monitoring ([documentation](https://cloud.google.com/monitoring)) **Workspace** page for your new project. The console may take some time to create a new workspace. Afterward, you'll be able to see a few dashboards generated through Cloud Operations tools.
+Navigate to the GCP Monitoring Workspace URL, which takes you to the [Cloud Monitoring **Workspace** page](https://console.cloud.google.com/monitoring) for your new project. The console may take some time to create a new workspace. Afterward, you'll be able to see a few dashboards generated through Cloud Operations tools.
 
 ## Shop like a hipster!
 
@@ -80,17 +80,17 @@ As the cloud-native microservice architecture, which promises scalability and fl
 
 Ops Management provides products for both developers and administrators; this section introduces the products and their general audiences.  The tools are covered in more detail later.
 
-Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of** Application Performance Management (APM)** has increased. Ops Management provides 3 products for APM:
+Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of **Application Performance Management (APM)** has increased. Ops Management provides 3 products for APM:
 
--  Cloud Trace
--  Cloud Profiler
--  Cloud Debugger
+-  [Cloud Trace](https://console.cloud.google.com/traces)
+-  [Cloud Profiler](https://console.cloud.google.com/profiler)
+-  [Cloud Debugger](https://console.cloud.google.com/debug)
 
 Similarly, cloud-native, microservice-based applications complicate traditional approaches used by administrators for monitoring system health: it's harder to observe your system health when the number of instances is flexible and the inter-dependencies among the many components are complicated. In the last few years, **Site Reliability Engineering (SRE)** has become recognized as a practical approach to managing large-scale, highly complex, distributed systems. Ops Management provides the following tools that are useful for SRE:
 
--  Cloud Monitoring
--  Cloud Logging
--  Cloud Error Reporting
+-  [Cloud Monitoring](https://console.cloud.google.com/monitoring)
+-  [Cloud Logging](https://console.cloud.google.com/logs)
+-  [Cloud Error Reporting](https://console.cloud.google.com/errors)
 
 You can find the Ops Management products in the navigation panel on the GCP Console:
 
@@ -100,9 +100,9 @@ Next, learn about the APM products!
 
 ## Cloud Trace Overview
 
-Cloud Trace ([documentation](https://cloud.google.com/trace/docs/)) enables developers to see distributed traces that visually expose latency bottleneck in requests. Developers instrument application code to collect trace information. You can also include environmental information in traces and trace information can be included in Cloud Logging logs. The Trace UI can then pull relevant log events into the trace timelines. 
+[Cloud Trace](https://console.cloud.google.com/traces) enables developers to see distributed traces that visually expose latency bottleneck in requests. Developers instrument application code to collect trace information. You can also include environmental information in traces and trace information can be included in Cloud Logging logs. The Trace UI can then pull relevant log events into the trace timelines. 
 
-For instrumenting your applications, currently recommended solution is **OpenCensus.** [OpenCensus](https://opencensus.io/) is an open-source project that supports trace instrumentation in a variety of languages and that can export this data to Cloud. Then you can use the Cloud Trace UI to analyze the data. Note that OpenCensus is merging with another similar project, OpenTracing, to form OpenTelemetry. See **OpenCensus to become OpenTelemetry**  in this doc.
+For instrumenting your applications, the currently recommended solution is [**OpenCensus**](https://opencensus.io/). OpenCensus is an open-source project that supports trace instrumentation in a variety of languages and that can export this data to Cloud. Then you can use the Cloud Trace UI to analyze the data. Note that OpenCensus is merging with another similar project, OpenTracing, to form OpenTelemetry.
 
 HipsterShop microservices are instrumented to collect trace data. In addition to distributed tracing, **OpenCensus (Stats)** provides the sink to send quantifiable data, such as database latency, open file descriptors, and so on, that helps to set up monitoring of [SLIs and SLOs](https://cloud.google.com/blog/products/gcp/sre-fundamentals-slis-slas-and-slos) for the service. This data is available in Cloud Monitoring, and HipsterShop microservices are also instrumented to collect this kind of data.
 
@@ -124,7 +124,7 @@ Feel free to explore the tracing data collected from here before moving on to th
 
 ## Cloud Profiler Overview
 
-Cloud Profiler ([documentation](https://cloud.google.com/profiler/docs/)) performs statistical sampling on your running application. Depending on the language, it can capture statistical data on CPU utilization, heap size, threads, and so on. You can use the charts created by the Profiler UI to help identify performance bottlenecks in your application code. 
+[Cloud Profiler](https://console.cloud.google.com/profiler) performs statistical sampling on your running application. Depending on the language, it can capture statistical data on CPU utilization, heap size, threads, and so on. You can use the charts created by the Profiler UI to help identify performance bottlenecks in your application code. 
 
 You do not have to write any profiling code in your application; you simply need to make the Profiler library available (the mechanism varies by language). This library will sample performance traits and create reports, which you can then analyze with the Profiler UI.
 
@@ -156,7 +156,7 @@ Profiler uses a visualization called a flame graph to represents both code execu
 
 You might have experienced situations where you see problems in production environments but they can't be reproduced in test environments. To find a root cause, then, you need to step into the source code or add more logs of the application as it runs in the production environment. Typically, this would require re-deploying the app, with all associated risks for production deployment.
 
-Cloud Debugger ([documentation](https://cloud.google.com/debugger/docs/)) lets developers debug running code with live request data. You can set breakpoints and log points on the fly. When a breakpoint is hit, a snapshot of the process state is taken, so you can examine what caused the problem. With log points, you can add a log statement to a running app without re-deploying, and without incurring meaningful performance costs.
+[Cloud Debugger](https://console.cloud.google.com/debug) lets developers debug running code with live request data. You can set breakpoints and log points on the fly. When a breakpoint is hit, a snapshot of the process state is taken, so you can examine what caused the problem. With log points, you can add a log statement to a running app without re-deploying, and without incurring meaningful performance costs.
 
 You do not have to  add any instrumentation code to your application to use Cloud Debugger. You start the debugger agent in the container running the application, and  you can then use the Debugger UI to step through snapshots of the running code.
 
@@ -228,13 +228,13 @@ To see all messages that are being generated in Cloud Logging from your logpoint
 
 ## The Cloud observability products: Monitoring, Logging, and Error Reporting
 
-Next, learn about Cloud observability products!
+Next, learn about Cloud Observability products!
 
 ## Cloud Monitoring
 
 ### Monitoring Overview
 
-Cloud Monitoring ([documentation](https://cloud.google.com/monitoring/docs/)) is the go-to place to grasp real-time trends of the system based on SLI/SLO. SRE team and application development team (and even business organization team) can collaborate to set up charts on the monitoring dashboard using metrics sent from the resources and the applications. 
+[Cloud Monitoring](https://console.cloud.google.com/monitoring) is the go-to place to grasp real-time trends of the system based on SLI/SLO. SRE team and application development team (and even business organization team) can collaborate to set up charts on the monitoring dashboard using metrics sent from the resources and the applications. 
 
 ### Using Monitoring
 
@@ -280,7 +280,7 @@ Search for the metric type using the name you gave it.
 
 ### Logging Overview
 
-On detecting unusual symptoms in the charts, operators can look into Cloud Logging ([documentation](https://cloud.google.com/logging/docs/)) to find clues of it in the log messages. Filtering lets you identify relevant logs, and logs can be exported from Cloud Logging to "sinks" for long-term storage.
+On detecting unusual symptoms in the charts, operators can look into [Cloud Logging](https://console.cloud.google.com/logs) to find clues of it in the log messages. Filtering lets you identify relevant logs, and logs can be exported from Cloud Logging to "sinks" for long-term storage.
 
 ### Using Logging
 
@@ -319,7 +319,7 @@ Click **Create Sink**. Then follow the prompts to create a new storage bucket an
 
 ### Error Reporting Overview
 
-Cloud Error Reporting ([documentation](https://cloud.google.com/error-reporting/docs/)) automatically groups errors depending on the stack trace message patterns and shows the frequency of each error groups. The error groups are generated automatically, based on stack traces.
+[Cloud Error Reporting](https://console.cloud.google.com/errors) automatically groups errors depending on the stack trace message patterns and shows the frequency of each error groups. The error groups are generated automatically, based on stack traces.
 
 On opening an error group report, operators can access to the exact line in the application code where the error occurred and reason about the cause by navigating to the line of the source code on Google Cloud Source Repository. 
 
