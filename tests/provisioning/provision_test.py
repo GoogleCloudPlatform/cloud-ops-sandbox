@@ -36,7 +36,11 @@ class TestGKECluster(unittest.TestCase):
         # set kubectl context
         command=('gcloud container clusters get-credentials cloud-ops-sandbox --zone {0}'.format(getClusterZone()))
         subprocess.run(split(command))
-    
+        # obtain the context name
+        command=('kubectl config current-context')
+        result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
+        cls.context = result.stdout
+
     def testNodeMachineType(self):
         """ Test if the machine type for the nodes is as specified """
         client = cluster_manager.ClusterManagerClient()
@@ -50,10 +54,10 @@ class TestGKECluster(unittest.TestCase):
         cluster_info = client.get_cluster(name=TestGKECluster.name)
         node_count = cluster_info.current_node_count
         self.assertTrue(node_count == 4)
-    
+
     def testStatusOfServices(self):
         """ Test if all the service deployments are ready """
-        command = ("kubectl get deployment --all-namespaces -o json")
+        command = ("kubectl get deployment --context=%s --all-namespaces -o json" % TestGKECluster.context)
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
         services = json.loads(result.stdout)
         for service in services['items']:
@@ -61,7 +65,7 @@ class TestGKECluster(unittest.TestCase):
 
     def testReachOfHipsterShop(self):
         """ Test if querying hipster shop returns 200 """
-        command = ("kubectl -n istio-system get service istio-ingressgateway --context=cloud-ops-sandbox -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
+        command = ("kubectl -n istio-system get service istio-ingressgateway --context=%s -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" % TestGKECluster.context)
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
         external_ip = result.stdout.replace('\n', '')
         url = 'http://{0}'.format(external_ip)
@@ -78,7 +82,7 @@ class TestProjectResources(unittest.TestCase):
         api_enabled = result.stdout.strip().split('\n')
         for api in api_requested:
             self.assertTrue(api in api_enabled)
-    
+
     def testErrorReporting(self):
         """ Test if we can report error using Error Reporting API """
         client = error_reporting.Client(project=getProjectId())
