@@ -22,7 +22,7 @@ echo "### Begin install istio control plane"
 echo "### "
 
 # Set vars for DIRs
-ISTIO_VERSION="${ISTIO_VERSION:-1.6.2}"
+ISTIO_VERSION="${ISTIO_VERSION:-1.7.1}"
 
 # Set the working directory to our current directory (/sandbox/terraform/istio)
 export SCRIPTPATH=$(dirname $(realpath $0))
