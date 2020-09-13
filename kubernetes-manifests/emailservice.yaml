@@ -28,7 +28,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/cloud-ops-sandbox-3908905088/emailimage:latest
+        image: gcr.io/stackdriver-sandbox-230822/sandbox/emailservice:latest
         ports:
         - containerPort: 8080
         readinessProbe:
