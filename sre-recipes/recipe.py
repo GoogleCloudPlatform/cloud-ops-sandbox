@@ -20,6 +20,8 @@ behavior of each recipe.
 """
 
 import abc
+import subprocess
+import logging
 
 class Recipe(abc.ABC):
     """
@@ -40,3 +42,32 @@ class Recipe(abc.ABC):
         Verifies that the user of the recipe found the root cause
         of the breakage
         """
+
+    @abc.abstractmethod
+    def hint(self):
+        """
+        Provides a hint about the root cause of the issue
+        """
+
+    @staticmethod
+    def _run_command(command):
+        """Runs the given command and returns any output and error"""
+        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        return output, error
+
+    @staticmethod
+    def _auth_cluster():
+        """ Authenticates for kubectl commands. """
+        logging.info('Authenticating cluster')
+        get_project_command = "gcloud config list --format value(core.project)"
+        project_id, error = Recipe._run_command(get_project_command)
+        project_id = project_id.decode("utf-8").replace('"', '')
+        zone_command = "gcloud container clusters list --filter name:cloud-ops-sandbox --project {} --format value(zone)".format(project_id)
+        zone, error = Recipe._run_command(zone_command)
+        zone = zone.decode("utf-8").replace('"', '')
+        auth_command = "gcloud container clusters get-credentials cloud-ops-sandbox --project {} --zone {}".format(project_id, zone)
+        Recipe._run_command(auth_command)
+        logging.info('Cluster has been authenticated')
+
+

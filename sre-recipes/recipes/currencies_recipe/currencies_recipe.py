@@ -14,7 +14,7 @@
 
 # -*- coding: utf-8 -*-
 """
-This module contains the implementation of recipe 1
+This module contains the implementation of recipe 0
 """
 
 import logging
@@ -24,16 +24,9 @@ from recipe import Recipe
 
 class CurrenciesRecipe(Recipe):
     """
-    This class implements recipe 1, which purposefully
+    This class implements recipe 0, which purposefully
     introduces latency into the frontend service.
     """
-
-    @staticmethod
-    def _run_command(command):
-        """Runs the given command and returns any output and error"""
-        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-        output, error = process.communicate()
-        return output, error
 
     @staticmethod
     def _deploy_state(state):
@@ -48,36 +41,22 @@ class CurrenciesRecipe(Recipe):
         logging.info('Setting env variable: %s', set_env_command)
         logging.info('Getting pod: %s', get_pod_command)
 
-        CurrenciesRecipe._run_command(set_env_command)
-        service, error = CurrenciesRecipe._run_command(get_pod_command)
+        Recipe._run_command(set_env_command)
+        service, error = Recipe._run_command(get_pod_command)
         service = service.decode("utf-8").replace('"', '')
         delete_pod_command = f"kubectl delete pod {service}"
         logging.info('Deleting pod: %s', delete_pod_command)
-        CurrenciesRecipe._run_command(delete_pod_command)
-
-    @staticmethod
-    def _auth_cluster():
-        """ Authenticates for kubectl commands. """
-        logging.info('Authenticating cluster')
-        get_project_command = "gcloud config list --format value(core.project)"
-        project_id, error = CurrenciesRecipe._run_command(get_project_command)
-        project_id = project_id.decode("utf-8").replace('"', '')
-        zone_command = "gcloud container clusters list --filter name:cloud-ops-sandbox --project {} --format value(zone)".format(project_id)
-        zone, error = CurrenciesRecipe._run_command(zone_command)
-        zone = zone.decode("utf-8").replace('"', '')
-        auth_command = "gcloud container clusters get-credentials cloud-ops-sandbox --project {} --zone {}".format(project_id, zone)
-        CurrenciesRecipe._run_command(auth_command)
-        logging.info('Cluster has been authenticated')
+        Recipe._run_command(delete_pod_command)
 
     def break_service(self):
         """
         Rolls back the working version of the given service and deploys the
         broken version of the given service
         """
-        print("Deploying broken service...")
-        self._auth_cluster()
+        print('Deploying broken service...')
+        Recipe._auth_cluster()
         self._deploy_state(True)
-        print("Done")
+        print('Done')
         logging.info('Deployed broken service')
 
     def restore_service(self):
@@ -85,13 +64,27 @@ class CurrenciesRecipe(Recipe):
         Rolls back the broken version of the given service and deploys the
         working version of the given service
         """
-        print("Deploying working service...")
-        self._auth_cluster()
+        print('Deploying working service...')
+        Recipe._auth_cluster()
         self._deploy_state(False)
-        print("Done")
+        print('Done')
         logging.info('Deployed working service')
 
-    def _service_multiple_choice(self):
+    def hint(self):
+        """
+        Provides a hint about finding the root cause of this recipe
+        """
+        print('Giving hint for recipe')
+        external_ip_command = "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+        ip, error = Recipe._run_command(external_ip_command)
+        ip = ip.decode("utf-8").replace("'", '')
+        print('Visit the external IP of the demo application to see if there are any visible changes: http://{}'.format(ip))
+        get_project_command = "gcloud config list --format value(core.project)"
+        project_id, error = Recipe._run_command(get_project_command)
+        project_id = project_id.decode("utf-8").replace('"', '')
+        print('Use Monitoring Dashboards to see metrics associated with each service: https://console.cloud.google.com/monitoring/dashboards?project={}'.format(project_id))
+
+    def service_multiple_choice(self):
         """
         Displays a multiple choice quiz to the user about which service
         broke and prompts the user for an answer
@@ -111,7 +104,7 @@ class CurrenciesRecipe(Recipe):
         answer = input('Your answer: ')
         return answer
 
-    def _cause_multiple_choice(self):
+    def cause_multiple_choice(self):
         """
         Displays a multiple choice quiz to the user about the cause of
         the breakage and prompts the user for an answer
@@ -124,17 +117,17 @@ class CurrenciesRecipe(Recipe):
         answer = input('Your answer: ')
         return answer
 
-    def _verify_broken_service(self):
+    def verify_broken_service(self):
         """Verifies the user found which service broke"""
-        answer = self._service_multiple_choice()
+        answer = self.service_multiple_choice()
         while answer.lower() != 'f':
             print('Incorrect. Please try again.')
             answer = input('Your answer: ')
         print('Correct! The frontend service is broken.')
 
-    def _verify_broken_cause(self):
+    def verify_broken_cause(self):
         """Verifies the user found the root cause of the breakage"""
-        answer = self._cause_multiple_choice()
+        answer = self.cause_multiple_choice()
         while answer.lower() != 'c':
             print('Incorrect. Please try again.')
             answer = input('Your answer: ')
@@ -144,7 +137,7 @@ class CurrenciesRecipe(Recipe):
         """Verifies the user found the root cause of the broken service"""
         print("This is a multiple choice quiz to verify that you've")
         print('found the root cause of the break')
-        self._verify_broken_service()
-        self._verify_broken_cause()
+        self.verify_broken_service()
+        self.verify_broken_cause()
         print('Good job! You have correctly identified which service broke')
         print('and what caused it to break!')
