@@ -242,6 +242,7 @@ spec:
       multiCluster:
         enabled: false
         clusterName: ""
+      canaryvalue: true
       omitSidecarInjectorConfigMap: false
       network: ""
       defaultResources:
