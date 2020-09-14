@@ -53,8 +53,9 @@ kubectl create clusterrolebinding cluster-admin-binding \
     --clusterrole=cluster-admin \
     --user=$(gcloud config get-value core/account)
 
+# Can also set flag here if values isn't actually being read...https://istio.io/v1.4/docs/setup/install/istioctl/
 # install using operator config - https://istio.io/docs/setup/install/istioctl/#customizing-the-configuration
-${WORK_DIR}/istioctl manifest apply -f ${WORK_DIR}/istio_operator.yaml
+${WORK_DIR}/istioctl manifest install --set values.global.proxy.holdApplicationUntilProxyStarts=true ${WORK_DIR}/istio_operator.yaml
 
 # apply manifests
 kubectl apply -f ${WORK_DIR}/../../istio-manifests
