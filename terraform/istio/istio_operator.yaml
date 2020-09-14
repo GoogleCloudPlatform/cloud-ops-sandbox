@@ -168,7 +168,6 @@ spec:
     global:
       istioNamespace: istio-system
       istiod:
-        enabled: true
         enableAnalysis: false
       logging:
         level: "default:info"
@@ -242,7 +241,6 @@ spec:
       multiCluster:
         enabled: false
         clusterName: ""
-      canaryvalue: true
       omitSidecarInjectorConfigMap: false
       network: ""
       defaultResources:
