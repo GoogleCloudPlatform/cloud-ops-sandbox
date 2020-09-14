@@ -69,5 +69,3 @@ class Recipe(abc.ABC):
         auth_command = "gcloud container clusters get-credentials cloud-ops-sandbox --project {} --zone {}".format(project_id, zone)
         Recipe._run_command(auth_command)
         logging.info('Cluster has been authenticated')
-
-
