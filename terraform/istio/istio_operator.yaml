@@ -212,6 +212,8 @@ spec:
           host: # example: statsd-svc.istio-system
           port: # example: 9125
         tracer: "zipkin"
+        # Controls if sidecar is injected at the front of the container list and blocks the start of the other containers until the proxy is ready
+        holdApplicationUntilProxyStarts: false
       proxy_init:
         image: proxyv2
         resources:
