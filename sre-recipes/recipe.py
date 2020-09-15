@@ -57,15 +57,19 @@ class Recipe(abc.ABC):
         return output, error
 
     @staticmethod
-    def _auth_cluster():
+    def _auth_cluster(cluster="APP"):
         """ Authenticates for kubectl commands. """
         logging.info('Authenticating cluster')
         get_project_command = "gcloud config list --format value(core.project)"
         project_id, error = Recipe._run_command(get_project_command)
         project_id = project_id.decode("utf-8").replace('"', '')
-        zone_command = "gcloud container clusters list --filter name:cloud-ops-sandbox --project {} --format value(zone)".format(project_id)
+        name = "cloud-ops-sandbox"
+        if cluster == "LOADGEN":
+            name = "loadgenerator"
+        zone_command = "gcloud container clusters list --filter name:{} --project {} --format value(zone)".format(name, project_id)
         zone, error = Recipe._run_command(zone_command)
         zone = zone.decode("utf-8").replace('"', '')
-        auth_command = "gcloud container clusters get-credentials cloud-ops-sandbox --project {} --zone {}".format(project_id, zone)
+        print(zone)
+        auth_command = "gcloud container clusters get-credentials {} --project {} --zone {}".format(name, project_id, zone)
         Recipe._run_command(auth_command)
         logging.info('Cluster has been authenticated')
