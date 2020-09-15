@@ -73,3 +73,44 @@ class Recipe(abc.ABC):
         auth_command = "gcloud container clusters get-credentials {} --project {} --zone {}".format(name, project_id, zone)
         Recipe._run_command(auth_command)
         logging.info('Cluster has been authenticated')
+
+    @staticmethod
+    def _generate_multiple_choice(prompt, choices, correct_answer):
+        """ Creates a multiple choice quiz using numeric answers and prints to terminal. Automatically polls for user response.
+        Input:
+            prompt - (string) the question asked to the user
+            choice - (list of strings) a list of responses. They will automatically be ennumerated 
+            correct_answer - (string) the correct answer - must string match with one of the entries in the choice array
+        Output:
+            No output
+        """
+        # Verify the correct exists as a choice
+        found_ans = False
+        for choice in choices:
+            if correct_answer == choice:
+                found_ans = True
+
+        if not found_ans:
+            logging.info('Correct answer not found in available choices for prompt: {}'.format(prompt))
+            return
+
+        print(prompt)
+        for index in range(1, len(choices)+1):
+            print("\t {}) {}".format(index, choices[index-1]))
+
+        answer = input('Enter the number of your answer: ')
+
+        while True:
+            try:
+                answer = int(answer)
+                if answer < 1 or answer > len(choices):
+                    print('Not a valid choice.')
+                elif choices[answer-1] == correct_answer:
+                    print('Correct!')
+                    return
+                else:
+                    print('Incorrect. Try again.')
+            except ValueError:
+                print('Please enter the number of your answer.')
+
+            answer = input('Enter the number of your answer: ')

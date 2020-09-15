@@ -84,54 +84,25 @@ class CurrenciesRecipe(Recipe):
         project_id = project_id.decode("utf-8").replace('"', '')
         print('Use Monitoring Dashboards to see metrics associated with each service: https://console.cloud.google.com/monitoring/dashboards?project={}'.format(project_id))
 
-    def service_multiple_choice(self):
+    def verify_broken_service(self):
         """
         Displays a multiple choice quiz to the user about which service
         broke and prompts the user for an answer
         """
-        print("Which service broke?\n"
-                "\t[a] ad service \n"
-                "\t[b] cart service \n"
-                "\t[c] checkout service \n"
-                "\t[d] currency service \n"
-                "\t[e] email service \n"
-                "\t[f] frontend service \n"
-                "\t[g] payment service \n"
-                "\t[h] product catalog service \n"
-                "\t[i] recommendation service \n"
-                "\t[j] redis \n"
-                "\t[k] shipping service")
-        answer = input('Your answer: ')
-        return answer
+        prompt = 'Which service has a breakage?'
+        choices = ['email service', 'frontend service', 'ad service', 'recommendation service', 'currency service']
+        answer = 'frontend service'
+        Recipe._generate_multiple_choice(prompt, choices, answer)
 
-    def cause_multiple_choice(self):
+    def verify_broken_cause(self):
         """
         Displays a multiple choice quiz to the user about the cause of
         the breakage and prompts the user for an answer
         """
-        print('What caused the breakage?')
-        print('\t[a] failed connections to other services')
-        print('\t[b] high memory usage')
-        print('\t[c] high latency')
-        print('\t[d] dropped requests')
-        answer = input('Your answer: ')
-        return answer
-
-    def verify_broken_service(self):
-        """Verifies the user found which service broke"""
-        answer = self.service_multiple_choice()
-        while answer.lower() != 'f':
-            print('Incorrect. Please try again.')
-            answer = input('Your answer: ')
-        print('Correct! The frontend service is broken.')
-
-    def verify_broken_cause(self):
-        """Verifies the user found the root cause of the breakage"""
-        answer = self.cause_multiple_choice()
-        while answer.lower() != 'c':
-            print('Incorrect. Please try again.')
-            answer = input('Your answer: ')
-        print('Correct! High latency caused the breakage.')
+        prompt = 'What caused the breakage?'
+        choices = ['failed connections to other services', 'high memory usage', 'high latency', 'dropped requests']
+        answer = 'high latency'
+        Recipe._generate_multiple_choice(prompt, choices, answer)
 
     def verify(self):
         """Verifies the user found the root cause of the broken service"""
