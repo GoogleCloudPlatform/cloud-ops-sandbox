@@ -69,6 +69,15 @@ class EncodingRecipe(Recipe):
         print("Done")
         logging.info('Deployed working service')
 
+    def hint(self):
+        """
+        Provides a hint about the root cause of the issue
+        """
+        get_project_command = "gcloud config list --format value(core.project)"
+        project_id, error = Recipe._run_command(get_project_command)
+        project_id = project_id.decode("utf-8").replace('"', '')
+        print('Use Cloud Logging to view logs exported by each service: https://console.cloud.google.com/logs?project={}'.format(project_id))
+
     def verify_broken_service(self):
         """
         Displays a multiple choice quiz to the user about which service
