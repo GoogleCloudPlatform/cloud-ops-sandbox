@@ -20,6 +20,7 @@ import os
 import sys
 import time
 import grpc
+import base64
 from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateError
 from google.api_core.exceptions import GoogleAPICallError
 from google.auth.exceptions import DefaultCredentialsError
@@ -120,7 +121,26 @@ class EmailService(BaseEmailService):
 class DummyEmailService(BaseEmailService):
   def SendOrderConfirmation(self, request, context):
     logger.info('A request to send order confirmation email to {} has been received.'.format(request.email))
+    if self.EncodeEmail(request.email):
+      logger.error('Err: Could not encode email')
+      context.set_code(grpc.StatusCode.INTERNAL)
     return demo_pb2.Empty()
+
+  def EncodeEmail(self, email):
+    """ 
+    Encodes the email address to base64 encoding
+    Input: 
+      email - (string) the email address
+    Output:
+      boolean - whether the encoding was successful or not
+    """
+    if os.getenv('ENCODE_EMAIL').lower() == "true":
+      byte_rep = email.encode('ascii')
+      b64_bytes = base64.b64encode(byte_rep)
+      encoded = b64_bytes.decode('ascii')
+      return True
+    else:
+      return False
 
 class HealthCheck():
   def Check(self, request, context):
