@@ -85,21 +85,18 @@ class Recipe(abc.ABC):
             No output
         """
         # Verify the correct exists as a choice
-        found_ans = False
-        for choice in choices:
-            if correct_answer == choice:
-                found_ans = True
-
-        if not found_ans:
-            logging.info('Correct answer not found in available choices for prompt: {}'.format(prompt))
+        if not correct_answer in choices:
+            logging.error('Correct answer not found in available choices for prompt: {}'.format(prompt))
             return
 
+        # Show the multiple choice
         print(prompt)
-        for index in range(1, len(choices)+1):
-            print("\t {}) {}".format(index, choices[index-1]))
+        for index in range(0, len(choices)):
+            print("\t {}) {}".format(index + 1, choices[index]))
 
         answer = input('Enter the number of your answer: ')
 
+        # Verify the answer
         while True:
             try:
                 answer = int(answer)
