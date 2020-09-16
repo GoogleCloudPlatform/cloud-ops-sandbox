@@ -26,11 +26,6 @@ spec:
         app: emailservice
     spec:
       terminationGracePeriodSeconds: 5
-      # Verify GKE-MDS DNS as it takes time to start up. Prevents auth race condition in Python container.
-      initContainers:
-      - name: wait-for-gke-metadata-server
-        image: busybox:1.32
-        command: ['sh', '-c', 'for i in {1..10}; do sleep 1; if nslookup metadata.google.internal; then exit 0; fi; done; exit 0']
       containers:
       - name: server
         image: gcr.io/stackdriver-sandbox-230822/sandbox/emailservice:latest

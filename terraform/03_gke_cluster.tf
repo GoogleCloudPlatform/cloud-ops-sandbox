@@ -42,6 +42,7 @@ resource "random_shuffle" "zone" {
 resource "google_container_cluster" "gke" {
   provider = google-beta
   project = data.google_project.project.project_id
+  min_master_version = "1.16.13-gke.401"
 
   # Here's how you specify the name
   name = "cloud-ops-sandbox"
@@ -121,7 +122,7 @@ resource "google_container_cluster" "gke" {
 }
 
 
-# Set current project 
+# Set current project
 resource "null_resource" "current_project" {
   provisioner "local-exec" {
     command = "gcloud config set project ${data.google_project.project.project_id}"
@@ -186,7 +187,7 @@ resource "null_resource" "install_istio" {
   depends_on = [null_resource.set_editor]
 }
 
-# Deploy microservices into GKE cluster 
+# Deploy microservices into GKE cluster
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
     command = "kubectl apply -f ../kubernetes-manifests"
