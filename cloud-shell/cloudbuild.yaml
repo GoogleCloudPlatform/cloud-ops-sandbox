@@ -23,19 +23,26 @@ steps:
   - |-
     git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git
     cd cloud-ops-sandbox
-    # build latest image
-    docker build -t gcr.io/$PROJECT_ID/cloudshell-image:latest ./cloud-shell
-    docker push gcr.io/$PROJECT_ID/cloudshell-image:latest
-    for TAG in $(git tag); do
-        echo "checking out $$TAG"
-        git checkout $$TAG
-        # if cloud-build directory exists, build new container
-        if [[ -d "./cloud-shell" ]]; then
-            echo "building $$TAG"
-            docker build -t gcr.io/$PROJECT_ID/cloudshell-image:$$TAG ./cloud-shell
-            docker push gcr.io/$PROJECT_ID/cloudshell-image:$$TAG
-        else
-            echo "No cloud-shell directory in tag $$TAG"
-        fi
+
+    # build images in both GCR repos
+    CERTIFIED_PATH=gcr.io/$PROJECT_ID/cloudshell-image
+    UNCERTIFIED_PATH=$$CERTIFIED_PATH/uncertified
+
+    for GCR_PATH in $$CERTIFIED_PATH $$UNCERTIFIED_PATH; do
+        # build latest image
+        docker build -t $$GCR_PATH:latest ./cloud-shell
+        docker push $$GCR_PATH:latest
+        for TAG in $(git tag); do
+            echo "checking out $$TAG"
+            git checkout $$TAG
+            # if cloud-build directory exists, build new container
+            if [[ -d "./cloud-shell" ]]; then
+                echo "building $$TAG"
+                docker build -t $$GCR_PATH:$$TAG ./cloud-shell
+                docker push $$GCR_PATH:$$TAG
+            else
+                echo "No cloud-shell directory in tag $$TAG"
+            fi
+        done
     done
 logsBucket: 'gs://sandbox-cloud-build-logs'
