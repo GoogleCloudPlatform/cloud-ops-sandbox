@@ -63,7 +63,7 @@ class Recipe(abc.ABC):
         get_project_command = 'gcloud config list --format value(core.project)'
         project_id, error = Recipe._run_command(get_project_command)
         project_id = project_id.decode("utf-8").replace('"', '')
-        if project_id == '':
+        if not project_id:
             print('No project found.')
             logging.error('Could not authenticate cluster. No project ID found.')
             exit(1)
@@ -73,7 +73,7 @@ class Recipe(abc.ABC):
         zone_command = 'gcloud container clusters list --filter name:{} --project {} --format value(zone)'.format(name, project_id)
         zone, error = Recipe._run_command(zone_command)
         zone = zone.decode("utf-8").replace('"', '')
-        if zone == '':
+        if not zone:
             print('Failed to set up recipe. No cluster for {} was found.'.format(name))
             logging.error('Could not authenticate cluster. No cluster found for {} found.'.format(name))
             exit(1)

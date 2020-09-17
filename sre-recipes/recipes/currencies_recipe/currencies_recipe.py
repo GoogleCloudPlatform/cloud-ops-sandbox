@@ -44,7 +44,7 @@ class CurrenciesRecipe(Recipe):
         Recipe._run_command(set_env_command)
         service, error = Recipe._run_command(get_pod_command)
         service = service.decode("utf-8").replace('"', '')
-        if service == '':
+        if not service:
             print('No service found. Could not deploy state.')
             logging.error('No service found. Could not deploy state.')
         delete_pod_command = f"kubectl delete pod {service}"
@@ -82,7 +82,7 @@ class CurrenciesRecipe(Recipe):
         external_ip_command = "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
         ip, error = Recipe._run_command(external_ip_command)
         ip = ip.decode("utf-8").replace("'", '')
-        if ip == '':
+        if not ip:
             print('No external IP found.')
             logging.error('No external IP found.')
             exit(1)
@@ -90,7 +90,7 @@ class CurrenciesRecipe(Recipe):
         get_project_command = "gcloud config list --format value(core.project)"
         project_id, error = Recipe._run_command(get_project_command)
         project_id = project_id.decode("utf-8").replace('"', '')
-        if project_id == '':
+        if not project_id:
             print('No project ID found.')
             logging.error('No project ID found.')
             exit(1)
