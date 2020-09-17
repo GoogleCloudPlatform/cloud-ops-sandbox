@@ -43,6 +43,10 @@ class EncodingRecipe(Recipe):
         Recipe._run_command(set_env_command)
         service, error = Recipe._run_command(get_pod_command)
         service = service.decode("utf-8").replace('"', '')
+        if service == '':
+            print('Could not deploy state. No service found.')
+            logging.error('Error: No services found while trying to deploy state')
+            exit(1)
         delete_pod_command = f"kubectl delete pod {service}"
         logging.info('Deleting pod: %s', delete_pod_command)
         Recipe._run_command(delete_pod_command)
@@ -76,6 +80,10 @@ class EncodingRecipe(Recipe):
         get_project_command = "gcloud config list --format value(core.project)"
         project_id, error = Recipe._run_command(get_project_command)
         project_id = project_id.decode("utf-8").replace('"', '')
+        if project_id == '':
+            print('No project ID found.')
+            logging.error('No project ID found.')
+            exit(1)
         print('Use Cloud Logging to view logs exported by each service: https://console.cloud.google.com/logs?project={}'.format(project_id))
 
     def verify_broken_service(self):
