@@ -43,7 +43,7 @@ class EncodingRecipe(Recipe):
         Recipe._run_command(set_env_command)
         service, error = Recipe._run_command(get_pod_command)
         service = service.decode("utf-8").replace('"', '')
-        if service == '':
+        if not service:
             print('No service found. Could not deploy state.')
             logging.error('No service found. Could not deploy state.')
             exit(1)
@@ -80,7 +80,7 @@ class EncodingRecipe(Recipe):
         get_project_command = "gcloud config list --format value(core.project)"
         project_id, error = Recipe._run_command(get_project_command)
         project_id = project_id.decode("utf-8").replace('"', '')
-        if project_id == '':
+        if not project_id:
             print('No project ID found.')
             logging.error('No project ID found.')
             exit(1)
