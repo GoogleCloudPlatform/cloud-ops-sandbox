@@ -100,13 +100,17 @@ class EncodingRecipe(Recipe):
 
     def verify(self):
         """Verifies the user found the root cause of the broken service"""
-        print('''
-            This is a multiple choice quiz to verify that 
-            you have found the root cause of the break.
-            ''')
+        print(
+        '''
+        This is a multiple choice quiz to verify that 
+        you have found the root cause of the break.
+        '''
+            )
         self.verify_broken_service()
         self.verify_broken_cause()
-        print('''
-            Good job! You have correctly identified which 
-            service broke and what caused it to break!
-            ''')
+        print(
+        '''
+        Good job! You have correctly identified which 
+        service broke and what caused it to break!
+        '''
+            )
