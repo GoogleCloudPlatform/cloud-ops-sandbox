@@ -75,6 +75,7 @@ class CurrenciesRecipe(Recipe):
         Provides a hint about finding the root cause of this recipe
         """
         print('Giving hint for recipe')
+        Recipe._auth_cluster()
         external_ip_command = "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
         ip, error = Recipe._run_command(external_ip_command)
         ip = ip.decode("utf-8").replace("'", '')
@@ -106,9 +107,7 @@ class CurrenciesRecipe(Recipe):
 
     def verify(self):
         """Verifies the user found the root cause of the broken service"""
-        print("This is a multiple choice quiz to verify that you've")
-        print('found the root cause of the break')
+        print('This is a multiple choice quiz to verify that you have \nfound the root cause of the breakage.')
         self.verify_broken_service()
         self.verify_broken_cause()
-        print('Good job! You have correctly identified which service broke')
-        print('and what caused it to break!')
+        print('Good job! You have correctly identified which service broke \nand what caused it to break.')

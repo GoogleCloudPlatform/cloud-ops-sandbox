@@ -60,17 +60,24 @@ class Recipe(abc.ABC):
     def _auth_cluster(cluster="APP"):
         """ Authenticates for kubectl commands. """
         logging.info('Authenticating cluster')
-        get_project_command = "gcloud config list --format value(core.project)"
+        get_project_command = 'gcloud config list --format value(core.project)'
         project_id, error = Recipe._run_command(get_project_command)
         project_id = project_id.decode("utf-8").replace('"', '')
+        if project_id == '':
+            print('No project found.')
+            logging.error('Could not authenticate cluster. No project ID found.')
+            exit(1)
         name = "cloud-ops-sandbox"
-        if cluster == "LOADGEN":
-            name = "loadgenerator"
-        zone_command = "gcloud container clusters list --filter name:{} --project {} --format value(zone)".format(name, project_id)
+        if cluster == 'LOADGEN':
+            name = 'loadgenerator'
+        zone_command = 'gcloud container clusters list --filter name:{} --project {} --format value(zone)'.format(name, project_id)
         zone, error = Recipe._run_command(zone_command)
         zone = zone.decode("utf-8").replace('"', '')
-        print(zone)
-        auth_command = "gcloud container clusters get-credentials {} --project {} --zone {}".format(name, project_id, zone)
+        if zone == '':
+            print('Failed to set up recipe. No cluster for {} was found.'.format(name))
+            logging.error('Could not authenticate cluster. No cluster found for {} found.'.format(name))
+            exit(1)
+        auth_command = 'gcloud container clusters get-credentials {} --project {} --zone {}'.format(name, project_id, zone)
         Recipe._run_command(auth_command)
         logging.info('Cluster has been authenticated')
 
@@ -91,13 +98,12 @@ class Recipe(abc.ABC):
 
         # Show the multiple choice
         print(prompt)
-        for index in range(0, len(choices)):
-            print("\t {}) {}".format(index + 1, choices[index]))
-
-        answer = input('Enter the number of your answer: ')
+        for index, choice in enumerate(choices, 1):
+            print("\t {}) {}".format(index, choice))
 
         # Verify the answer
         while True:
+            answer = input('Enter the number of your answer: ')
             try:
                 answer = int(answer)
                 if answer < 1 or answer > len(choices):
@@ -109,5 +115,3 @@ class Recipe(abc.ABC):
                     print('Incorrect. Try again.')
             except ValueError:
                 print('Please enter the number of your answer.')
-
-            answer = input('Enter the number of your answer: ')
