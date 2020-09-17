@@ -107,7 +107,17 @@ class CurrenciesRecipe(Recipe):
 
     def verify(self):
         """Verifies the user found the root cause of the broken service"""
-        print('This is a multiple choice quiz to verify that you have \nfound the root cause of the breakage.')
+        print(
+        '''
+        This is a multiple choice quiz to verify that 
+        you have found the root cause of the breakage.
+        '''
+            )
         self.verify_broken_service()
         self.verify_broken_cause()
-        print('Good job! You have correctly identified which service broke \nand what caused it to break.')
+        print(
+        '''
+        Good job! You have correctly identified which 
+        service broke and what caused it to break.
+        '''
+            )
