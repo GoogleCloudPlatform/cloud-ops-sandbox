@@ -76,7 +76,7 @@ def get_recipes():
 
 RECIPES = get_recipes()
 @click.command()
-@click.argument('action', type=click.Choice(['break', 'restore', 'verify']))
+@click.argument('action', type=click.Choice(['break', 'restore', 'verify', 'hint']))
 @click.argument('recipe_name', type=click.Choice(RECIPES.keys()))
 def main(action, recipe_name):
     """Performs an action on a recipe."""
@@ -92,6 +92,9 @@ def main(action, recipe_name):
     elif action == 'verify':
         logging.info('Verifying %s', recipe_name)
         recipe.verify()
+    elif action == 'hint':
+        logging.info('Giving hint for %s', recipe_name)
+        recipe.hint()
 
 
 if __name__ == "__main__":
