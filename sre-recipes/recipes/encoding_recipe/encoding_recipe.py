@@ -44,8 +44,8 @@ class EncodingRecipe(Recipe):
         service, error = Recipe._run_command(get_pod_command)
         service = service.decode("utf-8").replace('"', '')
         if service == '':
-            print('Could not deploy state. No service found.')
-            logging.error('Error: No services found while trying to deploy state')
+            print('No service found. Could not deploy state.')
+            logging.error('No service found. Could not deploy state.')
             exit(1)
         delete_pod_command = f"kubectl delete pod {service}"
         logging.info('Deleting pod: %s', delete_pod_command)
