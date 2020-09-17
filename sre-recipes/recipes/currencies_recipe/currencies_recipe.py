@@ -44,6 +44,9 @@ class CurrenciesRecipe(Recipe):
         Recipe._run_command(set_env_command)
         service, error = Recipe._run_command(get_pod_command)
         service = service.decode("utf-8").replace('"', '')
+        if service == '':
+            print('No service found. Could not deploy state.')
+            logging.error('No service found. Could not deploy state.')
         delete_pod_command = f"kubectl delete pod {service}"
         logging.info('Deleting pod: %s', delete_pod_command)
         Recipe._run_command(delete_pod_command)
@@ -79,10 +82,18 @@ class CurrenciesRecipe(Recipe):
         external_ip_command = "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
         ip, error = Recipe._run_command(external_ip_command)
         ip = ip.decode("utf-8").replace("'", '')
+        if ip == '':
+            print('No external IP found.')
+            logging.error('No external IP found.')
+            exit(1)
         print('Visit the external IP of the demo application to see if there are any visible changes: http://{}'.format(ip))
         get_project_command = "gcloud config list --format value(core.project)"
         project_id, error = Recipe._run_command(get_project_command)
         project_id = project_id.decode("utf-8").replace('"', '')
+        if project_id == '':
+            print('No project ID found.')
+            logging.error('No project ID found.')
+            exit(1)
         print('Use Monitoring Dashboards to see metrics associated with each service: https://console.cloud.google.com/monitoring/dashboards?project={}'.format(project_id))
 
     def verify_broken_service(self):
