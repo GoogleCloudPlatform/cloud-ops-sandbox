@@ -28,7 +28,7 @@ class EncodingRecipe(Recipe):
     spits errors from the Email Service.
     """
 
-    def deploy_state(state):
+    def deploy_state(self, state):
         """
         Sets an environment variable ENCODE_EMAIL to given state
         and updates the state accordingly
