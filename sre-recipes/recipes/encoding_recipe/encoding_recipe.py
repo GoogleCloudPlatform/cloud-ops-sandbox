@@ -27,7 +27,11 @@ class EncodingRecipe(Recipe):
     This class implements recipe 1, which purposefully
     spits errors from the Email Service.
     """
+    name = "encoding_recipe"
 
+    def get_name(self):
+        return self.name
+        
     def deploy_state(self, state):
         """
         Sets an environment variable ENCODE_EMAIL to given state

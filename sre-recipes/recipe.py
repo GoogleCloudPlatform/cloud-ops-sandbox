@@ -29,6 +29,10 @@ class Recipe(abc.ABC):
     """
 
     @abc.abstractmethod
+    def get_name(self):
+        """ Returns the name of the recipe"""
+
+    @abc.abstractmethod
     def break_service(self):
         """Deploys the broken service"""
 

@@ -27,6 +27,10 @@ class CurrenciesRecipe(Recipe):
     This class implements recipe 0, which purposefully
     introduces latency into the frontend service.
     """
+    name = "currency_recipe"
+    
+    def get_name(self):
+        return self.name
 
     @staticmethod
     def _deploy_state(state):

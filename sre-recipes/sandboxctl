@@ -26,6 +26,7 @@ For information on how to run the CLI, run the following:
 
 import logging
 import os
+import sys
 from os.path import dirname, abspath
 from pkgutil import iter_modules
 from pathlib import Path
@@ -46,7 +47,8 @@ def get_valid_recipes(attributes):
         if isclass(attribute) and attribute is not Recipe and issubclass(attribute, Recipe):
             try:
                 recipe_obj = attribute()
-                recipe_objs[f"recipe{recipe_num}"] = recipe_obj
+                name = recipe_obj.get_name()
+                recipe_objs[name] = recipe_obj
                 recipe_num += 1
             except TypeError:
                 logging.warning('%s needs to implement all abstract methods', \
