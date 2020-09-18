@@ -121,9 +121,13 @@ class EmailService(BaseEmailService):
 class DummyEmailService(BaseEmailService):
   def SendOrderConfirmation(self, request, context):
     logger.info('A request to send order confirmation email to {} has been received.'.format(request.email))
-    if self.EncodeEmail(request.email):
-      logger.error('Err: Could not encode email')
-      context.set_code(grpc.StatusCode.INTERNAL)
+    if os.getenv('ENCODE_EMAIL').lower() == 'true':
+      try:
+        encoded_email = self.EncodeEmail(request.email)
+        request.email = encoded_email
+      except:
+        logger.error('Err: Could not encode email')
+        context.set_code(grpc.StatusCode.INTERNAL)
     return demo_pb2.Empty()
 
   def EncodeEmail(self, email):
@@ -132,15 +136,11 @@ class DummyEmailService(BaseEmailService):
     Input: 
       email - (string) the email address
     Output:
-      boolean - whether the encoding was successful or not
+      string - the encoded email as base64
     """
-    if os.getenv('ENCODE_EMAIL').lower() == "true":
-      byte_rep = email.encode('ascii')
-      b64_bytes = base64.b64encode(byte_rep)
-      encoded = b64_bytes.decode('ascii')
-      return True
-    else:
-      return False
+    byte_rep = email.encode('ascii')
+    b64_bytes = base64.b64encode(email)
+    return b64_bytes.decode('ascii')
 
 class HealthCheck():
   def Check(self, request, context):
