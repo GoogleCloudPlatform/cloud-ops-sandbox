@@ -27,8 +27,8 @@ class CurrenciesRecipe(Recipe):
     This class implements recipe 0, which purposefully
     introduces latency into the frontend service.
     """
-    name = "currency_recipe"
-    
+    name = "recipe0"
+
     def get_name(self):
         return self.name
 
@@ -54,6 +54,8 @@ class CurrenciesRecipe(Recipe):
         delete_pod_command = f"kubectl delete pod {service}"
         logging.info('Deleting pod: %s', delete_pod_command)
         Recipe._run_command(delete_pod_command)
+        availability_command = "kubectl wait --for=condition=available --timeout=600s deployment/frontend"
+        Recipe._run_command(availability_command)
 
     def break_service(self):
         """

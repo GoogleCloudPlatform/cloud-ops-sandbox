@@ -27,11 +27,11 @@ class EncodingRecipe(Recipe):
     This class implements recipe 1, which purposefully
     spits errors from the Email Service.
     """
-    name = "encoding_recipe"
+    name = "recipe1"
 
     def get_name(self):
         return self.name
-        
+
     def deploy_state(self, state):
         """
         Sets an environment variable ENCODE_EMAIL to given state
@@ -54,6 +54,8 @@ class EncodingRecipe(Recipe):
         delete_pod_command = f"kubectl delete pod {service}"
         logging.info('Deleting pod: %s', delete_pod_command)
         Recipe._run_command(delete_pod_command)
+        availability_command = "kubectl wait --for=condition=available --timeout=600s deployment/emailservice"
+        Recipe._run_command(availability_command)
 
     def break_service(self):
         """
