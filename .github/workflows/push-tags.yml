@@ -14,9 +14,9 @@
 
 name: "Push Tagged Images"
 on:
-  create:
+  push:
     tags:
-      - v*
+      - 'v*'
 jobs:
   push-tags:
     runs-on: [self-hosted, push-privilege]
@@ -25,7 +25,7 @@ jobs:
     - name: Get the version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
-    - name: Push to GCR
+    - name: Push Service Images to GCR
       timeout-minutes: 20
       run: |
         set -x
@@ -35,3 +35,18 @@ jobs:
                        --tag=${{ steps.get_version.outputs.VERSION  }}
       env:
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
+    - name: Push Load Generator Image to GCR
+      timeout-minutes: 20
+      run: |
+        set -x
+        gcloud auth configure-docker --quiet
+        IMAGE=gcr.io/$PROJECT_ID/sandbox/loadgenerator/basic:${{ steps.get_version.outputs.VERSION }}
+        docker build -t $IMAGE ./src/loadgenerator
+        docker push $IMAGE
+      env:
+        PROJECT_ID: ${{ secrets.PROJECT_ID }}
+    - name: Deploy Website to App Engine
+      timeout-minutes: 20
+      run: |
+        set -x
+        gcloud app deploy app.yaml

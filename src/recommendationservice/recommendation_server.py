@@ -22,10 +22,16 @@ from concurrent import futures
 
 import googleclouddebugger
 import grpc
-from opencensus.trace.exporters import print_exporter
-from opencensus.trace.exporters import stackdriver_exporter
-from opencensus.trace.ext.grpc import server_interceptor
-from opencensus.trace.samplers import always_on
+from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
+from opencensus.ext.grpc import server_interceptor as oc_server_interceptor
+from opencensus.trace import samplers
+
+from opentelemetry import trace
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from opentelemetry.ext.grpc import client_interceptor, server_interceptor
+from opentelemetry.ext.grpc.grpcext import intercept_server, intercept_channel
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleExportSpanProcessor
 
 import demo_pb2
 import demo_pb2_grpc
@@ -65,12 +71,26 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
+    # OpenTelemetry Tracing
+    # TracerProvider provides global state and access to tracers.
+    trace.set_tracer_provider(TracerProvider())
+
+    # Export traces to Google Cloud Trace
+    # When running on GCP, the exporter handles authentication
+    # using automatically default application credentials.
+    # When running locally, credentials may need to be set explicitly.
+    cloud_trace_exporter = CloudTraceSpanExporter()
+    trace.get_tracer_provider().add_span_processor(
+        SimpleExportSpanProcessor(cloud_trace_exporter)
+    )
+
+    # TODO: remove OpenCensus after conversion to OpenTelemetry
     try:
-        sampler = always_on.AlwaysOnSampler()
+        sampler = samplers.AlwaysOnSampler()
         exporter = stackdriver_exporter.StackdriverExporter()
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+        oc_interceptor = oc_server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
     except:
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+        oc_interceptor = oc_server_interceptor.OpenCensusServerInterceptor()
 
     try:
         googleclouddebugger.enable(
@@ -87,13 +107,21 @@ if __name__ == "__main__":
     if catalog_addr == "":
         raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
     logger.info("product catalog address: " + catalog_addr)
+
+    # Create the gRPC client channel to ProductCatalog (server).
     channel = grpc.insecure_channel(catalog_addr)
+    
+    # OpenTelemetry client interceptor passes trace contexts to the server.
+    channel = intercept_channel(channel, client_interceptor(trace.get_tracer_provider()))
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
-    # create gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10)) # ,interceptors=(tracer_interceptor,))
+    # Create the gRPC server for accepting ListRecommendations Requests from frontend (client).
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-    # add class to gRPC server
+    # OpenTelemetry interceptor receives trace contexts from clients.
+    server = intercept_server(server, server_interceptor(trace.get_tracer_provider()))
+
+    # Add RecommendationService class to gRPC server.
     service = RecommendationService()
     demo_pb2_grpc.add_RecommendationServiceServicer_to_server(service, server)
     health_pb2_grpc.add_HealthServicer_to_server(service, server)

@@ -15,7 +15,7 @@
 .-PHONY: cluster deploy deploy-continuous logs check-env check-service
 
 ZONE=us-west1-a
-CLUSTER=stackdriver-sandbox
+CLUSTER=cloud-ops-sandbox
 
 cluster: check-env
 	gcloud beta container clusters create ${CLUSTER} \

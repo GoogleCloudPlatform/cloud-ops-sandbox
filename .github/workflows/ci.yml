@@ -25,7 +25,7 @@ on:
       - master
 jobs:
   run-tests:
-    runs-on: self-hosted
+    runs-on: [self-hosted, kind-cluster]
     steps:
     - uses: actions/checkout@v2
     - name: License Check
@@ -38,6 +38,16 @@ jobs:
         if [[ -n $(git status -s) ]]; then
           exit 1
         fi
+    - name: Test Custom Cloud Shell Image Build
+      run: |
+        set -x
+        # build cloud shell image: it will automatically exit if there's an error in build
+        docker build -t cloud-shell ./cloud-shell
+    - name: Build Load Generator Image
+      run: |
+        set -x
+        # build load generator image: it will automatically exit if there's an error in the build
+        docker build -t loadgenerator ./src/loadgenerator
     - name: Setup Cluster
       run: |
         set -x
@@ -49,12 +59,6 @@ jobs:
         set -x
         skaffold config set --global local-cluster true
         skaffold run -p local --status-check=false
-    - name: Deploy Load Generator
-      run: |
-        set -x
-        kubectl create deployment loadgenerator \
-          --image=gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator:latest
-         kubectl set env deployment/loadgenerator FRONTEND_ADDR=frontend:80
     - name: Wait For Pods
       timeout-minutes: 10
       run: |
@@ -65,25 +69,29 @@ jobs:
         kubectl wait --for=condition=available --timeout=500s deployment/currencyservice
         kubectl wait --for=condition=available --timeout=500s deployment/emailservice
         kubectl wait --for=condition=available --timeout=500s deployment/frontend
-        kubectl wait --for=condition=available --timeout=500s deployment/loadgenerator
         kubectl wait --for=condition=available --timeout=500s deployment/paymentservice
         kubectl wait --for=condition=available --timeout=500s deployment/productcatalogservice
         kubectl wait --for=condition=available --timeout=500s deployment/recommendationservice
         kubectl wait --for=condition=available --timeout=500s deployment/shippingservice
-    - name: Smoke Test
+    - name: Port Forward frontend
+      run: |
+        set -x
+        port_forward() {
+            # get name of frontend pod
+            local frontend_pod=$(kubectl get pods -l=app=frontend -o=jsonpath='{.items[0].metadata.name}')
+            kubectl port-forward $frontend_pod 3000:8080
+        }
+        port_forward &
+    - name: Ping Frontend
       timeout-minutes: 5
       run: |
         set -x
-        # start fresh loadgenerator pod
-        kubectl delete pod -l app=loadgenerator
-        # wait for requests to come in
-        REQUEST_COUNT="0"
-        while [[ "$REQUEST_COUNT"  -lt "100"  ]]; do
+        # wait for status code 200
+        while [[ -z "$(curl -I localhost:3000 | grep 200)" ]]; do
             sleep 5
-            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Total | awk '{print $2}')
         done
-        # ensure there are no errors hitting endpoints
-        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Total | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
-        if [[ "$ERROR_COUNT" -gt "0" ]]; then
-          exit 1
-        fi
+        # ping homepage
+        # should contain "Hipster Shop"
+        curl --show-error --fail localhost:3000 | grep "Hipster Shop"
+        # ping cart page
+        curl --silent --output /dev/null --show-error --fail localhost:3000/cart

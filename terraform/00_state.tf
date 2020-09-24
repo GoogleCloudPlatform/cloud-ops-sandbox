@@ -12,26 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Here we configure the state backend. For this demo we're using the "local"
-# backend which stores everything in a local directory. The config you see below
-# is functionally equivalent to the defaults.
+
+# We use gcs as our backend, so the state file will be stored
+# in a storage bucket. Since the bucket must preexists, we will create 
+# the project and bucket outside Terraform. Also since the configuration
+# of bucket can't be a variable, we create an empty config and modify it
+# in the data section.
 
 terraform {
-  backend "local" {
-    path = "terraform.tfstate"
-  }
+   backend "gcs" {}
 }
 
-# TODO - Consider storing state remotely on a per-instance basis. 
-# In that case we'd generate a backend config just before
-# running terraform that would look something like this:
-
-# terraform {
-#   backend "gcs" {
-#     bucket = "stackdriver-sandbox"
-#     prefix = "<project-id>"
-#   }
-# }
-
-# Interpolations are not supported in backend configs so we'd have to generate
-# the file rather than rely on env vars like we can do almost everywhere else.
+data "terraform_remote_state" "state" {
+    backend = "gcs"
+    config = {
+        bucket = var.bucket_name
+    }
+}

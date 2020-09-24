@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:12-slim as base
-
+FROM node:12-alpine as base
 FROM base as builder
 
 # Some packages (e.g. @google-cloud/profiler) require additional

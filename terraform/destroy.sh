@@ -13,7 +13,7 @@
 # limitations under the License.
 #!/bin/bash
 
-# This script deletes the GCP project provisioned by Stackdriver Sandbox
+# This script deletes the GCP project provisioned by Cloud Operations Sandbox
 
 #set -euo pipefail
 set -o errexit  # Exit on error
@@ -21,29 +21,60 @@ set -o errexit  # Exit on error
 
 log() { echo "$1" >&2;  }
 
+IFS=$'\n'
+acct=$(gcloud info --format="value(config.account)")
+
 # ensure the working dir is the script's folder
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
-# find the stackdriver sandbox project id
-found=$(gcloud projects list --filter="name:stackdriver-sandbox-*" --format="value(projectId)")
-if [[ -z "${found}" ]]; then
-    log "error: no Stackdriver Sandbox projects found"
+# create variable for telemetry purposes if SESSION is not already set
+# session is defined as the current "instance" in which the user is logged-in to Cloud Shell terminal, working with Sandbox
+if [[ -z "$SESSION" ]]; then export SESSION=$(python3 -c "import uuid; print(uuid.uuid4())"); fi
+
+# this function sends de-identified information to the Google Cloud Platform database
+# on what events occur in users' Sandbox projects for development purposes
+sendTelemetry() {
+  python3 telemetry.py --session=$SESSION --project_id=$1 --event=$2 --version=$VERSION
+}
+
+# find the cloud operations sandbox project id
+filter=$(cat <<-END
+  (id:cloud-ops-sandbox-* AND name='Cloud Operations Sandbox Demo')
+  OR
+  (id:stackdriver-sandbox-* AND name='Stackdriver Sandbox Demo')
+END
+)
+found=$(gcloud projects list --filter="$filter" --format="value(projectId)")
+
+# find projects owned by current user
+for proj in ${found[@]}; do
+  iam_test=$(gcloud projects get-iam-policy "$proj" \
+               --flatten="bindings[].members" \
+               --format="table(bindings.members)" \
+               --filter="bindings.role:roles/owner" 2> /dev/null | grep $acct | cat)
+  if [[ -n "$iam_test" ]]; then
+    create_time=$(gcloud projects describe "$proj" --format="value(create_time.date(%b-%d-%Y))")
+    owned_projects+=("$proj | [$create_time]")
+  fi
+done
+
+# prompt user for a project to delete
+if [[ -z "${owned_projects}" ]]; then
+    log "error: no Cloud Operations Sandbox projects found"
     exit 1
-elif [[ $(echo ${found} | wc -w) -gt 1 ]]; then
-    log "which Stackdriver Sandbox project do you want to delete?:"
-    select opt in $found "cancel"; do
+else
+    log "which Cloud Operations Sandbox project do you want to delete?:"
+    select opt in ${owned_projects[@]} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
             exit 0
         elif [[ -z "${opt}" ]]; then
             log "invalid response"
         else
-            PROJECT_ID=$opt
+            PROJECT_ID=$(echo $opt | awk '{print $1}')
             break
         fi
     done
-else
-    PROJECT_ID=$found
 fi
 
 # attempt deletion (tool will prompt user for confirmation)
@@ -55,10 +86,12 @@ gcloud projects delete $PROJECT_ID
 found=$(gcloud projects list --filter="${PROJECT_ID}" --format="value(projectId)")
 if [[ -n "${found}" ]]; then
     log "project $PROJECT_ID not deleted"
+    sendTelemetry $PROJECT_ID sandbox-not-destroyed
     exit 1
 fi
 
+sendTelemetry $PROJECT_ID sandbox-destroyed
 # remove tfstate file so a new project id will be generated next time
 log "removing tfstate file"
-rm -f terraform.tfstate
-log "Stackdriver Sandbox resources deleted"
+rm -f .terraform/terraform.tfstate
+log "Cloud Operations Sandbox resources deleted"

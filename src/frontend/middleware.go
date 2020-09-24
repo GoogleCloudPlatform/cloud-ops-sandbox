@@ -21,6 +21,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+
+	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel/api/kv"
 )
 
 type ctxKeyLog struct{}
@@ -57,6 +60,10 @@ func (lh *logHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestID, _ := uuid.NewRandom()
 	ctx = context.WithValue(ctx, ctxKeyRequestID{}, requestID.String())
+	trace.SpanFromContext(ctx).SetAttributes(kv.String("name", r.URL.Path))
+
+	// TODO: remove when default metrics through Views API are available in OpenTelemetry
+	http_request_count.Add(ctx, 1)
 
 	start := time.Now()
 	rr := &responseRecorder{w: w}
@@ -74,6 +81,12 @@ func (lh *logHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			"http.resp.took_ms": int64(time.Since(start) / time.Millisecond),
 			"http.resp.status":  rr.status,
 			"http.resp.bytes":   rr.b}).Debugf("request complete")
+		// TODO: remove when default metrics through Views API are available in OpenTelemetry
+		http_request_latency.Record(ctx, int64(time.Since(start) / time.Millisecond))
+		if rr.status != http.StatusOK {
+			// TODO: remove when default metrics through Views API are available in OpenTelemetry
+			http_response_errors.Add(ctx, 1)
+		}
 	}()
 
 	ctx = context.WithValue(ctx, ctxKeyLog{}, log)

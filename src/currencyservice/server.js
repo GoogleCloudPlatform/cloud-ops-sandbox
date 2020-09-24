@@ -20,13 +20,38 @@ require('@google-cloud/profiler').start({
     version: '1.0.0'
   }
 });
-require('@google-cloud/trace-agent').start();
 require('@google-cloud/debug-agent').start({
   serviceContext: {
     service: 'currencyservice',
     version: 'VERSION'
   }
 });
+
+const opentelemetry = require('@opentelemetry/api');
+const {NodeTracerProvider} = require('@opentelemetry/node');
+const {BatchSpanProcessor} = require('@opentelemetry/tracing');
+const {TraceExporter} = require('@google-cloud/opentelemetry-cloud-trace-exporter');
+
+// OpenTelemetry tracing with exporter to Google Cloud Trace
+const provider = new NodeTracerProvider({
+  // Use grpc plugin to receive trace contexts from clients.
+  plugins: {
+    grpc: {
+      enabled: true,
+      path: '@opentelemetry/plugin-grpc',
+    }
+  }
+});
+
+// Enable OpenTelemetry exporters to export traces to Google Cloud Trace.
+// Exporters use Application Default Credentials (ADCs) to authenticate.
+// See https://developers.google.com/identity/protocols/application-default-credentials
+// for more details. When your application is running on GCP,
+// you don't need to provide auth credentials or a project id.
+const exporter = new TraceExporter();
+provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+provider.register();
+const tracer = opentelemetry.trace.getTracer('currency');
 
 const path = require('path');
 const grpc = require('grpc');
@@ -116,9 +141,18 @@ function _carry (amount) {
  * Lists the supported currencies
  */
 function getSupportedCurrencies (call, callback) {
+  // Extract the span context received from the gRPC client.
+  // Create a child span and add an event.
+  const currentSpan = tracer.getCurrentSpan();
+  const span = tracer.startSpan('currencyservice:GetSupportedCurrencies()', {
+    parent: currentSpan,
+    kind: 1, // server
+  });
+  span.addEvent('Get Supported Currencies');
   logger.info('Getting supported currencies...');
   _getCurrencyData((data) => {
     callback(null, {currency_codes: Object.keys(data)});
+    span.end();
   });
 }
 
@@ -126,6 +160,13 @@ function getSupportedCurrencies (call, callback) {
  * Converts between currencies
  */
 function convert (call, callback) {
+  // Extract the span context received from the gRPC client.
+  // Create a child span and add an event.
+  const currentSpan = tracer.getCurrentSpan();
+  const span = tracer.startSpan('currencyservice:Convert()', {
+    parent: currentSpan,
+    kind: 1, // server
+  });
   logger.info('received conversion request');
   try {
     _getCurrencyData((data) => {
@@ -151,7 +192,9 @@ function convert (call, callback) {
       result.currency_code = request.to_code;
 
       logger.info(`conversion request successful`);
+      span.addEvent(`Convert Currency from ${request.from.currency_code} to ${request.to_code}`);
       callback(null, result);
+      span.end();
     });
   } catch (err) {
     logger.error(`conversion request failed: ${err}`);
@@ -180,3 +223,5 @@ function main () {
 }
 
 main();
+// Flush all traces and shut down the Cloud Trace exporter.
+exporter.shutdown();
