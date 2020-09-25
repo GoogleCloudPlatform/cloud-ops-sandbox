@@ -27,6 +27,7 @@ For information on how to run the CLI, run the following:
 from enum import Enum
 import logging
 import os
+import sys
 from os.path import dirname, abspath
 from pkgutil import iter_modules
 from pathlib import Path
@@ -46,11 +47,14 @@ def get_valid_recipes(attributes):
     """
 
     recipe_objs = {}
-    for recipe_num, (attribute_name, attribute) in enumerate(attributes):
+    recipe_num = 0
+    for (attribute_name, attribute) in attributes:
         if isclass(attribute) and attribute is not Recipe and issubclass(attribute, Recipe):
             try:
                 recipe_obj = attribute()
-                recipe_objs[f"recipe{recipe_num}"] = recipe_obj
+                name = recipe_obj.get_name()
+                recipe_objs[name] = recipe_obj
+                recipe_num += 1
             except TypeError:
                 logging.warning('%s needs to implement all abstract methods', \
                     attribute_name)
@@ -100,7 +104,8 @@ def restart_loadgen(pattern=LoadPattern.BASIC):
 
 RECIPES = get_recipes()
 @click.command()
-@click.argument('action', type=click.Choice(['break', 'restore', 'verify', "loadgen-step"]))
+@click.argument('action', type=click.Choice(
+    ['break', 'restore', 'verify', 'hint', "loadgen-step"]))
 @click.argument('recipe_name', type=click.Choice(RECIPES.keys()))
 def main(action, recipe_name):
     """Performs an action on a recipe."""
@@ -116,6 +121,9 @@ def main(action, recipe_name):
     elif action == 'verify':
         logging.info('Verifying %s', recipe_name)
         recipe.verify()
+    elif action == 'hint':
+        logging.info('Giving hint for %s', recipe_name)
+        recipe.hint()
     elif action == 'loadgen-step':
         logging.info('Restarting Load Generator in Step Pattern')
         restart_loadgen(pattern=LoadPattern.STEP)

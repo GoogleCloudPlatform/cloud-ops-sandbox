@@ -19,12 +19,12 @@ $ gcloud auth configure-docker
 ```
 3. Tag the image. This will enable docker to push it to the correct location (the project GCR registry), and automatically show this image as "latest" unless another tag is specified by adding `:my_tag` to the command below.
 ```bash
-$ docker tag cloudshell-image gcr.io/stackdriver-sandbox-230822/cloudshell-image
+$ docker tag cloudshell-image gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified
 ```
 
 4. Finally, push the image. It should be visible in the registry.
 ```bash
-$ docker push gcr.io/stackdriver-sandbox-230822/cloudshell-image
+$ docker push gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified
 ```
 
 See the [Google documentation for Container Registry](https://cloud.google.com/container-registry/docs/quickstart)  for more information on these steps.

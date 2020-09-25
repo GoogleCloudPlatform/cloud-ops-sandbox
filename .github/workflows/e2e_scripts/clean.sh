@@ -40,7 +40,6 @@ while [ -n "$CLUSTER_ZONE" ]; do
   fi
 done
 
-
 # delete GKE loadgenerator
 LOADGENERATOR_ZONE="first_run"
 while [ -n "$LOADGENERATOR_ZONE" ]; do
