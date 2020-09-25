@@ -26,7 +26,7 @@ RUN python3 -m pip install click
 RUN python3 -m pip install google-cloud-monitoring
 
 # set env var
-RUN echo "VERSION=v0.2.5" >> /etc/environment
+RUN echo "VERSION=v0.3.0" >> /etc/environment
 
 # add sre-recipe CLI to PATH
 ENV PATH="/cloud-ops-sandbox/sre-recipes/sandboxctl:${PATH}"

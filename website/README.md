@@ -1,6 +1,6 @@
-# Stackdriver Sandbox Website
+# Cloud Operations Sandbox Website
 
-The Stackdriver Sandbox website is currently deployed at [stackdriver-sandbox.dev](https://stackdriver-sandbox.dev).
+The Stackdriver Sandbox website is currently deployed at [cloud-ops-sandbox.dev](https://cloud-ops-sandbox.dev).
 
 ## Website Architecture
 
@@ -11,7 +11,6 @@ Important files and directories relevent to the website include:
 * `index.html` - located in `website/` directory. This is the main file for the website.
 * `main.css` - located in `website/css/` directory. This is the style sheet for Stackdriver Sandbox's website.
 * `images/` - located in `website/` directory. Any images on the website should be located in this directory.
-* `cloudbuild.yaml` - located in `website/` directory. It is important for this file to be here, since the website is built on App Engine using a build trigger within `stackdriver-sandbox` project on Google Cloud Platform. This build-configuration should be available in order for the website to be automatically deployed.
 
 The website is automatically deployed to App Engine. Every time a new version is released, a build trigger is run that builds the website.
 

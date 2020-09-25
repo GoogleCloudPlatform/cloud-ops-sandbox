@@ -36,8 +36,8 @@ sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VE
 sed -i -e "s/cloudshell-image:v\([0-9\.]\+\)/cloudshell-image:${NEW_VERSION}/g" ${REPO_ROOT}/README.md;
 
 # update website deployment tag
-sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/docs/index.html;
-sed -i -e "s/cloudshell-image:v\([0-9\.]\+\)/cloudshell-image:${NEW_VERSION}/g" ${REPO_ROOT}/docs/index.html;
+sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/website/index.html;
+sed -i -e "s/cloudshell-image:v\([0-9\.]\+\)/cloudshell-image:${NEW_VERSION}/g" ${REPO_ROOT}/website/index.html;
 
 # update custom Cloud Shell image variable
 sed -i -e "s/VERSION=v\([0-9\.]\+\)/VERSION=${NEW_VERSION}/g" ${REPO_ROOT}/cloud-shell/Dockerfile;
@@ -56,7 +56,7 @@ else
     git checkout -b "release/${NEW_VERSION}"
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
     git add "${REPO_ROOT}/kubernetes-manifests/loadgenerator/*.yaml"
-    git add "${REPO_ROOT}/docs/index.html"
+    git add "${REPO_ROOT}/website/index.html"
     git add "${REPO_ROOT}/README.md"
     git add "${REPO_ROOT}/cloud-shell/Dockerfile"
     git add "${REPO_ROOT}/terraform/telemetry.py"
