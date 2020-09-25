@@ -40,7 +40,9 @@ resource "random_shuffle" "zone" {
 # replicates what the Hipster Shop README creates. If you want to see what else
 # is possible, check out the docs: https://www.terraform.io/docs/providers/google/r/container_cluster.html
 resource "google_container_cluster" "gke" {
+  provider = google-beta
   project = data.google_project.project.project_id
+  min_master_version = "1.16.13-gke.401"
 
   # Here's how you specify the name
   name = "cloud-ops-sandbox"
@@ -49,6 +51,11 @@ resource "google_container_cluster" "gke" {
   # returns a list so we have to pull the first element off. If you're looking
   # at this and thinking "huh terraform syntax looks a clunky" you are NOT WRONG
   location = element(random_shuffle.zone.result, 0)
+
+  # Enable Workload Identity for cluster
+  workload_identity_config {
+    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+  }
 
   # Using an embedded resource to define the node pool. Another
   # option would be to create the node pool as a separate resource and link it
@@ -70,12 +77,17 @@ resource "google_container_cluster" "gke" {
       machine_type = "n1-standard-2"
 
       oauth_scopes = [
-        "https://www.googleapis.com/auth/cloud-platform"  
+        "https://www.googleapis.com/auth/cloud-platform"
       ]
 
       labels = {
         environment = "dev",
-        cluster = "cloud-ops-sandbox-main"   
+        cluster = "cloud-ops-sandbox-main"
+      }
+
+      # Enable Workload Identity for node pool
+      workload_metadata_config {
+        node_metadata = "GKE_METADATA_SERVER"
       }
     }
 
@@ -101,7 +113,7 @@ resource "google_container_cluster" "gke" {
   provisioner "local-exec" {
     command = "gcloud config set compute/zone ${element(random_shuffle.zone.result, 0)}"
   }
-  
+
   # add a hint that the service resource must be created (i.e., the service must
   # be enabled) before the cluster can be created. This will not address the
   # eventual consistency problems we have with the API but it will make sure
@@ -110,31 +122,48 @@ resource "google_container_cluster" "gke" {
 }
 
 
-# Set current project 
+# Set current project
 resource "null_resource" "current_project" {
   provisioner "local-exec" {
     command = "gcloud config set project ${data.google_project.project.project_id}"
   }
 }
 
-#resource "null_resource" "sleeping_subprocess" {
-#  provisioner "local-exec" {
-#      command = "sleep 60 >./stdout.log 2>./stderr.log & echo \"sleeping in PID\" $!"
-#  }
-#
-#  depends_on = [google_container_cluster.gke]
-#}
-
-# Setting kubectl context to currently deployed GKE cluster
-resource "null_resource" "set_gke_context" {
-  provisioner "local-exec" {
-    command = "gcloud container clusters get-credentials cloud-ops-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${data.google_project.project.project_id}"
-  }
-
+# Gets the default Compute Engine Service Account of GKE
+data "google_compute_default_service_account" "default" {
+  project = data.google_project.project.project_id
   depends_on = [
-    google_container_cluster.gke, 
+    google_container_cluster.gke,
     null_resource.current_project
   ]
+}
+
+# Create GSA/KSA binding: let IAM auth KSAs as a svc.id.goog member name
+resource "google_service_account_iam_binding" "set_gsa_binding" {
+  service_account_id = data.google_compute_default_service_account.default.name // google_service_account.set_gsa.name
+  role = "roles/iam.workloadIdentityUser"
+
+  members = [
+    "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[default/default]"
+  ]
+
+  depends_on = [data.google_compute_default_service_account.default]
+}
+
+# Annotate KSA
+resource "null_resource" "annotate_ksa" {
+  triggers = {
+    cluster_ep = google_container_cluster.gke.endpoint  #kubernetes cluster endpoint
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+      gcloud container clusters get-credentials cloud-ops-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${data.google_project.project.project_id}
+      kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-service-account=${data.google_compute_default_service_account.default.email}
+    EOT
+  }
+
+  depends_on = [google_service_account_iam_binding.set_gsa_binding]
 }
 
 # Install Istio into the GKE cluster
@@ -143,10 +172,10 @@ resource "null_resource" "install_istio" {
     command = "./istio/install_istio.sh"
   }
 
-  depends_on = [null_resource.set_gke_context]
+  depends_on = [null_resource.annotate_ksa]
 }
 
-# Deploy microservices into GKE cluster 
+# Deploy microservices into GKE cluster
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
     command = "kubectl apply -f ../kubernetes-manifests"
