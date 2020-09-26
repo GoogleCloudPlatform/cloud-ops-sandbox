@@ -31,11 +31,13 @@ spec:
     spec:
       containers:
         - name: locust-main
-          image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/basic:latest
+          image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke:latest
           imagePullPolicy: Always
           env:
             - name: LOCUST_MODE
               value: master
+            - name: LOCUST_TASK
+              value: basic_locustfile.py
             - name: TARGET_HOST
               valueFrom:
                 configMapKeyRef:
@@ -51,3 +53,60 @@ spec:
             - name: loc-master-p2
               containerPort: 5558
               protocol: TCP
+---
+apiVersion: "extensions/v1beta1"
+kind: "Deployment"
+metadata:
+  name: locust-worker
+  labels:
+    name: locust-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: locust-worker
+  template:
+    metadata:
+      labels:
+        app: locust-worker
+    spec:
+      containers:
+        - name: locust-worker
+          image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke:latest
+          imagePullPolicy: Always
+          env:
+            - name: LOCUST_MODE
+              value: worker
+            - name: LOCUST_MASTER
+              value: locust-main
+            - name: LOCUST_TASK
+              value: basic_locustfile.py
+            - name: TARGET_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: address-config
+                  key: FRONTEND_ADDR
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: locust-main
+  labels:
+    app: locust-main
+spec:
+  ports:
+    - port: 8089
+      targetPort: loc-master-web
+      protocol: TCP
+      name: loc-master-web
+    - port: 5557
+      targetPort: loc-master-p1
+      protocol: TCP
+      name: loc-master-p1
+    - port: 5558
+      targetPort: loc-master-p2
+      protocol: TCP
+      name: loc-master-p2
+  selector:
+    app: locust-main
+  type: LoadBalancer
