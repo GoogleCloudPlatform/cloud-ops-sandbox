@@ -16,18 +16,20 @@
 apiVersion: "extensions/v1beta1"
 kind: "Deployment"
 metadata:
-  name: locust-main
+  name: loadgenerator-main
   labels:
-    name: locust-main
+    name: loadgenerator-main
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: locust-main
+      app: loadgenerator
+      mode: master
   template:
     metadata:
       labels:
-        app: locust-main
+        app: loadgenerator
+        mode: master
     spec:
       containers:
         - name: locust-main
@@ -57,18 +59,20 @@ spec:
 apiVersion: "extensions/v1beta1"
 kind: "Deployment"
 metadata:
-  name: locust-worker
+  name: loadgenerator-worker
   labels:
-    name: locust-worker
+    name: loadgenerator-worker
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: locust-worker
+      app: loadgenerator
+      mode: worker
   template:
     metadata:
       labels:
-        app: locust-worker
+        app: loadgenerator
+        mode: worker
     spec:
       containers:
         - name: locust-worker
@@ -90,9 +94,9 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: locust-main
+  name: loadgenerator
   labels:
-    app: locust-main
+    app: loadgenerator
 spec:
   ports:
     - port: 8089
@@ -108,5 +112,6 @@ spec:
       protocol: TCP
       name: loc-master-p2
   selector:
-    app: locust-main
+    app: loadgenerator
+    mode: master
   type: LoadBalancer

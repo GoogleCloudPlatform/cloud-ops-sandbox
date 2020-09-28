@@ -102,12 +102,14 @@ def restart_loadgen(pattern=LoadPattern.BASIC):
     subprocess.call(split(command), stdout=DEVNULL)
 
 
+cli = click.Group()
+
 RECIPES = get_recipes()
-@click.command()
+@cli.command()
 @click.argument('action', type=click.Choice(
-    ['break', 'restore', 'verify', 'hint', "loadgen-step"]))
+    ['break', 'restore', 'verify', 'hint']))
 @click.argument('recipe_name', type=click.Choice(RECIPES.keys()))
-def main(action, recipe_name):
+def sre_recipes(action, recipe_name):
     """Performs an action on a recipe."""
     logging.basicConfig(filename='srerecipes.log', level=logging.INFO, \
         format='%(asctime)s %(message)s')
@@ -124,10 +126,25 @@ def main(action, recipe_name):
     elif action == 'hint':
         logging.info('Giving hint for %s', recipe_name)
         recipe.hint()
-    elif action == 'loadgen-step':
+    elif action == 'loadgen':
         logging.info('Restarting Load Generator in Step Pattern')
         restart_loadgen(pattern=LoadPattern.STEP)
 
+@cli.command()
+@click.argument('traffic_pattern', type=click.Choice(['basic', 'step']))
+def loadgen(traffic_pattern):
+    """Change traffic patterns for the loadgenerator service"""
+    Recipe._auth_cluster()
+    set_env_commands = ["kubectl set env deployment/loadgenerator-"\
+                            f"{mode} LOCUST_TASK={traffic_pattern}_locustfile.py" \
+                            for mode in ['main', 'worker']]
+
+    for cmd in set_env_commands:
+        Recipe._run_command(cmd)
+    delete_pods_command = "kubectl delete pods -l app=loadgenerator"
+    Recipe._run_command(delete_pods_command)
+    print('Loadgenerator redeployed using {traffic_pattern} pattern')
+
 
 if __name__ == "__main__":
-    main()
+    cli()
