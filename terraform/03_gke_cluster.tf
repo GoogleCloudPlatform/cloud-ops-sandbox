@@ -178,7 +178,17 @@ resource "null_resource" "install_istio" {
 # Deploy microservices into GKE cluster
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ../kubernetes-manifests"
+    command = <<-EOT
+    kubectl apply -f ../kubernetes-manifests/adservice
+    kubectl apply -f ../kubernetes-manifests/cartservice
+    kubectl apply -f ../kubernetes-manifests/checkoutservice
+    kubectl apply -f ../kubernetes-manifests/currencyservice
+    kubectl apply -f ../kubernetes-manifests/emailservice
+    kubectl apply -f ../kubernetes-manifests/frontend
+    kubectl apply -f ../kubernetes-manifests/paymentservice
+    kubectl apply -f ../kubernetes-manifests/productcatalogservice
+    kubectl apply -f ../kubernetes-manifests/recommendationservice
+  EOT
   }
 
   depends_on = [null_resource.install_istio]
