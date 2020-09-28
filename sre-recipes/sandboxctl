@@ -36,10 +36,6 @@ from inspect import isclass
 import click
 from recipe import Recipe
 
-class LoadPattern(Enum):
-    BASIC = 1
-    STEP = 2
-
 def get_valid_recipes(attributes):
     """
     Gets all valid recipes from the given list of tuples of attribute names
@@ -81,26 +77,6 @@ def get_recipes():
                     for attribute_name in dir(recipe_module)]
     recipes = get_valid_recipes(attributes)
     return recipes
-
-def restart_loadgen(pattern=LoadPattern.BASIC):
-    """
-    Restarts the load generator with the intent of deploying a
-    particular load pattern.
-    """
-    DEVNULL = open(devnull, 'w')
-    command = (
-        'sed -i -e'
-        ' "s/(basic|step):latest/step:latest/g"'
-        ' ../kubernetes-manifest/loadgenerator/locust-main-controller.yaml'
-        ' ../kubernetes-manifest/loadgenerator/locust-worker-controller.yaml'
-    )
-    subprocess.call(split(command), stdout=DEVNULL)
-    command = (
-        'kubectl apply'
-        ' -f ../kubernetes-manifest/loadgenerator/'
-    )
-    subprocess.call(split(command), stdout=DEVNULL)
-
 
 cli = click.Group()
 
