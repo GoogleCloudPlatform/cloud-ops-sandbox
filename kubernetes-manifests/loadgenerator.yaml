@@ -13,12 +13,10 @@
 # limitations under the License.
 
 
-apiVersion: "extensions/v1beta1"
-kind: "Deployment"
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: loadgenerator-main
-  labels:
-    name: loadgenerator-main
 spec:
   replicas: 1
   selector:
@@ -56,12 +54,10 @@ spec:
               containerPort: 5558
               protocol: TCP
 ---
-apiVersion: "extensions/v1beta1"
-kind: "Deployment"
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: loadgenerator-worker
-  labels:
-    name: loadgenerator-worker
 spec:
   replicas: 1
   selector:
