@@ -8,7 +8,7 @@ certifi==2019.11.28         # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via flask
 flask==1.0.2              # via locustio
-gevent==1.4.0             # via locustio
+gevent==20.9.0             # via locustio
 greenlet==0.4.17          # via gevent
 idna==2.8                 # via requests
 itsdangerous==1.1.0       # via flask
