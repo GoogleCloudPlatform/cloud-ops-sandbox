@@ -5,7 +5,7 @@
   "pinVersions": false,
   "rebaseStalePrs": true,
   "schedule": [
-    "after 9am and before 3pm"
+    "after 9am and before 3pm every tuesday"
   ],
   "prConcurrentLimit": 5,
   "gitAuthor": null,
