@@ -23,7 +23,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 # Copy tasks and runner script
-COPY run_step.sh .
+COPY run.sh .
 COPY locust-tasks ./locust-tasks
 
 # Expose the required Locust ports
