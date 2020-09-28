@@ -46,9 +46,8 @@ jobs:
     - name: Build Load Generator Image
       run: |
         set -x
-        # build load generator images: this will automatically exit if there's an error in the build
-        docker build -t loadgenerator-basic ./src/loadgenerator/basic
-        docker build -t loadgenerator-step ./src/loadgenerator/step
+        # build load generator image: this will automatically exit if there's an error in the build
+        docker build -t loadgenerator-basic ./src/loadgenerator
     - name: Setup Cluster
       run: |
         set -x
