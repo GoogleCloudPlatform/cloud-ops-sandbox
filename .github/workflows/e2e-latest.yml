@@ -17,9 +17,9 @@ on:
   push:
     # run on pushes to master or release/*
     branches:
-    - master
-    - release/*
-    - e2e*
+      - master
+      - release/*
+      - e2e*
   pull_request:
     types: [review_requested]
   workflow_dispatch:
