@@ -30,4 +30,4 @@ COPY locust-tasks ./locust-tasks
 EXPOSE 5557 5558 8089
 
 # Start Locust using LOCUS_OPTS environment variable
-ENTRYPOINT ["./run_step.sh"]
+ENTRYPOINT ["./run.sh"]
