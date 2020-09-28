@@ -17,12 +17,13 @@ on:
   push:
     # run on pushes to master or release/*
     branches:
-      - master
-      - release/*
-      - e2e*
-      - loadgen_integration # will remove before merging
+    - master
+    - release/*
+    - e2e*
+  pull_request:
+    types: [review_requested]
   workflow_dispatch:
-    # trigger through UI or API
+  # trigger through UI or API
 jobs:
   end-to-end-latest:
     runs-on: [self-hosted, e2e-worker]
