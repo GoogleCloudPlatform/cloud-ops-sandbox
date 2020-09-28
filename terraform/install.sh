@@ -285,7 +285,7 @@ loadGen() {
       "${TRIES}" -lt 20  ]]; do
     log "waiting for load generator instance..."
     sleep 10
-    loadgen_ip=$(kubectl get service locust-main -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
+    loadgen_ip=$(kubectl get service loadgenerator-main -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
      [ -z "$loadgen_ip" ] && sleep 10;
     TRIES=$((TRIES + 1))
   done
