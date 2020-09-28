@@ -4,6 +4,7 @@
   ],
   "pinVersions": false,
   "rebaseStalePrs": true,
+  "timezone": "America/Los_Angeles",
   "schedule": [
     "after 9am and before 3pm every tuesday"
   ],
