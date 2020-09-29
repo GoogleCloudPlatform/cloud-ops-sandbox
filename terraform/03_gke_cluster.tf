@@ -179,6 +179,7 @@ resource "null_resource" "install_istio" {
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
     command = <<-EOT
+    kubectl apply -f ../kubernetes-manifests/redis.yaml
     kubectl apply -f ../kubernetes-manifests/adservice.yaml
     kubectl apply -f ../kubernetes-manifests/cartservice.yaml
     kubectl apply -f ../kubernetes-manifests/checkoutservice.yaml
