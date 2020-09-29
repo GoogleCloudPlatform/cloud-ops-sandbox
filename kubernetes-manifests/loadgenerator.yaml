@@ -78,7 +78,7 @@ spec:
             - name: LOCUST_MODE
               value: worker
             - name: LOCUST_MASTER
-              value: loadgenerator-main
+              value: http://loadgenerator
             - name: LOCUST_TASK
               value: basic_locustfile.py
             - name: TARGET_HOST
