@@ -189,6 +189,7 @@ resource "null_resource" "deploy_services" {
     kubectl apply -f ../kubernetes-manifests/paymentservice.yaml
     kubectl apply -f ../kubernetes-manifests/productcatalogservice.yaml
     kubectl apply -f ../kubernetes-manifests/recommendationservice.yaml
+    kubectl apply -f ../kubernetes-manifests/shippingservice.yaml
   EOT
   }
 
@@ -208,6 +209,7 @@ resource "null_resource" "delay" {
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/paymentservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/productcatalogservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/recommendationservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/shippingservice
   EOT
   }
 
