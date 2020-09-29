@@ -114,12 +114,12 @@ def loadgen(traffic_pattern):
     set_env_commands = ["kubectl set env deployment/loadgenerator-"\
                             f"{mode} LOCUST_TASK={traffic_pattern}_locustfile.py" \
                             for mode in ['main', 'worker']]
-
+    print('Redeploying Loadgenerator...')
     for cmd in set_env_commands:
         Recipe._run_command(cmd)
     delete_pods_command = "kubectl delete pods -l app=loadgenerator"
     Recipe._run_command(delete_pods_command)
-    print('Loadgenerator redeployed using {traffic_pattern} pattern')
+    print(f'Loadgenerator deployed using {traffic_pattern} pattern')
 
 
 if __name__ == "__main__":
