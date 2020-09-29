@@ -43,6 +43,11 @@ jobs:
         set -x
         # build cloud shell image: it will automatically exit if there's an error in build
         docker build -t cloud-shell ./cloud-shell
+    - name: Build Load Generator Image
+      run: |
+        set -x
+        # build load generator image: it will automatically exit if there's an error in the build
+        docker build -t loadgenerator ./src/loadgenerator
     - name: Setup Cluster
       run: |
         set -x
@@ -53,10 +58,7 @@ jobs:
       run: |
         set -x
         skaffold config set --global local-cluster true
-        # deploy services
-        skaffold run --default-repo=local -p local --status-check=false
-        # deploy loadgenerator
-        skaffold run --default-repo=local -p loadgenerator -p local --status-check=false
+        skaffold run -p local --status-check=false
     - name: Wait For Pods
       timeout-minutes: 10
       run: |
@@ -71,8 +73,6 @@ jobs:
         kubectl wait --for=condition=available --timeout=500s deployment/productcatalogservice
         kubectl wait --for=condition=available --timeout=500s deployment/recommendationservice
         kubectl wait --for=condition=available --timeout=500s deployment/shippingservice
-        kubectl wait --for=condition=available --timeout=500s deployment/loadgenerator-main
-        kubectl wait --for=condition=available --timeout=500s deployment/loadgenerator-worker
     - name: Port Forward frontend
       run: |
         set -x

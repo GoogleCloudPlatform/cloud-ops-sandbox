@@ -75,16 +75,3 @@ profiles:
   build:
     local: 
       push: false
-- name: loadgenerator
-  build:
-    artifacts:
-    - image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke
-      context: src/loadgenerator
-    tagPolicy:
-      gitCommit: {}
-  deploy:
-    statusCheckDeadlineSeconds: 120
-    kubectl:
-      manifests:
-      - ./kubernetes-manifests/loadgenerator.yaml
-      - ./kubernetes-manifests/loadgenerator-config.yaml
