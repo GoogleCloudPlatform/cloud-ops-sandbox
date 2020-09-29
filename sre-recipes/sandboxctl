@@ -120,6 +120,7 @@ def loadgen(traffic_pattern):
     delete_pods_command = "kubectl delete pods -l app=loadgenerator"
     Recipe._run_command(delete_pods_command)
     print(f'Loadgenerator deployed using {traffic_pattern} pattern')
+    Recipe._auth_cluster('APP')
 
 
 if __name__ == "__main__":
