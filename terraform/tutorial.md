@@ -177,9 +177,9 @@ In **Cloud Shell**, issue these **commands** to download a release of the Sandbo
 
 ```bash
 cd ~
-wget https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/archive/next19.tar.gz
-tar -xvf next19.tar.gz
-cd stackdriver-sandbox-next19
+wget https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/archive/v0.3.0.tar.gz
+tar -xvf v0.3.0.tar.gz
+cd cloud-ops-sandbox-0.3.0
 ```
 
 ### Create and configure source repository
@@ -199,7 +199,7 @@ In the Debugger home page, **copy** the command (_don't click the button!_) in t
 Paste the command into your Cloud Shell prompt and add a space and a period:
 
 ```bash
-gcloud beta debug source upload --project=stackdriver-sandbox-68291054 --branch=6412930C2492B84D99F3 .
+gcloud beta debug source upload --project=<project_ID> --branch=6412930C2492B84D99F3 .
 ```
 
 Enter _RETURN_ to execute the command.
@@ -224,7 +224,7 @@ Switch to the **Logpoint** tab on the right side. To create the logpoint:
 
 To see all messages that are being generated in Cloud Logging from your logpoint, click the **Logs** tab in the middle of the UI. This brings up an embedded viewer for the logs.
 
-## The Cloud observability products: Monitoring, Logging, and Error Reporting
+## The Cloud Observability products: Monitoring, Logging, and Error Reporting
 
 Next, learn about Cloud Observability products!
 
