@@ -14,7 +14,7 @@ The Hipster Shop application consists of a number of microservices, written in a
 
 **Note:** We are not endorsing this architecture as the best way to build a real online store. This application is optimized for demonstration and learning purposes.  It illustrates a large number of cloud-native technologies, uses a variety of programming languages, and provides an environment that can be explored productively with Ops Management tools.
 
-The Git repository you cloned has all the source code, so you can explore the implementation details of the application. See the repository [README](https://github.com/GoogleCloudPlatform/stackdriver-sandbox) for a guided tour.
+The Git repository you cloned has all the source code, so you can explore the implementation details of the application. See the repository [README](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox) for a guided tour.
 
 ### Prerequisites
 
@@ -49,7 +49,7 @@ If a message does **not** appear, and the installation script is not able to run
 
 In this tutorial, walk through a guided tour of products in Cloud Operations and explore how they can be used to work with an application.
 
-A User Guide with visuals can be used to follow along as well. The User Guide can be found [here](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/blob/master/docs/README.md).
+A User Guide with visuals can be used to follow along as well. The User Guide can be found [here](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/master/docs/README.md).
 
 Let's get started!
 
@@ -179,7 +179,7 @@ In **Cloud Shell**, issue these **commands** to download a release of the Sandbo
 
 ```bash
 cd ~
-wget https://github.com/GoogleCloudPlatform/stackdriver-sandbox/archive/next19.tar.gz
+wget https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/archive/next19.tar.gz
 tar -xvf next19.tar.gz
 cd stackdriver-sandbox-next19
 ```
