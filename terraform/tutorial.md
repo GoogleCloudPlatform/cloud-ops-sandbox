@@ -32,13 +32,11 @@ For more information, see ["Create a new billing account"](https://cloud.google.
 The installation process takes a few minutes. When it completes, you see a message like the following:
 
 ```bash
-********************************************************************************
 Cloud Operations Sandbox deployed successfully!
-
-     Google Cloud Console GKE Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project_ID>
-     Google Cloud Console Monitoring Workspace: https://console.cloud.google.com/monitoring?project=<project_ID>
-     Hipstershop web app address: http://XX.XX.XX.XX
-     Load generator web interface: http://XX.XX.XX.XX
+    Google Cloud Console GKE Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project_ID>
+    Google Cloud Console Monitoring Workspace: https://console.cloud.google.com/monitoring?project=<project_ID>
+    Hipstershop web app address: http://XX.XX.XX.XX
+    Load generator web interface: http://XX.XX.XX.XX
 ```
 
 The URLs in this message tell you where to find the results of the installation.
