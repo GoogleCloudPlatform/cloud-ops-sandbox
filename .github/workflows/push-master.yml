@@ -47,7 +47,7 @@ jobs:
         docker push $IMAGE_SHA
         # build and tag with latest
         IMAGE_LATEST=gcr.io/$PROJECT_ID/sandbox/loadgenerator/gke:latest
-        docker build -t $IMAGE_LATEST ./src/loadgenerator/basic
+        docker build -t $IMAGE_LATEST ./src/loadgenerator
         docker push $IMAGE_LATEST
       env:
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
