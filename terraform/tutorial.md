@@ -2,17 +2,17 @@
 
 ## Overview
 
-The Cloud Operations Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the [Ops Management](http://cloud.google.com/products/operations) (formerly Stackdriver) product suite. Ops Management is a suite of tools that helps you gain full observability into your code and applications.
+The Cloud Operations Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the [Cloud Operations](http://cloud.google.com/products/operations) (formerly Stackdriver) product suite. Cloud Operations is a suite of tools that helps you gain full observability into your code and applications.
 
 The Hipster Shop application used in the sandbox is intended to be sufficiently complex such that you can meaningfully experiment with it, and the Sandbox automatically provisions a new demo cluster, configures and deploys Hipster Shop, and simulates real users.
 
-With the Sandbox running, you can experiment with various Ops Management tools to solve problems and accomplish standard SRE tasks in a sandboxed environment without impacting your production monitoring setup.
+With the Sandbox running, you can experiment with various Cloud Operations tools to solve problems and accomplish standard SRE tasks in a sandboxed environment without impacting your production monitoring setup.
 
 ### Architecture of the Hipster Shop application
 
 The Hipster Shop application consists of a number of microservices, written in a variety of languages, that talk to each other over gRPC.
 
-**Note:** We are not endorsing this architecture as the best way to build a real online store. This application is optimized for demonstration and learning purposes.  It illustrates a large number of cloud-native technologies, uses a variety of programming languages, and provides an environment that can be explored productively with Ops Management tools.
+**Note:** We are not endorsing this architecture as the best way to build a real online store. This application is optimized for demonstration and learning purposes.  It illustrates a large number of cloud-native technologies, uses a variety of programming languages, and provides an environment that can be explored productively with Cloud Operations tools.
 
 The Git repository you cloned has all the source code, so you can explore the implementation details of the application. See the repository [README](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox) for a guided tour.
 
@@ -78,21 +78,21 @@ navigation menu to bring up other GCP tools.
 
 As the cloud-native microservice architecture, which promises scalability and flexibility benefits, gets more popular, developers and administrators need tools that can work across cloud-based distributed systems.
 
-Ops Management provides products for both developers and administrators; this section introduces the products and their general audiences.  The tools are covered in more detail later.
+Cloud Operations provides products for both developers and administrators; this section introduces the products and their general audiences.  The tools are covered in more detail later.
 
-Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of **Application Performance Management (APM)** has increased. Ops Management provides 3 products for APM:
+Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of **Application Performance Management (APM)** has increased. Cloud Operations provides 3 products for APM:
 
 -  [Cloud Trace](https://console.cloud.google.com/traces)
 -  [Cloud Profiler](https://console.cloud.google.com/profiler)
 -  [Cloud Debugger](https://console.cloud.google.com/debug)
 
-Similarly, cloud-native, microservice-based applications complicate traditional approaches used by administrators for monitoring system health: it's harder to observe your system health when the number of instances is flexible and the inter-dependencies among the many components are complicated. In the last few years, **Site Reliability Engineering (SRE)** has become recognized as a practical approach to managing large-scale, highly complex, distributed systems. Ops Management provides the following tools that are useful for SRE:
+Similarly, cloud-native, microservice-based applications complicate traditional approaches used by administrators for monitoring system health: it's harder to observe your system health when the number of instances is flexible and the inter-dependencies among the many components are complicated. In the last few years, **Site Reliability Engineering (SRE)** has become recognized as a practical approach to managing large-scale, highly complex, distributed systems. Cloud Operations provides the following tools that are useful for SRE:
 
 -  [Cloud Monitoring](https://console.cloud.google.com/monitoring)
 -  [Cloud Logging](https://console.cloud.google.com/logs)
 -  [Cloud Error Reporting](https://console.cloud.google.com/errors)
 
-You can find the Ops Management products in the navigation panel on the GCP Console:
+You can find the Cloud Operations products in the navigation panel on the GCP Console:
 
 ## The Cloud APM products: Trace, Profiler, and Debugger
 
