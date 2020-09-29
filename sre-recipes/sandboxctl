@@ -122,6 +122,19 @@ def loadgen(traffic_pattern):
     print(f'Loadgenerator deployed using {traffic_pattern} pattern')
     Recipe._auth_cluster('APP')
 
+@cli.command()
+def create():
+    """Create a new sandbox"""
+    os.chdir(os.path.abspath(sys.path[0]))
+    create_command = "../terraform/install.sh"
+    Recipe._run_command(create_command)
+
+@cli.command()
+def destroy():
+    """Delete an existing sandbox"""
+    os.chdir(os.path.abspath(sys.path[0]))
+    destroy_command = "../terraform/destroy.sh"
+    Recipe._run_command(destroy_command)
 
 if __name__ == "__main__":
     cli()
