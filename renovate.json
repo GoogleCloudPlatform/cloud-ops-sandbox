@@ -20,7 +20,7 @@
   "labels": [
     "dependencies",
     "type: cleanup",
-    "priority: p1",
+    "priority: p2",
     "automerge"
   ]
 }
