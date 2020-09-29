@@ -53,7 +53,7 @@ Let's get started!
 
 ## Explore your project in GCP
 
-In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you to the [Kubernetes Engine **Workloads** page](https://console.cloud.google.com/projectselector2/kubernetes/workload) for the project created by the installer.
+In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you to the [Kubernetes Engine **Workloads** page](https://console.cloud.google.com/kubernetes/workload) for the project created by the installer.
 
 ## Explore Cloud Monitoring
 
