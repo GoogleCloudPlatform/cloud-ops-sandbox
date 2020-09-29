@@ -321,7 +321,7 @@ displaySuccessMessage() {
     log ""
     log "To remove the Sandbox once finished using it, run"
     log ""
-    log "     ./destroy.sh"
+    log "     sandboxctl destroy"
     log ""
     log "********************************************************************************"
 }
