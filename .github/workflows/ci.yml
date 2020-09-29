@@ -53,9 +53,10 @@ jobs:
       run: |
         set -x
         skaffold config set --global local-cluster true
-        skaffold run -p local --status-check=false
+        # deploy services
+        skaffold run --default-repo=local -p local --status-check=false
         # deploy loadgenerator
-        skaffold run -p loadgenerator -p local --status-check=false
+        skaffold run --default-repo=local -p loadgenerator -p local --status-check=false
     - name: Wait For Pods
       timeout-minutes: 10
       run: |
