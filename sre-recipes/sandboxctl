@@ -110,7 +110,7 @@ def sre_recipes(action, recipe_name):
 @click.argument('traffic_pattern', type=click.Choice(['basic', 'step']))
 def loadgen(traffic_pattern):
     """Change traffic patterns for the loadgenerator service"""
-    Recipe._auth_cluster()
+    Recipe._auth_cluster('LOADGEN')
     set_env_commands = ["kubectl set env deployment/loadgenerator-"\
                             f"{mode} LOCUST_TASK={traffic_pattern}_locustfile.py" \
                             for mode in ['main', 'worker']]
