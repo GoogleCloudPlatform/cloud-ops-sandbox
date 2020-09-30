@@ -102,9 +102,6 @@ def sre_recipes(action, recipe_name):
     elif action == 'hint':
         logging.info('Giving hint for %s', recipe_name)
         recipe.hint()
-    elif action == 'loadgen':
-        logging.info('Restarting Load Generator in Step Pattern')
-        restart_loadgen(pattern=LoadPattern.STEP)
 
 @cli.command()
 @click.argument('traffic_pattern', type=click.Choice(['basic', 'step']))
