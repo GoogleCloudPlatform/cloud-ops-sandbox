@@ -49,5 +49,7 @@ steps:
     LATEST_TAG=$(git tag | grep "v[0-9]*\.[0-9]*\.[0-9]*" | sort -V | tail -n 1)
     git checkout $$LATEST_TAG
     docker build -t $$CERTIFIED_PATH:latest ./cloud-shell
+    docker build -t $$CERTIFIED_PATH:$$LATEST_TAG ./cloud-shell
     docker push $$CERTIFIED_PATH:latest
+    docker push $$CERTIFIED_PATH:$$LATEST_TAG
 logsBucket: 'gs://sandbox-cloud-build-logs'
