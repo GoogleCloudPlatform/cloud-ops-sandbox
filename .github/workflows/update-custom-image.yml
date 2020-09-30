@@ -36,7 +36,8 @@ jobs:
       run: |
         set -x
         run_info=$(gcloud beta builds submit --config cloud-shell/cloudbuild.yaml --async)
-        run_id=$(echo $run_info |  awk '{print $1}' | tail -n 1)
+        # capture run id (format: xxxxxxxx-xxxx-xxxx-xxxxxxxxxxxx)
+        run_id=$(echo $run_info |   grep -o "\([0-9,a-z]\+-\)\{4\}[0-9,a-z]\+")
         echo ::set-output name=run_id::${run_id}
     - name: Display Logs
       continue-on-error: true
