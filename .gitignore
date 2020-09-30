@@ -19,3 +19,4 @@ terraform/terraform.tfstate
 terraform/istio/istioctl
 terraform/istio/istio-*/**
 .token
+skaffold

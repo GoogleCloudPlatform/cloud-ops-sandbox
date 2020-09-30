@@ -19,7 +19,7 @@ CLUSTER=cloud-ops-sandbox-${USER}
 
 cluster: check-env
 	EXISTING_CLUSTER=`gcloud container clusters list --zone=us-west1-a --format="value(name)" --filter="name:${CLUSTER}"`
-	if [ -s "${EXISTING_CLUSTER}" ]; then \
+	if [ "${EXISTING_CLUSTER}" != "" ]; then \
     	gcloud container clusters delete ${CLUSTER} --project=${PROJECT_ID} --zone=${ZONE} --quiet; \
 	fi
 	

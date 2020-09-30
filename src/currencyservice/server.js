@@ -17,13 +17,11 @@
 require('@google-cloud/profiler').start({
   serviceContext: {
     service: 'currencyservice',
-    version: '1.0.0'
   }
 });
 require('@google-cloud/debug-agent').start({
   serviceContext: {
     service: 'currencyservice',
-    version: 'VERSION'
   }
 });
 
