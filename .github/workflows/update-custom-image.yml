@@ -36,7 +36,7 @@ jobs:
       run: |
         set -x
         run_id=$(gcloud builds submit \
-            --config cloud-shell/cloudbuild.yaml --asynic --format="value(id)")
+            --config cloud-shell/cloudbuild.yaml --async --format="value(id)")
         echo ::set-output name=run_id::${run_id}
     - name: Display Logs
       continue-on-error: true
