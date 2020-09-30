@@ -34,6 +34,7 @@ jobs:
     - name: Run Cloud Build Trigger
       id: cloud_build
       run: |
+        set -x
         run_info=$(gcloud beta builds submit --config cloud-shell/cloudbuild.yaml --async)
         run_id=$(echo $run_info |  awk '{print $1}' | tail -n 1)
         echo ::set-output name=run_id::${run_id}
