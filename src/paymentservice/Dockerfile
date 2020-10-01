@@ -13,7 +13,6 @@
 # limitations under the License.
 
 FROM node:12-alpine as base
-
 FROM base as builder
 
 # Some packages (e.g. @google-cloud/profiler) require additional

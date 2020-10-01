@@ -14,17 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# ensure the working dir is the script's folder
+SCRIPT_DIR=$(realpath $(dirname "$0"))
+cd $SCRIPT_DIR
 
-LOCUST="/usr/local/bin/locust"
-LOCUS_OPTS="-f /locust-tasks/locustfile.py --host=$TARGET_HOST"
 LOCUST_MODE=${LOCUST_MODE:-standalone}
+LOCUST_TASK=${LOCUST_TASK:-basic_locustfile.py}
+LOCUS_OPTS="-f ./locust-tasks/$LOCUST_TASK --host=$TARGET_HOST"
 
 if [[ "$LOCUST_MODE" = "master" ]]; then
     LOCUS_OPTS="$LOCUS_OPTS --master"
 elif [[ "$LOCUST_MODE" = "worker" ]]; then
-    LOCUS_OPTS="$LOCUS_OPTS --slave --master-host=$LOCUST_MASTER"
+    LOCUS_OPTS="$LOCUS_OPTS --worker --master-host=$LOCUST_MASTER"
 fi
 
-echo "$LOCUST $LOCUS_OPTS"
+echo "locust $LOCUS_OPTS"
 
-$LOCUST $LOCUS_OPTS
+locust $LOCUS_OPTS

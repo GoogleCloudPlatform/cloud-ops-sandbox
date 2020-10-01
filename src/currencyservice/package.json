@@ -9,7 +9,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@google-cloud/debug-agent": "3.2.0",
+    "@google-cloud/debug-agent": "5.1.2",
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^0.4.1",
     "@google-cloud/profiler": "4.0.3",
     "@grpc/proto-loader": "0.5.5",
@@ -19,6 +19,7 @@
     "@opentelemetry/plugin-http": "^0.11.0",
     "@opentelemetry/plugin-https": "^0.11.0",
     "@opentelemetry/tracing": "^0.11.0",
+    "ajv": "^5.0.0",
     "async": "3.2.0",
     "google-protobuf": "3.13.0",
     "grpc": "1.24.3",

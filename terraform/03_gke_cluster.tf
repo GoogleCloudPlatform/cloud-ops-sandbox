@@ -70,7 +70,7 @@ resource "google_container_cluster" "gke" {
   # it's deployed, so it makes sense to accept the tradeoff for the convenience
   # of having it inline.
   #
-  # Many of the paramaters below are self-explanatory so I'll only call out
+  # Many of the parameters below are self-explanatory so I'll only call out
   # interesting things.
   node_pool {
     node_config {
@@ -178,7 +178,19 @@ resource "null_resource" "install_istio" {
 # Deploy microservices into GKE cluster
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ../kubernetes-manifests"
+    command = <<-EOT
+    kubectl apply -f ../kubernetes-manifests/redis.yaml
+    kubectl apply -f ../kubernetes-manifests/adservice.yaml
+    kubectl apply -f ../kubernetes-manifests/cartservice.yaml
+    kubectl apply -f ../kubernetes-manifests/checkoutservice.yaml
+    kubectl apply -f ../kubernetes-manifests/currencyservice.yaml
+    kubectl apply -f ../kubernetes-manifests/emailservice.yaml
+    kubectl apply -f ../kubernetes-manifests/frontend.yaml
+    kubectl apply -f ../kubernetes-manifests/paymentservice.yaml
+    kubectl apply -f ../kubernetes-manifests/productcatalogservice.yaml
+    kubectl apply -f ../kubernetes-manifests/recommendationservice.yaml
+    kubectl apply -f ../kubernetes-manifests/shippingservice.yaml
+  EOT
   }
 
   depends_on = [null_resource.install_istio]
@@ -197,6 +209,7 @@ resource "null_resource" "delay" {
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/paymentservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/productcatalogservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/recommendationservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/shippingservice
   EOT
   }
 

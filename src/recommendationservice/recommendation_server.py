@@ -94,8 +94,7 @@ if __name__ == "__main__":
 
     try:
         googleclouddebugger.enable(
-            module='recommendationserver',
-            version='1.0.0'
+            module='recommendationservice',
         )
     except (Exception, err):
         logger.error("could not enable debugger")

@@ -15,16 +15,21 @@
 .-PHONY: cluster deploy deploy-continuous logs check-env check-service
 
 ZONE=us-west1-a
-CLUSTER=cloud-ops-sandbox
+CLUSTER=cloud-ops-sandbox-${USER}
 
 cluster: check-env
+	EXISTING_CLUSTER=`gcloud container clusters list --zone=${ZONE} --format="value(name)" --filter="name:${CLUSTER}"`
+	if [ "${EXISTING_CLUSTER}" != "" ]; then \
+    	gcloud container clusters delete ${CLUSTER} --project=${PROJECT_ID} --zone=${ZONE} --quiet; \
+	fi
+	
 	gcloud beta container clusters create ${CLUSTER} \
 		--project=${PROJECT_ID} --zone=${ZONE} \
 		--machine-type=n1-standard-2 --num-nodes=4 \
 		--enable-stackdriver-kubernetes \
 		--scopes https://www.googleapis.com/auth/cloud-platform
-	cd ./terraform/istio && \
-	./install_istio.sh
+	#cd ./terraform/istio && \
+	#./install_istio.sh
 	skaffold run --default-repo=gcr.io/${PROJECT_ID}/sandbox -l skaffold.dev/run-id=${CLUSTER}-${PROJECT_ID}-${ZONE}
 
 deploy: check-env
