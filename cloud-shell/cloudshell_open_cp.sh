@@ -19,7 +19,7 @@
 # NOTE: this file is a copy of cloudshell_open.sh script usually stored
 # at /google/devshell/bashrc.google.d/ in GCP. It should be updated if that
 # script changes.
-# The only change from the original script is the addition of "./install.sh"
+# The only change from the original script is the addition of "sandboxctl create"
 # right before the end.
 
 function cloudshell_open {
