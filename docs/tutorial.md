@@ -176,10 +176,10 @@ As you can see, Debugger requires access to source code to function.  For this e
 In **Cloud Shell**, issue these **commands** to download a release of the Sandbox source code and extract the archive:
 
 ```bash
-cd ~
-wget https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/archive/v0.3.0.tar.gz
-tar -xvf v0.3.0.tar.gz
-cd cloud-ops-sandbox-0.3.0
+VERSION=$(git describe --tags --abbrev=0)
+wget https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/archive/$VERSION.tar.gz
+tar -xvf $VERSION.tar.gz
+cd cloud-ops-sandbox-${VERSION#?}
 ```
 
 ### Create and configure source repository
