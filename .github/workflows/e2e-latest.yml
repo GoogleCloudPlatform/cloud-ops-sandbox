@@ -21,8 +21,10 @@ on:
       - release/*
       - e2e*
       - step-pattern
+  pull_request:
+    types: [review_requested]
   workflow_dispatch:
-    # trigger through UI or API
+  # trigger through UI or API
 jobs:
   end-to-end-latest:
     runs-on: [self-hosted, e2e-worker]

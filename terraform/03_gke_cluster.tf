@@ -70,7 +70,7 @@ resource "google_container_cluster" "gke" {
   # it's deployed, so it makes sense to accept the tradeoff for the convenience
   # of having it inline.
   #
-  # Many of the paramaters below are self-explanatory so I'll only call out
+  # Many of the parameters below are self-explanatory so I'll only call out
   # interesting things.
   node_pool {
     node_config {
