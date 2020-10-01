@@ -27,7 +27,7 @@ else
   # use latest code
   mkdir /sandbox
   cp -r /sandbox-shared/. /sandbox
-  cd /sandbox/terraform
+  cd /sandbox
 fi
 
 
