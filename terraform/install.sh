@@ -331,9 +331,9 @@ checkAuthentication() {
     AUTH_ACCT=$(gcloud auth list --format="value(account)")
     if [[ -z $AUTH_ACCT ]]; then
         YELLOW=`tput setaf 3`
-        log "${YELLOW}********************************************************************************"
+        REVERT=`tput reset
         log "${YELLOW}⚠️  Authentication failed"
-        log "${YELLOW}Please allow gcloud and Cloud Shell to access your GCP account"
+        log "${YELLOW}Please allow gcloud and Cloud Shell to access your GCP account${REVERT}"
     fi
     while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 300  ]]; do
         AUTH_ACCT=$(gcloud auth list --format="value(account)")
