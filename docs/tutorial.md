@@ -41,7 +41,7 @@ Cloud Operations Sandbox deployed successfully!
 
 The URLs in this message tell you where to find the results of the installation.
 
-If a message does **not** appear, and the installation script is not able to run, then try running `./install.sh` in your Cloud Shell terminal once you have set-up your billing account.
+If a message does **not** appear, and the installation script is not able to run, then try running `install.sh` in your Cloud Shell terminal once you have set-up your billing account.
 
 ## Explore the Sandbox!
 
@@ -341,7 +341,7 @@ Once you have finished exploring the Sandbox project, don't forget to destroy it
 
 Destroy your Sandbox project by opening the Cloud Shell and running the destroy script:
 ```
-$ ./destroy.sh
+$ destroy.sh
 ```
 
 **Note:** This script destroys the current project. If the install.sh script were run again, a Sandbox project with a new project id would be created.
