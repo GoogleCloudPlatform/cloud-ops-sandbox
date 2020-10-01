@@ -17,17 +17,20 @@ set -x
 # This file sets up and executes an installation inside the
 # custom Cloud Shell container
 
+mkdir ~/cloudshell_open
+DIR_NAME=~/cloudshell_open/cloud-ops-sandbox
+
 if [[ -n "$release_repo" ]]; then
   # pull down repo in the same way the Open in Cloud Shell button would
-  git clone $release_repo /sandbox
-  cd /sandbox
+  git clone $release_repo $DIR_NAME
+  cd $DIR_NAME
   if [[ -n "$release_branch" ]]; then git checkout $release_branch; fi
   if [[ -n "$release_dir" ]]; then cd $release_dir; fi
 else
   # use latest code
-  mkdir /sandbox
-  cp -r /sandbox-shared/. /sandbox
-  cd /sandbox
+  mkdir $DIR_NAME
+  cp -r /sandbox-shared/. $DIR_NAME
+  cd $DIR_NAME
 fi
 
 
