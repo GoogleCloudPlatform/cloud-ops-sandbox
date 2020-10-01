@@ -28,8 +28,8 @@ cluster: check-env
 		--machine-type=n1-standard-2 --num-nodes=4 \
 		--enable-stackdriver-kubernetes \
 		--scopes https://www.googleapis.com/auth/cloud-platform
-	cd ./terraform/istio && \
-	./install_istio.sh
+	#cd ./terraform/istio && \
+	#./install_istio.sh
 	skaffold run --default-repo=gcr.io/${PROJECT_ID}/sandbox -l skaffold.dev/run-id=${CLUSTER}-${PROJECT_ID}-${ZONE}
 
 deploy: check-env

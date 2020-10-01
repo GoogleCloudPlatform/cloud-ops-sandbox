@@ -20,6 +20,7 @@ on:
       - master
       - release/*
       - e2e*
+      - step-pattern
   pull_request:
     types: [review_requested]
   workflow_dispatch:
@@ -48,7 +49,7 @@ jobs:
         set -x
         gcloud auth configure-docker --quiet
         # push latest load generator to test image repository
-        IMAGE_PATH=gcr.io/$PROJECT_ID/tests/gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/basic:$GITHUB_SHA
+        IMAGE_PATH=gcr.io/$PROJECT_ID/tests/gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke:$GITHUB_SHA
         docker build -t $IMAGE_PATH ./src/loadgenerator
         docker push $IMAGE_PATH
       env:

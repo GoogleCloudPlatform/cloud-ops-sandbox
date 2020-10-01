@@ -130,7 +130,7 @@ resource "null_resource" "set_env_vars" {
 # Deploy loadgenerator into GKE cluster 
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/../../kubernetes-manifests/loadgenerator"
+    command = "kubectl apply -f ${path.module}/../../loadgenerator-manifests/loadgenerator.yaml"
   }
 
   depends_on = [
@@ -141,7 +141,7 @@ resource "null_resource" "deploy_services" {
 # We wait for the load generator to become available on kubernetes
 resource "null_resource" "delay" {
   provisioner "local-exec" {
-    command = "kubectl wait --for=condition=available --timeout=600s deployment/locust-main"
+    command = "kubectl wait --for=condition=available --timeout=600s deployment/loadgenerator-main"
   }
 
   triggers = {

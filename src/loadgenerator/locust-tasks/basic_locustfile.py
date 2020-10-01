@@ -15,7 +15,7 @@
 # limitations under the License.
 
 import random
-from locust import HttpLocust, TaskSet
+from locust import HttpUser, TaskSet
 
 products = [
     '0PUK6V6EV0',
@@ -113,7 +113,7 @@ class BrowsingBehavior(TaskSet):
 
 # LocustIO Locust classes defining general user scenarios.
 
-class PurchasingUser(HttpLocust):
+class PurchasingUser(HttpUser):
     '''
     User that browses products, adds to cart, and purchases via checkout.
     '''
@@ -121,7 +121,7 @@ class PurchasingUser(HttpLocust):
     min_wait = 1000
     max_wait = 10000
 
-class WishlistUser(HttpLocust):
+class WishlistUser(HttpUser):
     '''
     User that browses products, adds to cart, empties cart, but never purchases.
     '''
@@ -129,7 +129,7 @@ class WishlistUser(HttpLocust):
     min_wait = 1000
     max_wait = 10000
 
-class BrowsingUser(HttpLocust):
+class BrowsingUser(HttpUser):
     '''
     User that only browses products.
     '''
