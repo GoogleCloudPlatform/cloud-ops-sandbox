@@ -162,11 +162,13 @@ createProject() {
     # create project
     if [[ $acct == *"google.com"* ]];
     then
+      YELLOW=`tput setaf 3`
+      REVERT=`tput sgr0`
       log ""
-      log "Note: your project will be created in the /untrusted/demos/cloud-ops-sandboxes folder."
-      log "If you don't have access to this folder, please make sure to request at:"
-      log "go/cloud-ops-sandbox-access"
-      log ""
+      log "${YELLOW}Note: your project will be created in the /untrusted/demos/cloud-ops-sandboxes folder."
+      log "${YELLOW}If you don't have access to this folder, please make sure to request at:"
+      log "${YELLOW}go/cloud-ops-sandbox-access"
+      log "${REVERT}"
       sendTelemetry $project_id new-sandbox-googler
       select opt in "continue" "cancel"; do
         if [[ "$opt" == "continue" ]]; then
@@ -234,6 +236,7 @@ installMonitoring() {
   gcp_monitoring_path="https://console.cloud.google.com/monitoring?project=$project_id"
   if [[ -z $skip_workspace_prompt ]]; then
     YELLOW=`tput setaf 3`
+    REVERT=`tput sgr0`
     log ""
     log ""
     log "${YELLOW}********************************************************************************"
@@ -241,7 +244,7 @@ installMonitoring() {
     log "${YELLOW}⚠️ Please create a monitoring workspace for the project by clicking on the following link:"
     log "${YELLOW}  $gcp_monitoring_path"
     log ""
-    read -p "${YELLOW}When you are done, please PRESS ENTER TO CONTINUE"
+    read -p "${YELLOW}When you are done, please PRESS ENTER TO CONTINUE${REVERT}"
   fi
 
   log "Checking to make sure necessary Istio services are ready for monitoring"
@@ -330,10 +333,8 @@ checkAuthentication() {
     TRIES=0
     AUTH_ACCT=$(gcloud auth list --format="value(account)")
     if [[ -z $AUTH_ACCT ]]; then
-        YELLOW=`tput setaf 3`
-        REVERT=`tput reset`
-        log "${YELLOW}⚠️  Authentication failed"
-        log "${YELLOW}Please allow gcloud and Cloud Shell to access your GCP account${REVERT}"
+        log "Authentication failed"
+        log "Please allow gcloud and Cloud Shell to access your GCP account"
     fi
     while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 300  ]]; do
         AUTH_ACCT=$(gcloud auth list --format="value(account)")
