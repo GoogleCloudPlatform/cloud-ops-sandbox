@@ -34,8 +34,9 @@ jobs:
     - name: Run Cloud Build Trigger
       id: cloud_build
       run: |
-        run_info=$(gcloud beta builds triggers run --branch=master Build-CloudShell-Image)
-        run_id=$(echo $run_info | grep -oP "id: \K(\w+-){4}\w+")
+        set -x
+        run_id=$(gcloud builds submit \
+            --config cloud-shell/cloudbuild.yaml --async --format="value(id)")
         echo ::set-output name=run_id::${run_id}
     - name: Display Logs
       continue-on-error: true

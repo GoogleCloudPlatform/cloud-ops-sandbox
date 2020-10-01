@@ -24,25 +24,32 @@ steps:
     git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git
     cd cloud-ops-sandbox
 
-    # build images in both GCR repos
-    CERTIFIED_PATH=gcr.io/$PROJECT_ID/cloudshell-image
-    UNCERTIFIED_PATH=$$CERTIFIED_PATH/uncertified
-
-    for GCR_PATH in $$CERTIFIED_PATH $$UNCERTIFIED_PATH; do
-        # build latest image
-        docker build -t $$GCR_PATH:latest ./cloud-shell
-        docker push $$GCR_PATH:latest
-        for TAG in $(git tag); do
-            echo "checking out $$TAG"
-            git checkout $$TAG
-            # if cloud-build directory exists, build new container
-            if [[ -d "./cloud-shell" ]]; then
-                echo "building $$TAG"
-                docker build -t $$GCR_PATH:$$TAG ./cloud-shell
-                docker push $$GCR_PATH:$$TAG
-            else
-                echo "No cloud-shell directory in tag $$TAG"
-            fi
-        done
+    # update uncertified images
+    # build images for each releases, and repo HEAD
+    UNCERTIFIED_PATH=gcr.io/$PROJECT_ID/cloudshell-image/uncertified
+    # build latest image
+    docker build -t $$UNCERTIFIED_PATH:latest ./cloud-shell
+    docker push $$UNCERTIFIED_PATH:latest
+    for TAG in $(git tag | sort -V); do
+        echo "checking out $$TAG"
+        git checkout $$TAG
+        # if cloud-build directory exists, build new container
+        if [[ -d "./cloud-shell" ]]; then
+            echo "building $$TAG"
+            docker build -t $$UNCERTIFIED_PATH:$$TAG ./cloud-shell
+            docker push $$UNCERTIFIED_PATH:$$TAG
+        else
+            echo "No cloud-shell directory in tag $$TAG"
+        fi
     done
+
+    # update certified image
+    # build image using latest release
+    CERTIFIED_PATH=gcr.io/$PROJECT_ID/cloudshell-image
+    LATEST_TAG=$(git describe --abbrev=0 --tags)
+    git checkout $$LATEST_TAG
+    docker build -t $$CERTIFIED_PATH:latest ./cloud-shell
+    docker build -t $$CERTIFIED_PATH:$$LATEST_TAG ./cloud-shell
+    docker push $$CERTIFIED_PATH:latest
+    docker push $$CERTIFIED_PATH:$$LATEST_TAG
 logsBucket: 'gs://sandbox-cloud-build-logs'
