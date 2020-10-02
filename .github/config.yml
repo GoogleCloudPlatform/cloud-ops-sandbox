@@ -1,0 +1,35 @@
+# Disable label by Drift product
+product: false
+language:
+  # Disable issue labeling (not accurate)
+  issue: false
+  # Enable pr labeling
+  pullrequest: true
+  labelprefix: 'lang: '
+  # To re-map extension to languages
+  extensions:
+    JSON: ['JSON']
+    typescript: ['ts']
+  # To map languages based on project directory structure:
+  paths:
+    src:
+      frontend: 'go'
+      cartservice: 'c#'
+      productcatalogservice: 'go'
+      currencyservice: 'javascript'
+      paymentservice: 'javascript'
+      shippingservice: 'go'
+      emailservice: 'python'
+      checkoutservice: 'go'
+      recommendationservice: 'python'
+      adservice: 'java'
+      loadgenerator: 'python'
+    tests:
+      # To designate the default language for a subdirectory use '.'
+      .: 'python'
+      # More specific path designations will overwrite the default
+      cartservice: 'c#'
+      ratingservice: 'python'
+    website:
+      .: 'javascript'
+      images: 'svg'
