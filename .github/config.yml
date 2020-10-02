@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Config file for Label Bot
 # Disable label by Drift product
 product: false
 language:
@@ -22,7 +23,7 @@ language:
   labelprefix: 'lang: '
   # To re-map extension to languages
   extensions:
-    JSON: ['JSON']
+    terraform: ['tf']
     typescript: ['ts']
   # To map languages based on project directory structure:
   paths:
@@ -38,8 +39,10 @@ language:
       recommendationservice: 'python'
       adservice: 'java'
       loadgenerator: 'python'
-    tests:
+    terraform:
       # To designate the default language for a subdirectory use '.'
+      .: 'terraform'
+    tests:
       .: 'python'
       # More specific path designations will overwrite the default
       cartservice: 'c#'
