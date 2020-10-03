@@ -22,13 +22,13 @@ RUN apk update && apk --no-cache add ca-certificates wget
 RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
 RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.30-r0/glibc-2.30-r0.apk
 RUN apk add glibc-2.30-r0.apk
-RUN dotnet restore
+RUN dotnet restore -r linux-musl-x64
 
 COPY . .
-RUN dotnet publish -c Release -o cart_out --no-restore
+RUN dotnet publish -c Release -o cart_out -r linux-musl-x64 --no-restore --self-contained true
 
 # cartservice
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine as runtime
+FROM mcr.microsoft.com/dotnet/core/runtime-deps:3.1-alpine as runtime
 RUN GRPC_HEALTH_PROBE_VERSION=v0.3.2 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
@@ -47,4 +47,4 @@ RUN apk add --no-cache \
     icu
 WORKDIR /app
 COPY --from=builder /app/cart_out ./
-ENTRYPOINT ["dotnet", "cart_grpc.dll", "start"]
+ENTRYPOINT ["./cart_grpc", "start"]
