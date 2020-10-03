@@ -22,6 +22,7 @@ using cartservice.interfaces;
 using Grpc.Core;
 using Hipstershop;
 using StackExchange.Redis;
+using Google.Protobuf;
 
 namespace cartservice.cartstore
 {
@@ -214,14 +215,11 @@ namespace cartservice.cartstore
 
         private static byte[] ToByteArray(Hipstershop.Cart cart)
         {
-            byte[] bytes;
-            var formatter = new BinaryFormatter();
-            using (MemoryStream stream = new MemoryStream())
+            if (cart == null)
             {
-                formatter.Serialize(stream, cart);
-                bytes = stream.ToArray();
+                return null;
             }
-            return bytes;
+            return cart.ToByteArray();
         }
     }
 }
