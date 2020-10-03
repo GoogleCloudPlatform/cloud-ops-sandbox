@@ -28,7 +28,7 @@ COPY . .
 RUN dotnet publish -c Release -o cart_out --no-restore
 
 # cartservice
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine as runtime
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine as runtime
 RUN GRPC_HEALTH_PROBE_VERSION=v0.3.2 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
@@ -47,4 +47,4 @@ RUN apk add --no-cache \
     icu
 WORKDIR /app
 COPY --from=builder /app/cart_out ./
-ENTRYPOINT ["dotnet", "./cart_grpc", "start"]
+ENTRYPOINT ["dotnet", "cart_grpc.dll", "start"]
