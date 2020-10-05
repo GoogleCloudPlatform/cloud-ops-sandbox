@@ -42,7 +42,6 @@ resource "random_shuffle" "zone" {
 resource "google_container_cluster" "gke" {
   provider = google-beta
   project = data.google_project.project.project_id
-  min_master_version = "1.16.13-gke.401"
 
   # Here's how you specify the name
   name = "cloud-ops-sandbox"
