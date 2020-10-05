@@ -438,12 +438,12 @@ You can expand any of the messages that matches the filter to see the full stack
 
 Once you have finished exploring the Cloud Operations Sandbox project, don't forget to destroy it to avoid incurring additional billing.
 
-Destroy your Sandbox project by opening the Cloud Shell and running the destroy command:
+Destroy your Sandbox project by opening the Cloud Shell and running sandboxctl destroy:
 ```
 $ sandboxctl destroy
 ```
 
-This script destroys the current Cloud Operations Sandbox project. If the install.sh script were run again, a Cloud Operations Sandbox project with a new project id would be created.
+This script destroys the current Cloud Operations Sandbox project. If `sandboxctl create` were run again, a Cloud Operations Sandbox project with a new project id would be created.
 
 # OpenCensus to become OpenTelemetry
 
