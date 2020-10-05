@@ -1,6 +1,6 @@
 # Cloud Operations Sandbox Website
 
-The Stackdriver Sandbox website is currently deployed at [cloud-ops-sandbox.dev](https://cloud-ops-sandbox.dev).
+The Cloud Operations Sandbox website is currently deployed at [cloud-ops-sandbox.dev](https://cloud-ops-sandbox.dev).
 
 ## Website Architecture
 
@@ -21,4 +21,6 @@ The website is automatically deployed to App Engine. Every time a new version is
 $ gcloud app deploy app.yaml
 $ gcloud app browse
 ```
+The website should be automatically deployed when `push-tags.yml` is run (one of the project's GitHub Actions).
+
 **Note:** In order to run these commands, it is important to install gcloud tools. Documentation on that can be found [here](https://cloud.google.com/source-repositories/docs/quickstart-deploying-from-source-repositories-to-app-engine).

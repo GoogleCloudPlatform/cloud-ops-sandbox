@@ -58,7 +58,7 @@ When you are done using Cloud Operations Sandbox, you can tear down the environm
 * Use the Sandbox `destroy` script:
 
 ```bash
-./destroy.sh
+destroy.sh
 ```
 
 * If you no longer have the Cloud Operations Sandbox files downloaded, delete your project manually using `gcloud`

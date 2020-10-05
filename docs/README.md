@@ -440,7 +440,7 @@ Once you have finished exploring the Cloud Operations Sandbox project, don't for
 
 Destroy your Sandbox project by opening the Cloud Shell and running the destroy script:
 ```
-$ ./destroy.sh
+$ destroy.sh
 ```
 
 This script destroys the current Cloud Operations Sandbox project. If the install.sh script were run again, a Cloud Operations Sandbox project with a new project id would be created.
