@@ -29,7 +29,7 @@ fi
 
 # temporarily pin manifests to :$NEW_VERSION
 find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:latest/:${NEW_VERSION}/g" {} \;
-find "${REPO_ROOT}/kubernetes-manifests/loadgenerator" -name '*.yaml' -exec sed -i -e "s/:latest/:${NEW_VERSION}/g" {} \;
+find "${REPO_ROOT}/loadgenerator-manifests" -name '*.yaml' -exec sed -i -e "s/:latest/:${NEW_VERSION}/g" {} \;
 
 # update README
 sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/README.md;
@@ -54,7 +54,7 @@ else
     # create release commit
     git checkout -b "release/${NEW_VERSION}"
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
-    git add "${REPO_ROOT}/kubernetes-manifests/loadgenerator/*.yaml"
+    git add "${REPO_ROOT}/loadgenerator-manifests/*.yaml"
     git add "${REPO_ROOT}/website/index.html"
     git add "${REPO_ROOT}/README.md"
     git add "${REPO_ROOT}/cloud-shell/Dockerfile"
@@ -67,12 +67,12 @@ else
     # change back manifests to :latest
     find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:${NEW_VERSION}/:latest/g" {} \;
     git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
-    git add "${REPO_ROOT}/kubernetes-manifests/loadgenerator/*.yaml"
+    git add "${REPO_ROOT}/loadgenerator-manifests/*.yaml"
 
     # change back telemetry Pub/Sub topic to "Test" topic
     sed -i -e "s/topic_id = \"${PROD_TOPIC}\"/topic_id = \"${TEST_TOPIC}\"/g" ${REPO_ROOT}/terraform/telemetry.py;
     git add "${REPO_ROOT}/terraform/telemetry.py"
-    
+
     git commit -m "revert images to latest and telemetry pipeline to 'test'"
 
     # if no-push mode, exit without pushing git branch or tags to origin
