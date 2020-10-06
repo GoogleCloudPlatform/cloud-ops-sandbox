@@ -56,7 +56,7 @@ metadata:
     app: loadgenerator
 spec:
   ports:
-    - port: 8089
+    - port: 80
       targetPort: loc-master-web
       protocol: TCP
       name: loc-master-web

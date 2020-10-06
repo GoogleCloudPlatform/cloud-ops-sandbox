@@ -122,7 +122,7 @@ def loadgen(traffic_pattern):
     print(f'Loadgenerator deployed using {traffic_pattern} pattern')
     ip_addr, _ = Recipe._run_command(get_ip_command)
     if ip_addr:
-        print(f'Loadgenerator web UI: http://{ip_addr}:8089')
+        print(f'Loadgenerator web UI: http://{ip_addr}')
     Recipe._auth_cluster('APP')
 
 @cli.command()
