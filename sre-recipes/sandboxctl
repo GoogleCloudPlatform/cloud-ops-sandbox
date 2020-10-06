@@ -121,8 +121,9 @@ def loadgen(traffic_pattern):
     Recipe._run_command(delete_pods_command)
     print(f'Loadgenerator deployed using {traffic_pattern} pattern')
     ip_addr, _ = Recipe._run_command(get_ip_command)
+    ip_addr = ip_addr.decode('utf-8').strip("'")
     if ip_addr:
-        print(f'Loadgenerator web UI: http://{ip_addr}')
+        print(f"Loadgenerator web UI: http://{ip_addr.decode('utf-8')}")
     Recipe._auth_cluster('APP')
 
 @cli.command()
