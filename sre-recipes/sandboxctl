@@ -28,6 +28,8 @@ from enum import Enum
 import logging
 import os
 import sys
+import signal
+import subprocess
 from os.path import dirname, abspath
 from pkgutil import iter_modules
 from pathlib import Path
@@ -129,7 +131,7 @@ def create():
         process = subprocess.Popen([create_command], bufsize=0, shell=True)
         process.communicate()
     finally:
-        os.killpg(0, signall.SIGKILL)
+        os.killpg(0, signal.SIGKILL)
 
 @cli.command()
 def destroy():
