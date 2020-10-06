@@ -20,11 +20,11 @@ services:
   web:
     build: .
     ports:
-      - "8080:8080"
+      - "7070:7070"
     environment:
       REDIS_PORT: "6379"
       REDIS_ADDR: "redis:6379"
       LISTEN_ADDR: "localhost"
-      PORT: "8080"
+      PORT: "7070"
   redis:
     image: "redis:alpine"

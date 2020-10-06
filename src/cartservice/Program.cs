@@ -141,7 +141,7 @@ namespace cartservice
                 {
                     webBuilder.ConfigureKestrel(options =>
                     {
-                        options.Listen(IPAddress.Any, 8080, listenOptions =>
+                        options.Listen(IPAddress.Any, 7070, listenOptions =>
                         {
                             listenOptions.Protocols = HttpProtocols.Http2;
                         });

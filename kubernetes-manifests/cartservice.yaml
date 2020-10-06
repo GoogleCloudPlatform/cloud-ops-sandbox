@@ -35,7 +35,7 @@ spec:
         - name: REDIS_ADDR
           value: "redis-cart:6379"
         - name: PORT
-          value: "7070"
+          value: "8080"
         - name: LISTEN_ADDR
           value: "0.0.0.0"
         resources:
@@ -46,14 +46,19 @@ spec:
             cpu: 300m
             memory: 128Mi
         readinessProbe:
-          initialDelaySeconds: 15
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7070"]
+          httpGet:
+            path: /ready
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 15
         livenessProbe:
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7070"]
+          httpGet:
+            path: /self
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
