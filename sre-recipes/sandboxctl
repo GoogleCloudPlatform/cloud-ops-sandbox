@@ -124,7 +124,12 @@ def create():
     """Create a new sandbox"""
     os.chdir(os.path.abspath(sys.path[0]))
     create_command = "../terraform/install.sh"
-    Recipe._run_command(create_command)
+    os.setpgrp()
+    try:
+        process = subprocess.Popen([create_command], bufsize=0, shell=True)
+        process.communicate()
+    finally:
+        os.killpg(0, signall.SIGKILL)
 
 @cli.command()
 def destroy():
