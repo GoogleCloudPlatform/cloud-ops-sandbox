@@ -13,19 +13,17 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using cartservice.cartstore;
-using cartservice.interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using static cartservice.Program;
 
-namespace cart_grpc
+namespace cartservice
 {
     public class Startup
     {
@@ -39,6 +37,14 @@ namespace cart_grpc
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            string redisAddress = Configuration.GetValue<string>("RedisAddress");
+            ICartStore cartStore = new RedisCartStore(redisAddress);
+
+            // Initialize the redis store
+            cartStore.InitializeAsync().GetAwaiter().GetResult();
+            Console.WriteLine("Initialization completed");
+
+            services.AddSingleton<ICartStore>(cartStore);
             services.AddGrpc();
         }
 
@@ -54,7 +60,8 @@ namespace cart_grpc
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<CartServiceImpl>();
+                endpoints.MapGrpcService<CartServiceController>();
+                endpoints.MapGrpcService<HealthImpl>();
 
                 endpoints.MapGet("/", async context =>
                 {

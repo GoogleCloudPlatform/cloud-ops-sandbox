@@ -18,11 +18,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using cartservice.interfaces;
 using cartservice.cartstore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using System.Net;
+using Microsoft.Extensions.Configuration;
 
-namespace cart_grpc
+[assembly: InternalsVisibleTo("cartservice.tests")]
+namespace cartservice
 {
     public class Program
     {
@@ -31,7 +35,7 @@ namespace cart_grpc
         const string CART_SERVICE_PORT = "PORT";
 
         [Verb("start", HelpText = "Starts the server listening on provided port")]
-        class ServerOptions
+        public sealed class ServerOptions
         {
             [Option('h', "hostname", HelpText = "The ip on which the server is running. If not provided, LISTEN_ADDR environment variable value will be used. If not defined, localhost is used")]
             public string Host { get; set; }
@@ -68,12 +72,8 @@ namespace cart_grpc
                             // Set redis cache host (hostname+port)
                             string redis = ReadParameter("redis cache address", options.Redis, REDIS_ADDRESS, p => p, null);
 
-                            ICartStore cartStore = new RedisCartStore(redis);
-                            await cartStore.InitializeAsync();
-                            Console.WriteLine("Initialization completed");
-
                             // Start ASP.NET Core Engine with GRPC
-                            IHost hostBuilder = CreateHostBuilder(args, cartStore).Build();
+                            IHost hostBuilder = CreateHostBuilder(redis).Build();
                             await hostBuilder.RunAsync();
                             return 0;
                         },
@@ -107,6 +107,7 @@ namespace cart_grpc
             // Command line argument
             if(!EqualityComparer<T>.Default.Equals(commandLineValue, default(T))) 
             {
+                Console.WriteLine($"Reading {description} from command line argument. Value: {commandLineValue}. Done!");
                 return commandLineValue;
             }
 
@@ -118,6 +119,7 @@ namespace cart_grpc
                 try
                 {
                     var envTyped = environmentParser(envValue);
+                    Console.Write($" Value: {envTyped} ");
                     Console.WriteLine("Done!");
                     return envTyped;
                 }
@@ -133,17 +135,20 @@ namespace cart_grpc
 
         // Additional configuration is required to successfully run gRPC on macOS.
         // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
-        static IHostBuilder CreateHostBuilder(string[] args, ICartStore cartStore) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hostContext, services) =>
-                {
-                    // Add initialized cart store
-                    services.AddSingleton<ICartStore>(cartStore);
-                })
+        static IHostBuilder CreateHostBuilder(string redisAddr) =>
+            Host.CreateDefaultBuilder()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseUrls("http://*:8081", "http://*:8080");
+                    webBuilder.ConfigureKestrel(options =>
+                    {
+                        options.Listen(IPAddress.Any, 8080, listenOptions =>
+                        {
+                            listenOptions.Protocols = HttpProtocols.Http2;
+                        });
+                    });
+
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseSetting("RedisAddress", redisAddr);
                 });
     }
 }

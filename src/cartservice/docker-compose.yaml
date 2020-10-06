@@ -11,7 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+#
+# test redis with cart service with
+# docker-compose up --build
+#
 version: "3.8"
 services:
   web:
@@ -22,6 +25,6 @@ services:
       REDIS_PORT: "6379"
       REDIS_ADDR: "redis:6379"
       LISTEN_ADDR: "localhost"
-      PORT: "7070"
+      PORT: "8080"
   redis:
     image: "redis:alpine"

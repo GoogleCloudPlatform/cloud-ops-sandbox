@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Hipstershop;
 using Xunit;
+using Grpc.Net.Client;
 using static Hipstershop.CartService;
 
 namespace cartservice
@@ -24,31 +25,40 @@ namespace cartservice
     public class E2ETests
     {
         private static string serverHostName = "localhost";
-        private static int port = 7070;
+        private static int port = 8080;
+
+        private static string TargetUrl;
+
+        static E2ETests()
+        {
+            // This switch must be set before creating the GrpcChannel/HttpClient.
+            AppContext.SetSwitch(
+                "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", true);
+
+            TargetUrl = $"http://{serverHostName}:{port}";
+        }
 
         [Fact]
         public async Task GetItem_NoAddItemBefore_EmptyCartReturned()
         {
             string userId = Guid.NewGuid().ToString();
 
-            // Construct server's Uri
-            string targetUri = $"{serverHostName}:{port}";
-
             // Create a GRPC communication channel between the client and the server
-            var channel = new Channel(targetUri, ChannelCredentials.Insecure);
-
-            var client = new CartServiceClient(channel);
-
-            var request = new GetCartRequest
+            using (var channel = GrpcChannel.ForAddress(TargetUrl))
             {
-                UserId = userId,
-            };
+                var client = new CartServiceClient(channel);
 
-            var cart = await client.GetCartAsync(request);
-            Assert.NotNull(cart);
+                var request = new GetCartRequest
+                {
+                    UserId = userId,
+                };
+                var cart = await client.GetCartAsync(request);
+                Assert.NotNull(cart);
 
-            // All grpc objects implement IEquitable, so we can compare equality with by-value semantics
-            Assert.Equal(new Cart(), cart);
+                // All grpc objects implement IEquitable, so we can compare equality with by-value semantics
+                Assert.Equal(new Cart(), cart);
+            }
         }
 
         [Fact]
@@ -56,41 +66,39 @@ namespace cartservice
         {
             string userId = Guid.NewGuid().ToString();
 
-            // Construct server's Uri
-            string targetUri = $"{serverHostName}:{port}";
-
             // Create a GRPC communication channel between the client and the server
-            var channel = new Channel(targetUri, ChannelCredentials.Insecure);
-            
-            var client = new CartServiceClient(channel);
-            var request = new AddItemRequest
+            using (var channel = GrpcChannel.ForAddress(TargetUrl))
             {
-                UserId = userId,
-                Item = new CartItem
+                var client = new CartServiceClient(channel);
+                var request = new AddItemRequest
                 {
-                    ProductId = "1",
-                    Quantity = 1
-                }
-            };
+                    UserId = userId,
+                    Item = new CartItem
+                    {
+                        ProductId = "1",
+                        Quantity = 1
+                    }
+                };
 
-            // First add - nothing should fail
-            await client.AddItemAsync(request);
+                // First add - nothing should fail
+                await client.AddItemAsync(request);
 
-            // Second add of existing product - quantity should be updated
-            await client.AddItemAsync(request);
-            
-            var getCartRequest = new GetCartRequest
-            {
-                UserId = userId
-            };
-            var cart = await client.GetCartAsync(getCartRequest);
-            Assert.NotNull(cart);
-            Assert.Equal(userId, cart.UserId);
-            Assert.Single(cart.Items);
-            Assert.Equal(2, cart.Items[0].Quantity);
+                // Second add of existing product - quantity should be updated
+                await client.AddItemAsync(request);
+                
+                var getCartRequest = new GetCartRequest
+                {
+                    UserId = userId
+                };
+                var cart = await client.GetCartAsync(getCartRequest);
+                Assert.NotNull(cart);
+                Assert.Equal(userId, cart.UserId);
+                Assert.Single(cart.Items);
+                Assert.Equal(2, cart.Items[0].Quantity);
 
-            // Cleanup
-            await client.EmptyCartAsync(new EmptyCartRequest{ UserId = userId });
+                // Cleanup
+                await client.EmptyCartAsync(new EmptyCartRequest{ UserId = userId });
+            }
         }
 
         [Fact]
@@ -98,39 +106,37 @@ namespace cartservice
         {
             string userId = Guid.NewGuid().ToString();
 
-            // Construct server's Uri
-            string targetUri = $"{serverHostName}:{port}";
-
             // Create a GRPC communication channel between the client and the server
-            var channel = new Channel(targetUri, ChannelCredentials.Insecure);
-            
-            // Create a proxy object to work with the server
-            var client = new CartServiceClient(channel);
-
-            var request = new AddItemRequest
+            using (var channel = GrpcChannel.ForAddress(TargetUrl))
             {
-                UserId = userId,
-                Item = new CartItem
+                // Create a proxy object to work with the server
+                var client = new CartServiceClient(channel);
+
+                var request = new AddItemRequest
                 {
-                    ProductId = "1",
-                    Quantity = 1
-                }
-            };
+                    UserId = userId,
+                    Item = new CartItem
+                    {
+                        ProductId = "1",
+                        Quantity = 1
+                    }
+                };
 
-            await client.AddItemAsync(request);
+                await client.AddItemAsync(request);
 
-            var getCartRequest = new GetCartRequest
-            {
-                UserId = userId
-            };
-            var cart = await client.GetCartAsync(getCartRequest);
-            Assert.NotNull(cart);
-            Assert.Equal(userId, cart.UserId);
-            Assert.Single(cart.Items);
+                var getCartRequest = new GetCartRequest
+                {
+                    UserId = userId
+                };
+                var cart = await client.GetCartAsync(getCartRequest);
+                Assert.NotNull(cart);
+                Assert.Equal(userId, cart.UserId);
+                Assert.Single(cart.Items);
 
-            await client.EmptyCartAsync(new EmptyCartRequest{ UserId = userId });
-            cart = await client.GetCartAsync(getCartRequest);
-            Assert.Empty(cart.Items);
+                await client.EmptyCartAsync(new EmptyCartRequest{ UserId = userId });
+                cart = await client.GetCartAsync(getCartRequest);
+                Assert.Empty(cart.Items);
+            }
         }
     }
 }
