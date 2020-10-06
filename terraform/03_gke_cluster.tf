@@ -43,6 +43,10 @@ resource "google_container_cluster" "gke" {
   provider = google-beta
   project = data.google_project.project.project_id
 
+  # Set minimum GKE version to stable release since Terraform currently defaults to v1.15
+  # This can be unpinned once Terraform defaults to the correct GKE stable release
+  min_master_version = "1.16.13-gke.401"
+
   # Here's how you specify the name
   name = "cloud-ops-sandbox"
 
