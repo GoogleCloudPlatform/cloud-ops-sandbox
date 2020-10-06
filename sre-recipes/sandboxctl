@@ -28,6 +28,8 @@ from enum import Enum
 import logging
 import os
 import sys
+import signal
+import subprocess
 from os.path import dirname, abspath
 from pkgutil import iter_modules
 from pathlib import Path
@@ -124,7 +126,17 @@ def create():
     """Create a new sandbox"""
     os.chdir(os.path.abspath(sys.path[0]))
     create_command = "../terraform/install.sh"
-    Recipe._run_command(create_command)
+    os.setpgrp()
+    complete = False
+    try:
+        # run install.sh in a background shell
+        process = subprocess.Popen([create_command], bufsize=0, shell=True)
+        process.communicate()
+        complete = True
+    finally:
+        # kill background process if script is terminated
+        if not complete:
+            os.killpg(0, signal.SIGTERM)
 
 @cli.command()
 def destroy():
