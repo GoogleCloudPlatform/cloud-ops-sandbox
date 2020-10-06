@@ -127,13 +127,16 @@ def create():
     os.chdir(os.path.abspath(sys.path[0]))
     create_command = "../terraform/install.sh"
     os.setpgrp()
+    complete = False
     try:
         # run install.sh in a background shell
         process = subprocess.Popen([create_command], bufsize=0, shell=True)
         process.communicate()
+        complete = True
     finally:
         # kill background process if script is terminated
-        os.killpg(0, signal.SIGKILL)
+        if not complete:
+            os.killpg(0, signal.SIGTERM)
 
 @cli.command()
 def destroy():
