@@ -22,10 +22,11 @@ RUN apk update && apk --no-cache add ca-certificates wget
 RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
 RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.30-r0/glibc-2.30-r0.apk
 RUN apk add glibc-2.30-r0.apk
-RUN dotnet restore -r linux-musl-x64
+#RUN dotnet restore 
 
 COPY . .
-RUN dotnet publish -c Release -o cart_out -r linux-musl-x64 --no-restore --self-contained true
+RUN dotnet publish --runtime alpine-x64 --self-contained true -c Release -o cart_out 
+#--no-restore 
 
 # cartservice
 FROM mcr.microsoft.com/dotnet/core/runtime-deps:3.1-alpine as runtime
@@ -35,16 +36,24 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.2 && \
 
 # Dependencies for runtime
 # busybox-extras => telnet
-RUN apk add --no-cache \
-    busybox-extras \
-    libc6-compat \
-    libunwind \
-    libuuid \
-    libgcc \
-    libstdc++ \
-    libintl \
-    openssl \
+#RUN apk add --no-cache \
+#    busybox-extras \
+#    libc6-compat \
+#    libunwind \
+#    libuuid \
+#    libgcc \
+#    libstdc++ \
+#    libintl \
+#    openssl \
+#    icu
+
+RUN apk add --no-cache \ 
+    busybox-extras openssh libunwind \
+    nghttp2-libs libidn krb5-libs libuuid lttng-ust zlib \
+    libstdc++ libintl \
     icu
+
 WORKDIR /app
 COPY --from=builder /app/cart_out ./
+
 ENTRYPOINT ["./cartservice", "start"]

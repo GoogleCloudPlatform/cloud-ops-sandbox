@@ -30,8 +30,6 @@ namespace cart_grpc
         const string REDIS_ADDRESS = "REDIS_ADDR";
         const string CART_SERVICE_PORT = "PORT";
 
-        const string PROJECT_ID = "PROJECT_ID";
-
         [Verb("start", HelpText = "Starts the server listening on provided port")]
         class ServerOptions
         {
@@ -43,9 +41,6 @@ namespace cart_grpc
 
             [Option('r', "redis", HelpText = "The ip of redis cache")]
             public string Redis { get; set; }
-
-            [Option("projectId", HelpText = "The ProjectId to which telemetry will flow")]
-            public string ProjectId { get; set; }
         }
 
         public static async Task Main(string[] args)
