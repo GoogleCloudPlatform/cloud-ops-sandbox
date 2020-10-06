@@ -35,7 +35,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: LOCUST_MODE
-              value: master
+              value: standalone
             - name: LOCUST_TASK
               value: basic_locustfile.py
             - name: TARGET_HOST
@@ -47,45 +47,6 @@ spec:
             - name: loc-master-web
               containerPort: 8089
               protocol: TCP
-            - name: loc-master-p1
-              containerPort: 5557
-              protocol: TCP
-            - name: loc-master-p2
-              containerPort: 5558
-              protocol: TCP
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: loadgenerator-worker
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: loadgenerator
-      mode: worker
-  template:
-    metadata:
-      labels:
-        app: loadgenerator
-        mode: worker
-    spec:
-      containers:
-        - name: locust-worker
-          image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke:latest
-          imagePullPolicy: Always
-          env:
-            - name: LOCUST_MODE
-              value: worker
-            - name: LOCUST_MASTER
-              value: loadgenerator
-            - name: LOCUST_TASK
-              value: basic_locustfile.py
-            - name: TARGET_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: address-config
-                  key: FRONTEND_ADDR
 ---
 kind: Service
 apiVersion: v1
@@ -99,14 +60,6 @@ spec:
       targetPort: loc-master-web
       protocol: TCP
       name: loc-master-web
-    - port: 5557
-      targetPort: loc-master-p1
-      protocol: TCP
-      name: loc-master-p1
-    - port: 5558
-      targetPort: loc-master-p2
-      protocol: TCP
-      name: loc-master-p2
   selector:
     app: loadgenerator
     mode: master
