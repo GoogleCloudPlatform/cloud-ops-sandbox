@@ -25,7 +25,7 @@ language:
   labelprefix: 'lang: '
   # To re-map extension to languages
   extensions:
-    yaml: ['tf']
+    manifest: ['tf']
     typescript: ['ts']
   # To map languages based on project directory structure:
   paths:
