@@ -110,15 +110,19 @@ def sre_recipes(action, recipe_name):
 def loadgen(traffic_pattern):
     """Change traffic patterns for the loadgenerator service"""
     Recipe._auth_cluster('LOADGEN')
-    set_env_commands = ["kubectl set env deployment/loadgenerator-"\
-                            f"{mode} LOCUST_TASK={traffic_pattern}_locustfile.py" \
-                            for mode in ['main', 'worker']]
-    print('Redeploying Loadgenerator...')
-    for cmd in set_env_commands:
-        Recipe._run_command(cmd)
+    get_ip_command = "kubectl get service loadgenerator -o "\
+                        "jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+    set_env_command = "kubectl set env deployment/loadgenerator "\
+                        f"LOCUST_TASK={traffic_pattern}_locustfile.py"
     delete_pods_command = "kubectl delete pods -l app=loadgenerator"
+
+    print('Redeploying Loadgenerator...')
+    Recipe._run_command(set_env_command)
     Recipe._run_command(delete_pods_command)
     print(f'Loadgenerator deployed using {traffic_pattern} pattern')
+    ip_addr, _ = Recipe._run_command(get_ip_command)
+    if ip_addr:
+        print(f'Loadgenerator web UI: http://{ip_addr}:8089')
     Recipe._auth_cluster('APP')
 
 @cli.command()

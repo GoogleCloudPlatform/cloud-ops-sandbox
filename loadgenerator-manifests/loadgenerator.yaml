@@ -16,7 +16,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: loadgenerator-main
+  name: loadgenerator
 spec:
   replicas: 1
   selector:
