@@ -15,7 +15,7 @@
 # limitations under the License.
 
 import random
-from locust import HttpUser, TaskSet
+from locust import task, HttpUser, TaskSet
 
 products = [
     '0PUK6V6EV0',
@@ -38,22 +38,28 @@ currencies = [
 
 # Define specific frontend actions.
 
+@task
 def index(l):
     l.client.get("/")
 
+@task
 def setCurrency(l):
     l.client.post("/setCurrency",
         {'currency_code': random.choice(currencies)})
 
+@task
 def browseProduct(l):
     l.client.get("/product/" + random.choice(products))
 
+@task
 def viewCart(l):
     l.client.get("/cart")
 
+@task
 def emptyCart(l):
     l.client.post("/cart/empty")
 
+@task
 def addToCart(l):
     product = random.choice(products)
     l.client.get("/product/" + product)
@@ -61,6 +67,7 @@ def addToCart(l):
         'product_id': product,
         'quantity': random.choice([1,2,3,4,5,10])})
 
+@task
 def checkout(l):
     addToCart(l)
     l.client.post("/cart/checkout", {
@@ -117,7 +124,7 @@ class PurchasingUser(HttpUser):
     '''
     User that browses products, adds to cart, and purchases via checkout.
     '''
-    task_set = PurchasingBehavior
+    tasks = [PurchasingBehavior]
     min_wait = 1000
     max_wait = 10000
 
@@ -125,7 +132,7 @@ class WishlistUser(HttpUser):
     '''
     User that browses products, adds to cart, empties cart, but never purchases.
     '''
-    task_set = WishlistBehavior
+    tasks = [WishlistBehavior]
     min_wait = 1000
     max_wait = 10000
 
@@ -133,6 +140,6 @@ class BrowsingUser(HttpUser):
     '''
     User that only browses products.
     '''
-    task_set = BrowsingBehavior
+    tasks = [BrowsingBehavior]
     min_wait = 1000
     max_wait = 10000

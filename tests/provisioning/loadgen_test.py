@@ -59,7 +59,7 @@ class TestLoadGenerator(unittest.TestCase):
         command = ("kubectl get service loadgenerator --context=%s -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" % TestLoadGenerator.context)
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
         loadgen_ip = result.stdout.replace('\n', '')
-        url = 'http://{0}:8089'.format(loadgen_ip)
+        url = 'http://{0}'.format(loadgen_ip)
         self.assertTrue(urllib.request.urlopen(url).getcode() == 200)
 
     def testDifferentZone(self):
