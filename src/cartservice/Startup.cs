@@ -39,12 +39,6 @@ namespace cart_grpc
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            string redisHost = Configuration.GetValue<string>("redis");
-
-            // Add Redis cart dependency
-            ICartStore cartStore = new RedisCartStore(redisHost);
-            cartStore.InitializeAsync();
-            services.AddSingleton<ICartStore>(cartStore);
             services.AddGrpc();
         }
 

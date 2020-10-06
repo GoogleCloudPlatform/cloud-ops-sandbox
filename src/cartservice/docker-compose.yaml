@@ -6,12 +6,8 @@ services:
       - "8080:8080"
     environment:
       REDIS_PORT: "6379"
-      REDIS_ADDR: "redis:${REDIS_PORT}"
+      REDIS_ADDR: "redis:6379"
       LISTEN_ADDR: "localhost"
       PORT: "7070"
-    volumes:
-        - /app/obj/
-        - /app/bin/
-        - /app/out/
   redis:
     image: "redis:alpine"
