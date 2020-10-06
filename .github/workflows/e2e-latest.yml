@@ -21,6 +21,7 @@ on:
       - release/*
       - e2e*
       - step-pattern
+      - upstream/cart_grpc
   pull_request:
     types: [review_requested]
   workflow_dispatch:
