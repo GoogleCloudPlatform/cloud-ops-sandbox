@@ -71,7 +71,7 @@ class TestLoadGenerator(unittest.TestCase):
         """Test if load generator cluster is in a different zone from the Hipster Shop cluster"""
         self.assertTrue(getClusterZone() != os.environ['ZONE'])
 
-    @parameterized.expand([None, basic, step])
+    @parameterized.expand([None, 'basic', 'step'])
     def testStartSwarm(self, pattern):
         """
         Test if the load generation works properly when started
