@@ -14,7 +14,7 @@
 
 
 # Start with a base Python 3.8 image
-FROM python:3.8
+FROM python:3.9
 
 WORKDIR /home
 
