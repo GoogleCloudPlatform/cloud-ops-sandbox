@@ -62,7 +62,7 @@ class TestLoadGenerator(unittest.TestCase):
         self.assertTrue(node_count == 1)
 
     def testReachOfLoadgen(self):
-        """Test if querying load generator returns 201"""
+        """Test if querying load generator returns 2xx"""
         r = requests.get(TestLoadGenerator.url)
         self.assertTrue(r.ok)
 
