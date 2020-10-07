@@ -70,49 +70,28 @@ class TestLoadGenerator(unittest.TestCase):
         """Test if load generator cluster is in a different zone from the Hipster Shop cluster"""
         self.assertTrue(getClusterZone() != os.environ['ZONE'])
 
-    def testBasicSwarm(self):
-        """Test if the swarm works properly on basic mode"""
-        # switch to basic loadgenerator pattern
-        command=('sandboxctl loadgen basic')
-        subprocess.run(split(command))
-        # set kubectl context back to loadgenerator
-        command=('gcloud container clusters get-credentials loadgenerator --zone {0}'.format(getClusterZone()))
-        subprocess.run(split(command))
-        time.speep(2)
-        # start swarming
-        form_data = {'user_count':1, 'spawn_rate':1}
-        requests.post(f"{TestLoadGenerator.url}/swarm", form_data)
-        time.speep(2)
-        # check for running status
-        r = requests.get(f"{TestLoadGenerator.url}/stats/requests")
-        self.assertEqual(r.status_code, 200)
-        stats = json.loads(r.text)
-        self.assertEqual(stats['state'], 'running')
-        self.assertEqual(stats['errors'], [])
-        self.assertEqual(stats['user_count'], 1)
-        self.assertTrue(stats['total_rps'] > 0)
-
-    def testStepSwarm(self):
-        """Test if the swarm works properly on step mode"""
-        # switch to step loadgenerator pattern
-        command=('sandboxctl loadgen step')
-        subprocess.run(split(command))
-        # set kubectl context back to loadgenerator
-        command=('gcloud container clusters get-credentials loadgenerator --zone {0}'.format(getClusterZone()))
-        subprocess.run(split(command))
-        time.speep(2)
-        # start swarming
-        form_data = {'user_count':1, 'spawn_rate':1}
-        requests.post(f"{TestLoadGenerator.url}/swarm", form_data)
-        time.speep(2)
-        # check for running status
-        r = requests.get(f"{TestLoadGenerator.url}/stats/requests")
-        self.assertEqual(r.status_code, 200)
-        stats = json.loads(r.text)
-        self.assertEqual(stats['state'], 'running')
-        self.assertEqual(stats['errors'], [])
-        self.assertEqual(stats['user_count'], 1)
-        self.assertTrue(stats['total_rps'] > 0)
+    def testStartSwarm(self):
+        """Test if the load generation works properly when started"""
+        # test for each loadgenerator pattern
+        for pattern in ['basic', 'step']:
+            command=(f'sandboxctl loadgen {pattern}')
+            subprocess.run(split(command))
+            # set kubectl context back to loadgenerator
+            command=('gcloud container clusters get-credentials loadgenerator --zone {0}'.format(getClusterZone()))
+            subprocess.run(split(command))
+            time.speep(2)
+            # start swarming
+            form_data = {'user_count':1, 'spawn_rate':1}
+            requests.post(f"{TestLoadGenerator.url}/swarm", form_data)
+            time.speep(2)
+            # check for running status
+            r = requests.get(f"{TestLoadGenerator.url}/stats/requests")
+            self.assertEqual(r.status_code, 200)
+            stats = json.loads(r.text)
+            self.assertEqual(stats['state'], 'running')
+            self.assertEqual(stats['errors'], [])
+            self.assertEqual(stats['user_count'], 1)
+            self.assertTrue(stats['total_rps'] > 0)
 
 def getProjectId():
     return os.environ['GOOGLE_CLOUD_PROJECT']
