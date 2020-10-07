@@ -20,7 +20,6 @@ import unittest
 import subprocess
 from shlex import split
 import json
-import urllib.request
 import requests
 import time
 
@@ -64,7 +63,8 @@ class TestLoadGenerator(unittest.TestCase):
 
     def testReachOfLoadgen(self):
         """Test if querying load generator returns 201"""
-        self.assertTrue(urllib.request.urlopen(TestLoadGenerator.url).getcode() == 201)
+        r = requests.get(TestLoadGenerator.url)
+        self.assertEqual(r.status_code, 201)
 
     def testDifferentZone(self):
         """Test if load generator cluster is in a different zone from the Hipster Shop cluster"""
