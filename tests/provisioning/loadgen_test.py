@@ -102,7 +102,7 @@ class TestLoadGenerator(unittest.TestCase):
             self.assertTrue(r.ok)
             self.assertEqual(stats['state'], 'running')
             self.assertEqual(stats['errors'], [])
-            self.assertEqual(stats['user_count'], 1)
+            self.assertTrue(stats['user_count'] > 0)
             self.assertTrue(stats['total_rps'] > 0)
 
 def getProjectId():
