@@ -88,7 +88,7 @@ class TestLoadGenerator(unittest.TestCase):
             # start swarming
             form_data = {'user_count':1, 'spawn_rate':1}
             requests.post(f"{TestLoadGenerator.url}/swarm", form_data)
-            time.sleep(2)
+            time.sleep(10)
             # check for running status
             r = requests.get(f"{TestLoadGenerator.url}/stats/requests")
             self.assertTrue(r.ok)
@@ -96,11 +96,6 @@ class TestLoadGenerator(unittest.TestCase):
             self.assertEqual(stats['state'], 'running')
             self.assertEqual(stats['errors'], [])
             self.assertEqual(stats['user_count'], 1)
-            tries = 0
-            while stats['total_rps'] <= 0 and tries < 10:
-                # retry in case of slow start up
-                tries += 1
-                time.sleep(5)
             self.assertTrue(stats['total_rps'] > 0)
 
 def getProjectId():
