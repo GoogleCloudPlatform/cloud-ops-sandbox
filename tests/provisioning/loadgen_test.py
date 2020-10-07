@@ -17,6 +17,7 @@ from __future__ import print_function
 
 import os
 import unittest
+from parameterized import parameterized
 import subprocess
 from shlex import split
 import json
@@ -70,40 +71,41 @@ class TestLoadGenerator(unittest.TestCase):
         """Test if load generator cluster is in a different zone from the Hipster Shop cluster"""
         self.assertTrue(getClusterZone() != os.environ['ZONE'])
 
-    def testStartSwarm(self):
-        """Test if the load generation works properly when started"""
-        # test for each loadgenerator pattern
-        # start with `None` to check the default case (no explicit pattern)
-        for pattern in [None, 'basic', 'step']:
-            if pattern:
-                # reset deployment to use new pattern
-                set_env_command = "kubectl set env deployment/loadgenerator " \
-                                    f"LOCUST_TASK={pattern}_locustfile.py"
-                delete_pods_command = "kubectl delete pods -l app=loadgenerator"
-                wait_command = "kubectl wait --for=condition=available" \
-                                " --timeout=500s deployment/loadgenerator"
-                subprocess.run(split(set_env_command))
-                subprocess.run(split(delete_pods_command))
-                subprocess.run(split(wait_command))
-            # start swarming
-            success = False
-            tries = 0
-            while not success and tries < 10:
-                # retry in case of startup errors
-                tries += 1
-                time.sleep(2)
-                form_data = {'user_count':1, 'spawn_rate':1}
-                requests.post(f"{TestLoadGenerator.url}/swarm", form_data)
-                # check for running status
-                r = requests.get(f"{TestLoadGenerator.url}/stats/requests")
-                if r.ok:
-                    stats = json.loads(r.text)
-                    success = (stats['total_rps'] > 0)
-            self.assertTrue(r.ok)
-            self.assertEqual(stats['state'], 'running')
-            self.assertEqual(stats['errors'], [])
-            self.assertTrue(stats['user_count'] > 0)
-            self.assertTrue(stats['total_rps'] > 0)
+    @parameterized([None, basic, step])
+    def testStartSwarm(self, pattern):
+        """
+        Test if the load generation works properly when started
+        Run for each loadgenerator pattern
+        Start with `None` to check the default case (no explicit pattern)
+        """
+        if pattern:
+            # reset deployment to use new pattern
+            set_env_command = "kubectl set env deployment/loadgenerator " \
+                                f"LOCUST_TASK={pattern}_locustfile.py"
+            delete_pods_command = "kubectl delete pods -l app=loadgenerator"
+            wait_command = "kubectl wait --for=condition=available" \
+                            " --timeout=500s deployment/loadgenerator"
+            subprocess.run(split(set_env_command))
+            subprocess.run(split(delete_pods_command))
+            subprocess.run(split(wait_command))
+        # enable swarm
+        form_data = {'user_count':1, 'spawn_rate':1}
+        requests.post(f"{TestLoadGenerator.url}/swarm", form_data)
+        # wait for valid request in case of startup errors
+        success, tries = False, 0
+        while not success and tries < 10:
+            tries += 1
+            time.sleep(2)
+            response = requests.get(f"{TestLoadGenerator.url}/stats/requests")
+            if response.ok:
+                stats = json.loads(response.text)
+                success = (stats['total_rps'] > 0)
+        # assert expected values from response
+        self.assertTrue(response.ok)
+        self.assertEqual(stats['state'], 'running')
+        self.assertEqual(stats['errors'], [])
+        self.assertTrue(stats['user_count'] > 0)
+        self.assertTrue(stats['total_rps'] > 0)
 
 def getProjectId():
     return os.environ['GOOGLE_CLOUD_PROJECT']
