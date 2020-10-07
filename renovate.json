@@ -16,7 +16,7 @@
       "groupName": "linters"
     }
   ],
-  "reviewersFromCodeOwners": true,
+  "reviewers": ["nicoleczhu"],
   "labels": [
     "dependencies",
     "type: cleanup",
