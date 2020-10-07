@@ -64,7 +64,7 @@ class TestLoadGenerator(unittest.TestCase):
     def testReachOfLoadgen(self):
         """Test if querying load generator returns 201"""
         r = requests.get(TestLoadGenerator.url)
-        self.assertEqual(r.status_code, 201)
+        self.assertTrue(r.ok)
 
     def testDifferentZone(self):
         """Test if load generator cluster is in a different zone from the Hipster Shop cluster"""
@@ -91,7 +91,7 @@ class TestLoadGenerator(unittest.TestCase):
             time.speep(2)
             # check for running status
             r = requests.get(f"{TestLoadGenerator.url}/stats/requests")
-            self.assertEqual(r.status_code, 200)
+            self.assertTrue(r.ok)
             stats = json.loads(r.text)
             self.assertEqual(stats['state'], 'running')
             self.assertEqual(stats['errors'], [])
