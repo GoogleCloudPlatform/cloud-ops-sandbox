@@ -96,6 +96,11 @@ class TestLoadGenerator(unittest.TestCase):
             self.assertEqual(stats['state'], 'running')
             self.assertEqual(stats['errors'], [])
             self.assertEqual(stats['user_count'], 1)
+            tries = 0
+            while stats['total_rps'] <= 0 and tries < 10:
+                # retry in case of slow start up
+                tries += 1
+                time.sleep(5)
             self.assertTrue(stats['total_rps'] > 0)
 
 def getProjectId():
