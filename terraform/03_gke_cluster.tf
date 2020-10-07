@@ -17,7 +17,8 @@
 # This is another example of the random provider. Here we're using it to pick a
 # zone in us-central1 at random.
 resource "random_shuffle" "zone" {
-  input = ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"]
+  # TODO: add us-central1-a and us-central1-c once GKE completely rolls out Oct 2 release
+  input = ["us-central1-b", "us-central1-f"]
 
   # Seeding the RNG is technically optional but while building this we
   # found that it only ever picked `us-central-1c` unless we seeded it. Here
