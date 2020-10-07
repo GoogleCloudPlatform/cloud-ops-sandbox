@@ -73,13 +73,18 @@ class TestLoadGenerator(unittest.TestCase):
     def testStartSwarm(self):
         """Test if the load generation works properly when started"""
         # test for each loadgenerator pattern
-        for pattern in ['basic', 'step']:
-            command=(f'sandboxctl loadgen {pattern}')
-            subprocess.run(split(command))
-            # set kubectl context back to loadgenerator
-            command=('gcloud container clusters get-credentials loadgenerator --zone {0}'.format(getClusterZone()))
-            subprocess.run(split(command))
-            time.speep(2)
+        # start with `None` to check the default case (no explicit pattern)
+        for pattern in [None, 'basic', 'step']:
+            if pattern:
+                # reset deployment to use new pattern
+                set_env_command = "kubectl set env deployment/loadgenerator " \
+                                    f"LOCUST_TASK={pattern}_locustfile.py"
+                delete_pods_command = "kubectl delete pods -l app=loadgenerator"
+                wait_command = "kubectl wait --for=condition=available" \
+                                " --timeout=500s deployment/loadgenerator"
+                subprocess.run(split(set_env_command))
+                subprocess.run(split(delete_pods_command))
+                subprocess.run(split(wait_command))
             # start swarming
             form_data = {'user_count':1, 'spawn_rate':1}
             requests.post(f"{TestLoadGenerator.url}/swarm", form_data)
