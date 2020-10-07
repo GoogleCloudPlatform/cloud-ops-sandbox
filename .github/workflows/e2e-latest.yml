@@ -22,7 +22,8 @@ on:
       - e2e*
       - step-pattern
   pull_request:
-    types: [review_requested]
+    branches:
+      - master
   workflow_dispatch:
   # trigger through UI or API
 jobs:
