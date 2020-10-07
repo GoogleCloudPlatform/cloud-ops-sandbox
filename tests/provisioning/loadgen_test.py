@@ -77,10 +77,13 @@ class TestLoadGenerator(unittest.TestCase):
         requests.post(f"{TestLoadGenerator.url}/swarm", form_data)
         time.speep(2)
         # check for running status
-        r = requests.get(TestLoadGenerator.url)
+        r = requests.get(f"{TestLoadGenerator.url}/stats/requests")
         self.assertEqual(r.status_code, 200)
-        self.assertTrue("running" in r.text)
-        self.assertTrue("<span id=\"userCount\">1</span>" in r.text)
+        stats = json.loads(r.text)
+        self.assertEqual(stats['state'], 'running')
+        self.assertEqual(stats['errors'], [])
+        self.assertEqual(stats['user_count'], 1)
+        self.assertTrue(stats['total_rps'] > 0)
 
 def getProjectId():
     return os.environ['GOOGLE_CLOUD_PROJECT']
