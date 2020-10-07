@@ -88,7 +88,7 @@ class TestLoadGenerator(unittest.TestCase):
             # start swarming
             form_data = {'user_count':1, 'spawn_rate':1}
             requests.post(f"{TestLoadGenerator.url}/swarm", form_data)
-            time.speep(2)
+            time.sleep(2)
             # check for running status
             r = requests.get(f"{TestLoadGenerator.url}/stats/requests")
             self.assertTrue(r.ok)
