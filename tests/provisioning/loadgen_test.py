@@ -86,13 +86,20 @@ class TestLoadGenerator(unittest.TestCase):
                 subprocess.run(split(delete_pods_command))
                 subprocess.run(split(wait_command))
             # start swarming
-            form_data = {'user_count':1, 'spawn_rate':1}
-            requests.post(f"{TestLoadGenerator.url}/swarm", form_data)
-            time.sleep(10)
-            # check for running status
-            r = requests.get(f"{TestLoadGenerator.url}/stats/requests")
+            success = False
+            tries = 0
+            while not success and tries < 10:
+                # retry in case of startup errors
+                tries += 1
+                time.sleep(2)
+                form_data = {'user_count':1, 'spawn_rate':1}
+                requests.post(f"{TestLoadGenerator.url}/swarm", form_data)
+                # check for running status
+                r = requests.get(f"{TestLoadGenerator.url}/stats/requests")
+                if r.ok:
+                    stats = json.loads(r.text)
+                    success = (stats['total_rps'] > 0)
             self.assertTrue(r.ok)
-            stats = json.loads(r.text)
             self.assertEqual(stats['state'], 'running')
             self.assertEqual(stats['errors'], [])
             self.assertEqual(stats['user_count'], 1)
