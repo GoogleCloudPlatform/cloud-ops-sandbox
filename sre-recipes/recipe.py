@@ -30,7 +30,11 @@ class Recipe(abc.ABC):
 
     @abc.abstractmethod
     def get_name(self):
-        """ Returns the name of the recipe"""
+        """Returns the name of the recipe"""
+
+    def is_active(self):
+        """Determines whether the recipe shows up in sandboxctl"""
+        return True
 
     @abc.abstractmethod
     def break_service(self):
