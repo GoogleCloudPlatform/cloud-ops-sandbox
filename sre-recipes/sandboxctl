@@ -51,8 +51,9 @@ def get_valid_recipes(attributes):
             try:
                 recipe_obj = attribute()
                 name = recipe_obj.get_name()
-                recipe_objs[name] = recipe_obj
-                recipe_num += 1
+                if recipe_obj.is_active():
+                    recipe_objs[name] = recipe_obj
+                    recipe_num += 1
             except TypeError:
                 logging.warning('%s needs to implement all abstract methods', \
                     attribute_name)

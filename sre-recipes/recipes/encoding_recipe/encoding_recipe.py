@@ -32,6 +32,11 @@ class EncodingRecipe(Recipe):
     def get_name(self):
         return self.name
 
+    def is_active(self):
+        # recipe temporarily disabled until it is easier to solve
+        # TODO: improve and re-enable recipe
+        return False
+
     def deploy_state(self, state):
         """
         Sets an environment variable ENCODE_EMAIL to given state
