@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/stackdriver-sandbox-230822/sandbox/frontend:v0.4.0
+          image: gcr.io/stackdriver-sandbox-230822/sandbox/frontend:latest
           ports:
           - containerPort: 8080
           readinessProbe:
