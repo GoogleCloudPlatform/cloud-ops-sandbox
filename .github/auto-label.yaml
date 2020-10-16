@@ -13,8 +13,7 @@
 # limitations under the License.
 
 # Config file for Label Bot
-# TODO: update this with Yoshi repo later
-# Default settings: https://github.com/nicoleczhu/language-labeler/blob/b1e6adb3d1dbc02dc34ea6caf42b50f1f29a2450/src/lang-label.ts#L5
+# go/language-label-bot
 # Disable label by Drift product
 product: false
 language:
