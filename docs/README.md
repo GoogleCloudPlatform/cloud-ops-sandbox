@@ -109,7 +109,7 @@ As the cloud-native microservice architecture, which promises scalability and fl
 
 Ops Management provides products for both developers and administrators; this section introduces the products and their general audiences.  The tools are covered in more detail later.
 
-Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of** Application Performance Management (APM)** has increased. Ops Management provides 3 products for APM:
+Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of **Application Performance Management (APM)** has increased. Ops Management provides 3 products for APM:
 
 -  Cloud Trace
 -  Cloud Profiler
