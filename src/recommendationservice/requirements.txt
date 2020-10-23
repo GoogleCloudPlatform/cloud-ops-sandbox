@@ -23,7 +23,7 @@ idna==2.10                # via requests
 opencensus-context==0.1.2  # via opencensus
 opencensus-ext-grpc==0.7.1  # via -r requirements.in
 opencensus-ext-stackdriver==0.7.3  # via -r requirements.in
-opencensus==0.7.10        # via -r requirements.in, opencensus-ext-grpc, opencensus-ext-stackdriver
+opencensus==0.7.11        # via -r requirements.in, opencensus-ext-grpc, opencensus-ext-stackdriver
 opentelemetry-api==0.11b0  # via -r requirements.in, opentelemetry-exporter-google-cloud, opentelemetry-sdk
 opentelemetry-exporter-google-cloud==0.11b0  # via -r requirements.in
 opentelemetry-ext-grpc==0.11b1
