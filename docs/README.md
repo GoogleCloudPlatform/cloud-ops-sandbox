@@ -94,12 +94,11 @@ In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase"
 
 ## Run the load generator
 
-In another browser tab, navigate to the load-generator URL, from which you can simulate users interacting with the application to generate traffic. For this application, values like 100 users with a "hatch rate" of 2 (spawn 2 users per second) are reasonable.
+In another browser tab, navigate to the load-generator URL, from which you can simulate users interacting with the application to generate traffic. For this application, values like 100 total users with a spawn rate of 2 users per second are reasonable. Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't prepopulated. Click the **Start swarming** button to begin generating traffic to the site.
 
-![image](./images/user-guide/3-locust.png)
+![Locust example](./images/user-guide/3-locust.png)
 
-From here, you can explore how the application was deployed, and you can use the  
-navigation menu to bring up other GCP tools.
+From here, you can explore how the application was deployed, and you can use the navigation menu to bring up other GCP tools.
 
 # Learn Ops Management
 
