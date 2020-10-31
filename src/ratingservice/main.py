@@ -14,11 +14,13 @@
 
 import os
 from flask import Flask, jsonify, request
-from psycopg2 import pool
+from psycopg2 import pool, DatabaseError
 
 
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
+db_connection_pool = None
+
 app = Flask(__name__)
 if (os.environ.get('DB_USERNAME') == None or os.environ.get('DB_PASSWORD') == None
         or os.environ.get('DB_NAME') == None or os.environ.get('DB_HOST') == None):
@@ -26,6 +28,7 @@ if (os.environ.get('DB_USERNAME') == None or os.environ.get('DB_PASSWORD') == No
 
 
 def getConnection():
+    global db_connection_pool
     if db_connection_pool == None:
         cfg = {
             'user': os.environ.get('DB_USERNAME'),
@@ -34,8 +37,13 @@ def getConnection():
             'host': os.environ.get('DB_HOST')
         }
         max_connections = int(os.getenv("MAX_DB_CONNECTIONS", "10"))
-        db_connection_pool = pool.SimpleConnectionPool(
-            minconn=1, maxconn=max_connections, **cfg)
+        try:
+            db_connection_pool = pool.SimpleConnectionPool(
+                minconn=1, maxconn=max_connections, **cfg)
+        except (Exception, DatabaseError) as error:
+            print(error)
+            return None
+
     return db_connection_pool.getconn()
 
 
@@ -56,39 +64,42 @@ def makeResult(data):
 
 
 @app.route('/rating', methods=['GET'])
-def getRating(id):
-    eid = request.form['id']
+def getRating():
+    data = request.get_json()
+    eid = data['id']
     if eid == None or eid == "":
         return makeError(400, "invalid entity id")
 
     conn = getConnection()
+    if conn == None:
+        return makeError(500, 'failed to connect to DB')
     try:
         with conn.cursor() as cursor:
             cursor.execute(
                 "SELECT rating FROM ratings WHERE eid='{}';".format(eid))
             result = cursor.fetchone()
-            if result != None:
-                result = makeResult({
-                    'id': eid,
-                    'rating': str(result)
-                })
-            else:
-                resp = makeError(400, "invalid entity id")
         conn.commit()
+        if result != None:
+            return makeResult({
+                'id': eid,
+                'rating': result[0]
+            })
+        else:
+            return makeError(400, "invalid entity id")
     except:
         resp = makeError(500, 'DB error')
     finally:
-        connpool.putconn(conn)
-    return resp
+        db_connection_pool.putconn(conn)
 
 
 @app.route('/rating', methods=['POST'])
 def postRating():
-    eid = request.form['id']
+    data = request.get_json()
+    eid = data['id']
     if eid == None or eid == "":
         return makeError(400, "invalid entity id")
-    rating_str = request.form['rating']
-    if rating_str == None or rating_str == "" or :
+    rating_str = data['rating']
+    if rating_str == None or rating_str == "":
         return makeError(400, "invalid rating")
     try:
         rating = int(rating_str)
@@ -98,28 +109,32 @@ def postRating():
         return makeError(400, "invalid rating")
 
     conn = getConnection()
+    if conn == None:
+        return makeError(500, 'failed to connect to DB')
     try:
         with conn.cursor() as cursor:
             cursor.execute("INSERT INTO votes (eid, rating) VALUES ('{0}', {1});".format(
                 eid, rating))
-            resp = makeResult({})
         conn.commit()
+        return makeResult({})
     except:
-        resp = makeError(500, 'DB error')
+        return makeError(500, 'DB error')
     finally:
-        connpool.putconn(conn)
-    return resp
+        db_connection_pool.putconn(conn)
 
 
 @app.route('/ratings', methods=['PATCH'])
 def aggregateRatings():
-    eids = request.form.getlist('ids')
+    data = request.get_json()
+    eids = data['ids']
     if eids == None or len(eids) != 1:
         return makeError(400, "invalid list of entity ids")
     if eids[0] != "*":
         return makeError(400, "invalid list of entity ids")
 
     conn = getConnection()
+    if conn == None:
+        return makeError(500, 'failed to connect to DB')
     try:
         with conn.cursor() as cursor:
             cursor.execute("UPDATE votes SET in_process=TRUE;")
@@ -130,12 +145,12 @@ def aggregateRatings():
                 "FROM (SELECT eid, ROUND(AVG(rating),4) AS avg_rating, COUNT(eid) AS votes FROM votes WHERE in_process=TRUE GROUP BY eid) AS v "
                 "WHERE r.eid = v.eid;")
             cursor.execute("DELETE FROM votes WHERE in_process=TRUE;")
-            resp = makeResult({})
         conn.commit()
+        return makeResult({})
     except:
-        resp = makeError(500, 'DB error')
+        return makeError(500, 'DB error')
     finally:
-        connpool.putconn(conn)
+        db_connection_pool.putconn(conn)
     return resp
 
 
