@@ -1,7 +1,6 @@
 # Rating Service
 
-Rating Service is a new microservice deployed on App Engine. We'd like this microservice to demonstrate the observability of Cloud Ops on serverless platforms.
-The current state of this service is still self-contained. Later we will integrate it to our Hipster Shop app.
+Rating Service is a microservice developed in Python3 to run on App Engine Standard Environment. It supports a rating management functionality based on abstract entity ids and votes to rate the entity from 1 to 5. The service is used in the Hipster Shop application to simulate rating system of the shop's products.
 
 ## Deploy
 
