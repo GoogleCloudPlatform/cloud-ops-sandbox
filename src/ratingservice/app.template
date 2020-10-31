@@ -1,0 +1,10 @@
+runtime: python38
+
+env_variables:
+    DB_HOST: '${DBHOST}'
+    DB_NAME: '${DBNAME}'
+    DB_USERNAME: '${DBUSER}'
+    DB_PASSWORD: '${DBPWD}'
+    MAX_DB_CONNECTIONS: 10
+
+mime_type: application/json
