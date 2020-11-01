@@ -37,3 +37,9 @@ variable "rating_service_region_name" {
   default     = "us-east1"
   description = "The region name where rating serverless microservice is deployed."
 }
+
+variable "enable_rating_service" {
+  type        = number
+  default     = 0
+  description = "Temporary variable to allow disable (by default) provisioning of the rating service resources."
+}

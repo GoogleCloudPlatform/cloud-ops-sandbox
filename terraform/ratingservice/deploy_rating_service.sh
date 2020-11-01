@@ -13,22 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#--------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
 # Environment variables:
-# REGION - defines GCP region where application has to be deployed
-# VERSION - a version of the application to be deployed
-# DB_HOST - IP address of the Cloud SQL instance
-# DB_NAME - a name of the Postgres DB
-# DB_USER - DB user
-# DB_PWD - DB user password
-#--------------------------------------------------------------------------
+# DELETE   - (optional) 1 or 0 to mark whether script should stop or deploy the app version
+# REGION   - (optional) defines GCP region where application has to be deployed
+# VERSION  - (optional) a version of the application to be deployed
+# INTERVAL - (optional) an interval in minutes between calls to recollect rating votes
+# DBHOST   - IP address of the Cloud SQL instance
+# DBNAME   - a name of the Postgres DB
+# DBUSER   - DB user
+# DBPWD    - DB user password
+#-------------------------------------------------------------------------------------------
 REGION=${REGION:-us-east1}
 VERSION=${VERSION:-prod}
+INTERVAL=${VERSION:-2}
+DELETE=${DELETE:-0}
+
+if [ $DELETE -eq 1 ]; then
+    gcloud app versions stop $VERSION --quiet # application is always deployed as default service
+    exit
+fi
 
 #
 # check if need to create GAE application
 #
-gcloud describe &> /dev/null
+gcloud app describe &> /dev/null
 if [ $? -ne 0 ]; then
     gcloud app create --region=$REGION
 fi
@@ -36,9 +45,12 @@ fi
 #
 # deploy rating service to GAE
 #
-pushd
-cd ../src/ratingservice
+pushd ../src/ratingservice
 sed "s/\${DBHOST}/$DBHOST/;s/\${DBNAME}/$DBNAME/;s/\${DBUSER}/$DBUSER/;s/\${DBPWD}/$DBPWD/;" app.template > app.yaml 
 gcloud app deploy --version=$VERSION --quiet
 rm app.yaml
+sed "s/\${JOBINTERVAL}/$INTERVAL/" cron.template > cron.yaml 
+gcloud app deploy cron.yaml --version=$VERSION --quiet
+rm cron.yaml
+
 popd

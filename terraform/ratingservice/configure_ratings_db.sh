@@ -14,6 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#--------------------------------------------------------------------------
+# Environment variables:
+# DBHOST - IP address of the Cloud SQL instance
+# DBNAME - a name of the Postgres DB
+# DBUSER - DB user
+# DBPWD  - DB user password
+#--------------------------------------------------------------------------
+
 #
 # authorize access to sql instance from local machine
 # (machine has to have public ip)
