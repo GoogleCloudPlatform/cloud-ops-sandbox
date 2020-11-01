@@ -66,7 +66,7 @@ def makeResult(data):
 @app.route('/rating/<eid>', methods=['GET'])
 def getRatingById(eid):
     if eid == None or eid == "":
-        return makeError(400, "invalid entity id")
+        return makeError(400, "malformed entity id")
 
     conn = getConnection()
     if conn == None:
@@ -74,16 +74,17 @@ def getRatingById(eid):
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                "SELECT rating FROM ratings WHERE eid='{}';".format(eid))
+                "SELECT rating, votes FROM ratings WHERE eid='{}';".format(eid))
             result = cursor.fetchone()
         conn.commit()
         if result != None:
             return makeResult({
                 'id': eid,
-                'rating': result[0]
+                'rating': result[0],
+                'votes': result[1]
             })
         else:
-            return makeError(400, "invalid entity id")
+            return makeError(404, "invalid entity id")
     except:
         resp = makeError(500, 'DB error')
     finally:
