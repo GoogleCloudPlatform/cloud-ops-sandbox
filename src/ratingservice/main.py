@@ -63,10 +63,8 @@ def makeResult(data):
 #
 
 
-@app.route('/rating', methods=['GET'])
-def getRating():
-    data = request.get_json()
-    eid = data['id']
+@app.route('/rating/<eid>', methods=['GET'])
+def getRatingById(eid):
     if eid == None or eid == "":
         return makeError(400, "invalid entity id")
 
@@ -92,9 +90,20 @@ def getRating():
         db_connection_pool.putconn(conn)
 
 
+@app.route('/rating', methods=['GET'])
+def getRating():
+    data = request.get_json()
+    if data == None:
+        return makeError(400, "missing payload")
+    return getRatingById(data['id'])
+
+
 @app.route('/rating', methods=['POST'])
 def postRating():
     data = request.get_json()
+    if data == None:
+        return makeError(400, "missing payload")
+
     eid = data['id']
     if eid == None or eid == "":
         return makeError(400, "invalid entity id")
@@ -123,15 +132,8 @@ def postRating():
         db_connection_pool.putconn(conn)
 
 
-@app.route('/ratings', methods=['PATCH'])
+@app.route('/recollect', methods=['GET'])
 def aggregateRatings():
-    data = request.get_json()
-    eids = data['ids']
-    if eids == None or len(eids) != 1:
-        return makeError(400, "invalid list of entity ids")
-    if eids[0] != "*":
-        return makeError(400, "invalid list of entity ids")
-
     conn = getConnection()
     if conn == None:
         return makeError(500, 'failed to connect to DB')

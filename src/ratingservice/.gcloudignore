@@ -26,6 +26,9 @@
 # below:
 .git
 .gitignore
+README.md
+app.template
+cron.template
 
 # Python pycache:
 __pycache__/
