@@ -14,7 +14,7 @@
 
 import os
 from flask import Flask, jsonify, request
-from psycopg2 import pool, DatabaseError
+from psycopg2 import pool, DatabaseError, IntegrityError
 
 
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
@@ -24,6 +24,7 @@ db_connection_pool = None
 app = Flask(__name__)
 if (os.environ.get('DB_USERNAME') == None or os.environ.get('DB_PASSWORD') == None
         or os.environ.get('DB_NAME') == None or os.environ.get('DB_HOST') == None):
+    print('error: environment vars DB_USERNAME, DB_PASSWORD, DB_NAME and DB_HOST must be defined.')
     exit(1)
 
 
@@ -107,16 +108,16 @@ def postRating():
 
     eid = data['id']
     if eid == None or eid == "":
-        return makeError(400, "invalid entity id")
+        return makeError(400, "malformed entity id")
     rating_str = data['rating']
     if rating_str == None or rating_str == "":
-        return makeError(400, "invalid rating")
+        return makeError(400, "malformed rating")
     try:
         rating = int(rating_str)
         if rating < 1 or rating > 5:
-            return makeError(400, "invalid rating")
+            return makeError(400, "rating should be from 1 to 5")
     except ValueError:
-        return makeError(400, "invalid rating")
+        return makeError(400, "malformed rating")
 
     conn = getConnection()
     if conn == None:
@@ -127,6 +128,8 @@ def postRating():
                 eid, rating))
         conn.commit()
         return makeResult({})
+    except IntegrityError:
+        return makeError(404, 'invalid entity id')
     except:
         return makeError(500, 'DB error')
     finally:

@@ -30,13 +30,29 @@ MY_PUBLIC_IP=`dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | awk -F'"'
 gcloud sql instances patch $INSTANCE_NAME --authorized-networks=$MY_PUBLIC_IP --quiet
 
 #
-# create schema
+# configure db schema and populate rating entities
 #
-
 echo "Creating table [ratings]..."
-PGPASSWORD=$DBPWD psql -h $DBHOST -d $DBNAME -U $DBUSER -c "CREATE TABLE IF NOT EXISTS ratings (eid char(16),rating real,votes integer,PRIMARY KEY(eid));"
-echo "Creating table [votes]..."
-PGPASSWORD=$DBPWD psql -h $DBHOST -d $DBNAME -U $DBUSER -c "CREATE TABLE IF NOT EXISTS votes (id SERIAL,eid char(16),rating integer,in_process boolean DEFAULT FALSE,PRIMARY KEY(id));"
+PGPASSWORD=$DBPWD psql -U $DBUSER -h $DBHOST $DBNAME <<EOF
+CREATE TABLE IF NOT EXISTS ratings(
+    eid char(16),
+    rating real,
+    votes integer,
+    PRIMARY KEY(eid)
+);
+CREATE TABLE IF NOT EXISTS votes(
+    id SERIAL,
+    eid char(16),
+    rating integer,
+    in_process boolean DEFAULT FALSE,
+    PRIMARY KEY(id),
+    CONSTRAINT FK_votes_to_ratings
+        FOREIGN KEY (eid)
+            REFERENCES ratings(eid) 
+);
+CREATE INDEX IF NOT EXISTS INDX_votes_eid ON votes (eid);
+EOF
+
 #
 # populate schema
 #
@@ -44,7 +60,7 @@ echo "Generating ratings..."
 echo "eid,rating,votes" >> generated_data.csv
 jq -r '.products[].id' ../src/productcatalogservice/products.json | while read line ; do echo "$line,$(( $RANDOM % 5 + 1)),$(( $RANDOM % 50 + 1))" >> generated_data.csv; done
 echo "Populating ratings to DB..."
-cat generated_data.csv | PGPASSWORD=$DBPWD psql -h $DBHOST -d $DBNAME -U $DBUSER -c "COPY ratings FROM STDIN DELIMITER ',' CSV HEADER;"
+cat generated_data.csv | PGPASSWORD=$DBPWD psql -U $DBUSER -h $DBHOST $DBNAME -c "COPY ratings FROM STDIN DELIMITER ',' CSV HEADER;"
 rm generated_data.csv
 
 #
