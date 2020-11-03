@@ -46,6 +46,7 @@ jobs:
         BRANCH=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_branch\=).*?(?=&)')
         echo ::set-output name=branch::${BRANCH}
         WORKING_DIR=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_working_dir\=).*?(?=&)')
+        WORKING_DIR="${WORKING_DIR:=./}" # set default value
         echo ::set-output name=dir::${WORKING_DIR}
         CLOUDSHELL_IMAGE=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_image\=).*?(?=")')
         echo ::set-output name=cloudshell_image::${CLOUDSHELL_IMAGE}
