@@ -57,7 +57,6 @@ jobs:
           -e skip_workspace_prompt=1 \
           -e release_repo=${{ steps.website_variables.outputs.repo }} \
           -e release_branch=${{ steps.website_variables.outputs.branch }} \
-          -e release_dir=${{ steps.website_variables.outputs.dir }} \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
