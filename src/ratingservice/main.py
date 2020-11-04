@@ -75,7 +75,7 @@ def getRatingById(eid):
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                "SELECT rating, votes FROM ratings WHERE eid='{}';".format(eid))
+                "SELECT rating, votes FROM ratings WHERE eid=%s", (eid,))
             result = cursor.fetchone()
         conn.commit()
         if result != None:
@@ -98,10 +98,10 @@ def postRating():
     if data == None:
         return makeError(400, "missing json payload")
 
-    eid = data['id']
+    eid = str(data['id'])
     if eid == None or eid == "":
         return makeError(400, "malformed entity id")
-    rating_str = data['rating']
+    rating_str = str(data['rating'])
     if rating_str == None or rating_str == "":
         return makeError(400, "malformed rating")
     if not rating_str.isdigit():
@@ -115,8 +115,8 @@ def postRating():
         return makeError(500, 'failed to connect to DB')
     try:
         with conn.cursor() as cursor:
-            cursor.execute("INSERT INTO votes (eid, rating) VALUES ('{0}', {1});".format(
-                eid, rating))
+            cursor.execute(
+                "INSERT INTO votes (eid, rating) VALUES (%s, %s)", (eid, rating))
         conn.commit()
         return makeResult({})
     except IntegrityError:
@@ -127,21 +127,21 @@ def postRating():
         db_connection_pool.putconn(conn)
 
 
-@app.route('/recollect', methods=['GET'])
+@ app.route('/recollect', methods=['GET'])
 def aggregateRatings():
     conn = getConnection()
     if conn == None:
         return makeError(500, 'failed to connect to DB')
     try:
         with conn.cursor() as cursor:
-            cursor.execute("UPDATE votes SET in_process=TRUE;")
+            cursor.execute("UPDATE votes SET in_process=TRUE")
             cursor.execute(
                 "UPDATE ratings AS r SET "
                 "rating=(r.rating*r.votes/(r.votes+v.votes))+(v.avg_rating*v.votes/(r.votes+v.votes)), "
                 "votes=r.votes+v.votes "
                 "FROM (SELECT eid, ROUND(AVG(rating),4) AS avg_rating, COUNT(eid) AS votes FROM votes WHERE in_process=TRUE GROUP BY eid) AS v "
-                "WHERE r.eid = v.eid;")
-            cursor.execute("DELETE FROM votes WHERE in_process=TRUE;")
+                "WHERE r.eid = v.eid")
+            cursor.execute("DELETE FROM votes WHERE in_process=TRUE")
         conn.commit()
         return makeResult({})
     except:
