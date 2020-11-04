@@ -18,6 +18,7 @@ import os
 import unittest
 import requests
 import json
+import math
 
 
 class TestEndpoints(unittest.TestCase):
@@ -49,22 +50,37 @@ class TestEndpoints(unittest.TestCase):
             })
             self.assertEqual(res.status_code, 200)
 
-    # def testGetRatingCorrect(self):
-    #     """ Test if getting the rating of a product returns a correct number """
-    #     products = read_products()
-    #     url_get = "https://ratingservice-dot-{0}.wl.r.appspot.com/rating/{1}".format(
-    #         getProjectId(), products[0])
-    #     url_post = "https://ratingservice-dot-{0}.wl.r.appspot.com/rating".format(
-    #         getProjectId())
-    #     res1 = requests.get(url_get).json()
-    #     requests.post(url_post, data={
-    #         'rating': 5,
-    #         'id': products[0]
-    #     })
-    #     res2 = requests.get(url_get).json()
-    #     # The original total score (count * rating) plus the current score 5 must equal to the current total score
-    #     self.assertTrue(abs(float(res1['rating']) * float(res1['count']) + 5
-    #                         - float(res2['rating']) * float(res2['count'])) < 1e-5)
+    def testGetRatingCorrect(self):
+        """ Test if getting the rating of a product returns a correct number """
+        products = read_products()
+        url_get = "https://ratingservice-dot-{0}.wl.r.appspot.com/rating/{1}".format(
+            getProjectId(), products[0])
+        url_post = "https://ratingservice-dot-{0}.wl.r.appspot.com/rating".format(
+            getProjectId())
+        url_collect = "https://ratingservice-dot-{0}.wl.r.appspot.com/recollect"
+
+        result1 = requests.get(url_get).json()
+        self.assertEqual(result1.status_code, 200)
+        result2 = requests.post(url_post, data={
+            'rating': 5,
+            'id': products[0]
+        })
+        self.assertEqual(result2.status_code, 200)
+        result2 = requests.get(url_recollect).json()
+        self.assertEqual(result2.status_code, 200)
+        result2 = requests.get(url_get).json()
+        self.assertEqual(result2.status_code, 200)
+        self.assertEqual(int(result2['votes']), int(result1['votes']) + 1)
+        # calculated new rating rating2=rating1+((5.0-rating1)/votes1+1)
+        new_rating = float(
+            result1['rating'])+((5.0-float(result1['rating']))/float(result1['votes'])+1)
+        # compare new rating vs. expected which was rounded to 4 digits after floating point
+        self.assertEqual(float(result2['rating']),
+                         math.ceil(new_rating*10000)/10000)
+
+        # The original total score (count * rating) plus the current score 5 must equal to the current total score
+        self.assertTrue(abs(float(res1['rating']) * float(res1['count']) + 5
+                            - float(res2['rating']) * float(res2['count'])) < 1e-5)
 
 
 def getProjectId():
