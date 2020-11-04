@@ -65,7 +65,7 @@ comments are available in each file, but here's the short version:
 * `01_provider.tf` -- configure the terraform provider
 * `02_project.tf` -- create a GCP project, set up billing, and enable services
 * `03_gke_cluster.tf` -- provision a GKE cluster per to the Hipster Shop README
-* `03_rankingservice.tf` -- provision and populates Postgres DB over CloudSQL and deploy ranking service to AppEngine. Creates scheduled task to aggregate new placed ratings.
+* `03_ratingservice.tf` -- provision and populates Postgres DB over CloudSQL and deploy ranking service to AppEngine. Creates scheduled task to aggregate new placed ratings.
 
 The assumption is that a system under user control would run terraform and create resources on the user's behalf.
 The user would not be aware of the underlying tool.

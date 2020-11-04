@@ -92,19 +92,11 @@ def getRatingById(eid):
         db_connection_pool.putconn(conn)
 
 
-@app.route('/rating', methods=['GET'])
-def getRating():
-    data = request.get_json()
-    if data == None:
-        return makeError(400, "missing payload")
-    return getRatingById(data['id'])
-
-
 @app.route('/rating', methods=['POST'])
 def postRating():
     data = request.get_json()
     if data == None:
-        return makeError(400, "missing payload")
+        return makeError(400, "missing json payload")
 
     eid = data['id']
     if eid == None or eid == "":
@@ -112,12 +104,11 @@ def postRating():
     rating_str = data['rating']
     if rating_str == None or rating_str == "":
         return makeError(400, "malformed rating")
-    try:
-        rating = int(rating_str)
-        if rating < 1 or rating > 5:
-            return makeError(400, "rating should be from 1 to 5")
-    except ValueError:
-        return makeError(400, "malformed rating")
+    if not rating_str.isdigit():
+        return makeError(400, "rating should be non negative number")
+    rating = int(rating_str)
+    if rating < 1 or rating > 5:
+        return makeError(400, "rating should be non negative number")
 
     conn = getConnection()
     if conn == None:
