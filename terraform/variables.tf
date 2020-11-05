@@ -39,7 +39,7 @@ variable "rating_service_region_name" {
 }
 
 variable "enable_rating_service" {
-  type        = number
-  default     = 0
+  type        = bool
+  default     = false
   description = "Temporary variable to allow disable (by default) provisioning of the rating service resources."
 }

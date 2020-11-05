@@ -15,5 +15,5 @@
  */
 
 output "rating_db_postgres_user_pwd" {
-    value = random_password.db_password.result
+  value = random_password.db_password[0].result
 }

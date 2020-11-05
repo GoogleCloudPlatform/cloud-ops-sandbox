@@ -35,15 +35,15 @@ resource "google_sql_database" "ratings" {
   count    = var.enable_rating_service ? 1 : 0
   project  = data.google_project.project.project_id
   name     = "ratings-db"
-  instance = google_sql_database_instance.ratings.name
+  instance = google_sql_database_instance.ratings[0].name
 }
 
 resource "google_sql_user" "default" {
   count    = var.enable_rating_service ? 1 : 0
   project  = data.google_project.project.project_id
   name     = "postgres"
-  password = random_password.db_password.result
-  instance = google_sql_database_instance.ratings.name
+  password = random_password.db_password[0].result
+  instance = google_sql_database_instance.ratings[0].name
 }
 
 #
@@ -54,15 +54,15 @@ resource "null_resource" "rating_db_configuration" {
   provisioner "local-exec" {
     command = "./ratingservice/configure_ratings_db.sh"
     environment = {
-      INSTANCE_NAME = google_sql_database_instance.ratings.name
-      DBHOST        = google_sql_database_instance.ratings.public_ip_address
-      DBNAME        = google_sql_database.ratings.name
-      DBUSER        = google_sql_user.default.name
-      DBPWD         = google_sql_user.default.password
+      INSTANCE_NAME = google_sql_database_instance.ratings[0].name
+      DBHOST        = google_sql_database_instance.ratings[0].public_ip_address
+      DBNAME        = google_sql_database.ratings[0].name
+      DBUSER        = google_sql_user.default[0].name
+      DBPWD         = google_sql_user.default[0].password
     }
   }
 
-  depends_on = [google_sql_database.ratings, google_sql_user.default]
+  depends_on = [google_sql_database.ratings[0], google_sql_user.default[0]]
 }
 
 #
@@ -76,10 +76,10 @@ resource "null_resource" "rating_service_deployment" {
       REGION  = var.rating_service_region_name
       VERSION = "prod"
       # escape slashes since the value is used with 'sed'
-      DBHOST = "\\/cloudsql\\/${google_sql_database_instance.ratings.connection_name}"
-      DBNAME = google_sql_database.ratings.name
-      DBUSER = google_sql_user.default.name
-      DBPWD  = google_sql_user.default.password
+      DBHOST = "\\/cloudsql\\/${google_sql_database_instance.ratings[0].connection_name}"
+      DBNAME = google_sql_database.ratings[0].name
+      DBUSER = google_sql_user.default[0].name
+      DBPWD  = google_sql_user.default[0].password
     }
   }
   provisioner "local-exec" {
@@ -90,5 +90,5 @@ resource "null_resource" "rating_service_deployment" {
     }
   }
 
-  depends_on = [null_resource.rating_db_configuration]
+  depends_on = [null_resource.rating_db_configuration[0]]
 }
