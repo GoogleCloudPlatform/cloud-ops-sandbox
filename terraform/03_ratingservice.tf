@@ -18,10 +18,10 @@ resource "random_password" "db_password" {
   special = false
 }
 
-resource "google_sql_database_instance" "ratings" {
+resource "google_sql_database_instance" "rating_service" {
   count               = var.enable_rating_service ? 1 : 0
   project             = data.google_project.project.project_id
-  name                = "ratings-sql-instance"
+  name                = "rating-service-sql-instance"
   database_version    = "POSTGRES_12"
   region              = var.rating_service_region_name
   deletion_protection = false
@@ -31,11 +31,11 @@ resource "google_sql_database_instance" "ratings" {
   }
 }
 
-resource "google_sql_database" "ratings" {
+resource "google_sql_database" "rating_service" {
   count    = var.enable_rating_service ? 1 : 0
   project  = data.google_project.project.project_id
-  name     = "ratings-db"
-  instance = google_sql_database_instance.ratings[0].name
+  name     = "rating-db"
+  instance = google_sql_database_instance.rating_service[0].name
 }
 
 resource "google_sql_user" "default" {
@@ -43,7 +43,7 @@ resource "google_sql_user" "default" {
   project  = data.google_project.project.project_id
   name     = "postgres"
   password = random_password.db_password[0].result
-  instance = google_sql_database_instance.ratings[0].name
+  instance = google_sql_database_instance.rating_service[0].name
 }
 
 #
@@ -52,34 +52,35 @@ resource "google_sql_user" "default" {
 resource "null_resource" "rating_db_configuration" {
   count = var.enable_rating_service ? 1 : 0
   provisioner "local-exec" {
-    command = "./ratingservice/configure_ratings_db.sh"
+    command = "./ratingservice/configure_rating_db.sh"
     environment = {
-      INSTANCE_NAME = google_sql_database_instance.ratings[0].name
-      DBHOST        = google_sql_database_instance.ratings[0].public_ip_address
-      DBNAME        = google_sql_database.ratings[0].name
+      INSTANCE_NAME = google_sql_database_instance.rating_service[0].name
+      DBHOST        = google_sql_database_instance.rating_service[0].public_ip_address
+      DBNAME        = google_sql_database.rating_service[0].name
       DBUSER        = google_sql_user.default[0].name
       DBPWD         = google_sql_user.default[0].password
     }
   }
 
-  depends_on = [google_project_service.sqladmin, google_sql_database.ratings[0], google_sql_user.default[0]]
+  depends_on = [google_project_service.sqladmin, google_sql_database.rating_service[0], google_sql_user.default[0]]
 }
 
 #
 # deploy rating service to App Engine
 #
-resource "null_resource" "rating_service_deployment" {
+resource "null_resource" "rating_service_deployment1" {
   count = var.enable_rating_service ? 1 : 0
   provisioner "local-exec" {
     command = "./ratingservice/deploy_rating_service.sh"
     environment = {
       REGION  = var.rating_service_region_name
+      SERVICE = "default"
       VERSION = "prod"
-      # escape slashes since the value is used with 'sed'
-      DBHOST = "\\/cloudsql\\/${google_sql_database_instance.ratings[0].connection_name}"
-      DBNAME = google_sql_database.ratings[0].name
-      DBUSER = google_sql_user.default[0].name
-      DBPWD  = google_sql_user.default[0].password
+      # escape slashes to allow substituting the value with 'sed'
+      DB_HOST     = "\\/cloudsql\\/${google_sql_database_instance.rating_service[0].connection_name}"
+      DB_NAME     = google_sql_database.rating_service[0].name
+      DB_USERNAME = google_sql_user.default[0].name
+      DB_PASSWORD = google_sql_user.default[0].password
     }
   }
   provisioner "local-exec" {
@@ -94,9 +95,12 @@ resource "null_resource" "rating_service_deployment" {
 }
 
 resource "google_cloud_scheduler_job" "recollect_job" {
-  name             = "recollect-ratings-job"
+  count            = var.enable_rating_service ? 1 : 0
+  name             = "rating-service-recollect-job"
+  project          = data.google_project.project.project_id
+  region           = var.rating_service_region_name
   schedule         = "*/2 * * * *" # each two minutes
-  description      = "recollect all new posted rating votes"
+  description      = "recollect recently posted new votes"
   time_zone        = "Europe/London"
   attempt_deadline = "340s"
 

@@ -46,7 +46,7 @@ fi
 # deploy rating service to GAE
 #
 pushd ../src/ratingservice
-sed "s/\${DBHOST}/$DBHOST/;s/\${DBNAME}/$DBNAME/;s/\${DBUSER}/$DBUSER/;s/\${DBPWD}/$DBPWD/;" app.template > app.yaml 
+sed "s/\${DB_HOST}/$DB_HOST/;s/\${DB_NAME}/$DB_NAME/;s/\${DB_USERNAME}/$DB_USERNAME/;s/\${DB_PASSWORD}/$DB_PASSWORD/;" app.template > app.yaml 
 gcloud app deploy --version=$VERSION --quiet
 rm app.yaml
 popd
