@@ -25,7 +25,7 @@ app = Flask(__name__)
 db_user = os.environ.get('DB_USERNAME')
 db_name = os.environ.get('DB_NAME')
 db_pass = os.environ.get('DB_PASSWORD')
-db_host = os.environ.get('DB_PASSWORD')
+db_host = os.environ.get('DB_HOST')
 if not all([db_name, db_user, db_pass, db_host]):
     print('error: environment vars DB_USERNAME, DB_PASSWORD, DB_NAME and DB_HOST must be defined.')
     exit(1)
