@@ -22,8 +22,11 @@ from psycopg2 import pool, DatabaseError, IntegrityError
 db_connection_pool = None
 
 app = Flask(__name__)
-if (os.environ.get('DB_USERNAME') == None or os.environ.get('DB_PASSWORD') == None
-        or os.environ.get('DB_NAME') == None or os.environ.get('DB_HOST') == None):
+db_user = os.environ.get('DB_USERNAME')
+db_name = os.environ.get('DB_NAME')
+db_pass = os.environ.get('DB_PASSWORD')
+db_host = os.environ.get('DB_PASSWORD')
+if not all([db_name, db_user, db_pass, db_host]):
     print('error: environment vars DB_USERNAME, DB_PASSWORD, DB_NAME and DB_HOST must be defined.')
     exit(1)
 
@@ -32,10 +35,10 @@ def getConnection():
     global db_connection_pool
     if db_connection_pool == None:
         cfg = {
-            'user': os.environ.get('DB_USERNAME'),
-            'password': os.environ.get('DB_PASSWORD'),
-            'database': os.environ.get('DB_NAME'),
-            'host': os.environ.get('DB_HOST')
+            'user': db_user,
+            'password': db_pass,
+            'database': db_name,
+            'host': db_host
         }
         max_connections = int(os.getenv("MAX_DB_CONNECTIONS", "10"))
         try:
@@ -66,6 +69,18 @@ def makeResult(data):
 
 @app.route('/rating/<eid>', methods=['GET'])
 def getRatingById(eid):
+    '''Gets rating of the entity by its id.
+
+    Args:
+        eid (string): the entity id.
+
+    Returns:
+        HTTP status 200 and Json payload { 'id': (string), 'rating': (number), 'votes': (int) }
+        HTTP status 400 when eid is is missing or invalid
+        HTTP status 404 when rating for eid cannot be found
+        HTTP status 500 when there is an error querying DB
+    '''
+
     if eid == None or eid == "":
         return makeError(400, "malformed entity id")
 
@@ -94,6 +109,19 @@ def getRatingById(eid):
 
 @app.route('/rating', methods=['POST'])
 def postRating():
+    '''Adds new vote for entity's rating.
+
+    Args:
+        Json payload {'id': (string), 'rating': (integer) }
+
+    Returns:
+        HTTP status 200 and empty Json payload { }
+        HTTP status 400 when payload is malformed (e.g. missing expected field)
+        HTTP status 400 when eid is missing or invalid or rating is missing, invalid or out of [1..5] range
+        HTTP status 404 when rating for eid cannot be reported
+        HTTP status 500 when there is an error querying DB
+    '''
+
     data = request.get_json()
     if data == None:
         return makeError(400, "missing json payload")
@@ -127,8 +155,14 @@ def postRating():
         db_connection_pool.putconn(conn)
 
 
-@ app.route('/recollect', methods=['GET'])
+@ app.route('/recollect', methods=['PUT'])
 def aggregateRatings():
+    '''Updates current ratings for all entities based on new votes received until now.
+
+    Returns:
+        HTTP status 200 and empty Json payload { }
+        HTTP status 500 when there is an error querying DB
+    '''
     conn = getConnection()
     if conn == None:
         return makeError(500, 'failed to connect to DB')
