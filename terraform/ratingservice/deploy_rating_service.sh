@@ -49,8 +49,4 @@ pushd ../src/ratingservice
 sed "s/\${DBHOST}/$DBHOST/;s/\${DBNAME}/$DBNAME/;s/\${DBUSER}/$DBUSER/;s/\${DBPWD}/$DBPWD/;" app.template > app.yaml 
 gcloud app deploy --version=$VERSION --quiet
 rm app.yaml
-sed "s/\${JOBINTERVAL}/$INTERVAL/" cron.template > cron.yaml 
-gcloud app deploy cron.yaml --version=$VERSION --quiet
-rm cron.yaml
-
 popd

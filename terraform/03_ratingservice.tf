@@ -62,7 +62,7 @@ resource "null_resource" "rating_db_configuration" {
     }
   }
 
-  depends_on = [google_sql_database.ratings[0], google_sql_user.default[0]]
+  depends_on = [google_project_service.sqladmin, google_sql_database.ratings[0], google_sql_user.default[0]]
 }
 
 #
@@ -91,4 +91,33 @@ resource "null_resource" "rating_service_deployment" {
   }
 
   depends_on = [null_resource.rating_db_configuration[0]]
+}
+
+resource "google_cloud_scheduler_job" "recollect_job" {
+  name             = "recollect-ratings-job"
+  schedule         = "*/2 * * * *" # each two minutes
+  description      = "recollect all new posted rating votes"
+  time_zone        = "Europe/London"
+  attempt_deadline = "340s"
+
+  retry_config {
+    min_backoff_duration = "1s"
+    max_retry_duration   = "10s"
+    max_doublings        = 2
+    retry_count          = 3
+  }
+
+  app_engine_http_target {
+    http_method = "PUT"
+
+    # there is only one service and one version. parameters below are just for the reference
+    # app_engine_routing {
+    #   service = "default"
+    #   version = "prod"
+    # }
+
+    relative_uri = "/recollect"
+  }
+
+  depends_on = [google_project_service.cloudscheduler]
 }
