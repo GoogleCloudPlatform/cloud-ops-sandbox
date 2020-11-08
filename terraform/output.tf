@@ -15,5 +15,5 @@
  */
 
 output "rating_db_postgres_user_pwd" {
-  value = random_password.db_password[0].result
+  value = var.enable_rating_service ? random_password.db_password[0].result : null
 }
