@@ -90,7 +90,7 @@ def getRatingById(eid):
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                "SELECT rating, votes FROM ratings WHERE eid=%s", (eid,))
+                "SELECT ROUND(AVG(rating),4, votes FROM ratings WHERE eid=%s", (eid,))
             result = cursor.fetchone()
         conn.commit()
         if result != None:
