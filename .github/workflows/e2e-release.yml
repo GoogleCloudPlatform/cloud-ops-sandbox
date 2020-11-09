@@ -77,12 +77,14 @@ jobs:
         cd ./release-code
         # get cluster zone
         CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${{ env.PROJECT_ID }} --format="value(zone)")
+        LOADGEN_ZONE=$(gcloud container clusters list --filter="name:loadgenerator" --project ${{ env.PROJECT_ID }} --format="value(zone)")
         # build provisioning test image
         docker build -t test-provisioning:$GITHUB_SHA-release tests/provisioning/.
         # run provisioning tests
         docker run --rm \
           -e GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }} \
           -e ZONE=$CLUSTER_ZONE \
+          -e LOADGEN_ZONE=$LOADGEN_ZONE \
           -v ~/.config:/root/.config \
           test-provisioning:$GITHUB_SHA-release
     - name: Run Monitoring Integration Tests
