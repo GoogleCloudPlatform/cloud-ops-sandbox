@@ -16,7 +16,7 @@ name: "End to End - Release"
 on:
   schedule:
     # run every day at 8pm
-    - cron:  '* 20 * * *'
+    - cron:  '0 20 * * *'
   push:
     # run on pushes to test branch
     branches:
