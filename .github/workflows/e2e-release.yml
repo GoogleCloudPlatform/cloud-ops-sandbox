@@ -45,7 +45,7 @@ jobs:
         echo ::set-output name=repo::${REPO}
         BRANCH=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_branch\=).*?(?=&)')
         echo ::set-output name=branch::${BRANCH}
-        CLOUDSHELL_IMAGE=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_image\=).*?(?=")')
+        CLOUDSHELL_IMAGE=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_image\=).*?(?=&)')
         echo ::set-output name=cloudshell_image::${CLOUDSHELL_IMAGE}
     - name: Run Install Script
       timeout-minutes: 30
