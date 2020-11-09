@@ -16,7 +16,7 @@ google-cloud-monitoring==0.36.0  # via opencensus-ext-stackdriver, opentelemetry
 google-cloud-trace==0.24.0  # via opencensus-ext-stackdriver, opentelemetry-exporter-google-cloud
 google-python-cloud-debugger==2.15  # via -r requirements.in
 googleapis-common-protos==1.52.0  # via google-api-core
-grpcio-health-checking==1.32.0  # via -r requirements.in
+grpcio-health-checking==1.33.2  # via -r requirements.in
 grpcio==1.32.0            # via -r requirements.in, google-api-core, grpcio-health-checking, opencensus-ext-grpc, opentelemetry-ext-grpc
 httplib2==0.18.1          # via google-api-python-client, google-auth-httplib2
 idna==2.10                # via requests
