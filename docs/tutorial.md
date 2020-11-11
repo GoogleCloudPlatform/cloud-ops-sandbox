@@ -43,6 +43,12 @@ The URLs in this message tell you where to find the results of the installation.
 
 If a message does **not** appear, and the installation script is not able to run, then try running `sandboxctl create` in your Cloud Shell terminal once you have set-up your billing account.
 
+### Recovering from session timeout
+Should your Cloud Shell session timeout due to user inactivity, you will need to launch the custom Cloud Shell image to access the `sandboxctl` command.
+Click the button below to restart the custom Cloud Shell.
+
+[![Restart your Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=v0.4.0&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:v0.4.0&cloudshell_tutorial=docs/tutorial.md)
+
 ## Explore the Sandbox!
 
 In this tutorial, walk through a guided tour of products in Cloud Operations and explore how they can be used to work with an application.
