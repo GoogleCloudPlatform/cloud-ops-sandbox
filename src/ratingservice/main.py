@@ -81,7 +81,7 @@ def getRatingById(eid):
         HTTP status 500 when there is an error querying DB
     '''
 
-    if eid == None or eid == "":
+    if not eid:
         return makeError(400, "malformed entity id")
 
     conn = getConnection()
@@ -125,18 +125,18 @@ def postRating():
     data = request.get_json()
     if data == None:
         return makeError(400, "missing json payload")
-
-    eid = str(data['id'])
-    if eid == None or eid == "":
+    eid = data.get('id')
+    if not eid:
         return makeError(400, "malformed entity id")
-    rating_str = str(data['rating'])
-    if rating_str == None or rating_str == "":
-        return makeError(400, "malformed rating")
-    if not rating_str.isdigit():
-        return makeError(400, "rating should be non negative number")
-    rating = int(rating_str)
+    rating = 0
+    try:
+        rating = int(data['rating'])
+    except KeyError:
+        return makeError(400, "missing 'rating' field in payload")
+    except ValueError:
+        return makeError(400, "rating should be integer number")
     if rating < 1 or rating > 5:
-        return makeError(400, "rating should be non negative number")
+        return makeError(400, "rating should be value between 1 and 5")
 
     conn = getConnection()
     if conn == None:
@@ -144,7 +144,7 @@ def postRating():
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO votes (eid, rating) VALUES (%s, %s)", (eid, rating))
+                "INSERT INTO votes (eid, rating) VALUES (%s, %s)", (str(eid), rating))
         conn.commit()
         return makeResult({})
     except IntegrityError:
