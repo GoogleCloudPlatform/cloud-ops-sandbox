@@ -26,31 +26,26 @@ def getIstioServiceName(service_name, project_id, zone):
 
 
 def findService(client, service_name, project_id, zone, should_timeout):
-    """ Checks to see if a service exists in Cloud Monitoring 
-    Arguments:
-    client - the API client
-    service_name - the Istio service name, returned from getIstioServiceName
-    project_id - the Sandbox project id
-    zone - the zone of the Sandbox cluster
-    should_timeout - whether to timeout after 5 minutes or wait indefinitely for the service
-    """
-    found_service = False
-    full_service_name = getIstioServiceName(service_name, project_id, zone)
-    service = client.service_path(project_id, full_service_name)
-    num_tries = 0
-    while not found_service and num_tries <= 50:
-        try:
-            found_service = client.get_service(name=service)
-        except:  # possible exceptions include GoogleAPICallError and ValueError
-            if should_timeout:
-                num_tries += 1
-            time.sleep(6)
-            found_service = False
-
-    if not found_service:
-        print("{} was not found in Cloud Monitoring. There may be errors while provisioning Monitoring examples.".format(service_name))
-    else:
-        print("Found {} in Cloud Monitoring.".format(service_name))
+	""" Checks to see if a service exists in Cloud Monitoring 
+	Arguments:
+	client - the API client
+	service_name - the Istio service name, returned from getIstioServiceName
+	project_id - the Sandbox project id
+	zone - the zone of the Sandbox cluster
+	should_timeout - whether to timeout after 5 minutes or wait indefinitely for the service
+	"""
+	found_service = False
+	full_service_name = getIstioServiceName(service_name, project_id, zone)
+	service = client.service_path(project_id, full_service_name)
+	num_tries = 0
+	while not found_service and num_tries <= 50:
+		try:
+			found_service = client.get_service(name=service)
+		except: # possible exceptions include GoogleAPICallError and ValueError
+			if should_timeout:
+				num_tries += 1
+			time.sleep(6)
+			found_service = False
 
 
 def waitForIstioServicesDetection(project_id, zone, should_timeout):

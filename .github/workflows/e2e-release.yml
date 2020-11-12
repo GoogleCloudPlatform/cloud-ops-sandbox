@@ -16,7 +16,7 @@ name: "End to End - Release"
 on:
   schedule:
     # run every day at 8pm
-    - cron:  '* 20 * * *'
+    - cron:  '0 20 * * *'
   push:
     # run on pushes to test branch
     branches:
@@ -45,21 +45,19 @@ jobs:
         echo ::set-output name=repo::${REPO}
         BRANCH=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_branch\=).*?(?=&)')
         echo ::set-output name=branch::${BRANCH}
-        WORKING_DIR=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_working_dir\=).*?(?=&)')
-        echo ::set-output name=dir::${WORKING_DIR}
-        CLOUDSHELL_IMAGE=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_image\=).*?(?=")')
+        CLOUDSHELL_IMAGE=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_image\=).*?(?=&)')
         echo ::set-output name=cloudshell_image::${CLOUDSHELL_IMAGE}
     - name: Run Install Script
       timeout-minutes: 30
       run: |
         set -x
+        docker pull ${{ steps.website_variables.outputs.cloudshell_image }}
         # run install script
         docker run --rm \
           -e project_id=${{ env.PROJECT_ID }} \
           -e skip_workspace_prompt=1 \
           -e release_repo=${{ steps.website_variables.outputs.repo }} \
           -e release_branch=${{ steps.website_variables.outputs.branch }} \
-          -e release_dir=${{ steps.website_variables.outputs.dir }} \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
@@ -79,12 +77,14 @@ jobs:
         cd ./release-code
         # get cluster zone
         CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${{ env.PROJECT_ID }} --format="value(zone)")
+        LOADGEN_ZONE=$(gcloud container clusters list --filter="name:loadgenerator" --project ${{ env.PROJECT_ID }} --format="value(zone)")
         # build provisioning test image
         docker build -t test-provisioning:$GITHUB_SHA-release tests/provisioning/.
         # run provisioning tests
         docker run --rm \
           -e GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }} \
           -e ZONE=$CLUSTER_ZONE \
+          -e LOADGEN_ZONE=$LOADGEN_ZONE \
           -v ~/.config:/root/.config \
           test-provisioning:$GITHUB_SHA-release
     - name: Run Monitoring Integration Tests
