@@ -31,3 +31,15 @@ variable "bucket_name" {
   type        = string
   description = "The name of your bucket to store the state file. Case-sensitive."
 }
+
+variable "rating_service_region_name" {
+  type        = string
+  default     = "us-east1"
+  description = "The region name where rating serverless microservice is deployed."
+}
+
+variable "enable_rating_service" {
+  type        = bool
+  default     = false
+  description = "Temporary variable to allow disable (by default) provisioning of the rating service resources."
+}

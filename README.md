@@ -106,6 +106,7 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 | [recommendationservice](./src/recommendationservice) | Python | Recommends other products based on what's in the user's cart. |
 | [adservice](./src/adservice) | Java | Provides text ads based on given context words. |
 | [loadgenerator](./src/loadgenerator) | Python/Locust | Continuously sends requests that imitate realistic shopping flows to the frontend. |
+| [ratingservice](./src/ratingservice) | Python3 | Allows to post and get ratings by id. Demonistrates integration of different GCP services. |
 
 ### Technologies
 
