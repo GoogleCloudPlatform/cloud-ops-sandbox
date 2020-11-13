@@ -44,15 +44,15 @@
                     <form id="vote_form" method="POST" action="/rating" onsubmit="hideVoteForm()" class="form-inline text-muted">
                         <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
                         <div class="input-group">
-                            <select name="rating" id="rating" class="custom-select form-control form-control-lg">
+                            <select name="rating" id="rating_select" class="custom-select form-control form-control-lg" onchange="enableVoteButton()">
                                 <option selected="" disabled="" class="text-hide">Place rating</option>
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
                             </select>
-                            <button type="button" class="btn btn-info btn-lg ml-3" onclick="hideVoteForm()">Vote</button>
+                            <button id="vote_btn" type="button" class="btn btn-info btn-lg ml-3" disabled onclick="hideVoteForm()">Vote</button>
                         </div>
                     </form>
                     <hr />
@@ -87,9 +87,16 @@
 </main>
 {{ template "footer" . }}
 <script type="text/javascript">
-    function hideVoteForm() {
+    function hideFormSubmit() {
         var form = document.getElementById('vote_form');
         form.classList.add('invisible')
+    }
+    function enableVoteButton() {
+        var select = document.getElementById('rating_select');
+        if (select.value !== "") {
+            var btn = document.getElementById('vote_btn');
+            btn.disabled = false;
+        }
     }
 </script>
 {{ end }}
