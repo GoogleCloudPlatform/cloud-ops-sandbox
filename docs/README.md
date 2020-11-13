@@ -76,9 +76,11 @@ The URLs in this message tell you where to find the results of the installation:
 
 ### Recovering from session timeout
 Should your Cloud Shell session timeout due to user inactivity, you will need to launch the custom Cloud Shell image to access the `sandboxctl` command.
-Click the button below to restart the custom Cloud Shell.
+Click the
 
-[![Restart your Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=v0.4.0&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:v0.4.0&cloudshell_tutorial=docs/tutorial.md)
+![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)
+
+button from the [Cloud Operations Sandbox homepage](https://cloud-ops-sandbox.dev/) to restart the custom Cloud Shell
 
 ## Explore your project in GCP
 
