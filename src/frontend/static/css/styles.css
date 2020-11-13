@@ -1,0 +1,16 @@
+.rating-5starts {
+    --percent: calc(var(--rating) / 5 * 100%);
+    display: inline-block;
+    font-size: 30px;
+    font-family: "Comic Sans MS";
+    line-height: 1;
+}
+.rating-5starts::before {
+    content: '★★★★★';
+    letter-spacing: 3px;
+    background: linear-gradient(90deg, #fc0 var(--percent), #fff var(--percent));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
