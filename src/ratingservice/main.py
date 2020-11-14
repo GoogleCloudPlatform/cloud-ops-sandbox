@@ -13,103 +13,180 @@
 # limitations under the License.
 
 import os
-import json
-from flask import Flask,Response,jsonify,request
-from psycopg2 import pool
+from flask import Flask, jsonify, request
+from psycopg2 import pool, DatabaseError, IntegrityError
 
-connpool = None
 
-# connect to cloud sql
-def initConnection():
-    db_user = os.environ.get('CLOUD_SQL_USERNAME')
-    db_password = os.environ.get('CLOUD_SQL_PASSWORD')
-    db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
-    db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
-    host = '/cloudsql/{}'.format(db_connection_name)
-    db_config = {
-        'user': db_user,
-        'password': db_password,
-        'database': db_name,
-        'host': host
-    }
-    connpool = pool.ThreadedConnectionPool(minconn=1, maxconn=10, **db_config)
-    return connpool
-
-# read product ids
-def read_products():
-    res = []
-    with open('products.json') as f:
-        data = json.load(f)
-        for product in data['products']:
-            res.append(product['id'])
-    return res
-
-# create and populate table
-def populate_database():
-    try:
-        products = read_products()
-        conn = connpool.getconn()
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT EXISTS(SELECT * FROM information_schema.tables WHERE table_name = 'ratings');")
-            result = cursor.fetchone()
-            if not result[0]:
-                cursor.execute("CREATE TABLE ratings (id SERIAL PRIMARY KEY, product_id varchar(20) NOT NULL, score int DEFAULT 0);")
-                for product in products:
-                    cursor.execute("INSERT INTO ratings (product_id, score) VALUES ('{}', 5);".format(product))
-        conn.commit()
-    finally:
-        connpool.putconn(conn)
+# If `entrypoint` is not defined in app.yaml, App Engine will look for an app
+# called `app` in `main.py`.
+db_connection_pool = None
 
 app = Flask(__name__)
-connpool = initConnection()
-populate_database()
+db_user = os.environ.get('DB_USERNAME')
+db_name = os.environ.get('DB_NAME')
+db_pass = os.environ.get('DB_PASSWORD')
+db_host = os.environ.get('DB_HOST')
+if not all([db_name, db_user, db_pass, db_host]):
+    print('error: environment vars DB_USERNAME, DB_PASSWORD, DB_NAME and DB_HOST must be defined.')
+    exit(1)
 
-# get rating of a product
-@app.route('/rating/<id>', methods=['GET'])
-def getRating(id):
-    conn = connpool.getconn()
-    resp = None
+
+def getConnection():
+    global db_connection_pool
+    if db_connection_pool == None:
+        cfg = {
+            'user': db_user,
+            'password': db_pass,
+            'database': db_name,
+            'host': db_host
+        }
+        max_connections = int(os.getenv("MAX_DB_CONNECTIONS", "10"))
+        try:
+            db_connection_pool = pool.SimpleConnectionPool(
+                minconn=1, maxconn=max_connections, **cfg)
+        except (Exception, DatabaseError) as error:
+            print(error)
+            return None
+
+    return db_connection_pool.getconn()
+
+
+def makeError(code, message):
+    result = jsonify({'error': message})
+    result.status_code = code
+    return result
+
+
+def makeResult(data):
+    result = jsonify(data)
+    result.status_code = 200
+    return result
+
+#
+# APIs
+#
+
+
+@app.route('/rating/<eid>', methods=['GET'])
+def getRatingById(eid):
+    '''Gets rating of the entity by its id.
+
+    Args:
+        eid (string): the entity id.
+
+    Returns:
+        HTTP status 200 and Json payload { 'id': (string), 'rating': (number), 'votes': (int) }
+        HTTP status 400 when eid is is missing or invalid
+        HTTP status 404 when rating for eid cannot be found
+        HTTP status 500 when there is an error querying DB
+    '''
+
+    if not eid:
+        return makeError(400, "malformed entity id")
+
+    conn = getConnection()
+    if conn == None:
+        return makeError(500, 'failed to connect to DB')
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT AVG(score), COUNT(*) FROM ratings WHERE product_id='{}';".format(id))
+            cursor.execute(
+                "SELECT ROUND(AVG(rating),4, votes FROM ratings WHERE eid=%s", (eid,))
             result = cursor.fetchone()
-            rating, count = result[0], result[1]
-            if count > 0:
-                # product exists
-                resp = jsonify({
-                    'status' : 'success',
-                    'rating' : str(rating),
-                    'count'  : str(count)
-                })
-                resp.status_code = 200
-            else:
-                # product not exists
-                resp = jsonify({'error' : 'Product not found'.format(id)})
-                resp.status_code = 404   
-        conn.commit()    
+        conn.commit()
+        if result != None:
+            return makeResult({
+                'id': eid,
+                'rating': result[0],
+                'votes': result[1]
+            })
+        else:
+            return makeError(404, "invalid entity id")
     except:
-        resp = jsonify({'error' : 'Error in database: Fail to get the rating of product {}'.format(id)})
-        resp.status_code = 500
+        resp = makeError(500, 'DB error')
     finally:
-        connpool.putconn(conn)
-    return resp
+        db_connection_pool.putconn(conn)
 
-# rate a product
+
 @app.route('/rating', methods=['POST'])
-def rate():
-    conn = connpool.getconn()
-    resp = None
-    product_id = request.form['id']
-    score = request.form['score']
+def postRating():
+    '''Adds new vote for entity's rating.
+
+    Args:
+        Json payload {'id': (string), 'rating': (integer) }
+
+    Returns:
+        HTTP status 200 and empty Json payload { }
+        HTTP status 400 when payload is malformed (e.g. missing expected field)
+        HTTP status 400 when eid is missing or invalid or rating is missing, invalid or out of [1..5] range
+        HTTP status 404 when rating for eid cannot be reported
+        HTTP status 500 when there is an error querying DB
+    '''
+
+    data = request.get_json()
+    if data == None:
+        return makeError(400, "missing json payload")
+    eid = data.get('id')
+    if not eid:
+        return makeError(400, "malformed entity id")
+    rating = 0
+    try:
+        rating = int(data['rating'])
+    except KeyError:
+        return makeError(400, "missing 'rating' field in payload")
+    except ValueError:
+        return makeError(400, "rating should be integer number")
+    if rating < 1 or rating > 5:
+        return makeError(400, "rating should be value between 1 and 5")
+
+    conn = getConnection()
+    if conn == None:
+        return makeError(500, 'failed to connect to DB')
     try:
         with conn.cursor() as cursor:
-            cursor.execute("INSERT INTO ratings (product_id, score) VALUES ('{0}', {1});".format(product_id, score))
-            resp = jsonify({'status' : 'success'})
-            resp.status_code = 200
+            cursor.execute(
+                "INSERT INTO votes (eid, rating) VALUES (%s, %s)", (str(eid), rating))
         conn.commit()
+        return makeResult({})
+    except IntegrityError:
+        return makeError(404, 'invalid entity id')
     except:
-        resp = jsonify({'error' : 'Error in database: Fail to add a rating of product {}'.format(id)})
-        resp.status_code = 500
+        return makeError(500, 'DB error')
     finally:
-        connpool.putconn(conn)
+        db_connection_pool.putconn(conn)
+
+
+@ app.route('/recollect', methods=['PUT'])
+def aggregateRatings():
+    '''Updates current ratings for all entities based on new votes received until now.
+
+    Returns:
+        HTTP status 200 and empty Json payload { }
+        HTTP status 500 when there is an error querying DB
+    '''
+    conn = getConnection()
+    if conn == None:
+        return makeError(500, 'failed to connect to DB')
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("UPDATE votes SET in_process=TRUE")
+            cursor.execute(
+                "UPDATE ratings AS r SET "
+                "rating=(r.rating*r.votes/(r.votes+v.votes))+(v.avg_rating*v.votes/(r.votes+v.votes)), "
+                "votes=r.votes+v.votes "
+                "FROM (SELECT eid, ROUND(AVG(rating),4) AS avg_rating, COUNT(eid) AS votes FROM votes WHERE in_process=TRUE GROUP BY eid) AS v "
+                "WHERE r.eid = v.eid")
+            cursor.execute("DELETE FROM votes WHERE in_process=TRUE")
+        conn.commit()
+        return makeResult({})
+    except:
+        return makeError(500, 'DB error')
+    finally:
+        db_connection_pool.putconn(conn)
     return resp
+
+
+if __name__ == "__main__":
+    # Used when running locally only. When deploying to Google App
+    # Engine, a webserver process such as Gunicorn will serve the app. This
+    # can be configured by adding an `entrypoint` to app.yaml.
+    app.run(host="localhost", port=8080, debug=True)

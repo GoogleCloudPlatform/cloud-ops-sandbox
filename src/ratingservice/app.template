@@ -1,0 +1,12 @@
+runtime: python38
+env: standard
+entrypoint: uwsgi --http-socket :8080 --wsgi-file main.py --callable app --master --processes 1 --threads 10
+env_variables:
+    DB_HOST: '${DB_HOST}'
+    DB_NAME: '${DB_NAME}'
+    DB_USERNAME: '${DB_USERNAME}'
+    DB_PASSWORD: '${DB_PASSWORD}'
+    MAX_DB_CONNECTIONS: 10
+basic_scaling:
+  max_instances: 10
+  idle_timeout: 10m

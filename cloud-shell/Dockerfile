@@ -20,6 +20,9 @@ RUN sudo apt-get install unzip && \
   unzip -o terraform.zip && \
   sudo install terraform /usr/local/bin
 
+# install Postgres client and Json query
+RUN sudo apt-get -y install postgresql-client jq
+
 # install python libraries
 RUN python3 -m pip install google-cloud-pubsub
 RUN python3 -m pip install click

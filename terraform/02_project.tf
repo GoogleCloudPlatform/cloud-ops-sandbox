@@ -20,7 +20,7 @@
 
 # billing account is optional to allow deploying to existing projects
 data "google_billing_account" "acct" {
-  count        = "${var.billing_account != null ? 1 : 0}"
+  count        = var.billing_account != null ? 1 : 0
   display_name = var.billing_account
 }
 
@@ -73,6 +73,32 @@ resource "google_project_service" "sourcerepo" {
   project = data.google_project.project.project_id
 
   service = "sourcerepo.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "cloudscheduler" {
+  project = data.google_project.project.project_id
+
+  service = "cloudscheduler.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+# used for rating service
+resource "google_project_service" "sql" {
+  project = data.google_project.project.project_id
+
+  service = "sql-component.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+# used to provision rating service (temp)
+resource "google_project_service" "sqladmin" {
+  project = data.google_project.project.project_id
+
+  service = "sqladmin.googleapis.com"
 
   disable_dependent_services = true
 }
