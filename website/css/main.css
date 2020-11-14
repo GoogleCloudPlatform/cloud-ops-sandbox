@@ -284,6 +284,13 @@ li b {
   font-weight: 700;
 }
 
+.warning {
+  color: var(--grey700);
+  font-size: 14px;
+  line-height: 26px;
+  position: relative;
+}
+
 /* mobile view */
 @media (max-width: 1130px) {
   body {
