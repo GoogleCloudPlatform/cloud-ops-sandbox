@@ -15,6 +15,15 @@
 import os
 from flask import Flask, jsonify, request
 from psycopg2 import pool, DatabaseError, IntegrityError
+# enable GCP debugger when not running locally
+if __name__ != "__main__":
+    try:
+        import googleclouddebugger
+        googleclouddebugger.enable(
+            breakpoint_enable_canary=False
+        )
+    except ImportError:
+        pass
 
 
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
@@ -29,6 +38,8 @@ db_host = os.environ.get('DB_HOST')
 if not all([db_name, db_user, db_pass, db_host]):
     print('error: environment vars DB_USERNAME, DB_PASSWORD, DB_NAME and DB_HOST must be defined.')
     exit(1)
+if os.environ.get('GAE_ENV') == 'standard':
+    db_host = '/cloudsql/{}'.format(db_host)
 
 
 def getConnection():
@@ -47,7 +58,6 @@ def getConnection():
         except (Exception, DatabaseError) as error:
             print(error)
             return None
-
     return db_connection_pool.getconn()
 
 
@@ -83,26 +93,26 @@ def getRatingById(eid):
 
     if not eid:
         return makeError(400, "malformed entity id")
-
     conn = getConnection()
     if conn == None:
         return makeError(500, 'failed to connect to DB')
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                "SELECT ROUND(AVG(rating),4, votes FROM ratings WHERE eid=%s", (eid,))
+                "SELECT ROUND(rating,4), votes FROM ratings WHERE eid=%s", (eid,))
             result = cursor.fetchone()
         conn.commit()
         if result != None:
             return makeResult({
                 'id': eid,
-                'rating': result[0],
+                # cast to float because flas.jsonify doesn't work with decimal
+                'rating': float(result[0]),
                 'votes': result[1]
             })
         else:
             return makeError(404, "invalid entity id")
     except:
-        resp = makeError(500, 'DB error')
+        return makeError(500, 'DB error')
     finally:
         db_connection_pool.putconn(conn)
 
