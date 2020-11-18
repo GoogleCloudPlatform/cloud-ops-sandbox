@@ -24,8 +24,8 @@ import math
 class TestEndpoints(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
-        self.service_host_url = os.environ['RATING_SERVICE_URL']
-        if self.service_host_url == "":
+        self.service_host_url = os.environ.get('RATING_SERVICE_URL')
+        if not self.service_host_url:
             self.service_host_url = "https://ratingservice-dot-{0}.wl.r.appspot.com".format(
                 os.environ['GOOGLE_CLOUD_PROJECT'])
         self.service_host_url = self.service_host_url.rstrip('/')
