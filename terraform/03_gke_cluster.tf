@@ -190,7 +190,7 @@ resource "null_resource" "deploy_services" {
     kubectl apply -f ../kubernetes-manifests/productcatalogservice.yaml
     kubectl apply -f ../kubernetes-manifests/recommendationservice.yaml
     kubectl apply -f ../kubernetes-manifests/shippingservice.yaml
-    kubectl set env -f ../kubernetes-manifests/frontend.yaml RATING_SERVICE_ADDR=${module.ratingservice.service_url}
+    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${module.ratingservice.service_url}
   EOT
   }
 

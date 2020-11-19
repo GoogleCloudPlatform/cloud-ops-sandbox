@@ -31,21 +31,18 @@ provider "random" {
   version = "~> 2.0"
 }
 
-# activate APIs for CloudSQL and Scheduler; no API is needed for AppEngine
-resource "google_project_service" "sql" {
-  service                    = "sql-component.googleapis.com"
-  disable_dependent_services = true
-}
-
-# needed to connect to DB for schema update and populating
-resource "google_project_service" "sqladmin" {
-  service                    = "sqladmin.googleapis.com"
+resource "google_project_service" "gae" {
+  service                    = "appengine.googleapis.com"
   disable_dependent_services = true
 }
 
 resource "google_project_service" "cloudscheduler" {
   service                    = "cloudscheduler.googleapis.com"
   disable_dependent_services = true
+}
+
+resource "random_id" "suffix" {
+  byte_length = 6
 }
 
 # provision CloudSQL
@@ -55,7 +52,7 @@ resource "random_password" "db_password" {
 }
 
 resource "google_sql_database_instance" "rating_service" {
-  name                = "ratingservice-sql-instance"
+  name                = "ratingservice-sql-instance-${random_id.suffix.hex}"
   database_version    = "POSTGRES_12"
   deletion_protection = false
 
@@ -77,14 +74,12 @@ resource "google_sql_database" "rating_service" {
   provisioner "local-exec" {
     command = "${path.module}/configure_rating_db.sh ${var.gcp_project_id}"
     environment = {
-      INSTANCE_NAME = google_sql_database_instance.rating_service.name
-      DB_HOST       = google_sql_database_instance.rating_service.public_ip_address
-      DB_NAME       = google_sql_database.rating_service.name
-      DB_USERNAME   = google_sql_user.default.name
-      DB_PASSWORD   = google_sql_user.default.password
+      DB_HOST     = google_sql_database_instance.rating_service.connection_name
+      DB_NAME     = google_sql_database.rating_service.name
+      DB_USERNAME = google_sql_user.default.name
+      DB_PASSWORD = google_sql_user.default.password
     }
   }
-  depends_on = [google_project_service.sqladmin]
 }
 
 # provision App Engine service
@@ -96,7 +91,8 @@ locals {
 }
 
 resource "google_storage_bucket" "it" {
-  name = "${var.gcp_project_id}-ratingservice-deployables"
+  name                        = "${var.gcp_project_id}-ratingservice-deployables-${random_id.suffix.hex}"
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "requirements" {
@@ -124,6 +120,8 @@ data "external" "app_engine_state" {
 resource "google_app_engine_application" "app" {
   count       = data.external.app_engine_state.result.application_exist == "false" ? 1 : 0
   location_id = var.gcp_region_name
+
+  depends_on = [google_project_service.gae]
 }
 
 resource "google_app_engine_standard_app_version" "default" {
@@ -146,7 +144,9 @@ resource "google_app_engine_standard_app_version" "default" {
       source_url = "https://storage.googleapis.com/${google_storage_bucket.it.name}/${google_storage_bucket_object.default_main.name}"
     }
   }
+
   noop_on_destroy = true
+  depends_on      = [google_project_service.gae]
 }
 
 resource "google_app_engine_standard_app_version" "ratingservice" {
@@ -211,5 +211,5 @@ resource "google_cloud_scheduler_job" "recollect_job" {
     relative_uri = "/recollect"
   }
 
-  depends_on = [google_project_service.cloudscheduler]
+  depends_on = [google_project_service.cloudscheduler, google_app_engine_standard_app_version.ratingservice]
 }

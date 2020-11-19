@@ -31,9 +31,9 @@ service_exist=false
 print_json_result() {
   if [ $ae_app_exist == true ]; then
     app_hostname=$(gcloud app describe --format=json --project=$project_id | jq .defaultHostname)
-    echo "{ \"application_exist\": \"$ae_app_exist\", \"application_domain\": $app_hostname, \"default_svc_exist\": \"$service_exist\" }" | jq
+    echo "{ \"application_exist\": \"$ae_app_exist\", \"application_domain\": $app_hostname, \"default_svc_exist\": \"$service_exist\" }" | jq .
   else
-    echo "{ \"application_exist\": \"$ae_app_exist\", \"default_svc_exist\": \"$service_exist\" }" | jq
+    echo "{ \"application_exist\": \"$ae_app_exist\", \"default_svc_exist\": \"$service_exist\" }" | jq .
   fi
 }
 
