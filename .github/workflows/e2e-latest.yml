@@ -38,7 +38,7 @@ jobs:
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
-    - name: Build Sandbox K8S Services
+    - name: Build Sandbox Kubernetes Services
       run: |
         set -x
         skaffold config set --global local-cluster false
@@ -110,7 +110,7 @@ jobs:
         # install dependencies
         python3 -m pip install -r tests/ratingservice/requirements.txt
         # retrieve the exact service URL
-        RATING_SERVICE_URL="https://ratingservice-dot-$(gcloud app describe --format=json --project=${{ env.PROJECT_ID }} | jq .defaultHostname)""
+        RATING_SERVICE_URL="https://ratingservice-dot-$(gcloud app describe --format=json --project=${{ env.PROJECT_ID }} | jq .defaultHostname)"
         # run tests
         python3 tests/ratingservice/main_test.py "$RATING_SERVICE_URL"
     - name: Test Using Existing Project
