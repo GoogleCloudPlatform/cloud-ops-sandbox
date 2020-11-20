@@ -80,23 +80,32 @@ while [ -n "$BUCKET_CONTENTS" ]; do
 done
 
 # clear logs
+AUDIT_LOG_SUFFIX="logs/cloudaudit.googleapis.com"
 for LOG in $(gcloud logging logs list --project $PROJECT_ID --format="value(NAME)"); do
-    echo "deleting $LOG..."
-    gcloud logging logs delete $LOG --project $PROJECT_ID --quiet
+    if [[ ! $LOG =~ $AUDIT_LOG_SUFFIX ]]; then
+      echo "deleting $LOG...";
+      gcloud logging logs delete $LOG --project $PROJECT_ID --quiet;
+    fi
 done
 
 # delete scheduler job
-RESOURCE_NAME=$(gcloud scheduler jobs list --project=$PROJECT_ID | grep ratingservice-recollect-job)
-[ -n "$RESOURCE_NAME" ] && gcloud scheduler jobs delete ratingservice-recollect-job --project=$PROJECT_ID --quiet
+echo "deleting scheduler job 'ratingservice-recollect-job'..."
+gcloud scheduler jobs describe ratingservice-recollect-job --project=$PROJECT_ID 2>/dev/null
+[ $? -eq 0 ] && gcloud scheduler jobs delete ratingservice-recollect-job --project=$PROJECT_ID --quiet
 
 # delete app engine "ratingservice" service (default service cannot be deleted)
-RESOURCE_NAME=$(gcloud app services list --project=$PROJECT_ID | grep ratingservice)
-[ -n "$RESOURCE_NAME" ] && gcloud app services delete ratingservice --project=$PROJECT_ID --quiet
+echo "deleting App Engine service 'ratingservice'..."
+gcloud app services describe ratingservice --project=$PROJECT_ID 2>/dev/null
+[ $? -eq 0 ] && gcloud app services delete ratingservice --project=$PROJECT_ID --quiet
 
-# delete rating service code bucket
-RESOURCE_NAME=$(gsutil ls -p $PROJECT_ID | grep ratingservice-deployables-)
-[ -n "$RESOURCE_NAME" ] && gsuitl rm -r $RESOURCE_NAME
+# delete rating service code buckets
+for BUCKET_NAME in $(gsutil ls -p $PROJECT_ID | grep ratingservice-deployables-); do
+  echo "deleting $BUCKET_NAME..."
+  gsutil rm -r $BUCKET_NAME
+done
 
-# delete rating service database
-RESOURCE_NAME=$(gcloud sql instances list --project=$PROJECT_ID --format=json | jq .[].name)
-[ -n "$RESOURCE_NAME" ] && gcloud sql instances delete $RESOURCE_NAME --project=$PROJECT_ID --quiet
+# delete Cloud SQL instances
+for INSTANCE_NAME in $(gcloud sql instances list --project=$PROJECT_ID --format="value(NAME)"); do
+  echo "deleting Cloud SQL instance $INSTANCE_NAME..."
+  gcloud sql instances delete $INSTANCE_NAME --project=$PROJECT_ID --quiet
+done
