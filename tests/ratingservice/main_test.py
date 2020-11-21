@@ -15,35 +15,27 @@
 from __future__ import print_function
 
 import os
+import sys
 import unittest
 import requests
 import json
 import math
 
 
-class TestEndpoints(unittest.TestCase):
+service_url = ''
+products = []
 
-    def __init__(self, *args, **kwargs):
-        self.root_path = os.environ.get('SANDBOX_ROOT_PATH')
-        if not self.root_path:
-            self.root_path = os.getcwd()
-        self.root_path = self.root_path.rstrip("/")
-        self.service_host_url = os.environ.get('RATING_SERVICE_URL')
-        if not self.service_host_url:
-            self.service_host_url = "https://ratingservice-dot-{0}.wl.r.appspot.com".format(
-                os.environ['GOOGLE_CLOUD_PROJECT'])
-        self.service_host_url = self.service_host_url.rstrip('/')
-        super(TestEndpoints, self).__init__(*args, **kwargs)
+
+class TestEndpoints(unittest.TestCase):
 
     def composeUrl(self, resource, eid=""):
         if not eid:
-            return "{0}/{1}".format(self.service_host_url, resource)
+            return "{0}/{1}".format(service_url, resource)
         else:
-            return "{0}/{1}/{2}".format(self.service_host_url, resource, eid)
+            return "{0}/{1}/{2}".format(service_url, resource, eid)
 
     def testGetRating(self):
         """ test getting ratings for all shop products """
-        products = self.read_products()
         for product in products:
             url = self.composeUrl("rating", product)
             res = requests.get(url)
@@ -57,7 +49,6 @@ class TestEndpoints(unittest.TestCase):
 
     def testPostNewRating(self):
         """ test posting new rating to a product """
-        products = self.read_products()
         # use products[0] in "post new vote" test
         test_product_id = products[0]
         url = self.composeUrl("rating")
@@ -69,7 +60,6 @@ class TestEndpoints(unittest.TestCase):
 
     def testNewRatingCalculation(self):
         """ test rating calculation after recollection """
-        products = self.read_products()
         # use products[1] to avoid counting new vote from testRate() test
         test_product_id = products[1]
         new_rating_vote = 5
@@ -103,15 +93,31 @@ class TestEndpoints(unittest.TestCase):
         self.assertEqual(result2_data['rating'],
                          math.ceil(new_rating*10000)/10000)
 
-    def read_products(self):
-        """ read shop products from json file """
-        res = []
-        with open(self.root_path + '/src/productcatalogservice/products.json') as f:
+
+def getServiceUrl():
+    if len(sys.argv) > 1:
+        url = sys.argv[1]
+        return url.rstrip('/')
+    return None
+
+
+def getProducts():
+    path = os.getcwd().rstrip('/') + '/src/productcatalogservice/products.json'
+    if len(sys.argv) > 2:
+        path = sys.argv[2]
+    ids = []
+    try:
+        with open(path) as f:
             data = json.load(f)
             for product in data['products']:
-                res.append(product['id'])
-        return res
+                ids.append(product['id'])
+    except:
+        print("failed to load product ids from ", path)
+        return []
+    return ids
 
 
 if __name__ == '__main__':
-    unittest.main(verbosity=2)
+    service_url = getServiceUrl()
+    products = getProducts()
+    unittest.main(argv=['first-arg-is-ignored'], verbosity=2)

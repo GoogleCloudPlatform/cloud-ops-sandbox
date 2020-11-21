@@ -109,9 +109,10 @@ jobs:
         set -x
         # install dependencies
         python3 -m pip install -r tests/ratingservice/requirements.txt
+        # get service URL
+        RATING_SERVICE_URL="https://ratingservice-dot-$(gcloud app describe --format='value(defaultHostname)' --project=${{ env.PROJECT_ID }})"
         # run test
-        RATING_SERVICE_URL="https://ratingservice-dot-$(gcloud app describe --format='value(defaultHostname)' --project=${{ env.PROJECT_ID }})" \
-        python3 tests/ratingservice/main_test.py
+        python3 tests/ratingservice/main_test.py $RATING_SERVICE_URL
     - name: Test Using Existing Project
       timeout-minutes: 30
       run: |
