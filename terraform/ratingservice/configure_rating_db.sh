@@ -32,7 +32,13 @@ cloud_sql_proxy -instances=$DB_HOST=tcp:5432 -verbose=false &>/dev/null &
 cloud_proxy_pid=$!
 
 # wait until proxy establishes connection
-sleep 5
+connected=false
+while [ $connected = false ]; do
+    echo "Waiting for establishing connection to db..."
+    PGPASSWORD=$DB_PASSWORD psql "host=127.0.0.1 sslmode=disable dbname=$DB_NAME user=$DB_USERNAME" -q -c '\conninfo' &>/dev/null
+    [ $? -eq 0 ] && connected=true
+    sleep 1
+done
 
 #
 # configure db schema and populate rating entities
