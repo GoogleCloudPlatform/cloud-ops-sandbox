@@ -38,7 +38,7 @@ jobs:
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
-    - name: Build Sandbox Services
+    - name: Build Sandbox Kubernetes Services
       run: |
         set -x
         skaffold config set --global local-cluster false
@@ -103,6 +103,16 @@ jobs:
         gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
         # run tests
         python3 tests/monitoring_integration_test.py ${{ env.PROJECT_ID }}
+    - name: Run Rating Service Test
+      timeout-minutes: 5
+      run: |
+        set -x
+        # install dependencies
+        python3 -m pip install -r tests/ratingservice/requirements.txt
+        # get service URL
+        RATING_SERVICE_URL="https://ratingservice-dot-$(gcloud app describe --format='value(defaultHostname)' --project=${{ env.PROJECT_ID }})"
+        # run test
+        python3 tests/ratingservice/main_test.py $RATING_SERVICE_URL
     - name: Test Using Existing Project
       timeout-minutes: 30
       run: |

@@ -15,31 +15,27 @@
 from __future__ import print_function
 
 import os
+import sys
 import unittest
 import requests
 import json
 import math
 
 
+service_url = ''
+products = []
+
+
 class TestEndpoints(unittest.TestCase):
 
-    def __init__(self, *args, **kwargs):
-        self.service_host_url = os.environ['RATING_SERVICE_URL']
-        if self.service_host_url == "":
-            self.service_host_url = "https://ratingservice-dot-{0}.wl.r.appspot.com".format(
-                os.environ['GOOGLE_CLOUD_PROJECT'])
-        self.service_host_url = self.service_host_url.rstrip('/')
-        super(TestEndpoints, self).__init__(*args, **kwargs)
-
-    def composeUrl(self, request, arg1=""):
-        if arg1 != "":
-            return "{0}/{1}/{2}".format(self.service_host_url, request, arg1)
+    def composeUrl(self, resource, eid=""):
+        if not eid:
+            return "{0}/{1}".format(service_url, resource)
         else:
-            return "{0}/{1}".format(self.service_host_url, request)
+            return "{0}/{1}/{2}".format(service_url, resource, eid)
 
     def testGetRating(self):
         """ test getting ratings for all shop products """
-        products = read_products()
         for product in products:
             url = self.composeUrl("rating", product)
             res = requests.get(url)
@@ -53,7 +49,6 @@ class TestEndpoints(unittest.TestCase):
 
     def testPostNewRating(self):
         """ test posting new rating to a product """
-        products = read_products()
         # use products[0] in "post new vote" test
         test_product_id = products[0]
         url = self.composeUrl("rating")
@@ -65,7 +60,6 @@ class TestEndpoints(unittest.TestCase):
 
     def testNewRatingCalculation(self):
         """ test rating calculation after recollection """
-        products = read_products()
         # use products[1] to avoid counting new vote from testRate() test
         test_product_id = products[1]
         new_rating_vote = 5
@@ -96,19 +90,34 @@ class TestEndpoints(unittest.TestCase):
             ((new_rating_vote - result1_data['rating']) /
              (result1_data['votes'] + 1))
         # compare new rating vs. expected which was rounded to 4 digits after floating point
-        self.assertEqual(math.ceil(result2_data['rating']*10000)/10000,
+        self.assertEqual(result2_data['rating'],
                          math.ceil(new_rating*10000)/10000)
 
 
-def read_products():
-    """ read shop products from json file """
-    res = []
-    with open('../../src/productcatalogservice/products.json') as f:
-        data = json.load(f)
-        for product in data['products']:
-            res.append(product['id'])
-    return res
+def getServiceUrl():
+    if len(sys.argv) > 1:
+        url = sys.argv[1]
+        return url.rstrip('/')
+    return None
+
+
+def getProducts():
+    path = os.getcwd().rstrip('/') + '/src/productcatalogservice/products.json'
+    if len(sys.argv) > 2:
+        path = sys.argv[2]
+    ids = []
+    try:
+        with open(path) as f:
+            data = json.load(f)
+            for product in data['products']:
+                ids.append(product['id'])
+    except:
+        print("failed to load product ids from ", path)
+        return []
+    return ids
 
 
 if __name__ == '__main__':
-    unittest.main(verbosity=2)
+    service_url = getServiceUrl()
+    products = getProducts()
+    unittest.main(argv=['first-arg-is-ignored'], verbosity=2)

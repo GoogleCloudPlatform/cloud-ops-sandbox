@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-# Creating this variable but leaving it empty means that the user will be
-# prompted for a value when terraform is run
-variable "billing_account" {
-  default     = null
+variable "gcp_project_id" {
   type        = string
-  description = "The name of your billing account. Case-sensitive."
+  description = "GCP project id where rating service should be provisioned."
 }
 
-variable "project_id" {
+variable "gcp_region_name" {
   type        = string
-  description = "The id of your project. Case-sensitive."
-}
-
-variable "bucket_name" {
-  type        = string
-  description = "The name of your bucket to store the state file. Case-sensitive."
+  default     = "us-east1"
+  description = "GCP region name where CloudSQL instance and App Engine application should be deployed."
 }

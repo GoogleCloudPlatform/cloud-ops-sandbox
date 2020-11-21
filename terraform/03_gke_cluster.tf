@@ -42,7 +42,7 @@ resource "random_shuffle" "zone" {
 # is possible, check out the docs: https://www.terraform.io/docs/providers/google/r/container_cluster.html
 resource "google_container_cluster" "gke" {
   provider = google-beta
-  project = data.google_project.project.project_id
+  project  = data.google_project.project.project_id
 
   # Here's how you specify the name
   name = "cloud-ops-sandbox"
@@ -82,7 +82,7 @@ resource "google_container_cluster" "gke" {
 
       labels = {
         environment = "dev",
-        cluster = "cloud-ops-sandbox-main"
+        cluster     = "cloud-ops-sandbox-main"
       }
 
       # Enable Workload Identity for node pool
@@ -106,7 +106,7 @@ resource "google_container_cluster" "gke" {
 
   # Specifies the use of "new" Cloud logging and monitoring
   # https://cloud.google.com/kubernetes-engine-monitoring/
-  logging_service = "logging.googleapis.com/kubernetes"
+  logging_service    = "logging.googleapis.com/kubernetes"
   monitoring_service = "monitoring.googleapis.com/kubernetes"
 
   # Stores the zone of created gke cluster
@@ -153,7 +153,7 @@ resource "google_service_account_iam_binding" "set_gsa_binding" {
 # Annotate KSA
 resource "null_resource" "annotate_ksa" {
   triggers = {
-    cluster_ep = google_container_cluster.gke.endpoint  #kubernetes cluster endpoint
+    cluster_ep = google_container_cluster.gke.endpoint #kubernetes cluster endpoint
   }
 
   provisioner "local-exec" {
@@ -190,6 +190,7 @@ resource "null_resource" "deploy_services" {
     kubectl apply -f ../kubernetes-manifests/productcatalogservice.yaml
     kubectl apply -f ../kubernetes-manifests/recommendationservice.yaml
     kubectl apply -f ../kubernetes-manifests/shippingservice.yaml
+    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${module.ratingservice.service_url}
   EOT
   }
 
@@ -219,6 +220,6 @@ resource "null_resource" "delay" {
 }
 
 data "external" "terraform_vars" {
-  program = ["/bin/bash", "${path.module}/get_terraform_vars.sh"]
+  program    = ["/bin/bash", "${path.module}/get_terraform_vars.sh"]
   depends_on = [null_resource.delay]
 }

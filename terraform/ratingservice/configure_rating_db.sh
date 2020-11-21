@@ -16,27 +16,32 @@
 
 #--------------------------------------------------------------------------
 # Environment variables:
-# DBHOST - IP address of the Cloud SQL instance
-# DBNAME - a name of the Postgres DB
-# DBUSER - DB user
-# DBPWD  - DB user password
+# DB_HOST       - Cloud SQL instance connection name
+# DB_NAME       - Postgres DB name
+# DB_USERNAME   - DB user name
+# DB_PASSWORD   - DB user password
 #--------------------------------------------------------------------------
 
+project_id=$1
 #
 # authorize access to sql instance from local machine
 # (machine has to have public ip)
 #
-MY_PUBLIC_IP=`dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | awk -F'"' '{ print $2}'`
-gcloud sql instances patch $INSTANCE_NAME --authorized-networks=$MY_PUBLIC_IP --quiet
+echo "Launching Cloud SQL Proxy in background..."
+cloud_sql_proxy -instances=$DB_HOST=tcp:5432 -verbose=false &>/dev/null &
+cloud_proxy_pid=$!
+
+# wait until proxy establishes connection
+sleep 5
 
 #
 # configure db schema and populate rating entities
 #
 echo "Creating table [ratings]..."
-PGPASSWORD=$DBPWD psql -U $DBUSER -h $DBHOST $DBNAME <<EOF
+PGPASSWORD=$DB_PASSWORD psql "host=127.0.0.1 sslmode=disable dbname=$DB_NAME user=$DB_USERNAME" <<EOF
 CREATE TABLE IF NOT EXISTS ratings(
     eid char(16),
-    rating real,
+    rating numeric,
     votes integer,
     PRIMARY KEY(eid)
 );
@@ -60,10 +65,11 @@ echo "Generating ratings..."
 echo "eid,rating,votes" >> generated_data.csv
 jq -r '.products[].id' ../src/productcatalogservice/products.json | while read line ; do echo "$line,$(( $RANDOM % 5 + 1)),$(( $RANDOM % 50 + 1))" >> generated_data.csv; done
 echo "Populating ratings to DB..."
-cat generated_data.csv | PGPASSWORD=$DBPWD psql -U $DBUSER -h $DBHOST $DBNAME -c "COPY ratings FROM STDIN DELIMITER ',' CSV HEADER;"
+cat generated_data.csv | PGPASSWORD=$DB_PASSWORD psql "host=127.0.0.1 sslmode=disable dbname=$DB_NAME user=$DB_USERNAME" -c "COPY ratings FROM STDIN DELIMITER ',' CSV HEADER;"
 rm generated_data.csv
 
 #
 # remove authorized ips
 #
-gcloud sql instances patch $INSTANCE_NAME --clear-authorized-networks --quiet
+kill $cloud_proxy_pid; wait $cloud_proxy_pid 2>/dev/null
+echo "Cloud SQL Proxy background process is killed."
