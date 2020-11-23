@@ -41,8 +41,10 @@ resource "google_project_service" "cloudscheduler" {
   disable_dependent_services = true
 }
 
-resource "random_id" "suffix" {
-  byte_length = 6
+resource "random_string" "suffix" {
+  upper   = false
+  special = false
+  length  = 4
 }
 
 # provision CloudSQL
@@ -52,7 +54,7 @@ resource "random_password" "db_password" {
 }
 
 resource "google_sql_database_instance" "rating_service" {
-  name                = "ratingservice-sql-instance-${random_id.suffix.hex}"
+  name                = "ratingservice-sql-instance-${random_string.suffix.result}"
   database_version    = "POSTGRES_12"
   deletion_protection = false
 
@@ -91,7 +93,7 @@ locals {
 }
 
 resource "google_storage_bucket" "it" {
-  name                        = "${var.gcp_project_id}-ratingservice-deployables-${random_id.suffix.hex}"
+  name                        = "${var.gcp_project_id}-ratingservice-${random_string.suffix.result}"
   uniform_bucket_level_access = true
 }
 
