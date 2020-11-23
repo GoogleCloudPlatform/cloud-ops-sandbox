@@ -31,13 +31,18 @@ echo "Launching Cloud SQL Proxy in background..."
 cloud_sql_proxy -instances=$DB_HOST=tcp:5432 -verbose=false &>/dev/null &
 cloud_proxy_pid=$!
 
-# wait until proxy establishes connection
-connected=false
-while [ $connected = false ]; do
+# wait until proxy establishes connection or 5 retries
+tries=0
+while [[ "${tries}" -lt 5 ]]; do
     echo "Waiting for establishing connection to db..."
-    PGPASSWORD=$DB_PASSWORD psql "host=127.0.0.1 sslmode=disable dbname=$DB_NAME user=$DB_USERNAME" -q -c '\conninfo' &>/dev/null
-    [ $? -eq 0 ] && connected=true
-    sleep 1
+    status_str=$(PGPASSWORD=$DB_PASSWORD psql "host=127.0.0.1 sslmode=disable dbname=$DB_NAME user=$DB_USERNAME" -q -c '\conninfo' 2>/dev/null)
+    if [[ -n "$status_str" ]]; then
+        echo "Connection established"
+        break
+    else
+        sleep 2
+        tries=$((tries + 1))
+    fi
 done
 
 #

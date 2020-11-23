@@ -41,7 +41,7 @@ resource "google_project_service" "cloudscheduler" {
   disable_dependent_services = true
 }
 
-resource "random_string" "suffix" {
+resource "random_string" "suffix_len_4" {
   upper   = false
   special = false
   length  = 4
@@ -54,7 +54,7 @@ resource "random_password" "db_password" {
 }
 
 resource "google_sql_database_instance" "rating_service" {
-  name                = "ratingservice-sql-instance-${random_string.suffix.result}"
+  name                = "ratingservice-sql-instance-${random_string.suffix_len_4.result}"
   database_version    = "POSTGRES_12"
   deletion_protection = false
 
@@ -93,7 +93,8 @@ locals {
 }
 
 resource "google_storage_bucket" "it" {
-  name                        = "${var.gcp_project_id}-ratingservice-${random_string.suffix.result}"
+  # max name length is 63 char = 30 chars for project id + '-ratingservice-' + 4 char suffix
+  name                        = "${var.gcp_project_id}-ratingservice-${random_string.suffix_len_4.result}"
   uniform_bucket_level_access = true
 }
 

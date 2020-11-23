@@ -19,7 +19,7 @@ import sys
 import unittest
 import requests
 import json
-import math
+import decimal
 
 
 service_url = ''
@@ -80,18 +80,19 @@ class TestEndpoints(unittest.TestCase):
         result2 = requests.get(url_get)
         self.assertEqual(result2.status_code, 200)
 
-        result1_data = result1.json()
-        result2_data = result2.json()
-        self.assertEqual(result2_data['votes'],
-                         result1_data['votes'] + 1)
-
-        # new rating should be: old_rating+((5.0-old_rating)/(old_num_of_votes+1))
-        new_rating = result1_data['rating'] + \
-            ((new_rating_vote - result1_data['rating']) /
-             (result1_data['votes'] + 1))
-        # compare new rating vs. expected which was rounded to 4 digits after floating point
-        self.assertEqual(result2_data['rating'],
-                         math.ceil(new_rating*10000)/10000)
+        data = result1.json()
+        prev_vote = data['votes']
+        prev_rating = decimal.Decimal(data['rating'])
+        data = result2.json()
+        new_vote = data['votes']
+        new_rating = decimal.Decimal(data['rating'])
+        self.assertEqual(new_vote, prev_vote + 1)
+        expected_rating = prev_rating + \
+            ((new_rating_vote-prev_rating)/(prev_vote+1))
+        # compare expected result rounded to 4 decimal places
+        QUANTIZE_VALUE = decimal.Decimal("0.0001")
+        self.assertEqual(new_rating.quantize(QUANTIZE_VALUE),
+                         expected_rating.quantize(QUANTIZE_VALUE))
 
 
 def getServiceUrl():
