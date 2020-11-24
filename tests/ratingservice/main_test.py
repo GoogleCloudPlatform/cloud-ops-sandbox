@@ -18,6 +18,7 @@ import os
 import sys
 import unittest
 import requests
+from requests.adapters import HTTPAdapter
 import json
 import decimal
 
@@ -26,33 +27,42 @@ service_url = ''
 products = []
 
 
+def composeUrl(resource, eid=""):
+    if not eid:
+        return "{0}/{1}".format(service_url, resource)
+    else:
+        return "{0}/{1}/{2}".format(service_url, resource, eid)
+
+
 class TestEndpoints(unittest.TestCase):
 
-    def composeUrl(self, resource, eid=""):
-        if not eid:
-            return "{0}/{1}".format(service_url, resource)
-        else:
-            return "{0}/{1}/{2}".format(service_url, resource, eid)
+    def setUp(self):
+        self.session = requests.Session()
+        adapter = HTTPAdapter(max_retries=3)
+        self.session.mount('https://', adapter)
+
+    def tearDown(self):
+        self.session.close()
 
     def testGetRating(self):
         """ test getting ratings for all shop products """
         for product in products:
-            url = self.composeUrl("rating", product)
-            res = requests.get(url)
+            url = composeUrl("rating", product)
+            res = self.session.get(url, timeout=1.0)
             self.assertEqual(res.status_code, 200)
 
     def testGetRatingNotExist(self):
         """ test getting rating for non-exist product """
-        url = self.composeUrl("rating", "random")
-        res = requests.get(url)
+        url = composeUrl("rating", "random")
+        res = self.session.get(url, timeout=1.0)
         self.assertEqual(res.status_code, 404)
 
     def testPostNewRating(self):
         """ test posting new rating to a product """
         # use products[0] in "post new vote" test
         test_product_id = products[0]
-        url = self.composeUrl("rating")
-        res = requests.post(url, json={
+        url = composeUrl("rating")
+        res = self.session.post(url, timeout=1.0, json={
             'rating': 5,
             'id': test_product_id
         })
@@ -63,21 +73,21 @@ class TestEndpoints(unittest.TestCase):
         # use products[1] to avoid counting new vote from testRate() test
         test_product_id = products[1]
         new_rating_vote = 5
-        url_get = self.composeUrl("rating", test_product_id)
-        url_post = self.composeUrl("rating")
-        url_put = self.composeUrl("recollect")
+        url_get = composeUrl("rating", test_product_id)
+        url_post = composeUrl("rating")
+        url_put = composeUrl("recollect")
 
         # get current rating / post new vote / recollect / get updated rating
-        result1 = requests.get(url_get)
+        result1 = self.session.get(url_get, timeout=1.0)
         self.assertEqual(result1.status_code, 200)
-        result2 = requests.post(url_post, json={
+        result2 = self.session.post(url_post, timeout=1.0, json={
             'rating': new_rating_vote,
             'id': test_product_id
         })
         self.assertEqual(result2.status_code, 200)
-        result2 = requests.put(url_put)
+        result2 = self.session.put(url_put, timeout=1.0)
         self.assertEqual(result2.status_code, 200)
-        result2 = requests.get(url_get)
+        result2 = self.session.get(url_get, timeout=1.0)
         self.assertEqual(result2.status_code, 200)
 
         data = result1.json()
@@ -121,4 +131,4 @@ def getProducts():
 if __name__ == '__main__':
     service_url = getServiceUrl()
     products = getProducts()
-    unittest.main(argv=['first-arg-is-ignored'], verbosity=2)
+    unittest.main(argv=['first-arg-is-ignored'])
