@@ -104,7 +104,7 @@ jobs:
         # run tests
         python3 tests/monitoring_integration_test.py ${{ env.PROJECT_ID }}
     - name: Run Rating Service Test
-      timeout-minutes: 5
+      timeout-minutes: 30
       run: |
         set -x
         # install dependencies

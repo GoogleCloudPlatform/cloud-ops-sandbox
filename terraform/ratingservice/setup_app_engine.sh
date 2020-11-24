@@ -25,22 +25,16 @@
 # NOTE: Json has string values because Terraform data "external" does not know to parse non-string values
 
 project_id=$1
-ae_app_exist=false
-service_exist=false
 
-print_json_result() {
-  if [ $ae_app_exist == true ]; then
-    app_hostname=$(gcloud app describe --format=json --project=$project_id | jq .defaultHostname)
-    echo "{ \"application_exist\": \"$ae_app_exist\", \"application_domain\": $app_hostname, \"default_svc_exist\": \"$service_exist\" }" | jq .
-  else
-    echo "{ \"application_exist\": \"$ae_app_exist\", \"default_svc_exist\": \"$service_exist\" }" | jq .
-  fi
-}
+ae_domain=$(gcloud app describe --project=$project_id --format="value(defaultHostname)" 2>/dev/null)
+service_list=$(gcloud app services list --project=$project_id --filter="SERVICE=default" --format="value(SERVICE)" 2>/dev/null)
 
-service_list=$(gcloud app services list --project=$project_id --filter="SERVICE:default" --format=json 2>/dev/null)
-[ $? -eq 0 ] && ae_app_exist=true
-[[ $(echo $service_list | jq length) = 1 ]] && service_exist=true
-print_json_result
-
+if [[ -n "$ae_domain" ]]; then
+  default_service=false
+  [[ -n "$service_list" ]] && default_service=true
+  echo "{ \"application_exist\": \"true\", \"default_svc_exist\": \"$default_service\", \"application_domain\": \"$ae_domain\" }" | jq .
+else
+  echo "{ \"application_exist\": \"false\", \"default_svc_exist\": \"false\" }" | jq .
+fi
 
 
