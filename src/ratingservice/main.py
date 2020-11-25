@@ -68,7 +68,6 @@ def makeError(code, message):
 
 
 def makeResult(data):
-    print("2", data)
     result = jsonify(data)
     result.status_code = 200
     return result
@@ -95,15 +94,10 @@ def getRatings():
             cursor.execute("SELECT eid, ROUND(rating,4) FROM ratings")
             result = cursor.fetchall()
         conn.commit()
-        print("1")
-        if result != None:
-            print("1")
-            ratings = []
-            print("1")
-            for row in result:
-                # cast to float because flas.jsonify doesn't work with decimal
-                ratings.append({"id": row[0].strip(), "rating": float(row[1])})
-            print("1")
+        if result is not None:
+            # cast to float because flask.jsonify doesn't work with decimal
+            ratings = [{"id": eid.strip(), "rating": float(rating)}
+                       for (eid, rating) in result]
             return makeResult({
                 'ratings': ratings,
             })

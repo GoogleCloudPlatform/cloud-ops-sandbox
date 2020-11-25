@@ -52,16 +52,16 @@ class TestEndpoints(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         ratings = res.json().get('ratings')
         self.assertTrue(type(ratings) == list)
-        self.assertEqual(len(ratings), len(products))
-        ids = list(map(lambda r: r['id'], ratings))
-        self.assertTrue(all(p in products for p in ids))
+        ids = [r['id'] for r in ratings]
+        self.assertEqual(set(ids), set(products))
 
-    def testGetRatingPerProduct(self):
-        """ test getting ratings for each shop product """
-        for product in products:
-            url = composeUrl("rating", product)
-            res = self.session.get(url, timeout=TIMEOUT)
-            self.assertEqual(res.status_code, 200)
+    def testGetProductRating(self):
+        """ test getting ratings for a shop product """
+        # use products[0] in "get product rating" test
+        test_product_id = products[0]
+        url = composeUrl("rating", test_product_id)
+        res = self.session.get(url, timeout=TIMEOUT)
+        self.assertEqual(res.status_code, 200)
 
     def testGetRatingNotExist(self):
         """ test getting rating for non-exist product """
@@ -71,8 +71,8 @@ class TestEndpoints(unittest.TestCase):
 
     def testPostNewRating(self):
         """ test posting new rating to a product """
-        # use products[0] in "post new vote" test
-        test_product_id = products[0]
+        # use products[1] in "post new vote" test
+        test_product_id = products[1]
         url = composeUrl("rating")
         res = self.session.post(url, timeout=TIMEOUT, json={
             'rating': 5,
@@ -82,8 +82,8 @@ class TestEndpoints(unittest.TestCase):
 
     def testNewRatingCalculation(self):
         """ test rating calculation after recollection """
-        # use products[1] to avoid counting new vote from testRate() test
-        test_product_id = products[1]
+        # use products[2] to avoid counting new vote from testRate() test
+        test_product_id = products[2]
         new_rating_vote = 5
         url_get = composeUrl("rating", test_product_id)
         url_post = composeUrl("rating")
