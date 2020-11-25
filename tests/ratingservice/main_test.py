@@ -25,6 +25,7 @@ import decimal
 
 service_url = ''
 products = []
+TIMEOUT = 5.0
 
 
 def composeUrl(resource, eid=""):
@@ -44,17 +45,28 @@ class TestEndpoints(unittest.TestCase):
     def tearDown(self):
         self.session.close()
 
-    def testGetRating(self):
-        """ test getting ratings for all shop products """
+    def testGetAllRatings(self):
+        """ test getting all ratings """
+        url = composeUrl("ratings")
+        res = self.session.get(url, timeout=TIMEOUT)
+        self.assertEqual(res.status_code, 200)
+        ratings = res.json().get('ratings')
+        self.assertTrue(type(ratings) == list)
+        self.assertEqual(len(ratings), len(products))
+        ids = list(map(lambda r: r['id'], ratings))
+        self.assertTrue(all(p in products for p in ids))
+
+    def testGetRatingPerProduct(self):
+        """ test getting ratings for each shop product """
         for product in products:
             url = composeUrl("rating", product)
-            res = self.session.get(url, timeout=1.0)
+            res = self.session.get(url, timeout=TIMEOUT)
             self.assertEqual(res.status_code, 200)
 
     def testGetRatingNotExist(self):
         """ test getting rating for non-exist product """
         url = composeUrl("rating", "random")
-        res = self.session.get(url, timeout=1.0)
+        res = self.session.get(url, timeout=TIMEOUT)
         self.assertEqual(res.status_code, 404)
 
     def testPostNewRating(self):
@@ -62,7 +74,7 @@ class TestEndpoints(unittest.TestCase):
         # use products[0] in "post new vote" test
         test_product_id = products[0]
         url = composeUrl("rating")
-        res = self.session.post(url, timeout=1.0, json={
+        res = self.session.post(url, timeout=TIMEOUT, json={
             'rating': 5,
             'id': test_product_id
         })
@@ -78,16 +90,16 @@ class TestEndpoints(unittest.TestCase):
         url_put = composeUrl("recollect")
 
         # get current rating / post new vote / recollect / get updated rating
-        result1 = self.session.get(url_get, timeout=1.0)
+        result1 = self.session.get(url_get, timeout=TIMEOUT)
         self.assertEqual(result1.status_code, 200)
         result2 = self.session.post(url_post, timeout=1.0, json={
             'rating': new_rating_vote,
             'id': test_product_id
         })
         self.assertEqual(result2.status_code, 200)
-        result2 = self.session.put(url_put, timeout=1.0)
+        result2 = self.session.put(url_put, timeout=TIMEOUT)
         self.assertEqual(result2.status_code, 200)
-        result2 = self.session.get(url_get, timeout=1.0)
+        result2 = self.session.get(url_get, timeout=TIMEOUT)
         self.assertEqual(result2.status_code, 200)
 
         data = result1.json()

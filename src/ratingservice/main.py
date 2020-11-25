@@ -68,6 +68,7 @@ def makeError(code, message):
 
 
 def makeResult(data):
+    print("2", data)
     result = jsonify(data)
     result.status_code = 200
     return result
@@ -75,6 +76,43 @@ def makeResult(data):
 #
 # APIs
 #
+
+
+@app.route('/ratings', methods=['GET'])
+def getRatings():
+    '''Gets a list of all ratings.
+
+    Returns:
+        HTTP status 200 and Json payload { ratings: [{'id': (string), 'rating': (number)}] }
+        HTTP status 500 when there is an error querying DB or no data
+    '''
+
+    conn = getConnection()
+    if conn == None:
+        return makeError(500, 'failed to connect to DB')
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT eid, ROUND(rating,4) FROM ratings")
+            result = cursor.fetchall()
+        conn.commit()
+        print("1")
+        if result != None:
+            print("1")
+            ratings = []
+            print("1")
+            for row in result:
+                # cast to float because flas.jsonify doesn't work with decimal
+                ratings.append({"id": row[0].strip(), "rating": float(row[1])})
+            print("1")
+            return makeResult({
+                'ratings': ratings,
+            })
+        else:
+            return makeError(500, 'No available ratings')
+    except:
+        return makeError(500, 'DB error')
+    finally:
+        db_connection_pool.putconn(conn)
 
 
 @app.route('/rating/<eid>', methods=['GET'])
