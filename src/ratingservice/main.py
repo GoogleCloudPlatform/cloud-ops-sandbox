@@ -103,7 +103,7 @@ def getRatings():
             })
         else:
             return makeError(500, 'No available ratings')
-    except:
+    except DatabaseError:
         return makeError(500, 'DB error')
     finally:
         db_connection_pool.putconn(conn)
@@ -143,7 +143,7 @@ def getRatingById(eid):
             })
         else:
             return makeError(404, "invalid entity id")
-    except:
+    except DatabaseError:
         return makeError(500, 'DB error')
     finally:
         db_connection_pool.putconn(conn)
@@ -191,7 +191,7 @@ def postRating():
         return makeResult({})
     except IntegrityError:
         return makeError(404, 'invalid entity id')
-    except:
+    except DatabaseError:
         return makeError(500, 'DB error')
     finally:
         db_connection_pool.putconn(conn)
@@ -220,7 +220,7 @@ def aggregateRatings():
             cursor.execute("DELETE FROM votes WHERE in_process=TRUE")
         conn.commit()
         return makeResult({})
-    except:
+    except DatabaseError:
         return makeError(500, 'DB error')
     finally:
         db_connection_pool.putconn(conn)

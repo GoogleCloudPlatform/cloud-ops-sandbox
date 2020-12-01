@@ -18,63 +18,101 @@ import os
 import sys
 import unittest
 import requests
-from requests.adapters import HTTPAdapter
+from requests.exceptions import RequestException
+from urllib3.exceptions import ReadTimeoutError
 import json
 import decimal
 
 
-service_url = ''
-products = []
-TIMEOUT = 5.0
-
-
-def composeUrl(resource, eid=""):
-    if not eid:
-        return "{0}/{1}".format(service_url, resource)
-    else:
-        return "{0}/{1}/{2}".format(service_url, resource, eid)
-
-
 class TestEndpoints(unittest.TestCase):
 
+    @classmethod
+    def composeUrl(cls, resource, eid=""):
+        if not eid:
+            return "{0}/{1}".format(cls.service_url, resource)
+        else:
+            return "{0}/{1}/{2}".format(cls.service_url, resource, eid)
+
+    @classmethod
+    def setUpClass(cls):
+        cls.TIMEOUT = 5.0
+
+        cls.service_url = ''
+        if len(sys.argv) > 1:
+            cls.service_url = sys.argv[1].rstrip('/')
+
+        cls.products = []
+        path = os.getcwd().rstrip('/') + '/src/productcatalogservice/products.json'
+        if len(sys.argv) > 2:
+            path = sys.argv[2]
+        try:
+            with open(path) as f:
+                data = json.load(f)
+                for product in data['products']:
+                    cls.products.append(product['id'])
+        except:
+            print("failed to load product ids from ", path)
+            cls.products = []
+
     def setUp(self):
+        if not TestEndpoints.service_url:
+            self.fail("Rating service URL is not set for the test")
+        if not TestEndpoints.products:
+            self.fail("Test data about products is missing")
+
         self.session = requests.Session()
-        adapter = HTTPAdapter(max_retries=3)
-        self.session.mount('https://', adapter)
+        # adapter = HTTPAdapter(max_retries=3)
+        # self.session.mount('https://', adapter)
 
     def tearDown(self):
         self.session.close()
 
+    def sendRequest(self, method, url, **kwargs):
+        headers = {'Accept': 'application/json',
+                   'Accept-Encoding': '', 'User-Agent': None}
+        lastError = None
+        retries = 3
+        while retries > 0:
+            try:
+                if method == "GET":
+                    kwargs.setdefault('allow_redirects', True)
+                return self.session.request(method, url, timeout=TestEndpoints.TIMEOUT, headers=headers, **kwargs)
+            except (RequestException, ReadTimeoutError) as err:
+                lastError = err
+                time.sleep(1)
+            retries -= 1
+        raise lastError
+
     def testGetAllRatings(self):
         """ test getting all ratings """
-        url = composeUrl("ratings")
-        res = self.session.get(url, timeout=TIMEOUT)
+        url = TestEndpoints.composeUrl("ratings")
+        res = self.sendRequest("GET", url)
         self.assertEqual(res.status_code, 200)
         ratings = res.json().get('ratings')
         self.assertTrue(type(ratings) == list)
         ids = [r['id'] for r in ratings]
-        self.assertEqual(set(ids), set(products))
+        self.assertEqual(set(ids), set(TestEndpoints.products))
 
     def testGetProductRating(self):
         """ test getting ratings for a shop product """
         # use products[0] in "get product rating" test
-        test_product_id = products[0]
-        url = composeUrl("rating", test_product_id)
-        res = self.session.get(url, timeout=TIMEOUT)
+        test_product_id = TestEndpoints.products[0]
+        url = TestEndpoints.composeUrl("rating", test_product_id)
+        res = self.sendRequest("GET", url)
         self.assertEqual(res.status_code, 200)
 
     def testGetRatingNotExist(self):
         """ test getting rating for non-exist product """
-        url = composeUrl("rating", "random")
-        res = self.session.get(url, timeout=TIMEOUT)
+        url = TestEndpoints.composeUrl("rating", "random")
+        res = self.sendRequest("GET", url)
         self.assertEqual(res.status_code, 404)
 
     def testPostNewRating(self):
         """ test posting new rating to a product """
         # use products[1] in "post new vote" test
-        test_product_id = products[1]
-        url = composeUrl("rating")
-        res = self.session.post(url, timeout=TIMEOUT, json={
+        test_product_id = TestEndpoints.products[1]
+        url = TestEndpoints.composeUrl("rating")
+        res = self.sendRequest("POST", url, json={
             'rating': 5,
             'id': test_product_id
         })
@@ -83,23 +121,23 @@ class TestEndpoints(unittest.TestCase):
     def testNewRatingCalculation(self):
         """ test rating calculation after recollection """
         # use products[2] to avoid counting new vote from testRate() test
-        test_product_id = products[2]
+        test_product_id = TestEndpoints.products[2]
         new_rating_vote = 5
-        url_get = composeUrl("rating", test_product_id)
-        url_post = composeUrl("rating")
-        url_put = composeUrl("recollect")
+        url_get = TestEndpoints.composeUrl("rating", test_product_id)
+        url_post = TestEndpoints.composeUrl("rating")
+        url_put = TestEndpoints.composeUrl("recollect")
 
         # get current rating / post new vote / recollect / get updated rating
-        result1 = self.session.get(url_get, timeout=TIMEOUT)
+        result1 = self.sendRequest("GET", url_get)
         self.assertEqual(result1.status_code, 200)
-        result2 = self.session.post(url_post, timeout=1.0, json={
+        result2 = self.sendRequest("POST", url_post, json={
             'rating': new_rating_vote,
             'id': test_product_id
         })
         self.assertEqual(result2.status_code, 200)
-        result2 = self.session.put(url_put, timeout=TIMEOUT)
+        result2 = self.sendRequest("PUT", url_put)
         self.assertEqual(result2.status_code, 200)
-        result2 = self.session.get(url_get, timeout=TIMEOUT)
+        result2 = self.sendRequest("GET", url_get)
         self.assertEqual(result2.status_code, 200)
 
         data = result1.json()
@@ -117,30 +155,5 @@ class TestEndpoints(unittest.TestCase):
                          expected_rating.quantize(QUANTIZE_VALUE))
 
 
-def getServiceUrl():
-    if len(sys.argv) > 1:
-        url = sys.argv[1]
-        return url.rstrip('/')
-    return None
-
-
-def getProducts():
-    path = os.getcwd().rstrip('/') + '/src/productcatalogservice/products.json'
-    if len(sys.argv) > 2:
-        path = sys.argv[2]
-    ids = []
-    try:
-        with open(path) as f:
-            data = json.load(f)
-            for product in data['products']:
-                ids.append(product['id'])
-    except:
-        print("failed to load product ids from ", path)
-        return []
-    return ids
-
-
 if __name__ == '__main__':
-    service_url = getServiceUrl()
-    products = getProducts()
     unittest.main(argv=['first-arg-is-ignored'])
