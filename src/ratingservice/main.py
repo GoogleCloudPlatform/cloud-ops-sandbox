@@ -77,6 +77,38 @@ def makeResult(data):
 #
 
 
+@app.route('/ratings', methods=['GET'])
+def getRatings():
+    '''Gets a list of all ratings.
+
+    Returns:
+        HTTP status 200 and Json payload { ratings: [{'id': (string), 'rating': (number)}] }
+        HTTP status 500 when there is an error querying DB or no data
+    '''
+
+    conn = getConnection()
+    if conn == None:
+        return makeError(500, 'failed to connect to DB')
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT eid, ROUND(rating,4) FROM ratings")
+            result = cursor.fetchall()
+        conn.commit()
+        if result is not None:
+            # cast to float because flask.jsonify doesn't work with decimal
+            ratings = [{"id": eid.strip(), "rating": float(rating)}
+                       for (eid, rating) in result]
+            return makeResult({
+                'ratings': ratings,
+            })
+        else:
+            return makeError(500, 'No available ratings')
+    except DatabaseError:
+        return makeError(500, 'DB error')
+    finally:
+        db_connection_pool.putconn(conn)
+
+
 @app.route('/rating/<eid>', methods=['GET'])
 def getRatingById(eid):
     '''Gets rating of the entity by its id.
@@ -111,7 +143,7 @@ def getRatingById(eid):
             })
         else:
             return makeError(404, "invalid entity id")
-    except:
+    except DatabaseError:
         return makeError(500, 'DB error')
     finally:
         db_connection_pool.putconn(conn)
@@ -159,7 +191,7 @@ def postRating():
         return makeResult({})
     except IntegrityError:
         return makeError(404, 'invalid entity id')
-    except:
+    except DatabaseError:
         return makeError(500, 'DB error')
     finally:
         db_connection_pool.putconn(conn)
@@ -188,7 +220,7 @@ def aggregateRatings():
             cursor.execute("DELETE FROM votes WHERE in_process=TRUE")
         conn.commit()
         return makeResult({})
-    except:
+    except DatabaseError:
         return makeError(500, 'DB error')
     finally:
         db_connection_pool.putconn(conn)
