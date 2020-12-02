@@ -30,7 +30,7 @@
                             <h2>{{$.product.Item.Name}}</h2>
                         </div>
                         <div class="col-md-3 justify-content-end">
-                            <div class="rating-5starts" style="--rating: 3.5"></div>
+                            <div class="rating-5starts" style="--rating: {{$.product.Rating}}"></div>
                         </div>
                     </div>
                     <p class="text-muted">
@@ -41,8 +41,7 @@
                     <h6>Product Description:</h6>
                     {{$.product.Item.Description}}
                     </p>
-                    <form id="vote_form" method="POST" action="/rating" onsubmit="hideVoteForm()" class="form-inline text-muted">
-                        <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
+                    <form id="vote_form" method="POST" action="/product/{{$.product.Item.Id}}/rating" class="form-inline text-muted">
                         <div class="input-group">
                             <select name="rating" id="rating_select" class="custom-select form-control form-control-lg" onchange="enableVoteButton()">
                                 <option selected="" disabled="" class="text-hide">Place rating</option>
@@ -52,7 +51,7 @@
                                 <option value="4">4</option>
                                 <option value="5">5</option>
                             </select>
-                            <button id="vote_btn" type="button" class="btn btn-info btn-lg ml-3" disabled onclick="hideVoteForm()">Vote</button>
+                            <button id="vote_btn" type="button" onclick="submitVote()" class="btn btn-info btn-lg ml-3" disabled>Vote</button>
                         </div>
                     </form>
                     <hr />
@@ -87,10 +86,23 @@
 </main>
 {{ template "footer" . }}
 <script type="text/javascript">
-    function hideFormSubmit() {
-        var form = document.getElementById('vote_form');
-        form.classList.add('invisible')
+    function submitVote() {
+        const form = document.getElementById('vote_form');
+        form.classList.add('invisible');
+        const fd = new FormData(form)
+        const xhr = new XMLHttpRequest()
+        xhr.open(form.method, form.action)
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+        let data = ""
+        for (var f of fd.entries()) {
+            if (data !== "") {
+                data += "&"
+            }
+            data += f[0] + "=" + f[1]
+        }
+        xhr.send(data)
     }
+
     function enableVoteButton() {
         var select = document.getElementById('rating_select');
         if (select.value !== "") {
