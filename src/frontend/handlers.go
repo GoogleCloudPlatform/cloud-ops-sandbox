@@ -55,8 +55,8 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	ratings, err := fe.getAllRatings(r.Context())
 	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve ratings"), http.StatusInternalServerError)
-		return
+		log.WithField("error", err).Error("Cannot retrieve product ratings")
+		ratings = map[string]float64{}
 	}
 
 	cart, err := fe.getCart(r.Context(), sessionID(r))
