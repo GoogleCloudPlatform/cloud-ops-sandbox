@@ -308,7 +308,7 @@ displaySuccessMessage() {
     if [[ -n "${loadgen_ip}" ]]; then
         loadgen_addr="http://$loadgen_ip"
         sendTelemetry $project_id loadgen-available
-    else
+    elif [[ -z "${skip_loadgen}"  ]]; then
         loadgen_addr="[not found]"
         sendTelemetry $project_id loadgen-unavailable
     fi
@@ -363,6 +363,10 @@ parseArguments() {
       skip_workspace_prompt=1
       shift
       ;;
+    --skip-loadgenerator)
+      skip_loadgen=1
+      shift
+      ;;
     --service-wait)
       service_wait=1
       shift
@@ -413,6 +417,8 @@ authenticateCluster;
 # || true to prevent errors during monitoring setup from stopping the installation script
 installMonitoring || true;
 getExternalIp;
-loadGen;
+if [[ -z "${skip_loadgen}" ]]; then
+  loadGen;
+fi
 displaySuccessMessage;
 
