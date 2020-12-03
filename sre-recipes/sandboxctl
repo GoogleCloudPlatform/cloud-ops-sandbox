@@ -149,7 +149,6 @@ def create(project, *args, **kwargs):
     for (arg, value) in kwargs.items():
         if value:
             command += f' --{arg.replace("_", "-")}'
-    print(command)
     os.setpgrp()
     complete = False
     try:
