@@ -141,18 +141,20 @@ def loadgen(traffic_pattern):
 def create(project, *args, **kwargs):
     """Create a new sandbox"""
     os.chdir(os.path.abspath(sys.path[0]))
-    base_command = "../terraform/install.sh"
-    full_command = [base_command]
+    command = "../terraform/install.sh"
+    # add optional project argument
     if project:
-        full_command += ['--project', project]
+        command += f' --project {project}'
+    # add flags passed in to function
     for (arg, value) in kwargs.items():
         if value:
-            full_command.append(f'--{arg}')
+            command += f' --{arg.replace("_", "-")}'
+    print(command)
     os.setpgrp()
     complete = False
     try:
         # run install.sh in a background shell
-        process = subprocess.Popen(full_command, bufsize=0, shell=True)
+        process = subprocess.Popen(command, bufsize=0, shell=True)
         process.communicate()
         complete = True
     finally:
