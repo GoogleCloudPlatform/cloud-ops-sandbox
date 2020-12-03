@@ -74,6 +74,14 @@ The URLs in this message tell you where to find the results of the installation:
 
 -  The **load generator** URL takes you to an interface for generating synthetic traffic to Hipster Shop.
 
+### Recovering from session timeout
+Should your Cloud Shell session timeout due to user inactivity, you will need to launch the custom Cloud Shell image to access the `sandboxctl` command.
+Click the
+
+![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)
+
+button from the [Cloud Operations Sandbox homepage](https://cloud-ops-sandbox.dev/) to restart the custom Cloud Shell
+
 ## Explore your project in GCP
 
 In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you to the Kubernetes Engine ([documentation](https://cloud.google.com/kubernetes-engine/docs/)) **Workloads** page for the project created by the installer:
