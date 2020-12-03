@@ -5,7 +5,7 @@ There are two artifacts that make up a Stackdriver Sandbox release:
 - A set of manifests and code, saved as a git tag in this repository
 
 Contributors can use `./make-release.sh`, along with
-[GitHub Actions automation](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/tree/master/.github/workflows), 
+[GitHub Actions automation](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/.github/workflows), 
 to produce both at once.
 
 ## Release Process
@@ -21,10 +21,10 @@ to produce both at once.
 1. When the PR has been reviewed and thoroughly tested, merge it into master
    - Don't squash; we must keep the tagged commit in the git history
 1. The merge to master should kick off a
-   [`github-pages` job](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/deployments/activity_log?environment=github-pages)
-   to re-build the website. Ensure that [stackdriver-sandbox.dev](https://stackdriver-sandbox.dev/)
+   [`github-pages` job](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/deployments/activity_log?environment=github-pages)
+   to re-build the website. Ensure that [cloud-ops-sandbox.dev](https://stackdriver-sandbox.dev/)
    was updated to use the new tag when you press the "Open in Cloud Shell" button
-1. Do a manual sanity check, running through a deployment on [stackdriver-sandbox.dev](https://stackdriver-sandbox.dev/) to make sure everything still works
+1. Do a manual sanity check, running through a deployment on [cloud-ops-sandbox.dev](https://cloud-ops-sandbox.dev/) to make sure everything still works
 
 ## Version Names
 Version names should generally follow [semantic versioning](https://semver.org/) conventions:
