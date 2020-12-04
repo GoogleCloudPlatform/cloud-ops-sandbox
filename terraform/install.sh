@@ -203,9 +203,9 @@ applyTerraform() {
 
   log "Apply Terraform automation"
   if [[ -n "$billing_id" ]]; then
-    terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}" -var="var.skip_loadgen=${skip_loadgen:-false}"
+    terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}"
   else
-    terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"  -var="var.skip_loadgen=${skip_loadgen:-false}"
+    terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"  -var="skip_loadgen=${skip_loadgen:-false}"
   fi
 }
 
