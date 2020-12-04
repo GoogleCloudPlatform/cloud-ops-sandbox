@@ -33,6 +33,6 @@ variable "bucket_name" {
 }
 
 variable "skip_loadgen" {
-  type        = false
+  default     = false
   description = "If true, the load generator will not be deployed."
 }
