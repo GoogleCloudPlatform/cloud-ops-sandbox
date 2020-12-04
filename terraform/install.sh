@@ -308,7 +308,7 @@ displaySuccessMessage() {
     if [[ -n "${loadgen_ip}" ]]; then
         loadgen_addr="http://$loadgen_ip"
         sendTelemetry $project_id loadgen-available
-    elif [[ -z "${skip_loadgen}"  ]]; then
+    else
         loadgen_addr="[not found]"
         sendTelemetry $project_id loadgen-unavailable
     fi
@@ -320,7 +320,9 @@ displaySuccessMessage() {
     log "     Google Cloud Console KBE Dashboard: $gcp_kubernetes_path"
     log "     Google Cloud Console Monitoring Workspace: $gcp_monitoring_path"
     log "     Hipstershop web app address: http://$external_ip"
-    log "     Load generator web interface: $loadgen_addr"
+    if [[ -z "${skip_loadgen}" ]]; then
+      log "     Load generator web interface: $loadgen_addr"
+    fi
     log ""
     log "To remove the Sandbox once finished using it, run"
     log ""
