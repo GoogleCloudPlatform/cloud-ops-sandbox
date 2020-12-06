@@ -24,7 +24,7 @@ resource "google_monitoring_dashboard" "userexp_dashboard" {
 # in the dashboard can be found in the JSON specification file.
 resource "google_monitoring_dashboard" "frontend_dashboard" {
   dashboard_json = file("./dashboards/frontend_dashboard.json")
-} 
+}
 
 # Creates a dashboard for the adservice. The details of the charts
 # in the dashboard can be found in the JSON specification file.
@@ -58,6 +58,11 @@ resource "google_monitoring_dashboard" "productcatalogservice_dashboard" {
   dashboard_json = file("./dashboards/productcatalogservice_dashboard.json")
 }
 
+# Creates a dashboard for the ratingservice.
+resource "google_monitoring_dashboard" "ratingservice_dashboard" {
+  dashboard_json = file("./dashboards/ratingservice_dashboard.json")
+}
+
 # Create generic dashboards for three of the microservices. Since all three microservices
 # will share the same charts across their dashboards, we can leverage Terraform template files
 # in order to reproduce identical dashboards for each microservice.
@@ -67,20 +72,20 @@ resource "google_monitoring_dashboard" "productcatalogservice_dashboard" {
 variable "services" {
   type = list(object({
     service_name = string,
-    service_id = string
+    service_id   = string
   }))
   default = [
     {
       service_name = "Payment Service"
-      service_id = "paymentservice"
+      service_id   = "paymentservice"
     },
     {
       service_name = "Email Service"
-      service_id = "emailservice"
+      service_id   = "emailservice"
     },
     {
       service_name = "Shipping Service"
-      service_id = "shippingservice"
+      service_id   = "shippingservice"
     }
   ]
 }
@@ -90,7 +95,7 @@ variable "services" {
 data "template_file" "dash_json" {
   template = file("./dashboards/generic_dashboard.tmpl")
   count    = length(var.services)
-  vars     = {
+  vars = {
     service_name = var.services[count.index].service_name
     service_id   = var.services[count.index].service_id
   }
@@ -99,7 +104,7 @@ data "template_file" "dash_json" {
 # Create GCP Monitoring Dashboards using the rendered template files that were created in the data
 # resource above. This produces one dashboard for each microservice that we defined above.
 resource "google_monitoring_dashboard" "service_dashboards" {
-  count = length(var.services)
+  count          = length(var.services)
   dashboard_json = <<EOF
 ${data.template_file.dash_json[count.index].rendered}
 EOF
