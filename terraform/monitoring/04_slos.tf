@@ -194,8 +194,8 @@ resource "google_monitoring_slo" "rating_service_availability_slo" {
         "metric.label.\"response_code\"=\"200\""
       ])
 
-      # The total is the number of non-4XX and 429 responses
-      # We eliminate 4XX responses except 429 since they do not accurately represent server-side 
+      # The total is the number of non-4XX and 429 (Too Many Requests) responses
+      # We eliminate 4XX responses except 429 (Too Many Requests) since they do not accurately represent server-side 
       # failures and have the possibility of skewing our SLO measurements
       total_service_filter = join(" AND ", [
         "metric.type=\"appengine.googleapis.com/http/server/response_count\"",
