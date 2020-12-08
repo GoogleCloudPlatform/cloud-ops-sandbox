@@ -128,15 +128,32 @@ def loadgen(traffic_pattern):
     Recipe._auth_cluster('APP')
 
 @cli.command()
-def create():
+@click.option('--project','-p', default=None,
+              help='GCP project to deploy Cloud Operations Sandbox to')
+@click.option('--verbose', '-v', default=False, is_flag=True,
+              help='print commands as they run (set -x)')
+@click.option('--skip-workspace-prompt', default=False, is_flag=True,
+              help="Don't pause for Cloud Monitoring workspace set up")
+@click.option('--skip-loadgenerator', default=False,  is_flag=True,
+              help="Don't deploy a loadgenerator instance")
+@click.option('--service-wait', default=False,  is_flag=True,
+              help='Wait indefinitely for services to be detected by Cloud Monitoring')
+def create(project, *args, **kwargs):
     """Create a new sandbox"""
     os.chdir(os.path.abspath(sys.path[0]))
-    create_command = "../terraform/install.sh"
+    command = "../terraform/install.sh"
+    # add optional project argument
+    if project:
+        command += f' --project {project}'
+    # add flags passed in to function
+    for (arg, value) in kwargs.items():
+        if value:
+            command += f' --{arg.replace("_", "-")}'
     os.setpgrp()
     complete = False
     try:
         # run install.sh in a background shell
-        process = subprocess.Popen([create_command], bufsize=0, shell=True)
+        process = subprocess.Popen(command, bufsize=0, shell=True)
         process.communicate()
         complete = True
     finally:

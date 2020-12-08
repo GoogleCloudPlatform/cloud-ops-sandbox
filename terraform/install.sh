@@ -203,9 +203,9 @@ applyTerraform() {
 
   log "Apply Terraform automation"
   if [[ -n "$billing_id" ]]; then
-    terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
+    terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}"
   else
-    terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
+    terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"  -var="skip_loadgen=${skip_loadgen:-false}"
   fi
 }
 
@@ -320,7 +320,9 @@ displaySuccessMessage() {
     log "     Google Cloud Console KBE Dashboard: $gcp_kubernetes_path"
     log "     Google Cloud Console Monitoring Workspace: $gcp_monitoring_path"
     log "     Hipstershop web app address: http://$external_ip"
-    log "     Load generator web interface: $loadgen_addr"
+    if [[ -z "${skip_loadgen}" ]]; then
+      log "     Load generator web interface: $loadgen_addr"
+    fi
     log ""
     log "To remove the Sandbox once finished using it, run"
     log ""
@@ -363,6 +365,10 @@ parseArguments() {
       skip_workspace_prompt=1
       shift
       ;;
+    --skip-loadgenerator)
+      skip_loadgen=1
+      shift
+      ;;
     --service-wait)
       service_wait=1
       shift
@@ -378,6 +384,7 @@ parseArguments() {
       log "-p|--project|--project-id     GCP project to deploy Cloud Operations Sandbox to"
       log "-v|--verbose                  print commands as they run (set -x)"
       log "--skip-workspace-prompt       Don't pause for Cloud Monitoring workspace set up"
+      log "--skip-loadgenerator          Don't deploy a loadgenerator instance"
       log "--service-wait                Wait indefinitely for services to be detected by Cloud Monitoring"
       log ""
       exit 0
@@ -413,6 +420,8 @@ authenticateCluster;
 # || true to prevent errors during monitoring setup from stopping the installation script
 installMonitoring || true;
 getExternalIp;
-loadGen;
+if [[ -z "${skip_loadgen}" ]]; then
+  loadGen;
+fi
 displaySuccessMessage;
 
