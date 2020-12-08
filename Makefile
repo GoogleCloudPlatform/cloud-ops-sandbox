@@ -32,11 +32,13 @@ cluster: check-env
 	cd ./terraform/istio && \
 	./install_istio.sh
 	skaffold run --default-repo=gcr.io/${PROJECT_ID}/sandbox -l skaffold.dev/run-id=${CLUSTER}-${PROJECT_ID}-${ZONE}
+	kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=http://some.host
 
 deploy: check-env
 	echo ${CLUSTER}
 	gcloud container clusters get-credentials --project ${PROJECT_ID} ${CLUSTER} --zone ${ZONE}
 	skaffold run --default-repo=gcr.io/${PROJECT_ID}/sandbox -l skaffold.dev/run-id=${CLUSTER}-${PROJECT_ID}-${ZONE} --status-check=false
+	kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=http://some.host
 
 deploy-continuous: check-env
 	gcloud container clusters get-credentials --project ${PROJECT_ID} ${CLUSTER} --zone ${ZONE}
