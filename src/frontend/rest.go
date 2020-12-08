@@ -63,6 +63,8 @@ func buildURL(host, resource, id string) (string, error) {
 	return uri.String(), nil
 }
 
+// sendRestRequest abstracts sending GET and POST requests with a timeout, parsing response and error handling.
+// It parses the returned Json into response. Any response with code that is not 200 or 4xx results in error.
 func sendRestRequest(ctx context.Context, method, url string, payload io.Reader, response interface{}) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*500)
 	defer cancel()
@@ -105,6 +107,8 @@ func sendRestRequest(ctx context.Context, method, url string, payload io.Reader,
 	}
 }
 
+// getAllRatings sends GET /ratings request to rating service.
+// It returns a map of product ids to ratings.
 func (fe *frontendServer) getAllRatings(ctx context.Context) (map[string]float64, error) {
 	result := make(map[string]float64)
 
@@ -125,6 +129,8 @@ func (fe *frontendServer) getAllRatings(ctx context.Context) (map[string]float64
 	return result, nil
 }
 
+// getRating sends GET /rating/<id> request to rating service where <id> is a product id.
+// It returns the rating of the product and the current number of votes.
 func (fe *frontendServer) getRating(ctx context.Context, id string) (float64, int, error) {
 	url, err := buildURL(fe.ratingSvcAddr, "rating", id)
 	if err != nil {
@@ -139,6 +145,8 @@ func (fe *frontendServer) getRating(ctx context.Context, id string) (float64, in
 	return data.Rating, data.Votes, nil
 }
 
+// postNewRating sends POST /rating request to rating service to submit a new rating of the product.
+// It returns no data because the rating is not updated immediately.
 func (fe *frontendServer) postNewRating(ctx context.Context, id string, rating int32) error {
 	url, err := buildURL(fe.ratingSvcAddr, "rating", "")
 	if err != nil {
