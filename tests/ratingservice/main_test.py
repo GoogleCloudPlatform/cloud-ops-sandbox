@@ -125,7 +125,7 @@ class TestEndpoints(unittest.TestCase):
         new_rating_vote = 5
         url_get = TestEndpoints.composeUrl("rating", test_product_id)
         url_post = TestEndpoints.composeUrl("rating")
-        url_put = TestEndpoints.composeUrl("recollect")
+        url_recollect = TestEndpoints.composeUrl("ratings:recollect")
 
         # get current rating / post new vote / recollect / get updated rating
         result1 = self.sendRequest("GET", url_get)
@@ -135,7 +135,7 @@ class TestEndpoints(unittest.TestCase):
             'id': test_product_id
         })
         self.assertEqual(result2.status_code, 200)
-        result2 = self.sendRequest("PUT", url_put)
+        result2 = self.sendRequest("POST", url_recollect)
         self.assertEqual(result2.status_code, 200)
         result2 = self.sendRequest("GET", url_get)
         self.assertEqual(result2.status_code, 200)

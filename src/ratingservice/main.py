@@ -197,7 +197,7 @@ def postRating():
         db_connection_pool.putconn(conn)
 
 
-@ app.route('/recollect', methods=['PUT'])
+@ app.route('/ratings:recollect', methods=['POST'])
 def aggregateRatings():
     '''Updates current ratings for all entities based on new votes received until now.
 

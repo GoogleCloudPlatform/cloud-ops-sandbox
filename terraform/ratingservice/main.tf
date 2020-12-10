@@ -204,14 +204,14 @@ resource "google_cloud_scheduler_job" "recollect_job" {
   }
 
   app_engine_http_target {
-    http_method = "PUT"
+    http_method = "POST"
 
     app_engine_routing {
       service = local.service_name
       version = local.service_version
     }
 
-    relative_uri = "/recollect"
+    relative_uri = "/ratings:recollect"
   }
 
   depends_on = [google_project_service.cloudscheduler, google_app_engine_standard_app_version.ratingservice]
