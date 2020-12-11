@@ -7,7 +7,7 @@ The App Engine application in the provided GCP project is created only if there 
 The App Engine application requires having a service with the name "default" in order to be able to deploy any other service.
 The module deploys "default" App Engine service if such service does not exist. For this matter a simple Python application that returns "pong" on GET / request is deployed. See [/src/ratingservice/README.me](GoogleCloudPlatform/cloud-ops-sandbox/blob/master/src/ratingservice/README.md) for more details.
 Since terraform does not provide means for discovering App Engine Application or its services, the "external" data provider is used to execute "setup_app_engine.sh". See its description below.
-In addition, a Cloud Scheduler job is configured to call the rating microservice /recollect endpoint periodically (now each 2 minutes). It is done to follow the rating service TDD which requires recollection of the recently posted new votes in order to provide the up to date average rate values.
+In addition, a Cloud Scheduler job is configured to call the rating microservice `/ratings:recollect` endpoint each 2 minutes. The endpoint represents a custom "recollect" method following the Google Custom Methods [guidelines](https://cloud.google.com/apis/design/custom_methods). It is done to follow the rating service TDD which requires recollection of the recently posted new votes in order to provide the up to date average rate values.
 
 ## File content breakdown
 
