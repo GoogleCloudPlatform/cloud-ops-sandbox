@@ -1,30 +1,28 @@
 # Rating Service
 
-Rating Service is a new microservice deployed on App Engine. We'd like this microservice to demonstrate the observability of Cloud Ops on serverless platforms.
-The current state of this service is still self-contained. Later we will integrate it to our Hipster Shop app.
+Rating Service is a microservice in Python developed to run on App Engine Standard Environment.
+It manages ratings of the Hipster shop products graded in scale from 1 to 5.
+The collection of pairs {entity id, rating} are stored in Postgres database managed by Cloud SQL.
+The service exposes GET APIs to get a collection of all managed ratings or to get a rating of the specific product.
+It is possible to submit a new vote for the product's rating. New vote get recollected on demand and the new product rating is calculated as an average of the current rating and all submitted votes.
+The vote recollection is implemented as a scheduled task (using Cloud Schedule) which is triggered each two minutes.
 
-## Deploy
+## Deployment
 
-To deploy the service, first go to the directory.
-```
-$ cd terraform/serverless
-```
+The service is deployed using Terraform module [ratingservice](../../terraform/ratingservice).
+To deploy the service during development you should generate `app.yaml` file with the following parameters:
 
-Then run the installation script where "tag" is the tag of the source code you will upload to GCS.
-
-```
-$ ./install_serverless.sh ${project_id} ${tag}
-```
-
-Note that this script is currently not idempotent, so running it multiple times will cause re-provisioning of the infrastructure.
-
-## Integration
-
-To integrate the provisioning later on, we need to first move the Terraform files to the Terraform directory.
-```
-$ mv 04_cloudsql.tf ../04_cloudsql.tf && mv 05_app_engine.tf ../05_app_engine.tf
+```yaml
 ```
 
-Then move the functions in the installation script to install.sh. The install_serverless.sh does 3 things: create an App Engine app, upload the source code, then apply Terraform.
+A template of the file can be found in the [ratingservice](../../terraform/ratingservice) folder.
 
-Tests are in `tests/ratingservice` and they should also be integrated to the CI system.
+## Testing
+
+Rating service [e2e test](../../tests/ratingservice) verifies API correctness. To launch it manually, use the following command:
+
+```bash
+python3 main_test.py $SERVICE_URL $PATH_TO_PRODUCTS_JSON
+```
+
+where `SERVICE_URL` is a root URL of the rating service and `PATH_TO_PRODUCTS_YAML` is a local path to `product.json` file location.

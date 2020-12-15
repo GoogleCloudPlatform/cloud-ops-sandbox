@@ -20,13 +20,16 @@ RUN sudo apt-get install unzip && \
   unzip -o terraform.zip && \
   sudo install terraform /usr/local/bin
 
+# install Postgres client and Json query
+RUN sudo apt-get -y install postgresql-client jq
+
 # install python libraries
 RUN python3 -m pip install google-cloud-pubsub
 RUN python3 -m pip install click
 RUN python3 -m pip install google-cloud-monitoring
 
 # set env var
-RUN echo "VERSION=v0.3.0" >> /etc/environment
+RUN echo "VERSION=v0.4.0" >> /etc/environment
 
-# Change "Open in Cloudshell" script to run install.sh using local file and changing it
+# Change "Open in Cloudshell" script to run `sandboxctl create` using local file and changing it
 COPY cloudshell_open_cp.sh /google/devshell/bashrc.google.d/cloudshell_open.sh

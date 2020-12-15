@@ -31,7 +31,7 @@ import (
 	"go.opencensus.io/plugin/ochttp/propagation/b3"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
-	
+
 	// OTel Metric
 	"go.opentelemetry.io/otel/api/metric"
 	metricstdout "go.opentelemetry.io/otel/exporters/metric/stdout"
@@ -44,8 +44,8 @@ import (
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/standard"
 	"go.opentelemetry.io/otel/instrumentation/grpctrace"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	"google.golang.org/grpc"
 )
@@ -68,12 +68,12 @@ var (
 		"JPY": true,
 		"GBP": true,
 		"TRY": true}
-		// Custom Metrics for User Dashboard
-		// TODO: use automatic metrics collection when Views API available in OpenTelemetry
-		// TODO: remove these after automatically collected
-		http_request_count metric.Int64Counter
-		http_response_errors metric.Int64Counter
-		http_request_latency metric.Int64ValueRecorder
+	// Custom Metrics for User Dashboard
+	// TODO: use automatic metrics collection when Views API available in OpenTelemetry
+	// TODO: remove these after automatically collected
+	http_request_count   metric.Int64Counter
+	http_response_errors metric.Int64Counter
+	http_request_latency metric.Int64ValueRecorder
 )
 
 type ctxKeySessionID struct{}
@@ -99,6 +99,8 @@ type frontendServer struct {
 
 	adSvcAddr string
 	adSvcConn *grpc.ClientConn
+
+	ratingSvcAddr string
 }
 
 func main() {
@@ -144,6 +146,7 @@ func main() {
 	mustMapEnv(&svc.checkoutSvcAddr, "CHECKOUT_SERVICE_ADDR")
 	mustMapEnv(&svc.shippingSvcAddr, "SHIPPING_SERVICE_ADDR")
 	mustMapEnv(&svc.adSvcAddr, "AD_SERVICE_ADDR")
+	mustMapEnv(&svc.ratingSvcAddr, "RATING_SERVICE_ADDR")
 
 	mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr)
 	mustConnGRPC(ctx, &svc.productCatalogSvcConn, svc.productCatalogSvcAddr)
@@ -162,6 +165,7 @@ func main() {
 	r.HandleFunc("/setCurrency", svc.setCurrencyHandler).Methods(http.MethodPost)
 	r.HandleFunc("/logout", svc.logoutHandler).Methods(http.MethodGet)
 	r.HandleFunc("/cart/checkout", svc.placeOrderHandler).Methods(http.MethodPost)
+	r.HandleFunc("/product/{id}/rating", svc.submitRatingHandler).Methods(http.MethodPost)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
 	r.HandleFunc("/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })

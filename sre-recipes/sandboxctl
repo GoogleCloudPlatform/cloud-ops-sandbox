@@ -28,6 +28,8 @@ from enum import Enum
 import logging
 import os
 import sys
+import signal
+import subprocess
 from os.path import dirname, abspath
 from pkgutil import iter_modules
 from pathlib import Path
@@ -49,8 +51,9 @@ def get_valid_recipes(attributes):
             try:
                 recipe_obj = attribute()
                 name = recipe_obj.get_name()
-                recipe_objs[name] = recipe_obj
-                recipe_num += 1
+                if recipe_obj.is_active():
+                    recipe_objs[name] = recipe_obj
+                    recipe_num += 1
             except TypeError:
                 logging.warning('%s needs to implement all abstract methods', \
                     attribute_name)
@@ -108,17 +111,62 @@ def sre_recipes(action, recipe_name):
 def loadgen(traffic_pattern):
     """Change traffic patterns for the loadgenerator service"""
     Recipe._auth_cluster('LOADGEN')
-    set_env_commands = ["kubectl set env deployment/loadgenerator-"\
-                            f"{mode} LOCUST_TASK={traffic_pattern}_locustfile.py" \
-                            for mode in ['main', 'worker']]
-    print('Redeploying Loadgenerator...')
-    for cmd in set_env_commands:
-        Recipe._run_command(cmd)
+    get_ip_command = "kubectl get service loadgenerator -o "\
+                        "jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+    set_env_command = "kubectl set env deployment/loadgenerator "\
+                        f"LOCUST_TASK={traffic_pattern}_locustfile.py"
     delete_pods_command = "kubectl delete pods -l app=loadgenerator"
+
+    print('Redeploying Loadgenerator...')
+    Recipe._run_command(set_env_command)
     Recipe._run_command(delete_pods_command)
     print(f'Loadgenerator deployed using {traffic_pattern} pattern')
+    ip_addr, _ = Recipe._run_command(get_ip_command)
+    ip_addr = ip_addr.decode('utf-8').strip("'")
+    if ip_addr:
+        print(f"Loadgenerator web UI: http://{ip_addr}")
     Recipe._auth_cluster('APP')
 
+@cli.command()
+@click.option('--project','-p', default=None,
+              help='GCP project to deploy Cloud Operations Sandbox to')
+@click.option('--verbose', '-v', default=False, is_flag=True,
+              help='print commands as they run (set -x)')
+@click.option('--skip-workspace-prompt', default=False, is_flag=True,
+              help="Don't pause for Cloud Monitoring workspace set up")
+@click.option('--skip-loadgenerator', default=False,  is_flag=True,
+              help="Don't deploy a loadgenerator instance")
+@click.option('--service-wait', default=False,  is_flag=True,
+              help='Wait indefinitely for services to be detected by Cloud Monitoring')
+def create(project, *args, **kwargs):
+    """Create a new sandbox"""
+    os.chdir(os.path.abspath(sys.path[0]))
+    command = "../terraform/install.sh"
+    # add optional project argument
+    if project:
+        command += f' --project {project}'
+    # add flags passed in to function
+    for (arg, value) in kwargs.items():
+        if value:
+            command += f' --{arg.replace("_", "-")}'
+    os.setpgrp()
+    complete = False
+    try:
+        # run install.sh in a background shell
+        process = subprocess.Popen(command, bufsize=0, shell=True)
+        process.communicate()
+        complete = True
+    finally:
+        # kill background process if script is terminated
+        if not complete:
+            os.killpg(0, signal.SIGTERM)
+
+@cli.command()
+def destroy():
+    """Delete an existing sandbox"""
+    os.chdir(os.path.abspath(sys.path[0]))
+    destroy_command = "../terraform/destroy.sh"
+    Recipe._run_command(destroy_command)
 
 if __name__ == "__main__":
     cli()

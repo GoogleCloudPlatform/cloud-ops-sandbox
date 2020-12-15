@@ -12,22 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This file specifies files that are *not* uploaded to Google Cloud Platform
-# using gcloud. It follows the same syntax as .gitignore, with the addition of
-# "#!include" directives (which insert the entries of the given .gitignore-style
-# file at that point).
-#
-# For more information, run:
-#   $ gcloud topic gcloudignore
-#
-.gcloudignore
-# If you would like to upload your .git directory, .gitignore file or files
-# from your .gitignore file, remove the corresponding line
-# below:
-.git
-.gitignore
+from flask import Flask
 
-# Python pycache:
-__pycache__/
-# Ignored by the build system
-/setup.cfg
+app = Flask(__name__)
+
+
+@app.route('/', methods=['GET'])
+def pingpong():
+    """Return ping pong."""
+    return 'pong'
+
+
+if __name__ == "__main__":
+    # Used when running locally only. When deploying to Google App
+    # Engine, a webserver process such as Gunicorn will serve the app. This
+    # can be configured by adding an `entrypoint` to app.yaml.
+    app.run(host="localhost", port=8080, debug=True)

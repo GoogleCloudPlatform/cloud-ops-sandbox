@@ -41,7 +41,15 @@ Cloud Operations Sandbox deployed successfully!
 
 The URLs in this message tell you where to find the results of the installation.
 
-If a message does **not** appear, and the installation script is not able to run, then try running `install.sh` in your Cloud Shell terminal once you have set-up your billing account.
+If a message does **not** appear, and the installation script is not able to run, then try running `sandboxctl create` in your Cloud Shell terminal once you have set-up your billing account.
+
+### Recovering from session timeout
+Should your Cloud Shell session timeout due to user inactivity, you will need to launch the custom Cloud Shell image to access the `sandboxctl` command.
+Click the
+
+![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)
+
+button from the [Cloud Operations Sandbox homepage](https://cloud-ops-sandbox.dev/) to restart the custom Cloud Shell.
 
 ## Explore the Sandbox!
 
@@ -65,10 +73,11 @@ In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase"
 
 ## Run the load generator
 
-In another browser tab, navigate to the load-generator URL, from which you can simulate users interacting with the application to generate traffic. For this application, values like 100 users with a "hatch rate" of 2 (spawn 2 users per second) are reasonable.
+In another browser tab, navigate to the load-generator URL, from which you can simulate users interacting with the application to generate traffic. For this application, values like 100 total users with a spawn rate of 2 users per second are reasonable. Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't prepopulated. Click the **Start swarming** button to begin generating traffic to the site.
 
-From here, you can explore how the application was deployed, and you can use the  
-navigation menu to bring up other GCP tools.
+![Locust example](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/raw/master/docs/images/user-guide/3-locust.png "Example of Locust configuration")
+
+From here, you can explore how the application was deployed, and you can use the navigation menu to bring up other GCP tools.
 
 ## Learn Cloud Operations 
 
@@ -339,11 +348,11 @@ You can expand any of the messages that matches the filter to see the full stack
 
 Once you have finished exploring the Sandbox project, don't forget to destroy it to avoid incurring additional billing.
 
-Destroy your Sandbox project by opening the Cloud Shell and running the destroy script:
+Destroy your Sandbox project by opening the Cloud Shell and running sandboxctl destroy:
 ```
-$ destroy.sh
+$ sandboxctl destroy
 ```
 
-**Note:** This script destroys the current project. If the install.sh script were run again, a Sandbox project with a new project id would be created.
+**Note:** This script destroys the current project. If `sandboxctl create` were run again, a Sandbox project with a new project id would be created.
 
 ### Congratulations on finishing the Cloud Operations Sandbox tutorial!

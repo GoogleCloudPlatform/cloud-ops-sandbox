@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-certifi==2020.6.20        # via geventhttpclient, requests
+certifi==2020.11.8        # via geventhttpclient, requests
 chardet==3.0.4            # via requests
 click==7.1.2              # via flask
 configargparse==1.2.3     # via locust
@@ -16,7 +16,7 @@ greenlet==0.4.17          # via gevent
 idna==2.10                # via requests
 itsdangerous==1.1.0       # via flask
 jinja2==2.11.2            # via flask
-locust==1.2.3             # via -r requirements.in
+locust==1.3.1             # via -r requirements.in
 markupsafe==1.1.1         # via jinja2
 msgpack==1.0.0            # via locust
 psutil==5.7.2             # via locust

@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#!/bin/bash
 
 # This script provisions Hipster Shop Cluster for Cloud Operations Sandbox using Terraform
 #set -euo pipefail
@@ -203,9 +203,9 @@ applyTerraform() {
 
   log "Apply Terraform automation"
   if [[ -n "$billing_id" ]]; then
-    terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
+    terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}"
   else
-    terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"
+    terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"  -var="skip_loadgen=${skip_loadgen:-false}"
   fi
 }
 
@@ -214,6 +214,22 @@ authenticateCluster() {
   gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
   # Make alias for this kubectl context
   kubectx main=.
+}
+
+setupOperationsWorkspace() {
+  gcp_monitoring_path="https://console.cloud.google.com/monitoring?project=$project_id"
+  if [[ -z $skip_workspace_prompt ]]; then
+    YELLOW=`tput setaf 3`
+    REVERT=`tput sgr0`
+    log ""
+    log ""
+    log "${YELLOW}********************************************************************************"
+    log ""
+    log "${YELLOW}⚠️ Please create a monitoring workspace for the project by clicking on the following link:"
+    log "${YELLOW}  $gcp_monitoring_path"
+    log ""
+    read -p "${YELLOW}When you are done, please PRESS ENTER TO CONTINUE${REVERT}"
+  fi
 }
 
 installMonitoring() {
@@ -232,20 +248,6 @@ installMonitoring() {
   fi
 
   acct=$(gcloud info --format="value(config.account)")
-
-  gcp_monitoring_path="https://console.cloud.google.com/monitoring?project=$project_id"
-  if [[ -z $skip_workspace_prompt ]]; then
-    YELLOW=`tput setaf 3`
-    REVERT=`tput sgr0`
-    log ""
-    log ""
-    log "${YELLOW}********************************************************************************"
-    log ""
-    log "${YELLOW}⚠️ Please create a monitoring workspace for the project by clicking on the following link:"
-    log "${YELLOW}  $gcp_monitoring_path"
-    log ""
-    read -p "${YELLOW}When you are done, please PRESS ENTER TO CONTINUE${REVERT}"
-  fi
 
   log "Checking to make sure necessary Istio services are ready for monitoring"
   python3 monitoring/istio_service_setup.py $project_id $CLUSTER_ZONE $service_wait
@@ -281,10 +283,9 @@ loadGen() {
   gcloud container clusters get-credentials loadgenerator --zone "$LOADGEN_ZONE"
   kubectx loadgenerator=.
 
-  LOCUST_PORT="8089"
   # find the IP of the load generator web interface
   TRIES=0
-  while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip:$LOCUST_PORT" -o /dev/null --max-time 1) -ne 200  && \
+  while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip" -o /dev/null --max-time 1) -ne 200  && \
       "${TRIES}" -lt 20  ]]; do
     log "waiting for load generator instance..."
     sleep 10
@@ -298,7 +299,6 @@ loadGen() {
 }
 
 displaySuccessMessage() {
-    LOCUST_PORT="8089"
     gcp_path="https://console.cloud.google.com"
     if [[ -n "${project_id}" ]]; then
         gcp_kubernetes_path="$gcp_path/kubernetes/workload?project=$project_id"
@@ -306,7 +306,7 @@ displaySuccessMessage() {
     fi
 
     if [[ -n "${loadgen_ip}" ]]; then
-        loadgen_addr="http://$loadgen_ip:$LOCUST_PORT"
+        loadgen_addr="http://$loadgen_ip"
         sendTelemetry $project_id loadgen-available
     else
         loadgen_addr="[not found]"
@@ -320,11 +320,13 @@ displaySuccessMessage() {
     log "     Google Cloud Console KBE Dashboard: $gcp_kubernetes_path"
     log "     Google Cloud Console Monitoring Workspace: $gcp_monitoring_path"
     log "     Hipstershop web app address: http://$external_ip"
-    log "     Load generator web interface: $loadgen_addr"
+    if [[ -z "${skip_loadgen}" ]]; then
+      log "     Load generator web interface: $loadgen_addr"
+    fi
     log ""
     log "To remove the Sandbox once finished using it, run"
     log ""
-    log "     destroy.sh"
+    log "     sandboxctl destroy"
     log ""
     log "********************************************************************************"
 }
@@ -363,6 +365,10 @@ parseArguments() {
       skip_workspace_prompt=1
       shift
       ;;
+    --skip-loadgenerator)
+      skip_loadgen=1
+      shift
+      ;;
     --service-wait)
       service_wait=1
       shift
@@ -378,6 +384,7 @@ parseArguments() {
       log "-p|--project|--project-id     GCP project to deploy Cloud Operations Sandbox to"
       log "-v|--verbose                  print commands as they run (set -x)"
       log "--skip-workspace-prompt       Don't pause for Cloud Monitoring workspace set up"
+      log "--skip-loadgenerator          Don't deploy a loadgenerator instance"
       log "--service-wait                Wait indefinitely for services to be detected by Cloud Monitoring"
       log ""
       exit 0
@@ -404,6 +411,7 @@ if [[ -z "$project_id" ]]; then
   promptForBillingAccount;
   promptForProject;
 fi
+setupOperationsWorkspace;
 getOrCreateBucket;
 
 # deploy
@@ -412,6 +420,8 @@ authenticateCluster;
 # || true to prevent errors during monitoring setup from stopping the installation script
 installMonitoring || true;
 getExternalIp;
-loadGen;
+if [[ -z "${skip_loadgen}" ]]; then
+  loadGen;
+fi
 displaySuccessMessage;
 

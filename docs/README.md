@@ -74,6 +74,14 @@ The URLs in this message tell you where to find the results of the installation:
 
 -  The **load generator** URL takes you to an interface for generating synthetic traffic to Hipster Shop.
 
+### Recovering from session timeout
+Should your Cloud Shell session timeout due to user inactivity, you will need to launch the custom Cloud Shell image to access the `sandboxctl` command.
+Click the
+
+![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)
+
+button from the [Cloud Operations Sandbox homepage](https://cloud-ops-sandbox.dev/) to restart the custom Cloud Shell
+
 ## Explore your project in GCP
 
 In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you to the Kubernetes Engine ([documentation](https://cloud.google.com/kubernetes-engine/docs/)) **Workloads** page for the project created by the installer:
@@ -94,12 +102,11 @@ In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase"
 
 ## Run the load generator
 
-In another browser tab, navigate to the load-generator URL, from which you can simulate users interacting with the application to generate traffic. For this application, values like 100 users with a "hatch rate" of 2 (spawn 2 users per second) are reasonable.
+In another browser tab, navigate to the load-generator URL, from which you can simulate users interacting with the application to generate traffic. For this application, values like 100 total users with a spawn rate of 2 users per second are reasonable. Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't prepopulated. Click the **Start swarming** button to begin generating traffic to the site.
 
-![image](./images/user-guide/3-locust.png)
+![Locust example](./images/user-guide/3-locust.png)
 
-From here, you can explore how the application was deployed, and you can use the  
-navigation menu to bring up other GCP tools.
+From here, you can explore how the application was deployed, and you can use the navigation menu to bring up other GCP tools.
 
 # Learn Ops Management
 
@@ -109,7 +116,7 @@ As the cloud-native microservice architecture, which promises scalability and fl
 
 Ops Management provides products for both developers and administrators; this section introduces the products and their general audiences.  The tools are covered in more detail later.
 
-Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of** Application Performance Management (APM)** has increased. Ops Management provides 3 products for APM:
+Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of **Application Performance Management (APM)** has increased. Ops Management provides 3 products for APM:
 
 -  Cloud Trace
 -  Cloud Profiler
@@ -133,7 +140,7 @@ You can find the Ops Management products in the navigation panel on the GCP Cons
 
 Cloud Trace ([documentation](https://cloud.google.com/trace/docs/)) enables developers to see distributed traces that visually expose latency bottleneck in requests. Developers instrument application code to collect trace information. You can also include environmental information in traces and trace information can be included in Cloud Logging logs. The Trace UI can then pull relevant log events into the trace timelines. 
 
-For instrumenting your applications, currently recommended solution is **OpenCensus.** [OpenCensus](https://opencensus.io/) is an open-source project that supports trace instrumentation in a variety of languages and that can export this data to Cloud Operations. Then you can use the Cloud Trace UI to analyze the data. Note that OpenCensus is merging with another similar project, OpenTracing, to form OpenTelemetry. See **OpenCensus to become OpenTelemetry**  in this doc.
+For instrumenting your applications, currently recommended solution is **OpenCensus.** [OpenCensus](https://opencensus.io/) is an open-source project that supports trace instrumentation in a variety of languages and that can export this data to Cloud Operations. Then you can use the Cloud Trace UI to analyze the data. Note that OpenCensus is merging with another similar project, OpenTracing, to form OpenTelemetry. See [OpenCensus to become OpenTelemetry](#opencensus-to-become-opentelemetry) in this doc.
 
 HipsterShop microservices are instrumented to collect trace data. In addition to distributed tracing, **OpenCensus (Stats)** provides the sink to send quantifiable data, such as database latency, open file descriptors, and so on, that helps to set up monitoring of [SLIs and SLOs](https://cloud.google.com/blog/products/gcp/sre-fundamentals-slis-slas-and-slos) for the service. This data is available in Cloud Monitoring, and HipsterShop microservices are also instrumented to collect this kind of data.
 
@@ -438,12 +445,12 @@ You can expand any of the messages that matches the filter to see the full stack
 
 Once you have finished exploring the Cloud Operations Sandbox project, don't forget to destroy it to avoid incurring additional billing.
 
-Destroy your Sandbox project by opening the Cloud Shell and running the destroy script:
+Destroy your Sandbox project by opening the Cloud Shell and running sandboxctl destroy:
 ```
-$ destroy.sh
+$ sandboxctl destroy
 ```
 
-This script destroys the current Cloud Operations Sandbox project. If the install.sh script were run again, a Cloud Operations Sandbox project with a new project id would be created.
+This script destroys the current Cloud Operations Sandbox project. If `sandboxctl create` were run again, a Cloud Operations Sandbox project with a new project id would be created.
 
 # OpenCensus to become OpenTelemetry
 

@@ -28,6 +28,7 @@ RUN dotnet publish --runtime alpine-x64 --self-contained true -c Release -o cart
 
 # cartservice
 FROM mcr.microsoft.com/dotnet/runtime-deps:5.0.1-alpine3.12-amd64 as runtime
+
 RUN GRPC_HEALTH_PROBE_VERSION=v0.3.5 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe

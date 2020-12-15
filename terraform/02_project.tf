@@ -20,7 +20,7 @@
 
 # billing account is optional to allow deploying to existing projects
 data "google_billing_account" "acct" {
-  count        = "${var.billing_account != null ? 1 : 0}"
+  count        = var.billing_account != null ? 1 : 0
   display_name = var.billing_account
 }
 

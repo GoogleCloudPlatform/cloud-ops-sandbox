@@ -28,7 +28,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
     - `Cloud Build Editor`
     - `read permissions on GCS bucket holding cloud build logs`
     - `write permissons on GCS bucket holding GCR images`
-  - requires `PROJECT_ID` to be set properly in the [repo's secrets](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/settings/secrets)
+  - requires `PROJECT_ID` to be set properly as an environment variable
 - `e2e-worker`
   - end to end test worker
   - requires the following permissions on the end-to-end test project:
@@ -38,7 +38,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
     - `logging admin`
     - `service account user`
     - `storage admin` access to the GCR and terraform data buckets
-  - requires `E2E_PROJECT_ID` to be set properly in the [repo's secrets](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/settings/secrets)
+  - requires `E2E_PROJECT_ID` to be set properly as an environment variable
 
 ---
 ## Workflows

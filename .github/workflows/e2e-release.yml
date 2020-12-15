@@ -16,13 +16,15 @@ name: "End to End - Release"
 on:
   schedule:
     # run every day at 8pm
-    - cron:  '* 20 * * *'
+    - cron:  '0 20 * * *'
   push:
     # run on pushes to test branch
     branches:
       - e2e*
   workflow_dispatch:
     # trigger through UI or API
+env:
+  PROJECT_ID: stackdriver-sandbox-e2e
 jobs:
   end-to-end-released:
     runs-on: [self-hosted, e2e-worker]
@@ -43,27 +45,23 @@ jobs:
         echo ::set-output name=repo::${REPO}
         BRANCH=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_branch\=).*?(?=&)')
         echo ::set-output name=branch::${BRANCH}
-        WORKING_DIR=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_working_dir\=).*?(?=&)')
-        echo ::set-output name=dir::${WORKING_DIR}
-        CLOUDSHELL_IMAGE=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_image\=).*?(?=")')
+        CLOUDSHELL_IMAGE=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_image\=).*?(?=&)')
         echo ::set-output name=cloudshell_image::${CLOUDSHELL_IMAGE}
     - name: Run Install Script
       timeout-minutes: 30
       run: |
         set -x
+        docker pull ${{ steps.website_variables.outputs.cloudshell_image }}
         # run install script
         docker run --rm \
-          -e project_id=$PROJECT_ID \
+          -e project_id=${{ env.PROJECT_ID }} \
           -e skip_workspace_prompt=1 \
           -e release_repo=${{ steps.website_variables.outputs.repo }} \
           -e release_branch=${{ steps.website_variables.outputs.branch }} \
-          -e release_dir=${{ steps.website_variables.outputs.dir }} \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
           ${{ steps.website_variables.outputs.cloudshell_image }}
-      env:
-        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Checkout Release Code
       timeout-minutes: 30
       run: |
@@ -78,17 +76,17 @@ jobs:
         # change to previous release code state
         cd ./release-code
         # get cluster zone
-        CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $PROJECT_ID --format="value(zone)")
+        CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${{ env.PROJECT_ID }} --format="value(zone)")
+        LOADGEN_ZONE=$(gcloud container clusters list --filter="name:loadgenerator" --project ${{ env.PROJECT_ID }} --format="value(zone)")
         # build provisioning test image
         docker build -t test-provisioning:$GITHUB_SHA-release tests/provisioning/.
         # run provisioning tests
         docker run --rm \
-          -e GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
+          -e GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }} \
           -e ZONE=$CLUSTER_ZONE \
+          -e LOADGEN_ZONE=$LOADGEN_ZONE \
           -v ~/.config:/root/.config \
           test-provisioning:$GITHUB_SHA-release
-      env:
-        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID }}
     - name: Run Monitoring Integration Tests
       timeout-minutes: 30
       run: |
@@ -98,19 +96,17 @@ jobs:
         # install dependencies
         python3 -m pip install -r tests/requirements.txt
         # authenticate cluster
-        CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $PROJECT_ID --format="value(zone)")
+        CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${{ env.PROJECT_ID }} --format="value(zone)")
         gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
         # run tests
-        python3 tests/monitoring_integration_test.py $PROJECT_ID
-      env:
-        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
+        python3 tests/monitoring_integration_test.py ${{ env.PROJECT_ID }}
     - name:  Test Using Existing Project
       timeout-minutes: 30
       run: |
         set -x
         # run install script
         docker run --rm \
-          -e project_id=$PROJECT_ID \
+          -e project_id=${{ env.PROJECT_ID }} \
           -e skip_workspace_prompt=1 \
           -e release_repo=${{ steps.website_variables.outputs.repo }} \
           -e release_branch=${{ steps.website_variables.outputs.branch }} \
@@ -119,8 +115,6 @@ jobs:
           -v `pwd`:/sandbox-shared \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
           ${{ steps.website_variables.outputs.cloudshell_image }}
-      env:
-        PROJECT_ID: ${{ secrets.E2E_PROJECT_ID  }}
     - name: Clean Project State
       timeout-minutes: 30
       if: ${{ always()  }}
