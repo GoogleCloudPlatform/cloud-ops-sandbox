@@ -20,11 +20,11 @@ using static Grpc.Health.V1.Health;
 
 namespace cartservice
 {
-    internal class HealthImpl : HealthBase 
+    internal class HealthCheckService : HealthBase 
     {
         private ICartStore _dependency { get; }
 
-        public HealthImpl (ICartStore dependency) 
+        public HealthCheckService (ICartStore dependency) 
         {
             this._dependency = dependency;
         }

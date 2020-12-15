@@ -22,9 +22,7 @@ services:
     ports:
       - "7070:7070"
     environment:
-      REDIS_PORT: "6379"
       REDIS_ADDR: "redis:6379"
-      LISTEN_ADDR: "localhost"
-      PORT: "7070"
+      ASPNETCORE_URLS: "http://0.0.0.0:7070"
   redis:
     image: "redis:alpine"

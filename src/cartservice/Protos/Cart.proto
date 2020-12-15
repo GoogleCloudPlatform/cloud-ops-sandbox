@@ -48,4 +48,3 @@ message Cart {
 }
 
 message Empty {}
-

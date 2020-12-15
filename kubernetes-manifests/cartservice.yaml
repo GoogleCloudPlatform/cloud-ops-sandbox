@@ -34,10 +34,8 @@ spec:
         env:
         - name: REDIS_ADDR
           value: "redis-cart:6379"
-        - name: PORT
-          value: "8080"
-        - name: LISTEN_ADDR
-          value: "0.0.0.0"
+        - name: ASPNETCORE_URLS
+          value: "http://0.0.0.0:7070"
         resources:
           requests:
             cpu: 200m
@@ -46,19 +44,14 @@ spec:
             cpu: 300m
             memory: 128Mi
         readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8080
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 15
+          initialDelaySeconds: 15
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
         livenessProbe:
-          httpGet:
-            path: /self
-            port: 80
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 15
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
 ---
 apiVersion: v1
 kind: Service

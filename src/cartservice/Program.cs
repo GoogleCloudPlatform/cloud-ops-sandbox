@@ -18,31 +18,18 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using cartservice.cartstore;
-using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using System.Net;
-using Microsoft.Extensions.Configuration;
 
 [assembly: InternalsVisibleTo("cartservice.tests")]
 namespace cartservice
 {
     public class Program
     {
-        const string CART_SERVICE_ADDRESS = "LISTEN_ADDR";
         const string REDIS_ADDRESS = "REDIS_ADDR";
-        const string CART_SERVICE_PORT = "PORT";
 
         [Verb("start", HelpText = "Starts the server listening on provided port")]
         public sealed class ServerOptions
         {
-            [Option('h', "hostname", HelpText = "The ip on which the server is running. If not provided, LISTEN_ADDR environment variable value will be used. If not defined, localhost is used")]
-            public string Host { get; set; }
-
-            [Option('p', "port", HelpText = "The port on for running the server")]
-            public int Port { get; set; }
-
             [Option('r', "redis", HelpText = "The ip of redis cache")]
             public string Redis { get; set; }
         }
@@ -62,12 +49,6 @@ namespace cartservice
                         async (ServerOptions options) =>
                         {
                             Console.WriteLine($"Started as process with id {System.Diagnostics.Process.GetCurrentProcess().Id}");
-
-                            // Set hostname/ip address
-                            string hostname = ReadParameter("host address", options.Host, CART_SERVICE_ADDRESS, p => p, "0.0.0.0");
-
-                            // Set the port
-                            int port = ReadParameter("cart service port", options.Port, CART_SERVICE_PORT, int.Parse, 8080);
 
                             // Set redis cache host (hostname+port)
                             string redis = ReadParameter("redis cache address", options.Redis, REDIS_ADDRESS, p => p, null);
@@ -139,14 +120,6 @@ namespace cartservice
             Host.CreateDefaultBuilder()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.ConfigureKestrel(options =>
-                    {
-                        options.Listen(IPAddress.Any, 7070, listenOptions =>
-                        {
-                            listenOptions.Protocols = HttpProtocols.Http2;
-                        });
-                    });
-
                     webBuilder.UseStartup<Startup>();
                     webBuilder.UseSetting("RedisAddress", redisAddr);
                 });
