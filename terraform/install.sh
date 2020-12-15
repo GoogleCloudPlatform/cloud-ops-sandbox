@@ -177,11 +177,11 @@ createProject() {
           exit 0;
         fi
       done
-      folder_id="470827991545" # /cloud-ops-sandboxes  
-      gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo" --folder="$folder_id"    
+      folder_id="470827991545" # /cloud-ops-sandboxes
+      gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo" --folder="$folder_id"
     else
       sendTelemetry $project_id new-sandbox-non-googler
-      gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo"      
+      gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo"
     fi;
     # link billing account
     gcloud beta billing projects link "$project_id" --billing-account="$billing_id"
@@ -190,8 +190,8 @@ createProject() {
 applyTerraform() {
   rm -f .terraform/terraform.tfstate
 
-  log "Initialize terraform backend with bucket ${bucket_name}"  
-  
+  log "Initialize terraform backend with bucket ${bucket_name}"
+
   if terraform init -backend-config "bucket=${bucket_name}" -lock=false 2> /dev/null; then
     log "Credential check OK..."
   else
@@ -237,8 +237,8 @@ installMonitoring() {
   TRIES=0
   external_ip="";
   while [[ -z $external_ip && "${TRIES}" -lt 20 ]]; do
-     external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'); 
-     [ -z "$external_ip" ] && sleep 5; 
+     external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
+     [ -z "$external_ip" ] && sleep 5;
      TRIES=$((TRIES + 1))
   done;
 
@@ -259,11 +259,11 @@ installMonitoring() {
 }
 
 getExternalIp() {
-  external_ip=""; 
+  external_ip="";
   while [ -z $external_ip ]; do
-     log "Waiting for Hipster Shop endpoint..."; 
-     external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'); 
-     [ -z "$external_ip" ] && sleep 10; 
+     log "Waiting for Hipster Shop endpoint...";
+     external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
+     [ -z "$external_ip" ] && sleep 10;
   done;
   if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
       log "Hipster Shop app is available at http://$external_ip"
@@ -274,7 +274,8 @@ getExternalIp() {
   fi
 }
 
-# Install Load Generator service and start generating synthetic traffic to Sandbox
+# Start generating synthetic traffic to Sandbox for a few seconds then stop
+# This produces initial interesting telemetry data for users to view
 loadGen() {
   log "Running load generator"
 
@@ -283,9 +284,11 @@ loadGen() {
   gcloud container clusters get-credentials loadgenerator --zone "$LOADGEN_ZONE"
   kubectx loadgenerator=.
 
-  # find the IP of the load generator web interface
+  # Kicks of initial load generation via a POST request to Locust web interface
+  # This is because Locust currently doesn't support CLI and UI at the same time
   TRIES=0
-  while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip" -o /dev/null --max-time 1) -ne 200  && \
+#  while [[ $(curl -sL -w "%{http_code}"  "http://$loadgen_ip" -o /dev/null --max-time 1) -ne 200  && \
+  while [[ $(curl -XPOST -d "user_count=100&spawn_rate=10" http://$loadgen_ip/swarm -o /dev/null -w "%{http_code}" --max-time 1) -ne 200  && \
       "${TRIES}" -lt 20  ]]; do
     log "waiting for load generator instance..."
     sleep 10
@@ -293,6 +296,14 @@ loadGen() {
      [ -z "$loadgen_ip" ] && sleep 10;
     TRIES=$((TRIES + 1))
   done
+
+  # Lets load generator run for a few seconds
+  sleep 5
+
+  # Ends initial load generation
+  if [[ $(curl http://$loadgen_ip/stop -o /dev/null -w "%{http_code}") -ne 200 ]]; then
+    log "Failed to stop initial load generation"
+  fi
   # Return kubectl context to the main cluster and show this to the user
   kubectx main
   log $(kubectx)
