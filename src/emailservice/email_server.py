@@ -121,7 +121,7 @@ class EmailService(BaseEmailService):
 class DummyEmailService(BaseEmailService):
   def SendOrderConfirmation(self, request, context):
     logger.info('A request to send order confirmation email to {} has been received.'.format(request.email))
-    if os.getenv('ENCODE_EMAIL').lower() == 'true':
+    if os.getenv('ENCODE_EMAIL', 'false').lower() == 'true':
       try:
         encoded_email = self.EncodeEmail(request.email)
         request.email = encoded_email
