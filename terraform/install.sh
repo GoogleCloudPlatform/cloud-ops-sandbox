@@ -287,7 +287,7 @@ loadGen() {
   # Kicks off initial load generation via a POST request to Locust web interface
   # This is because Locust currently doesn't support CLI and UI at the same time
   TRIES=0
-  while [[ $(curl -XPOST -d "user_count=10&spawn_rate=2" http://$loadgen_ip/swarm -o /dev/null -w "%{http_code}" --max-time 1) -ne 200  && \
+  while [[ $(curl -XPOST -d "user_count=50&spawn_rate=10" http://$loadgen_ip/swarm -o /dev/null -w "%{http_code}" --max-time 1) -ne 200  && \
       "${TRIES}" -lt 20  ]]; do
     log "waiting for load generator instance..."
     sleep 10
