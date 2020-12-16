@@ -24,14 +24,13 @@
 
 project_id=$1
 #
-# authorize access to sql instance from local machine
-# (machine has to have public ip)
+# open SQL proxy session to connect to CloudSQL instance
 #
 echo "Launching Cloud SQL Proxy in background..."
 cloud_sql_proxy -instances=$DB_HOST=tcp:5432 -verbose=false &>/dev/null &
 cloud_proxy_pid=$!
 
-# wait until proxy establishes connection or 5 retries
+# wait until proxy connects or 5 attempts fail
 tries=0
 while [[ "${tries}" -lt 5 ]]; do
     echo "Waiting for establishing connection to db..."
@@ -70,17 +69,17 @@ CREATE INDEX IF NOT EXISTS INDX_votes_eid ON votes (eid);
 EOF
 
 #
-# populate schema
+# populate all products' ratings with random integers in [1..5] per single vote
 #
 echo "Generating ratings..."
 echo "eid,rating,votes" >> generated_data.csv
-jq -r '.products[].id' ../src/productcatalogservice/products.json | while read line ; do echo "$line,$(( $RANDOM % 5 + 1)),$(( $RANDOM % 50 + 1))" >> generated_data.csv; done
+jq -r '.products[].id' ../src/productcatalogservice/products.json | while read line ; do echo "$line,$(( $RANDOM % 5 + 1)),1" >> generated_data.csv; done
 echo "Populating ratings to DB..."
 cat generated_data.csv | PGPASSWORD=$DB_PASSWORD psql "host=127.0.0.1 sslmode=disable dbname=$DB_NAME user=$DB_USERNAME" -c "COPY ratings FROM STDIN DELIMITER ',' CSV HEADER;"
 rm generated_data.csv
 
 #
-# remove authorized ips
+# close SQL proxy session
 #
 kill $cloud_proxy_pid; wait $cloud_proxy_pid 2>/dev/null
 echo "Cloud SQL Proxy background process is killed."
