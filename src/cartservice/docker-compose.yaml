@@ -23,6 +23,5 @@ services:
       - "7070:7070"
     environment:
       REDIS_ADDR: "redis:6379"
-      ASPNETCORE_URLS: "http://0.0.0.0:7070"
   redis:
     image: "redis:alpine"

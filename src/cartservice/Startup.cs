@@ -35,8 +35,18 @@ namespace cartservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            string redisAddress = Configuration.GetValue<string>("RedisAddress");
-            ICartStore cartStore = new RedisCartStore(redisAddress);
+            string redisAddress = Configuration.GetValue<string>("RedisAddress");//REDIS_ADDR
+            ICartStore cartStore = null;
+            if (!string.IsNullOrEmpty(redisAddress))
+            {
+                cartStore = new RedisCartStore(redisAddress);
+            }
+            else
+            {
+                Console.WriteLine("Redis cache host(hostname+port) was not specified. Starting a cart service using local store");
+                Console.WriteLine("If you wanted to use Redis Cache as a backup store, you should provide its address via command line or REDIS_ADDR environment variable.");
+                cartStore = new LocalCartStore();
+            }
 
             // Initialize the redis store
             cartStore.InitializeAsync().GetAwaiter().GetResult();

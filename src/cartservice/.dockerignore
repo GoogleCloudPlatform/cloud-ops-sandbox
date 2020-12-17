@@ -1,0 +1,8 @@
+**/*.sh
+**/*.bat
+tests/
+**/bin/
+**/obj/
+**/out/
+Dockerfile*
+docker-compose*

@@ -12,34 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0.101-alpine3.12 as builder
+FROM mcr.microsoft.com/dotnet/sdk:5.0.101 as builder
 WORKDIR /app
-COPY *.csproj .
-
-# Workaround for https://github.com/grpc/grpc/issues/18428
-# Also see https://github.com/sgerrand/alpine-pkg-glibc
-RUN apk update && apk --no-cache add ca-certificates wget
-RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
-RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.30-r0/glibc-2.30-r0.apk
-RUN apk add glibc-2.30-r0.apk
-
+COPY cartservice.csproj .
+RUN dotnet restore cartservice.csproj -r linux-musl-x64
 COPY . .
-RUN dotnet publish --runtime alpine-x64 --self-contained true -c Release -o cart_out 
+RUN dotnet publish cartservice.csproj -p:PublishSingleFile=true -r linux-musl-x64 --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c release -o cart_out --no-restore
 
-# cartservice
-FROM mcr.microsoft.com/dotnet/runtime-deps:5.0.1-alpine3.12-amd64 as runtime
-
+FROM mcr.microsoft.com/dotnet/runtime-deps:5.0.1-alpine3.12-amd64
 RUN GRPC_HEALTH_PROBE_VERSION=v0.3.5 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
-
-RUN apk add --no-cache \ 
-    busybox-extras openssh libunwind \
-    nghttp2-libs libidn krb5-libs libuuid lttng-ust zlib \
-    libstdc++ libintl \
-    icu
-
 WORKDIR /app
 COPY --from=builder /app/cart_out ./
-
+ENV ASPNETCORE_URLS http://*:7070
 ENTRYPOINT ["./cartservice", "start"]
