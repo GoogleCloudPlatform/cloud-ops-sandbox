@@ -26,4 +26,4 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.5 && \
 WORKDIR /app
 COPY --from=builder /app/cart_out ./
 ENV ASPNETCORE_URLS http://*:7070
-ENTRYPOINT ["./cartservice", "start"]
+ENTRYPOINT ["/app/cartservice"]

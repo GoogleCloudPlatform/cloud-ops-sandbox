@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,116 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using CommandLine;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("cartservice.tests")]
 namespace cartservice
 {
     public class Program
     {
-        const string REDIS_ADDRESS = "REDIS_ADDR";
-
-        [Verb("start", HelpText = "Starts the server listening on provided port")]
-        public sealed class ServerOptions
+        public static void Main(string[] args)
         {
-            [Option('r', "redis", HelpText = "The ip of redis cache")]
-            public string Redis { get; set; }
-        }
-
-        public static async Task Main(string[] args)
-        {
-            if (args.Length == 0)
-            {
-                Console.WriteLine("Invalid number of arguments supplied");
-                Environment.Exit(-1);
-            }
-
-            switch (args[0])
-            {
-                case "start":
-                    await Parser.Default.ParseArguments<ServerOptions>(args).MapResult<ServerOptions, Task<int>>(
-                        async (ServerOptions options) =>
-                        {
-                            Console.WriteLine($"Started as process with id {System.Diagnostics.Process.GetCurrentProcess().Id}");
-
-                            // Set redis cache host (hostname+port)
-                            string redis = ReadParameter("redis cache address", options.Redis, REDIS_ADDRESS, p => p, null);
-
-                            // Start ASP.NET Core Engine with GRPC
-                            IHost hostBuilder = CreateHostBuilder(redis).Build();
-                            await hostBuilder.RunAsync();
-                            return 0;
-                        },
-                        errs => Task.FromResult(1));
-                    break;
-                default:
-                    Console.WriteLine("Invalid command");
-                    break;
-            }
-
-            await Task.FromResult(0);
-        }
-
-        /// <summary>
-        /// Reads parameter in the right order
-        /// </summary>
-        /// <param name="description">Parameter description</param>
-        /// <param name="commandLineValue">Value provided from the command line</param>
-        /// <param name="environmentVariableName">The name of environment variable where it could have been set</param>
-        /// <param name="environmentParser">The method that parses environment variable and returns typed parameter value</param>
-        /// <param name="defaultValue">Parameter's default value - in case other method failed to assign a value</param>
-        /// <typeparam name="T">The type of the parameter</typeparam>
-        /// <returns>Parameter value read from all the sources in the right order(priorities)</returns>
-        private static T ReadParameter<T>(
-            string description,
-            T commandLineValue, 
-            string environmentVariableName, 
-            Func<string, T> environmentParser, 
-            T defaultValue)
-        {
-            // Command line argument
-            if(!EqualityComparer<T>.Default.Equals(commandLineValue, default(T))) 
-            {
-                Console.WriteLine($"Reading {description} from command line argument. Value: {commandLineValue}. Done!");
-                return commandLineValue;
-            }
-
-            // Environment variable
-            Console.Write($"Reading {description} from environment variable {environmentVariableName}. ");
-            string envValue = Environment.GetEnvironmentVariable(environmentVariableName);
-            if (!string.IsNullOrEmpty(envValue))
-            {
-                try
-                {
-                    var envTyped = environmentParser(envValue);
-                    Console.Write($" Value: {envTyped} ");
-                    Console.WriteLine("Done!");
-                    return envTyped;
-                }
-                catch (Exception)
-                {
-                    // We assign the default value later on
-                }
-            }
-
-            Console.WriteLine($"Environment variable {environmentVariableName} was not set. Setting {description} to {defaultValue}");
-            return defaultValue;
+            CreateHostBuilder(args).Build().Run();
         }
 
         // Additional configuration is required to successfully run gRPC on macOS.
         // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
-        static IHostBuilder CreateHostBuilder(string redisAddr) =>
-            Host.CreateDefaultBuilder()
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseSetting("RedisAddress", redisAddr);
                 });
     }
 }

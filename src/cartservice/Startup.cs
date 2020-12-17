@@ -35,7 +35,7 @@ namespace cartservice
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            string redisAddress = Configuration.GetValue<string>("RedisAddress");//REDIS_ADDR
+            string redisAddress = Configuration["REDIS_ADDR"];
             ICartStore cartStore = null;
             if (!string.IsNullOrEmpty(redisAddress))
             {
