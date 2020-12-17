@@ -26,6 +26,10 @@ spec:
         app: cartservice
     spec:
       terminationGracePeriodSeconds: 5
+      initContainers:
+        - name: init-redis-ready
+          image: busybox
+          command: ['bin/sh', '-c', 'until nslookup redis-cart; do echo waiting for redis; sleep 2; done;']
       containers:
       - name: server
         image: gcr.io/stackdriver-sandbox-230822/sandbox/cartservice:latest
@@ -34,10 +38,8 @@ spec:
         env:
         - name: REDIS_ADDR
           value: "redis-cart:6379"
-        - name: PORT
-          value: "7070"
-        - name: LISTEN_ADDR
-          value: "0.0.0.0"
+        - name: ASPNETCORE_URLS
+          value: "http://0.0.0.0:7070"
         resources:
           requests:
             cpu: 200m
@@ -48,12 +50,12 @@ spec:
         readinessProbe:
           initialDelaySeconds: 15
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7070"]
+            command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
         livenessProbe:
           initialDelaySeconds: 15
           periodSeconds: 10
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7070"]
+            command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
 ---
 apiVersion: v1
 kind: Service
