@@ -42,7 +42,7 @@ Guidelines](https://opensource.google.com/conduct/).
 
 > 💡 Recommended if you're planning to develop the application.
 
-#### ![](docs/img/kubernetes.png =16x16) Run Kubernetes micro-services with “Docker for Desktop”
+#### ![kubernetes](docs/img/kubernetes.png) Run Kubernetes micro-services with “Docker for Desktop”
 
 1. Install tools to run a Kubernetes cluster locally:
 
@@ -67,7 +67,7 @@ Guidelines](https://opensource.google.com/conduct/).
    application frontend should be available at <http://localhost:80> on your
    machine.
 
-#### ![](docs/img/app-engine.png =16x16) Run App Engine (rating) micro-service
+#### ![app engine](docs/img/app-engine.png) Run App Engine (rating) micro-service
 
 > ℹ️   This task requires a running PostgreSQL DB instance with the configured rating database schema.
 
@@ -88,7 +88,7 @@ Guidelines](https://opensource.google.com/conduct/).
 
 > 💡  Recommended for demos and making it available publicly.
 
-#### ![](docs/img/kubernetes.png =16x16) Run Kubernetes micro-services on Google Kubernetes Engine (GKE)
+#### ![kubernetes](docs/img/kubernetes.png) Run Kubernetes micro-services on Google Kubernetes Engine (GKE)
 
 > ℹ️   This task can be automated with `make cluster PROJECT_ID=my-project`
 
@@ -160,7 +160,7 @@ terraform apply
 > are seeing this, run `kubectl get service frontend-external -o=yaml | kubectl apply -f-`
 > to trigger load-balancer reconfiguration.
 
-#### ![](docs/img/app-engine.png =16x16) Run App Engine micro-service on Google App Engine (GAE)
+#### ![app engine](docs/img/app-engine.png) Run App Engine micro-service on Google App Engine (GAE)
 
 > ℹ️   This task requires a running PostgreSQL DB instance with the configured rating database schema.
 > ℹ️   This task requires having App Engine application created in the project.
