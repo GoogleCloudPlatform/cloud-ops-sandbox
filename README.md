@@ -1,4 +1,3 @@
-
 # Cloud Operations Sandbox (Alpha)
 
 ![Continuous Integration](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/workflows/Continuous%20Integration/badge.svg)
@@ -71,9 +70,8 @@ gcloud projects delete $YOUR_PROJECT_ID
 
 ## Service Overview
 
-This project contains a 10-tier microservices application. It is a
-web-based e-commerce app called **“Hipster Shop”**, where users can browse items,
-add them to the cart, and purchase them.
+This project contains a multi-tier microservices application.
+It is a web-based e-commerce app called **“Hipster Shop”**, where users can browse items, add them to the cart, and purchase them.
 
 ### Screenshots
 
@@ -83,15 +81,15 @@ add them to the cart, and purchase them.
 
 ### Service Architecture
 
-**Hipster Shop** is composed of many microservices, written in different languages, that talk to each other over gRPC.
+**Hipster Shop** is composed of many microservices, written in different languages, that talk to each other over gRPC and REST API.
 >**We are not endorsing the architecture of Hipster Shop as the best way to build such a shop!**
 > The architecture is optimized for learning purposes and includes modern stack: Kubernetes, GKE, Istio,
-> Ops Management, gRPC, OpenTelemetry, and similar cloud-native technologies.
+> Ops Management, App Engine, gRPC, OpenTelemetry, and similar cloud-native technologies.
 
 [![Architecture of
 microservices](./docs/img/architecture-diagram.png)](./docs/img/architecture-diagram.png)
 
-Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
+Find the **gRPC protocol buffer descriptions** in the [`./pb` directory](./pb).
 
 | Service | Language | Description |
 |---------|----------|-------------|
@@ -106,7 +104,7 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 | [recommendationservice](./src/recommendationservice) | Python | Recommends other products based on what's in the user's cart. |
 | [adservice](./src/adservice) | Java | Provides text ads based on given context words. |
 | [loadgenerator](./src/loadgenerator) | Python/Locust | Continuously sends requests that imitate realistic shopping flows to the frontend. |
-| [ratingservice](./src/ratingservice) | Python3 | Allows to post and get ratings by id. Demonistrates integration of different GCP services. |
+| [ratingservice](./src/ratingservice) | Python3 | Manages ratings of the shop's products. Runs on App Engine. |
 
 ### Technologies
 
@@ -121,8 +119,11 @@ Find the **Protocol Buffers Descriptions** in the [`./pb` directory](./pb).
 * **[Skaffold](https://github.com/GoogleContainerTools/skaffold):** A tool used for doing repeatable deployments. You can deploy to Kubernetes with a single command using Skaffold.
 * **Synthetic Load Generation:** The application demo comes with dedicated load generation service that creates realistic usage patterns on Hipster Shop website using
   [Locust](https://locust.io/) load generator.
+* **[Google App Engine](https://cloud.google.com/appengine):** PaaS for running Web applications and services.
+* **[Google Cloud SQL](https://cloud.google.com/sql):** Fully managed relational database service for MySQL, PostgreSQL and SQL Server.
 
 ## For Developers
+
 If you are a developer and want to contribute to the Sandbox, you can refer to [CONTIBUTING.md](CONTRIBUTING.md).
 
 ---
