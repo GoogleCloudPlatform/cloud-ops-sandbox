@@ -1,6 +1,6 @@
 # Cloud Operations Sandbox User Guide
 
-# Overview
+## Overview
 
 The Cloud Operations Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the [Ops Management](http://cloud.google.com/products/operations) (formerly Stackdriver) product suite. Ops Management is a suite of tools that helps you gain full observability into your code and applications.
 
