@@ -12,90 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using cartservice.cartstore;
-using cartservice.interfaces;
 using CommandLine;
-using Grpc.Core;
-using Microsoft.Extensions.Configuration;
-using OpenCensus.Exporter.Stackdriver;
-using OpenCensus.Trace;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("cartservice.tests")]
 namespace cartservice
 {
-    class Program
+    public class Program
     {
-        const string CART_SERVICE_ADDRESS = "LISTEN_ADDR";
         const string REDIS_ADDRESS = "REDIS_ADDR";
-        const string CART_SERVICE_PORT = "PORT";
-
-        const string PROJECT_ID = "PROJECT_ID";
 
         [Verb("start", HelpText = "Starts the server listening on provided port")]
-        class ServerOptions
+        public sealed class ServerOptions
         {
-            [Option('h', "hostname", HelpText = "The ip on which the server is running. If not provided, LISTEN_ADDR environment variable value will be used. If not defined, localhost is used")]
-            public string Host { get; set; }
-
-            [Option('p', "port", HelpText = "The port on for running the server")]
-            public int Port { get; set; }
-
             [Option('r', "redis", HelpText = "The ip of redis cache")]
             public string Redis { get; set; }
-
-            [Option("projectId", HelpText = "The ProjectId to which telemetry will flow")]
-            public string ProjectId { get; set; }
         }
 
-        static object StartServer(string host, int port, ICartStore cartStore)
-        {
-            // Run the server in a separate thread and make the main thread busy waiting.
-            // The busy wait is because when we run in a container, we can't use techniques such as waiting on user input (Console.Readline())
-            Task serverTask = Task.Run(async () =>
-            {
-                try
-                {
-                    await cartStore.InitializeAsync();
-
-                    Console.WriteLine($"Trying to start a grpc server at  {host}:{port}");
-                    Server server = new Server
-                    {
-                        Services = 
-                        {
-                            // Cart Service Endpoint
-                             Hipstershop.CartService.BindService(new CartServiceImpl(cartStore)),
-
-                             // Health Endpoint
-                             Grpc.Health.V1.Health.BindService(new HealthImpl(cartStore))
-                        },
-                        Ports = { new ServerPort(host, port, ServerCredentials.Insecure) }
-                    };
-
-                    Console.WriteLine($"Cart server is listening at {host}:{port}");
-                    server.Start();
-
-                    Console.WriteLine("Initialization completed");
-
-                    // Keep the server up and running
-                    while(true)
-                    {
-                        Thread.Sleep(TimeSpan.FromMinutes(10));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
-            });
-
-            return Task.WaitAny(new[] { serverTask });
-        }
-
-        static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             if (args.Length == 0)
             {
@@ -106,41 +45,27 @@ namespace cartservice
             switch (args[0])
             {
                 case "start":
-                    Parser.Default.ParseArguments<ServerOptions>(args).MapResult(
-                        (ServerOptions options) => 
+                    await Parser.Default.ParseArguments<ServerOptions>(args).MapResult<ServerOptions, Task<int>>(
+                        async (ServerOptions options) =>
                         {
                             Console.WriteLine($"Started as process with id {System.Diagnostics.Process.GetCurrentProcess().Id}");
-
-                            // Set hostname/ip address
-                            string hostname = ReadParameter("host address", options.Host, CART_SERVICE_ADDRESS, p => p, "0.0.0.0");
-
-                            // Set the port
-                            int port = ReadParameter("cart service port", options.Port, CART_SERVICE_PORT, int.Parse, 8080);
-
-                            string projectId = ReadParameter("cloud service project id", options.ProjectId, PROJECT_ID, p => p, null);
-
-                            // Initialize Stackdriver Exporter - currently for tracing only
-                            if (!string.IsNullOrEmpty(projectId))
-                            {
-                                var exporter = new StackdriverExporter(
-                                    projectId, 
-                                    Tracing.ExportComponent,
-                                    viewManager: null);
-                                exporter.Start();
-                            }
 
                             // Set redis cache host (hostname+port)
                             string redis = ReadParameter("redis cache address", options.Redis, REDIS_ADDRESS, p => p, null);
 
-                            ICartStore cartStore = InstrumentedCartStore.Create(redis);
-                            return StartServer(hostname, port, cartStore);
+                            // Start ASP.NET Core Engine with GRPC
+                            IHost hostBuilder = CreateHostBuilder(redis).Build();
+                            await hostBuilder.RunAsync();
+                            return 0;
                         },
-                        errs => 1);
+                        errs => Task.FromResult(1));
                     break;
                 default:
                     Console.WriteLine("Invalid command");
                     break;
             }
+
+            await Task.FromResult(0);
         }
 
         /// <summary>
@@ -163,6 +88,7 @@ namespace cartservice
             // Command line argument
             if(!EqualityComparer<T>.Default.Equals(commandLineValue, default(T))) 
             {
+                Console.WriteLine($"Reading {description} from command line argument. Value: {commandLineValue}. Done!");
                 return commandLineValue;
             }
 
@@ -174,6 +100,7 @@ namespace cartservice
                 try
                 {
                     var envTyped = environmentParser(envValue);
+                    Console.Write($" Value: {envTyped} ");
                     Console.WriteLine("Done!");
                     return envTyped;
                 }
@@ -186,5 +113,15 @@ namespace cartservice
             Console.WriteLine($"Environment variable {environmentVariableName} was not set. Setting {description} to {defaultValue}");
             return defaultValue;
         }
+
+        // Additional configuration is required to successfully run gRPC on macOS.
+        // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
+        static IHostBuilder CreateHostBuilder(string redisAddr) =>
+            Host.CreateDefaultBuilder()
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseSetting("RedisAddress", redisAddr);
+                });
     }
 }
