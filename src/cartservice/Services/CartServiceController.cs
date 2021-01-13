@@ -45,11 +45,6 @@ namespace cartservice
         {
             await _cartStore.EmptyCartAsync(request.UserId);
             return Empty;
-        } 
-        public async void Start()
-        {
-            Console.WriteLine("Starting cart service...");
-            await _cartStore.InitializeAsync();
         }
     }
 }
