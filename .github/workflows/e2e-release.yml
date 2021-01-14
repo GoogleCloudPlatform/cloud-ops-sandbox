@@ -53,7 +53,7 @@ jobs:
         set -x
         docker pull ${{ steps.website_variables.outputs.cloudshell_image }}
         # run install script
-        # ISTIO_VCERSION is fix for v0.5.0. Can be removed after next release
+        # ISTIO_VERSION is fix for v0.5.0. Can be removed after next release
         docker run --rm \
           -e project_id=${{ env.PROJECT_ID }} \
           -e skip_workspace_prompt=1 \
