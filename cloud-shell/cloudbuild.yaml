@@ -18,6 +18,7 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
+  timeout: 30m
   args:
   - '-c'
   - |-
