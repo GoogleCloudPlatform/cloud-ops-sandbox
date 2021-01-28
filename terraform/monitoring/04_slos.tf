@@ -242,3 +242,34 @@ resource "google_monitoring_slo" "rating_service_latency_slo" {
     }
   }
 }
+
+# Rating data freshness SLO:
+# during a day 99.9% of minutes have at least 1 successful recollect API call
+resource "google_monitoring_slo" "rating_service_freshness_slo" {
+  # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine
+  # Identify of the service is built after the following template: gae:${project_id}_servicename
+  service      = "gae:${var.project_id}_ratingservice"
+  slo_id       = "freshness-slo"
+  display_name = "Rating freshness SLO with window based SLI"
+
+  goal                = 0.999
+  rolling_period_days = 1
+
+  windows_based_sli {
+    window_period = "60s"
+    metric_sum_in_range {
+      time_series = join(" AND ", [
+        "metric.type=\"logging.googleapis.com/user/ratingservice_recollect_requests_count\"",
+        "resource.type=\"gae_app\"",
+        join(" OR ", ["metric.label.\"status\"<\"400\"",
+        "metric.label.\"status\"=\"429\""])
+      ])
+      range {
+        min = 1
+        max = 9999 # the maximum can be any number of requests; the unreasonably high value is placed since inf is not supported
+      }
+    }
+  }
+
+  depends_on = [google_logging_metric.ratingservice_logging_metric]
+}
