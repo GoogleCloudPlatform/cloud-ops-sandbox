@@ -61,7 +61,9 @@ class Recipe(abc.ABC):
     @staticmethod
     def _run_command(command):
         """Runs the given command and returns any output and error"""
-        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+        process = subprocess.Popen(
+            command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
         output, error = process.communicate()
         return output, error
 

@@ -29,7 +29,7 @@ class RatingsFreshnessRecipe(Recipe):
     stops recollect API calls to rating service.
     """
 
-    name = "rating_freshness"
+    name = "recipe_"
 
     def get_name(self):
         return self.name
@@ -49,13 +49,16 @@ class RatingsFreshnessRecipe(Recipe):
             print("Failed: cannot find project id.")
             logging.error("Failed pausing scheduled job: no project id.")
             exit(1)
-        # hide error output to avoid additional hints :)
-        pause_command = "gcloud scheduler jobs pause ratingservice-recollect-job --project {pid} 2> /dev/null".format(
+        pause_command = "gcloud scheduler jobs pause ratingservice-recollect-job --project {pid}".format(
             pid=project_id
         )
-        Recipe._run_command(pause_command)
-        print("...done")
-        logging.info("Scheduled job of the rating service paused")
+        _, err_str = Recipe._run_command(pause_command)
+        if "ERROR:" in err_str:
+            print(err_str)
+            logging.error("Failed executing service breaking command:" + err_str)
+        else:
+            print("...done")
+            logging.info("Scheduled job of the rating service paused")
 
     def restore_service(self):
         """
@@ -69,13 +72,16 @@ class RatingsFreshnessRecipe(Recipe):
             print("Failed: cannot find project id.")
             logging.error("Failed pausing scheduled job: no project id.")
             exit(1)
-        # hide error output to avoid additional hints :)
-        resume_command = "gcloud scheduler jobs resume ratingservice-recollect-job --project {pid} 2> /dev/null".format(
+        resume_command = "gcloud scheduler jobs resume ratingservice-recollect-job --project {pid}".format(
             pid=project_id
         )
-        Recipe._run_command(resume_command)
-        print("...done")
-        logging.info("Scheduled job of the rating service resumed")
+        _, err_str = Recipe._run_command(resume_command)
+        if "ERROR:" in err_str:
+            print(err_str)
+            logging.error("Failed executing service restoring command:" + err_str)
+        else:
+            print("...done")
+            logging.info("Scheduled job of the rating service resumed")
 
     def hint(self):
         """
@@ -114,12 +120,14 @@ class RatingsFreshnessRecipe(Recipe):
         """
         prompt = "What is the cause of the break?"
         choices = [
-            "service does not run",
-            "ratings data inconsistent in the database",
-            "recollect requests fail or missing",
-            "new rating votes requests fail",
+            "rating service does not run",
+            "rating votes data is missing in the database",
+            "scheduler job that sends recollect request to rating service does not work",
+            "new ratings are calculated incorrectly",
         ]
-        answer = "recollect requests fail or missing"
+        answer = (
+            "scheduler job that sends recollect request to rating service does not work"
+        )
         Recipe._generate_multiple_choice(prompt, choices, answer)
 
     def verify(self):
