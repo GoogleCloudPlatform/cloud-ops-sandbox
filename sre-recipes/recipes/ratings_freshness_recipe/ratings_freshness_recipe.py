@@ -15,7 +15,7 @@
 
 # -*- coding: utf-8 -*-
 """
-This module contains the implementation of rating_freshness recipe
+This module contains the implementation of rating2 recipe
 """
 
 import logging
@@ -25,11 +25,11 @@ from recipe import Recipe
 
 class RatingsFreshnessRecipe(Recipe):
     """
-    This class implements 'rating_freshness' which purposefully
+    This class implements 'rating2' which purposefully
     stops recollect API calls to rating service.
     """
 
-    name = "recipe_"
+    name = "recipe2"
 
     def get_name(self):
         return self.name
