@@ -48,7 +48,7 @@ __Note__: If installation stops due to billing account errors, set up the billin
 
 * Explore your Sandbox deployment and its [architecture](#Service-Overview)
 * Follow the [User Guide](/docs/README.md) to start using Ops Management
-* Learn more about Ops Management using [Code Labs](https://codelabs.developers.google.com/gcp-next/?cat=Monitoring)
+* Learn more about Ops Management using [Code Labs](https://codelabs.developers.google.com/s/results?hl=en&q=Stackdriver)
 
 ### Clean Up
 
