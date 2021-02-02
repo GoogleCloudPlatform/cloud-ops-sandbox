@@ -191,6 +191,7 @@ resource "google_monitoring_slo" "rating_service_availability_slo" {
         "resource.type=\"gae_app\"",
         "resource.label.\"version_id\"=\"prod\"",
         "resource.label.\"module_id\"=\"ratingservice\"",
+        "metric.label.\"loading\"=\"false\"",
         "metric.label.\"response_code\"=\"200\""
       ])
 
@@ -202,9 +203,13 @@ resource "google_monitoring_slo" "rating_service_availability_slo" {
         "resource.type=\"gae_app\"",
         "resource.label.\"version_id\"=\"prod\"",
         "resource.label.\"module_id\"=\"ratingservice\"",
-        join(" OR ", ["metric.label.\"response_code\"<\"400\"",
-          "metric.label.\"response_code\"=\"429\"",
-        "metric.label.\"response_code\">=\"500\""])
+        "metric.label.\"loading\"=\"false\"",
+        # a mix of 'AND' and 'OR' operators is not currently supported
+        # without the following filter responses with HTTP status [400,500) will be included
+        # while a general guideline to exclude them since they do not reflect service issues
+        # join(" OR ", ["metric.label.\"response_code\"<\"400\"",
+        #   "metric.label.\"response_code\"=\"429\"",
+        # "metric.label.\"response_code\">=\"500\""])
       ])
     }
   }
@@ -225,19 +230,20 @@ resource "google_monitoring_slo" "rating_service_latency_slo" {
   request_based_sli {
     distribution_cut {
 
-      # The distribution filter retrieves latencies of requests that returned 200 OK responses
+      # The distribution filter retrieves latencies of user requests that returned 200 OK responses
       distribution_filter = join(" AND ", [
         "metric.type=\"appengine.googleapis.com/http/server/response_latencies\"",
         "resource.type=\"gae_app\"",
         "resource.label.\"version_id\"=\"prod\"",
         "resource.label.\"module_id\"=\"ratingservice\"",
+        "metric.label.\"loading\"=\"false\"",
         "metric.label.\"response_code\"=\"200\"",
       ])
 
       range {
         # By not setting a min value, it is automatically set to -infinity
         # The upper bound for latency is in ms
-        max = 175
+        max = 500
       }
     }
   }
