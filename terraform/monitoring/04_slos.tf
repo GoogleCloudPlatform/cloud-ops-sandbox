@@ -258,7 +258,7 @@ resource "google_monitoring_slo" "rating_service_freshness_slo" {
   slo_id       = "freshness-slo"
   display_name = "Rating freshness SLO with window based SLI"
 
-  goal                = 0.999
+  goal                = 0.99
   rolling_period_days = 1
 
   windows_based_sli {

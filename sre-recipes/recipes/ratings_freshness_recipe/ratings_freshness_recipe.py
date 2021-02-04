@@ -53,7 +53,7 @@ class RatingsFreshnessRecipe(Recipe):
             pid=project_id
         )
         _, err_str = Recipe._run_command(pause_command)
-        if "ERROR:" in err_str:
+        if "ERROR:" in str(err_str, "utf-8"):
             print(err_str)
             logging.error("Failed executing service breaking command:" + err_str)
         else:
@@ -76,7 +76,7 @@ class RatingsFreshnessRecipe(Recipe):
             pid=project_id
         )
         _, err_str = Recipe._run_command(resume_command)
-        if "ERROR:" in err_str:
+        if "ERROR:" in str(err_str, "utf-8"):
             print(err_str)
             logging.error("Failed executing service restoring command:" + err_str)
         else:
@@ -89,11 +89,15 @@ class RatingsFreshnessRecipe(Recipe):
         """
         project_id = Recipe._get_project_id()
         print(
-            "Try to change a rating for a shop's items one or more times.",
-            "Try to check SLO Monitoring and look for SLOs that consume error budget.",
-            "For SLO Monitoring open https://pantheon.corp.google.com/monitoring/services?project={pid}".format(
-                pid=project_id
-            ),
+            "\n".join(
+                (
+                    'Product ratings are managed by the "rating service", hosted on Google AppEngine.',
+                    "The service provides APIs that allow other services to get and update products' ratings.",
+                    "The rating data is kept up-to-date by periodically calling an API endpoint that collects",
+                    "all recently sent new rating scores for each product and calculates the new rating",
+                    "based on the old value and the new scores. Try to check if the rating service operates normally.",
+                )
+            )
         )
 
     def verify_broken_service(self):
