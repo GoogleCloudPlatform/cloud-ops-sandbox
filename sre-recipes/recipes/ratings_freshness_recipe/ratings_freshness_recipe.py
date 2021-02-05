@@ -43,7 +43,7 @@ class RatingsFreshnessRecipe(Recipe):
         the rating service
         """
         logging.info("Pausing scheduled job of the rating service")
-        print("Breaking rating operations...")
+        print("Breaking service operations...")
         project_id = Recipe._get_project_id()
         if not project_id:
             print("Failed: cannot find project id.")
@@ -66,7 +66,7 @@ class RatingsFreshnessRecipe(Recipe):
         the rating service
         """
         logging.info("Resuming scheduled job of the rating service")
-        print("Restoring rating operations...")
+        print("Restoring broken operations...")
         project_id = Recipe._get_project_id()
         if not project_id:
             print("Failed: cannot find project id.")
