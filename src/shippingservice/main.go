@@ -39,7 +39,7 @@ import (
 	"go.opentelemetry.io/otel/semconv"
 	apitrace "go.opentelemetry.io/otel/trace"
 
-	pb "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto"
+	pb "github.com/GoogleCloudPlatform/cloud-ops-sandbox/src/shippingservice/genproto"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
@@ -98,7 +98,9 @@ func main() {
 }
 
 // server controls RPC service responses.
-type server struct{}
+type server struct {
+	pb.UnimplementedShippingServiceServer
+}
 
 // Check is for health checking.
 func (s *server) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
@@ -151,6 +153,8 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 		TrackingId: id,
 	}, nil
 }
+
+func (s *server) mustEmbedUnimplementedShippingServiceServer() {}
 
 // Initialize Stats using OpenCensus
 // TODO: remove this after conversion to OpenTelemetry Metrics
