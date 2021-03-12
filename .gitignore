@@ -17,3 +17,5 @@ terraform/istio/istioctl
 terraform/istio/istio-*/**
 .token
 skaffold
+website/resources*
+website/deploy*
