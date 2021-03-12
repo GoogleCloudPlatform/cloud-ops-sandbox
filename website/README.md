@@ -4,23 +4,24 @@ The Cloud Operations Sandbox website is currently deployed at [cloud-ops-sandbox
 
 ## Website Architecture
 
-The website is currently set-up using a static html page and deployed in App Engine.
+The website is currently set-up using the [Hugo](https://github.com/gohugoio/hugo) static site generator with the [Docsy](https://github.com/google/docsy) theme and deployed in App Engine.
 
 Important files and directories relevent to the website include:
-* `app.yaml` - located in the main project directory, this file specifies python run-time and the locations of important files. In order to deploy through App Engine, it is critical for this file to exist and be located in the main project directory.
-* `index.html` - located in `website/` directory. This is the main file for the website.
-* `main.css` - located in `website/css/` directory. This is the style sheet for Stackdriver Sandbox's website.
-* `images/` - located in `website/` directory. Any images on the website should be located in this directory.
+* `config.toml` - Located in `website/`, this file specifies the hugo properties for the website. This is critical for hugo to build the website
+* `deploy.sh` - Not sure I need this actually
+* `content/` - Located in `website/` directory. This contains the main documentation files used to build the website
+* `layouts/` - Located in `website/` directory. This contains static html files used in the site
+* `static/` - Located in `website/` directory. This contains additional files use on the site
+* `themes/` - Located in `website/` directory. This contains the submodule Docsy which is used to theme the site
 
 The website is automatically deployed to App Engine. Every time a new version is released, a build trigger is run that builds the website.
 
 ## Contributing Guidelines
 
 1. Test locally by making changes and using the following commands within the root directory:
-```bash
-$ gcloud app deploy app.yaml
-$ gcloud app browse
+```hugo server
 ```
+
 The website should be automatically deployed when `push-tags.yml` is run (one of the project's GitHub Actions).
 
 **Note:** In order to run these commands, it is important to install gcloud tools. Documentation on that can be found [here](https://cloud.google.com/source-repositories/docs/quickstart-deploying-from-source-repositories-to-app-engine).
