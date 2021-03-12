@@ -43,8 +43,17 @@ jobs:
         IMAGE=gcr.io/${{ env.PROJECT_ID }}/sandbox/loadgenerator/gke:${{ steps.get_version.outputs.VERSION }}
         docker build -t $IMAGE ./src/loadgenerator
         docker push $IMAGE
+    - name: Install Hugo and npm
+      timeout-minutes: 20
+      run: sudo apt-get install hugo npm
+    - name: Install PostCSS
+      timeout-minutes: 20
+      run: sudo npm install -g autoprefixer postcss-cli postcss
+    - name: Generate Website
+      timeout-minutes: 20
+      run: hugo --source=website/ --destination=deploy/
     - name: Deploy Website to App Engine
       timeout-minutes: 20
       run: |
         set -x
-        gcloud app deploy app.yaml
+        gcloud app deploy website/app.yaml
