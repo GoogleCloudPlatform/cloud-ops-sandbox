@@ -191,6 +191,24 @@ footer p {
   line-height: 40px;
 }
 
+.docs-btn {
+  background: var(--blue600);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  margin: 0;
+  padding: .5em .75em;
+  text-decoration: none;
+  font-family: 'Google Sans Display', Arial, sans-serif;
+  font-size: 1.2em;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  white-space: nowrap;
+  width: 300px;
+}
+
 .console-btn {
   background: var(--blue600);
   color: #ffffff;
