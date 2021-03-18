@@ -76,6 +76,15 @@ def makeResult(data):
 # APIs
 #
 
+@app.route('/_ah/warmup')
+def warmup():
+    '''Handles App Engine warmup logic
+    '''
+    conn = getConnection()
+    if conn is not None:
+        db_connection_pool.putconn(conn)
+    return '', 200, {}
+
 
 @app.route('/ratings', methods=['GET'])
 def getRatings():

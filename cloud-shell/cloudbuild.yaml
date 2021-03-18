@@ -18,6 +18,7 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
+  timeout: 1800s
   args:
   - '-c'
   - |-
@@ -53,3 +54,4 @@ steps:
     docker push $$CERTIFIED_PATH:latest
     docker push $$CERTIFIED_PATH:$$LATEST_TAG
 logsBucket: 'gs://sandbox-cloud-build-logs'
+timeout: 1800s

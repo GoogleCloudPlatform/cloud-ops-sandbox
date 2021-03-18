@@ -22,8 +22,8 @@ resource "google_logging_metric" "checkoutservice_logging_metric" {
   name   = "checkoutservice_log_metric"
   filter = "resource.type=k8s_container AND resource.labels.cluster_name=cloud-ops-sandbox AND resource.labels.namespace_name=default AND resource.labels.container_name=server AND orderedItem"
   metric_descriptor {
-    metric_kind = "DELTA"  # set to DELTA for counter-based metric
-    value_type  = "INT64"  # set to INT64 for counter-based metric
+    metric_kind = "DELTA" # set to DELTA for counter-based metric
+    value_type  = "INT64" # set to INT64 for counter-based metric
     unit        = "1"
     labels {
       key         = "product_name"
@@ -87,3 +87,23 @@ resource "google_monitoring_dashboard" "log_based_metric_dashboard" {
 }
 EOF
 }
+
+resource "google_logging_metric" "ratingservice_logging_metric" {
+  name   = "ratingservice_recollect_requests_count"
+  filter = "resource.type=gae_app AND resource.labels.module_id=ratingservice AND resource.labels.version_id=prod protoPayload.method=POST AND protoPayload.resource=\"/ratings:recollect\""
+  metric_descriptor {
+    metric_kind = "DELTA" # set to DELTA for counter-based metric
+    value_type  = "INT64" # set to INT64 for counter-based metric
+    unit        = "1"
+    labels {
+      key         = "status"
+      value_type  = "INT64"
+      description = "Response status"
+    }
+    display_name = "Number of recollect requests to rating service"
+  }
+  label_extractors = {
+    "status" = "EXTRACT(protoPayload.status)"
+  }
+}
+

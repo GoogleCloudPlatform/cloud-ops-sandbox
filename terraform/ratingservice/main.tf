@@ -87,6 +87,7 @@ resource "google_sql_database" "rating_service" {
 # provision App Engine service
 locals {
   max_connections = 10
+  service_port    = 8080
   service_name    = "ratingservice"
   service_version = "prod"
   source_path     = "${path.root}/../src/ratingservice"
@@ -158,7 +159,7 @@ resource "google_app_engine_standard_app_version" "ratingservice" {
   runtime    = "python38"
 
   entrypoint {
-    shell = "uwsgi --http-socket :8080 --wsgi-file main.py --callable app --master --processes 1 --threads ${local.max_connections}"
+    shell = "uwsgi --http-socket :${local.service_port} --wsgi-file main.py --callable app --master --processes 1 --threads ${local.max_connections}"
   }
 
   deployment {
@@ -178,11 +179,16 @@ resource "google_app_engine_standard_app_version" "ratingservice" {
     DB_USERNAME        = google_sql_user.default.name
     DB_PASSWORD        = google_sql_user.default.password
     MAX_DB_CONNECTIONS = local.max_connections
+    PORT               = local.service_port
   }
 
-  basic_scaling {
-    max_instances = 10
-    idle_timeout  = "600s"
+  inbound_services = ["INBOUND_SERVICE_WARMUP"]
+
+  automatic_scaling {
+    standard_scheduler_settings {
+      min_instances = 1
+    }
+    max_concurrent_requests = 9
   }
 
   delete_service_on_destroy = true
@@ -191,7 +197,7 @@ resource "google_app_engine_standard_app_version" "ratingservice" {
 
 resource "google_cloud_scheduler_job" "recollect_job" {
   name             = "ratingservice-recollect-job"
-  schedule         = "*/2 * * * *" # each two minutes
+  schedule         = "* * * * *" # each minute
   description      = "recollect recently posted new votes"
   time_zone        = "Europe/London"
   attempt_deadline = "340s"
