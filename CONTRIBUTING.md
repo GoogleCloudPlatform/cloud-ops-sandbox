@@ -40,8 +40,8 @@ Guidelines](https://opensource.google.com/conduct/).
 
 ### Option 1: Running locally
 
-> 💡 Recommended if you're planning to develop the application.
-> ℹ️  Prerequisite: [Cloud SDK should be installed.](https://cloud.google.com/sdk/docs/quickstart) 
+> 💡 Recommended if you're planning to develop the application.  
+> ℹ️  Prerequisite: [Cloud SDK should be installed.](https://cloud.google.com/sdk/docs/quickstart)  
 
 #### ![kubernetes](docs/img/kubernetes.png) Run Kubernetes micro-services with “Docker for Desktop”
 
