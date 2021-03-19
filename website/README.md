@@ -8,11 +8,10 @@ The website is currently set-up using the [Hugo](https://github.com/gohugoio/hug
 
 Important files and directories relevent to the website include:
 * `config.toml` - Located in `website/`, this file specifies the hugo properties for the website. This is critical for hugo to build the website
-* `deploy.sh` - Not sure I need this actually
-* `content/` - Located in `website/` directory. This contains the main documentation files used to build the website
-* `layouts/` - Located in `website/` directory. This contains static html files used in the site
-* `static/` - Located in `website/` directory. This contains additional files use on the site
-* `themes/` - Located in `website/` directory. This contains the submodule Docsy which is used to theme the site
+* `content/` - Located in `website/` directory. Contains the main documentation files used to build the website
+* `layouts/` - Located in `website/` directory.  Contains static html files used in the site
+* `static/` - Located in `website/` directory.  Contains additional files use on the site
+* `themes/` - Located in `website/` directory. Contains the submodule Docsy which is used to theme the site
 
 The website is automatically deployed to App Engine. Every time a new version is released, a build trigger is run that builds the website.
 
