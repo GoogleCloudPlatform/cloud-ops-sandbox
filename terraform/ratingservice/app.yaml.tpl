@@ -8,6 +8,8 @@ env_variables:
     DB_USERNAME: '${db_username}'
     DB_PASSWORD: '${db_password}'
     MAX_DB_CONNECTIONS: ${max_connections}
-basic_scaling:
-  max_instances: 10
-  idle_timeout: 10m
+inbound_services:
+- warmup
+auto_scaling:
+  min_instances: 1
+  max_concurrent_requests: 9
