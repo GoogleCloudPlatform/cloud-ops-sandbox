@@ -75,6 +75,16 @@ class Recipe(abc.ABC):
         if not project_id:
             logging.error("Could not retrieve project id: " + error)
         return project_id
+    
+    @staticmethod
+    def _get_external_ip():
+        Recipe._auth_cluster()
+        external_ip_command = "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+        ip, error = Recipe._run_command(external_ip_command)
+        ip = ip.decode("utf-8").replace("'", '')
+        if not ip:
+            logging.error('No external IP found:' + error)
+        return ip
 
     @staticmethod
     def _auth_cluster(cluster="APP"):
