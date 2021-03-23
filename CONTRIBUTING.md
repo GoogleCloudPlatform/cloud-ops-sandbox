@@ -41,22 +41,14 @@ Guidelines](https://opensource.google.com/conduct/).
 ### Option 1: Running locally
 
 > 💡 Recommended if you're planning to develop the application.  
-<<<<<<< HEAD
-> ℹ️ Prerequisite: [Install Cloud SDK](https://cloud.google.com/sdk/docs/quickstart)
-=======
 > ℹ️  Prerequisite: [Cloud SDK should be installed.](https://cloud.google.com/sdk/docs/quickstart)  
->>>>>>> master
 
 #### ![kubernetes](docs/img/kubernetes.png) Run Kubernetes micro-services with “Docker for Desktop”
 
 1. Install tools to run a Kubernetes cluster locally:
 
    * kubectl (can be installed via `gcloud components install kubectl`)
-<<<<<<< HEAD
-   * [Docker for Desktop (Mac/Windows)](https://docs.docker.com/docker-for-mac/kubernetes/): It provides Kubernetes support as [noted
-=======
    * [Docker for Desktop (Mac/Windows)](https://docs.docker.com/desktop/#download-and-install), It provides Kubernetes support as [noted
->>>>>>> master
      here](https://docs.docker.com/docker-for-mac/kubernetes/).
    * [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
      (ensure version ≥v0.20)
