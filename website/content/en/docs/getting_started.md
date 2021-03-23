@@ -4,7 +4,7 @@ linkTitle: "Getting Started"
 weight: 2
 ---
 {{% pageinfo %}}
-* Using Sandbox
+* [Using Sandbox](#using-sandbox)
   * [Prerequisites](#prerequisites)
   * [Set Up](#set-up)
   * [Next Steps](#next-steps)
