@@ -142,7 +142,7 @@ Cloud Trace ([documentation](https://cloud.google.com/trace/docs/)) enables deve
 
 For instrumenting your applications, currently recommended solution is **OpenCensus.** [OpenCensus](https://opencensus.io/) is an open-source project that supports trace instrumentation in a variety of languages and that can export this data to Cloud Operations. Then you can use the Cloud Trace UI to analyze the data. Note that OpenCensus is merging with another similar project, OpenTracing, to form OpenTelemetry. See [OpenCensus to become OpenTelemetry](#opencensus-to-become-opentelemetry) in this doc.
 
-HipsterShop microservices are instrumented to collect trace data. In addition to distributed tracing, **OpenCensus (Stats)** provides the sink to send quantifiable data, such as database latency, open file descriptors, and so on, that helps to set up monitoring of [SLIs and SLOs](https://cloud.google.com/blog/products/gcp/sre-fundamentals-slis-slas-and-slos) for the service. This data is available in Cloud Monitoring, and HipsterShop microservices are also instrumented to collect this kind of data.
+HipsterShop microservices are instrumented to collect trace data. In addition to distributed tracing, **OpenCensus (Stats)** provides the sink to send quantifiable data, such as database latency, open file descriptors, and so on, that helps to set up monitoring of [SLIs and SLOs](#SLIs-SLOs-and-Burn-rate-Alerts) for the service. This data is available in Cloud Monitoring, and HipsterShop microservices are also instrumented to collect this kind of data.
 
 #### Using Trace
 
@@ -440,6 +440,53 @@ Click **View Logs** for one of the samples to see the log messages that match th
 You can expand any of the messages that matches the filter to see the full stack trace:
 
 ![image](./images/user-guide/35-logdet.png)
+
+### SLIs, SLOs and Burn rate Alerts
+
+Cloud operations sandbox comes with several predefined SLOs(Service level objectives), that allow us to measure our users happiness. To learn more about SLIs and SLOs [visit here.](https://cloud.google.com/blog/products/devops-sre/sre-fundamentals-slis-slas-and-slos)
+
+Cloud operations suite provides **service oriented monitoring**, that means that we are configuring SLIs, SLOs and Burning Rates Alerts for a 'service'.  
+
+The first step in order to create SLO is to **ingest the data**, for GKE services  it comes out of the box, but you can also ingest additional data and [create custom metrics.](#Monitoring-and-logs-based-metrics)
+
+Then we need to **define our service**, Cloud Operations Sandbox' services are already detected since Istio automatically detects and creates services for us. But to demonstrate that you can create your own services, it also deploys custom services using [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring).
+
+You can find all the services under [monitoring → services → Services Overview](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/svc-overview) , and you can create your own [custom service.](https://cloud.google.com stackdriver/docs/solutions/slo-monitoring/ui/define-svc)
+
+<PrintScreen PlaceHolder>
+
+The *predefined SLOs* are also deployed as part of [Terraform code](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring/04_slos.tf) and currently are for the mentioned custom services, the Istio service and Rating service.  
+
+#### Services SLOs
+```Custom service availability SLO: 90% of all non-4XX requests within the past 30 day windowed period return with 200 OK status```
+
+```Custom service Latency SLO:  90% of requests that return 200 OK responses return in under 500 ms```  
+
+- For example for service X:
+<PrintScreen PlaceHolder>  
+```
+- Istio service availability SLO: 90% of all non-4XX requests within the past 30 day windowed period return with 200 OK status
+- Istio service latency SLO: 99% of requests that return 200 OK responses return in under 500 ms
+- Rating service availability SLO: 99% of all non-4XX requests within the past 30 day windowed period  return with 200 OK status
+- Rating service latency SLO: 99% of requests that return 200 OK responses return in under 175 ms
+- Rating service's data freshness SLO: during a day 99.9% of minutes have at least 1 successful recollect API call
+```
+
+#### Configure your own SLIs and SLOs
+
+> **Remember**  Our scope to examine and measure our users' happiness is User journey, so in order to create the SLO  you need to identify the most important ones to the business. Then we want to identify the metrics that are closest to the customer experience and ingest that data.  
+
+You can also [configure your own SLIs and SLOs](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/create-slo) for an existing service or for your own custom service.  
+
+<PrintScreen PlaceHolder>
+
+#### Burn Rate Alerts
+
+You can also create[Burn Rate  Alerts](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate)to your SLOs.
+
+Several predefined polices are deployed as part of terraform Terraform <>. You can view them in the service screen. edit them, or [create your own](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate).
+
+<PrintScreen PlaceHolder>
 
 # Destroying your cluster
 

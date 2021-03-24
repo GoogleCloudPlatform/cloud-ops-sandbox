@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Create an SLO for availablity for the custom service.
+# Create an SLO for availability for the custom service.
 # Example SLO is defined as following:
 #   90% of all non-4XX requests within the past 30 day windowed period
 #   return with 200 OK status
@@ -89,7 +89,7 @@ resource "google_monitoring_slo" "custom_service_latency_slo" {
   }
 }
 
-# Create an SLO for availablity for the Istio service.
+# Create an SLO for availability for the Istio service.
 # Example SLO is defined as following:
 #   90% of all non-4XX requests within the past 30 day windowed period
 #   return with 200 OK status
@@ -249,7 +249,7 @@ resource "google_monitoring_slo" "rating_service_latency_slo" {
   }
 }
 
-# Rating data freshness SLO:
+# Rating service's data freshness SLO:
 # during a day 99.9% of minutes have at least 1 successful recollect API call
 resource "google_monitoring_slo" "rating_service_freshness_slo" {
   # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine
