@@ -28,7 +28,7 @@ With Sandbox, we provide a tool that automatically provisions a new demo cluster
   * [Clean Up](#Clean-Up)
 * [Service Overview](#Service-Overview)
   * [Screenshots](#Screenshots)
-  * [Architecture](#Architecture)
+  * [Architecture](#Service-Architecture)
 
 ## Using Sandbox
 
