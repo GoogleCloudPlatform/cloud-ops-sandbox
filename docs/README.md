@@ -306,7 +306,7 @@ To get to Cloud Monitoring from the GCP console, select **Monitoring** on the na
 
 ![image](./images/user-guide/19-gcp-monitoring-overview.png)
 
-There are many pre-built monitoring pages. For example, the GKE Cluster Details page (select **Monitoring > Dashboards > Kubernetes Engine > Infrastructure**) brings up a page that provides information about the Sandbox cluster: 
+There are many pre-built monitoring pages. For example, the GKE Cluster Details page (select **Monitoring > Dashboards > GKE > Infrastructure**) brings up a page that provides information about the Sandbox cluster: 
 
 ![image](./images/user-guide/20-monitoring-dashboards-kubernetes.png)
 
