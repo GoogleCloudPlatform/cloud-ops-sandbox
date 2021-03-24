@@ -11,7 +11,7 @@
   "dependencies": {
     "@google-cloud/debug-agent": "5.1.3",
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^0.9.0",
-    "@google-cloud/profiler": "4.1.0",
+    "@google-cloud/profiler": "4.1.1",
     "@grpc/proto-loader": "0.5.6",
     "@opentelemetry/api": "^0.11.0",
     "@opentelemetry/node": "^0.11.0",
