@@ -298,7 +298,7 @@ To see all messages that are being generated in Cloud Logging from your logpoint
 
 #### Monitoring Overview
 
-Cloud Monitoring ([documentation](https://cloud.google.com/monitoring/docs/)) is the go-to place to grasp real-time trends of the system based on SLI/SLO. SRE team and application development team (and even business organization team) can collaborate to set up charts on the monitoring dashboard using metrics sent from the resources and the applications. 
+Cloud Monitoring ([documentation](https://cloud.google.com/monitoring/docs/)) is the go-to place to grasp real-time trends of the system based on SLI/SLO. SRE team and application development team (and even business organization team) can collaborate to set up charts on the monitoring dashboard using metrics sent from the resources and the applications.  
 
 #### Using Monitoring
 
@@ -306,7 +306,7 @@ To get to Cloud Monitoring from the GCP console, select **Monitoring** on the na
 
 ![image](./images/user-guide/19-gcp-monitoring-overview.png)
 
-There are many pre-built monitoring pages. For example, the GKE Cluster Details page (select **Monitoring > Dashboards > GKE > Infrastructure**) brings up a page that provides information about the Sandbox cluster: 
+There are many pre-built monitoring pages. For example, the GKE Cluster Details page (select **Monitoring > Dashboards > GKE > Infrastructure**) brings up a page that provides information about the Sandbox cluster:  
 
 ![image](./images/user-guide/20-monitoring-dashboards-kubernetes.png)
 
@@ -451,42 +451,79 @@ The first step in order to create SLO is to **ingest the data**, for GKE service
 
 Then we need to **define our service**, Cloud Operations Sandbox' services are already detected since Istio automatically detects and creates services for us. But to demonstrate that you can create your own services, it also deploys custom services using [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring).
 
-You can find all the services under [monitoring → services → Services Overview](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/svc-overview) , and you can create your own [custom service.](https://cloud.google.com stackdriver/docs/solutions/slo-monitoring/ui/define-svc)
+You can find all the services under [monitoring → services → Services Overview](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/svc-overview) , and you can create your own [custom service.](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/define-svc)
 
-<PrintScreen PlaceHolder>
+![image](./images/user-guide/37-services-overview.png)  
+
+#### Services SLOs  
 
 The *predefined SLOs* are also deployed as part of [Terraform code](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring/04_slos.tf) and currently are for the mentioned custom services, the Istio service and Rating service.  
 
-#### Services SLOs
-```Custom service availability SLO: 90% of all non-4XX requests within the past 30 day windowed period return with 200 OK status```
-
-```Custom service Latency SLO:  90% of requests that return 200 OK responses return in under 500 ms```  
-
-- For example for service X:
-<PrintScreen PlaceHolder>  
+**Custom services SLOs**
+``` 
+Custom service availability SLO: 90% of all non-4XX requests within the past 30 day windowed period return with 200 OK status 
 ```
-- Istio service availability SLO: 90% of all non-4XX requests within the past 30 day windowed period return with 200 OK status
-- Istio service latency SLO: 99% of requests that return 200 OK responses return in under 500 ms
-- Rating service availability SLO: 99% of all non-4XX requests within the past 30 day windowed period  return with 200 OK status
-- Rating service latency SLO: 99% of requests that return 200 OK responses return in under 175 ms
-- Rating service's data freshness SLO: during a day 99.9% of minutes have at least 1 successful recollect API call
+
+``` 
+Custom service Latency SLO:  90% of requests that return 200 OK responses return in under 500 ms 
+```  
+To view the exiting SLOs, in the Services Overview screen choose the desired service.
+
+*For example for checkoutservice*:
+
+![image](./images/user-guide/47-choose-checkout-custom-service.png)
+
+![image](./images/user-guide/36-checkoutservice-overview.png)
+
+**Additional predefined SLOs:**
+
+```
+Istio service availability SLO: 90% of all non-4XX requests within the past 30 day windowed period return with 200 OK status
+```
+```
+Istio service latency SLO: 99% of requests that return 200 OK responses return in under 500 ms
+```
+```
+Rating service availability SLO: 99% of all non-4XX requests within the past 30 day windowed period  return with 200 OK status
+```
+```
+Rating service latency SLO: 99% of requests that return 200 OK responses return in under 175 ms
+```
+```
+Rating service's data freshness SLO: during a day 99.9% of minutes have at least 1 successful recollect API call
 ```
 
 #### Configure your own SLIs and SLOs
 
-> **Remember**  Our scope to examine and measure our users' happiness is User journey, so in order to create the SLO  you need to identify the most important ones to the business. Then we want to identify the metrics that are closest to the customer experience and ingest that data.  
+> **Remember**  Our scope to examine and measure our users' happiness is User journey, so in order to create the SLO you need to identify the most important ones to the business. Then we want to *identify the metrics* that are closest to the customer experience and ingest that data.  
 
-You can also [configure your own SLIs and SLOs](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/create-slo) for an existing service or for your own custom service.  
+You can [configure your own SLIs and SLOs](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/create-slo) for an existing service or for your own custom service.  
 
-<PrintScreen PlaceHolder>
+#### Let's demonstrate that using the checkout auto-defined Istio service:
+1. In the service screen we will choose Create SLO:
+![image](./images/user-guide/39-checkout-service.png)
+2.Then we will set our SLI, we need to choose SLI type and the method(request vs window based):
+![image](./images/user-guide/42-checkoutservice-sli.png)
+3. Then we wil define our metric and we can also preview it's performance based on historical data:
+![image](./images/user-guide/41-checkoutservice-define-sli.png)
+4. Then we will configure our SLO, our target in a specific time window. We can also choose between [rolling window or a calendar window](https://sre.google/workbook/implementing-slos/):
+![image](./images/user-guide/43-set-slo.png)
 
-#### Burn Rate Alerts
+#### Configure Burn Rate Alerts
 
-You can also create[Burn Rate  Alerts](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate)to your SLOs.
+After you created the SLO, you can create[Burn Rate Alerts](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate)for those.
 
-Several predefined polices are deployed as part of terraform Terraform <>. You can view them in the service screen. edit them, or [create your own](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate).
+Several *predefined polices* are deployed as part of [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/master/terraform/monitoring/05_alerting_policies.tf). You can view them in the service screen, edit them, or [create your own](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate).
 
-<PrintScreen PlaceHolder>
+Let's continue with the Istio checkoutservice SLO we created [in the previous section:](#Let's-demonstrate-that-using-the-checkout-auto-defined-Istio-service:)
+
+1. In the service screen we will be able to see our new SLO and we will choose 'Create Alerting Policy'
+
+![image](./images/user-guide/46-crete-slo-burn-alert.png)
+2. Then we will want to set the alert's condition, who and how they will be notified and additional instructions:  
+![image](./images/user-guide/44-set-slo-burn-alert.png)
+3. After it will be created you could see it and incidents that might be triggered due to it in teh service screen and in the Alerting screen:
+![image](./images/user-guide/45-burn-rate-final.png)
 
 # Destroying your cluster
 
