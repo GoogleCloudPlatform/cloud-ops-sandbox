@@ -81,10 +81,9 @@ class Recipe(abc.ABC):
         Recipe._auth_cluster()
         external_ip_command = "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
         ip, error = Recipe._run_command(external_ip_command)
-        ip = ip.decode("utf-8").replace("'", '')
         if not ip:
             logging.error('No external IP found:' + error)
-        return ip
+        return ip.decode("utf-8").replace("'", '')
 
     @staticmethod
     def _auth_cluster(cluster="APP"):

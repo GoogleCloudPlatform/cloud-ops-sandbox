@@ -176,9 +176,9 @@ def create(project, *args, **kwargs):
 def describe():
     """Show information about an existing sandbox"""
     gcp_path = "https://console.cloud.google.com"
-    loadgen_ip = get_loadgen_ip()
-    external_ip = get_external_ip()
     project_id = get_project_id()
+    loadgen_ip = "http://" + get_loadgen_ip()
+    external_ip = "http://" + get_external_ip()
     gcp_kubernetes_path = gcp_path + '/kubernetes/workload?project=' + project_id
     gcp_monitoring_path = gcp_path + '/monitoring?project=' + project_id
     print("""
