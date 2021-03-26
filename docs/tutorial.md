@@ -351,6 +351,7 @@ Click **View Logs** for one of the samples to see the log messages that match th
 
 You can expand any of the messages that matches the filter to see the full stack trace.
 
+
 ## SLO Monitoring
 
 Cloud operations sandbox comes with several predefined SLOs(Service level objectives), that allow us to measure our users happiness. To learn more about SLIs and SLOs [visit here.](https://cloud.google.com/blog/products/devops-sre/sre-fundamentals-slis-slas-and-slos)
