@@ -22,14 +22,13 @@ from concurrent import futures
 
 import googleclouddebugger
 import grpc
-from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
-from opencensus.ext.grpc import server_interceptor as oc_server_interceptor
-from opencensus.trace import samplers
+
 
 from opentelemetry import trace
 from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
-from opentelemetry.ext.grpc import client_interceptor, server_interceptor
-from opentelemetry.ext.grpc.grpcext import intercept_server, intercept_channel
+from opentelemetry.instrumentation.grpc import client_interceptor
+from opentelemetry.instrumentation.grpc import server_interceptor
+from opentelemetry.instrumentation.grpc.grpcext import intercept_channel
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleExportSpanProcessor
 
@@ -84,14 +83,6 @@ if __name__ == "__main__":
         SimpleExportSpanProcessor(cloud_trace_exporter)
     )
 
-    # TODO: remove OpenCensus after conversion to OpenTelemetry
-    try:
-        sampler = samplers.AlwaysOnSampler()
-        exporter = stackdriver_exporter.StackdriverExporter()
-        oc_interceptor = oc_server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-    except:
-        oc_interceptor = oc_server_interceptor.OpenCensusServerInterceptor()
-
     try:
         googleclouddebugger.enable(
             module='recommendationservice',
@@ -115,10 +106,9 @@ if __name__ == "__main__":
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
     # Create the gRPC server for accepting ListRecommendations Requests from frontend (client).
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-
-    # OpenTelemetry interceptor receives trace contexts from clients.
-    server = intercept_server(server, server_interceptor(trace.get_tracer_provider()))
+    interceptor = server_interceptor(trace.get_tracer_provider())
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
+                       interceptors=(interceptor,))
 
     # Add RecommendationService class to gRPC server.
     service = RecommendationService()
