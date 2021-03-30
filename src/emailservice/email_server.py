@@ -30,15 +30,10 @@ import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
-from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
-from opencensus.ext.grpc import server_interceptor as oc_server_interceptor
-from opencensus.common.transports.async_ import AsyncTransport
-from opencensus.trace import samplers
-
 from opentelemetry import trace
 from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
-from opentelemetry.ext.grpc import server_interceptor
-from opentelemetry.ext.grpc.grpcext import intercept_server
+from opentelemetry.instrumentation.grpc import server_interceptor
+from opentelemetry.instrumentation.grpc.grpcext import intercept_channel
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleExportSpanProcessor
 
@@ -149,10 +144,9 @@ class HealthCheck():
 
 def start(dummy_mode):
   # Create gRPC server channel to receive requests from checkout (client).
+  interceptor = server_interceptor(trace.get_tracer_provider())
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                       interceptors=(oc_tracer_interceptor,)) # TODO: remove OpenCensus interceptor
-  # OpenTelemetry interceptor receives trace contexts from clients.
-  server = intercept_server(server, server_interceptor(trace.get_tracer_provider()))
+                       interceptors=(interceptor,))
 
   service = None
   if dummy_mode:
@@ -212,21 +206,6 @@ if __name__ == '__main__':
   except KeyError:
       logger.info("Profiler disabled.")
 
-  # TODO: remove OpenCensus after conversion to OpenTelemetry
-  try:
-    if "DISABLE_TRACING" in os.environ:
-      raise KeyError()
-    else:
-      logger.info("Tracing enabled.")
-      sampler = samplers.AlwaysOnSampler()
-      exporter = stackdriver_exporter.StackdriverExporter(
-        project_id=os.environ.get('GCP_PROJECT_ID'),
-        transport=AsyncTransport)
-      oc_tracer_interceptor = oc_server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-  except (KeyError, DefaultCredentialsError):
-      logger.info("Tracing disabled.")
-      oc_tracer_interceptor = oc_server_interceptor.OpenCensusServerInterceptor()
-  
   # OpenTelemetry Tracing
   # TracerProvider provides global state and access to tracers.
   trace.set_tracer_provider(TracerProvider())
