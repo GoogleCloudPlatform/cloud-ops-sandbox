@@ -10,3 +10,4 @@ opentelemetry-instrumentation==0.17b0
 python-json-logger==0.1.11
 requests==2.24.0
 wrapt==1.12.1
+httplib2==0.19.0
