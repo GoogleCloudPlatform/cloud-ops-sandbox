@@ -1,6 +1,6 @@
 ---
-title: "Overview"
-linkTitle: "Overview"
+title: "Home"
+linkTitle: "Home"
 weight: 1
 menu:
   main:
@@ -10,7 +10,6 @@ menu:
 
 # Cloud Operations Sandbox (Alpha)
 
-![Continuous Integration](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/workflows/Continuous%20Integration/badge.svg)
 
 Cloud Operations Sandbox is an open-source tool that helps practitioners to learn Service Reliability Engineering practices from Google and apply them on their cloud services using [Ops Management](https://cloud.google.com/products/operations) (formerly Stackdriver).
 It is based on [Hipster Shop](https://github.com/GoogleCloudPlatform/microservices-demo), a cloud-native microservices application.

@@ -9,9 +9,10 @@ weight: 2
   * [Set Up](#set-up)
   * [Next Steps](#next-steps)
   * [Clean Up](#clean-up)
-* [Service Overview](/docs/service_overview)
+* [Service Overview](/docs/service_overview/)
   * [Screenshots](/docs/service_overview/#screenshots)
-  * [Architecture](/docs/service_overview#architecture)
+  * [Architecture](/docs/service_overview/#service-architecture)
+  * [Technologies](/docs/service_overview/#technologies)
 {{% /pageinfo %}}
 
 ## Using Sandbox
