@@ -366,6 +366,7 @@ $ sandboxctl sre-recipes
 
 1. Run the recipe to manufacture errors in the demo cluster
 
+> **Note:** It may take up to 5 minutes for breakages to take effect in production.
 ```
 $ sandboxctl sre-recipes break recipe0
 ```
