@@ -22,7 +22,7 @@ The website is automatically deployed to App Engine. Every time a new version is
 
 2. For Hugo to compile you will need NPM installed along with the following packages: postcss-clie, autoprefixer
 
-3.Test locally by making changes and using the following commands within the root directory:
+3. Test locally by making changes and using the following commands within the root directory:
 ```hugo server```
 
 4. Generate website using hugo --destination=deploy/
