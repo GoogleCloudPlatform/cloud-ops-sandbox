@@ -17,11 +17,15 @@ The website is automatically deployed to App Engine. Every time a new version is
 
 ## Contributing Guidelines
 
-1. Test locally by making changes and using the following commands within the root directory:
-```hugo server
-```
+1. First ensure you have Docsy on your system
+```git submodule update --init --recursive``` 
 
-2. Generate website using hugo --source=website/ --destination=deploy/
+2. For Hugo to compile you will need NPM installed along with the following packages: postcss-clie, autoprefixer
+
+3. Test locally by making changes and using the following commands within the root directory:
+```hugo server```
+
+4. Generate website using hugo --destination=deploy/
 
 The website should be automatically deployed when `push-tags.yml` is run (one of the project's GitHub Actions).
 
