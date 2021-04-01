@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: locust-main
-          image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke:latest
+          image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke:v0.6.0
           imagePullPolicy: Always
           env:
             - name: LOCUST_MODE

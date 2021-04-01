@@ -28,7 +28,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/stackdriver-sandbox-230822/sandbox/paymentservice:latest
+        image: gcr.io/stackdriver-sandbox-230822/sandbox/paymentservice:v0.6.0
         ports:
         - containerPort: 50051
         readinessProbe:
