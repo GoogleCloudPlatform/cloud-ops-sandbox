@@ -101,6 +101,7 @@ class CurrenciesRecipe(Recipe):
             logging.error('No project ID found.')
             exit(1)
         print('Use Monitoring Dashboards to see metrics associated with each service: https://console.cloud.google.com/monitoring/dashboards?project={}'.format(project_id))
+        print('Note: It may take up to 5 minutes for monitoring metrics to be updated')
 
     def verify_broken_service(self):
         """
