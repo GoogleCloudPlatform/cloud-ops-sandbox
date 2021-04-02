@@ -17,9 +17,15 @@ runtime: python37
 
 handlers:
         - url: /
-          static_files: website/index.html
-          upload: website/index.html
+          static_files: deploy/index.html
+          upload: deploy/index.html
 
-        - url: /(.*)
-          static_files: website/\1
-          upload: website/(.*)
+        - url: /(.*)/
+          static_files: deploy/\1/index.html
+          upload: deploy/*
+
+        - url: /
+          static_dir: deploy/
+        
+error_handlers:
+  - file: deploy/404.html

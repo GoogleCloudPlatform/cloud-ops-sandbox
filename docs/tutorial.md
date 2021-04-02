@@ -73,7 +73,14 @@ In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase"
 
 ## Run the load generator
 
-In another browser tab, navigate to the load-generator URL, from which you can simulate users interacting with the application to generate traffic. For this application, values like 100 total users with a spawn rate of 2 users per second are reasonable. Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't prepopulated. Click the **Start swarming** button to begin generating traffic to the site.
+Cloud Ops Sandbox comes with [Locust load generator](https://locust.io/), to simulate users traffic.  
+
+- In another browser tab, navigate to the load-generator URL(from the installation stage if it isn't populated).  
+- Enter the number of **users** and **spawn rate**. For this application, we recommend to test 100 total users with a spawn rate of 2 users per second.  
+- Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't populated.  
+- Click the **Start swarming** button to begin generating traffic to the site.
+
+This will produce traffic on the store from a loadgenerator pod:
 
 ![Locust example](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/raw/master/docs/images/user-guide/3-locust.png "Example of Locust configuration")
 
@@ -343,6 +350,46 @@ The **Error Details** screen shows you when the error has been occurring in the 
 Click **View Logs** for one of the samples to see the log messages that match this particular error.
 
 You can expand any of the messages that matches the filter to see the full stack trace.
+
+## SRE Recipes
+
+SRE Recipes is our [Chaos Engineering](https://en.wikipedia.org/wiki/Chaos_engineering) tool to test your sandbox environment. It helps users to familiarize themselves with finding the root cause of a breakage using Cloud Operations suite of tools.  
+Each 'recipe' simulates a different scenario of real life problems that can occur to the production system. There are several recipes that you can run and you can also [contribute your own.](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/sre-recipes#contributing)  
+
+```
+$ sandboxctl sre-recipes  
+```
+
+### Running an example SRE Recipe
+
+> **Note:** Recipe's names are not explicit by design as we don't want to allude to the problem.
+
+1. Run the recipe to manufacture errors in the demo cluster
+
+> **Note:** It may take up to 5 minutes for breakages to take effect in production.
+```
+$ sandboxctl sre-recipes break recipe0
+```
+
+2. Use Cloud Operations suite to diagnose the problem.
+
+> **Note:** If you are stuck, you can use a hint to direct you to the right direction.
+```
+$ sandboxctl sre-recipes hint recipe0
+```
+
+3. Verify your hypothesis on what could be wrong with the demo app by using command line tool
+
+```
+$ sandboxctl sre-recipes verify recipe0
+```
+
+4. After you discover the problem, you can restore the cluster to its original state.
+
+```
+$ sandboxctl sre-recipes restore recipe0
+```
+
 
 ## Destroying your cluster
 

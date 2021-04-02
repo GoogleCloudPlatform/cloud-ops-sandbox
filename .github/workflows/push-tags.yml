@@ -47,4 +47,4 @@ jobs:
       timeout-minutes: 20
       run: |
         set -x
-        gcloud app deploy app.yaml
+        gcloud app deploy website/app.yaml
