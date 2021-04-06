@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Create an SLO for availablity for the custom service.
+# Create an SLO for availability for the custom service.
 # Example SLO is defined as following:
-#   90% of all non-4XX requests within the past 30 day windowed period
-#   return with 200 OK status
+#   90% of HTTP requests are successful within the past 30 day windowed period
+
 resource "google_monitoring_slo" "custom_service_availability_slo" {
   count        = length(var.custom_services)
   service      = google_monitoring_custom_service.custom_service[count.index].service_id
@@ -56,7 +56,7 @@ resource "google_monitoring_slo" "custom_service_availability_slo" {
 
 # Create another SLO on the custom service this time with respect to latency.
 # Example SLO is defined as following:
-#   90% of requests that return 200 OK responses return in under 500 ms
+#   90% of requests return in under 500 ms in the previous 30 days
 resource "google_monitoring_slo" "custom_service_latency_slo" {
   count        = length(var.custom_services)
   service      = google_monitoring_custom_service.custom_service[count.index].service_id
@@ -89,10 +89,9 @@ resource "google_monitoring_slo" "custom_service_latency_slo" {
   }
 }
 
-# Create an SLO for availablity for the Istio service.
+# Create an SLO for availability for the Istio service.
 # Example SLO is defined as following:
-#   90% of all non-4XX requests within the past 30 day windowed period
-#   return with 200 OK status
+#   90% of HTTP requests are successful within the past 30 day windowed period
 resource "google_monitoring_slo" "istio_service_availability_slo" {
   count = length(var.istio_services)
 
@@ -136,7 +135,7 @@ resource "google_monitoring_slo" "istio_service_availability_slo" {
 
 # Create an SLO with respect to latency using the Istio service.
 # Example SLO is defined as:
-#   99% of requests that return 200 OK responses return in under 500 ms
+#   99% of requests return in under 500 ms in the previous 30 days
 resource "google_monitoring_slo" "istio_service_latency_slo" {
   count        = length(var.istio_services)
   service      = "ist:${var.project_id}-zone-${var.zone}-cloud-ops-sandbox-default-${var.istio_services[count.index].service_id}"
@@ -169,8 +168,8 @@ resource "google_monitoring_slo" "istio_service_latency_slo" {
 }
 
 # Rating service availability SLO:
-# 99% of all non-4XX requests within the past 30 day windowed period
-# return with 200 OK status
+#   99% of HTTP requests are successful within the past 30 day windowed period
+
 resource "google_monitoring_slo" "rating_service_availability_slo" {
   # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine
   # Identify of the service is built after the following template: gae:${project_id}_servicename
@@ -216,7 +215,8 @@ resource "google_monitoring_slo" "rating_service_availability_slo" {
 }
 
 # Rating service latency SLO:
-#   99% of requests that return 200 OK responses return in under 175 ms
+#   99% of requests that return in under 175 ms in the previous 30 days
+
 resource "google_monitoring_slo" "rating_service_latency_slo" {
   # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine
   # Identify of the service is built after the following template: gae:${project_id}_servicename
@@ -249,7 +249,7 @@ resource "google_monitoring_slo" "rating_service_latency_slo" {
   }
 }
 
-# Rating data freshness SLO:
+# Rating service's data freshness SLO:
 # during a day 99.9% of minutes have at least 1 successful recollect API call
 resource "google_monitoring_slo" "rating_service_freshness_slo" {
   # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine

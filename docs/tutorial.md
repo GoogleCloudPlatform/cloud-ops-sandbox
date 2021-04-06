@@ -351,6 +351,62 @@ Click **View Logs** for one of the samples to see the log messages that match th
 
 You can expand any of the messages that matches the filter to see the full stack trace.
 
+
+## SLO Monitoring
+
+Cloud operations sandbox comes with several predefined SLOs(Service level objectives), that allow us to measure our users happiness. To learn more about SLIs and SLOs [visit here.](https://cloud.google.com/blog/products/devops-sre/sre-fundamentals-slis-slas-and-slos)
+
+Cloud operations suite provides **service oriented monitoring**, that means that we are configuring SLIs, SLOs and Burning Rates Alerts for a 'service'. Cloud Operations Sandbox' services are already detected since Istio automatically detects and creates services for us. But to demonstrate that you can create your own services, it also deploys custom services using [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring).
+
+You can find all the services under [monitoring → services → Services Overview](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/svc-overview) , and you can create your own [custom service.](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/define-svc)
+
+![image](./images/user-guide/37-services-overview.png)  
+
+### Services SLOs  
+
+To view, edit or create SLOs for a service you need to go to the service page:
+![image](./images/user-guide/36-checkoutservice-overview.png)
+
+The *predefined SLOs* are also deployed as part of [Terraform code](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring/04_slos.tf) and currently are for the mentioned custom services, the Istio service and Rating service.  
+
+*For example for checkoutservice*:
+
+![image](./images/user-guide/47-choose-checkout-custom-service.png =250x)
+
+![image](./images/user-guide/36-checkoutservice-overview.png)
+
+
+### Configure your own SLIs and SLOs
+
+You can [configure your own SLIs and SLOs](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/create-slo) for an existing service or for your own custom service.  
+
+> **Remember**  Our scope to examine and measure our users' happiness is User journey, so in order to create the SLO you need to identify the most important ones to the business. Then we want to *identify the metrics* that are closest to the customer experience and ingest that data.  
+
+#### Checkout auto-defined Istio service example:
+1. In the service screen we will choose Create SLO:
+![image](./images/user-guide/39-checkout-service.png )
+2.Then we will set our SLI, we need to choose SLI type and the method(request vs window based):
+![image](./images/user-guide/42-checkoutservice-sli.png)
+3. Then we wil define our metric and we can also preview it's performance based on historical data:
+![image](./images/user-guide/41-checkoutservice-define-sli.png)
+4. Then we will configure our SLO, our target in a specific time window. We can also choose between [rolling window or a calendar window](https://sre.google/workbook/implementing-slos/):
+![image](./images/user-guide/43-set-slo.png)
+
+#### Configure Burn Rate Alerts
+
+After you created the SLO, you can create [Burn Rate Alerts](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate) for those.
+
+> There are also several *predefined polices* are deployed as part of [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/master/terraform/monitoring/05_alerting_policies.tf). You can view or edit them in the service screen.
+
+5. In the service screen we will be able to see our new SLO and we will choose 'Create Alerting Policy'
+![image](./images/user-guide/46-crete-slo-burn-alert.png)
+
+6. Then we will want to set the alert's condition, who and how they will be notified and additional instructions:  
+![image](./images/user-guide/44-set-slo-burn-alert.png)
+
+7. After it will be created you could see it and incidents that might be triggered due to it in teh service screen and in the Alerting screen:
+![image](./images/user-guide/45-burn-rate-final.png)
+
 ## SRE Recipes
 
 SRE Recipes is our [Chaos Engineering](https://en.wikipedia.org/wiki/Chaos_engineering) tool to test your sandbox environment. It helps users to familiarize themselves with finding the root cause of a breakage using Cloud Operations suite of tools.  
@@ -389,7 +445,6 @@ $ sandboxctl sre-recipes verify recipe0
 ```
 $ sandboxctl sre-recipes restore recipe0
 ```
-
 
 ## Destroying your cluster
 
