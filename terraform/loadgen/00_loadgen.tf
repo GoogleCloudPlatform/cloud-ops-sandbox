@@ -68,7 +68,7 @@ resource "google_container_cluster" "gke_loadgen" {
   # interesting things.
   node_pool {
     node_config {
-      machine_type = "n1-standard-2"
+      machine_type = "n1-standard-1"
 
       oauth_scopes = [
         "https://www.googleapis.com/auth/cloud-platform"  
