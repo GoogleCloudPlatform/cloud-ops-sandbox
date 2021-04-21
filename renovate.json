@@ -22,6 +22,10 @@
     "type: cleanup",
     "priority: p2"
   ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "recreateClosed": true
+  },
   "ignoreDeps": [
     "com.google.protobuf:protoc"
   ]
