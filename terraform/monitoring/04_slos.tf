@@ -13,7 +13,9 @@
 # limitations under the License.
 
 # Create an SLO for availability for the custom service.
-# Example SLO is defined as following:
+# For all services other than Frontend SLO is defined as following:
+#   99% of HTTP requests are successful within the past 30 day windowed period
+# For the Frontend service SLO is defined as following:
 #   90% of HTTP requests are successful within the past 30 day windowed period
 
 resource "google_monitoring_slo" "custom_service_availability_slo" {
@@ -55,7 +57,9 @@ resource "google_monitoring_slo" "custom_service_availability_slo" {
 }
 
 # Create another SLO on the custom service this time with respect to latency.
-# Example SLO is defined as following:
+# For all services other than Frontend SLO is defined as following:
+#   99% of requests return in under 500 ms in the previous 30 days
+# For the Frontend service SLO is defined as following:
 #   90% of requests return in under 500 ms in the previous 30 days
 resource "google_monitoring_slo" "custom_service_latency_slo" {
   count        = length(var.custom_services)
