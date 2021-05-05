@@ -32,8 +32,8 @@ __Note__: If installation stops due to billing account errors, set up the billin
 ### Next Steps
 
 * Explore your Sandbox deployment and its [architecture](#Service-Overview)
-* Follow the [User Guide](/docs/README.md) to start using Ops Management
-* Learn more about Ops Management using [Code Labs](https://codelabs.developers.google.com/s/results?q=Monitoring)
+* Follow the [User Guide](/docs/README.md) to start using Cloud Operations
+* Learn more about Cloud Operations using [Code Labs](https://codelabs.developers.google.com/s/results?q=Monitoring)
 
 ### Clean Up
 

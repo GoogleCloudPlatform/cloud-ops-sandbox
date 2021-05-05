@@ -19,7 +19,7 @@ In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you t
 
 ## Explore Cloud Monitoring
 
-In a new browser tab, navigate to the GCP Monitoring Workspace URL, which takes you to the Cloud Monitoring ([documentation](https://cloud.google.com/monitoring)) **Workspace** page for your new project. The console may take some time to create a new workspace. Afterward, you'll be able to see a few dashboards generated through Ops Management tools.
+In a new browser tab, navigate to the GCP Monitoring Workspace URL, which takes you to the Cloud Monitoring ([documentation](https://cloud.google.com/monitoring)) **Workspace** page for your new project. The console may take some time to create a new workspace. Afterward, you'll be able to see a few dashboards generated through Cloud Operations tools.
 
 ![image](/docs/images/user-guide/19-gcp-monitoring-overview.png)
 
