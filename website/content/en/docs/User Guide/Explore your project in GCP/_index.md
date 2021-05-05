@@ -30,9 +30,31 @@ In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase"
 ![image](/docs/images/user-guide/2-hipstershop.png)
 
 ## Run the load generator
+Cloud Ops Sandbox comes with [Locust load generator](https://locust.io/), to simulate users traffic.  
 
-In another browser tab, navigate to the load-generator URL, from which you can simulate users interacting with the application to generate traffic. For this application, values like 100 total users with a spawn rate of 2 users per second are reasonable. Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't prepopulated. Click the **Start swarming** button to begin generating traffic to the site.
+- In another browser tab, navigate to the load-generator URL(from the installation stage if it isn't populated).  
+- Enter the number of **users** and **spawn rate**. For this application, we recommend to test 100 total users with a spawn rate of 2 users per second.  
+- Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't populated.  
+- Click the **Start swarming** button to begin generating traffic to the site.
+
+This will produce traffic on the store from a loadgenerator pod:
 
 ![Locust example](/docs/images/user-guide/3-locust.png)
+
+
+
+You can also run load testing from Cloud Shell using `sandboxctl` command, there are 2 available traffic patterns : 'basic' or 'step'
+
+```bash
+sandboxctl loadgen <traffic_pattern>
+```
+
+A step load shape will increase user traffic in every step for the entire test duration([current settings](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/src/loadgenerator/locust-tasks)).
+```bash
+sandboxctl loadgen step
+```
+
+> Note: It is **not recommended** to spawn more than 150 users, as the Error rate will be high (>80%)
+
 
 From here, you can explore how the application was deployed, and you can use the navigation menu to bring up other GCP tools.
