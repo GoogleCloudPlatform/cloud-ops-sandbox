@@ -35,15 +35,14 @@ The following chart shows the client-side RPC calls that did not result in an OK
 
 ![image](/docs/images/user-guide/21-metrics-explorer.png)
 
-This chart uses the  metric type `custom.googleapis.com/opencensus/ grpc.io/client/completed_rpcs` (display name: "OpenCensus/grpc.io/client/completed_rpcs" ), and filters on the  `grpc_client_status` than is equal to "OK".
+This chart uses the  metric type `custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs` (display name: "OpenCensus/grpc.io/client/completed_rpcs" ), and filters on the  `grpc_client_status` than is equal to "OK".
 
 Below you can find another example, the below chart only display grpc_client_status that are not "OK" (e.g. PERMISSION_DENIED) and that the grpc_client_method do not include google, i.e. it's from the application services.
 
 ![image](/docs/images/user-guide/49-metrics-explorer-filter-rpc.png)
 
 In addition GCP predefined [dashboards](https://cloud.google.com/monitoring/dashboards) mentioned above, Cloud Operations Sandbox come with several additional dashboards that are provisioned using [Terraform code](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring/dashboards). 
-As part of the `User Experience Dashboard` you can view a few of opencensus metrics: `HTTP Request Count by Method`, `HTTP Response Errors` and `HTTP Request Latency, 99th Percentile` you edit the dashboard and add additional charts, and you can also open the chart in the Metrics explorer as shown below:
-
+As part of the `User Experience Dashboard` you can view a few of Opencensus metrics: `HTTP Request Count by Method`, `HTTP Response Errors` and `HTTP Request Latency, 99th Percentile` you edit the dashboard and add additional charts, and you can also open the chart in the Metrics explorer as shown below:
 
 ![image](/docs/images/user-guide/50-cust-expr-dashboard.png)
 
