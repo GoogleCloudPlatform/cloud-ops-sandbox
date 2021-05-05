@@ -20,7 +20,6 @@ import time
 import traceback
 from concurrent import futures
 
-import googleclouddebugger
 import grpc
 
 
@@ -39,6 +38,16 @@ from grpc_health.v1 import health_pb2_grpc
 
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
+
+try:
+    import googleclouddebugger
+    googleclouddebugger.enable(
+        module='recommendationservice',
+    )
+except ImportError:
+    logger.error("could not enable debugger")
+    logger.error(traceback.print_exc())
+    pass
 
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
@@ -82,15 +91,6 @@ if __name__ == "__main__":
     trace.get_tracer_provider().add_span_processor(
         SimpleExportSpanProcessor(cloud_trace_exporter)
     )
-
-    try:
-        googleclouddebugger.enable(
-            module='recommendationservice',
-        )
-    except (Exception, err):
-        logger.error("could not enable debugger")
-        logger.error(traceback.print_exc())
-        pass
 
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
