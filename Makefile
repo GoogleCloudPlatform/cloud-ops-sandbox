@@ -26,7 +26,7 @@ cluster: check-env
 
 	gcloud beta container clusters create ${CLUSTER} \
 		--project=${PROJECT_ID} --zone=${ZONE} \
-		--machine-type=n1-standard-1 --num-nodes=3 \
+		--machine-type=n1-standard-2 --num-nodes=4 \
 		--enable-stackdriver-kubernetes \
 		--scopes https://www.googleapis.com/auth/cloud-platform
 	cd ./terraform/istio && \
