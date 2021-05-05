@@ -38,6 +38,23 @@ Cloud Ops Sandbox comes with [Locust load generator](https://locust.io/), to sim
 - Click the **Start swarming** button to begin generating traffic to the site.
 
 This will produce traffic on the store from a loadgenerator pod:
+
 ![Locust example](/docs/images/user-guide/3-locust.png)
+
+
+
+You can also run load testing from Cloud Shell using `sandboxctl` command, there are 2 available traffic patterns : 'basic' or 'step'
+
+```bash
+sandboxctl loadgen <traffic_pattern>
+```
+
+A step load shape will increase user traffic in every step for the entire test duration([current settings](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/src/loadgenerator/locust-tasks)).
+```bash
+sandboxctl loadgen step
+```
+
+> Note: It is **not recommended** to spawn more than 150 users, as the Error rate will be high (>80%)
+
 
 From here, you can explore how the application was deployed, and you can use the navigation menu to bring up other GCP tools.
