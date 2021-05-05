@@ -191,7 +191,7 @@ resource "google_app_engine_standard_app_version" "ratingservice" {
     }
     max_concurrent_requests = 9
     min_idle_instances = 1
-    max_idle_instances = 2
+    max_idle_instances = 1
   }
 
   delete_service_on_destroy = true

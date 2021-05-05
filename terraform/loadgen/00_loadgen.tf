@@ -84,7 +84,7 @@ resource "google_container_cluster" "gke_loadgen" {
 
     autoscaling {
       min_node_count = 1
-      max_node_count = 5
+      max_node_count = 3
     }
 
     management {
