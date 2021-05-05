@@ -12,15 +12,15 @@ Cloud Operations provides products for both developers and administrators; this 
 
 Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of **Application Performance Management (APM)** has increased. Cloud Operations provides 3 products for APM:
 
--  Cloud Trace
--  Cloud Profiler
--  Cloud Debugger
+-  [Cloud Trace](./cloud_trace)
+-  [Cloud Profiler](./cloud_profiler)
+-  [Cloud Debugger](./cloud_debugger.md)
 
 Similarly, cloud-native, microservice-based applications complicate traditional approaches used by administrators for monitoring system health: it's harder to observe your system health when the number of instances is flexible and the inter-dependencies among the many components are complicated. In the last few years, **Site Reliability Engineering (SRE)** has become recognized as a practical approach to managing large-scale, highly complex, distributed systems. Cloud Operations provides the following tools that are useful for SRE:
 
--  Cloud Monitoring
--  Cloud Logging
--  Cloud Error Reporting
+-  [Cloud Monitoring](./cloud_monitoring)
+-  [Cloud Logging](./cloud_logging)
+-  [Cloud Error Reporting](./cloud_error_reporting)
 
 You can find the Cloud Operations products in the navigation panel on the GCP Console:
 
