@@ -43,6 +43,7 @@ try:
     import googleclouddebugger
     googleclouddebugger.enable(
         module='recommendationservice',
+        version='1.0.0'
     )
 except ImportError:
     logger.error("could not enable debugger")
