@@ -187,11 +187,8 @@ resource "google_app_engine_standard_app_version" "ratingservice" {
   automatic_scaling {
     standard_scheduler_settings {
       min_instances = 1
-      max_instances = 5
     }
     max_concurrent_requests = 9
-    min_idle_instances = 1
-    max_idle_instances = 2
   }
 
   delete_service_on_destroy = true
