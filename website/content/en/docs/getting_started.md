@@ -32,7 +32,7 @@ __Note__: If installation stops due to billing account errors, set up the billin
 ### Next Steps
 
 * Explore your Sandbox deployment and its [architecture](#Service-Overview)
-* Follow the [User Guide](/docs/README.md) to start using Cloud Operations
+* Follow the User Guide to start using [Cloud Operations](https://cloud-ops-sandbox.dev/docs/user-guide/learn-cloud-learn-cloud-operations/)
 * Learn more about Cloud Operations using [Code Labs](https://codelabs.developers.google.com/s/results?q=Monitoring)
 
 ### Clean Up
