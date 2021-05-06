@@ -255,7 +255,7 @@ if (!doNotTrack) {
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/docs/user-guide/learn-ops-management/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Learn Cloud Operations</a>
+    <a  href="/docs/user-guide/learn-ops-management/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Learn Ops Management</a>
   </li>
   <ul>
     <li class="collapse " id="docsuser-guidelearn-ops-management">
@@ -476,7 +476,7 @@ It is a web-based e-commerce app called <strong>“Hipster Shop”</strong>, whe
 <blockquote>
 <p><strong>We are not endorsing the architecture of Hipster Shop as the best way to build such a shop!</strong>
 The architecture is optimized for learning purposes and includes modern stack: Kubernetes, GKE, Istio,
-Cloud Operations, App Engine, gRPC, OpenTelemetry, and similar cloud-native technologies.</p>
+Ops Management, App Engine, gRPC, OpenTelemetry, and similar cloud-native technologies.</p>
 </blockquote>
 <p><a href="/docs/img/architecture-diagram.png"><img src="/docs/img/architecture-diagram.png" alt="Architecture ofmicroservices"></a></p>
 <p>Find the <strong>gRPC protocol buffer descriptions</strong> in the <a href="https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/pb"><code>./pb</code> directory</a>.</p>
@@ -559,7 +559,7 @@ The app is designed to run on Google Kubernetes Engine.</li>
 communicate to each other.</li>
 <li><strong><a href="https://opentelemetry.io/">OpenTelemetry</a> Tracing:</strong> Most services are
 instrumented using OpenTelemetry tracers and interceptors which handle trace context propagation through gRPC and HTTP.</li>
-<li><strong><a href="https://cloud.google.com/products/operations">Cloud Operations APM and SRE</a>:</strong> Many services
+<li><strong><a href="https://cloud.google.com/products/operations">Ops Management APM and SRE</a>:</strong> Many services
 are instrumented with <strong>Profiling</strong>, <strong>Tracing</strong>, <strong>Debugging</strong>, <strong>Monitoring</strong>, <strong>Logging</strong> and <strong>Error Reporting</strong>.</li>
 <li><strong><a href="https://github.com/GoogleContainerTools/skaffold">Skaffold</a>:</strong> A tool used for doing repeatable deployments. You can deploy to Kubernetes with a single command using Skaffold.</li>
 <li><strong>Synthetic Load Generation:</strong> The application demo comes with dedicated load generation service that creates realistic usage patterns on Hipster Shop website using
