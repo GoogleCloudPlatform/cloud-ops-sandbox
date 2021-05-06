@@ -24,7 +24,7 @@ It is a web-based e-commerce app called **“Hipster Shop”**, where users can 
 **Hipster Shop** is composed of many microservices, written in different languages, that talk to each other over gRPC and REST API.
 >**We are not endorsing the architecture of Hipster Shop as the best way to build such a shop!**
 > The architecture is optimized for learning purposes and includes modern stack: Kubernetes, GKE, Istio,
-> Cloud Operations, App Engine, gRPC, OpenTelemetry, and similar cloud-native technologies.
+> Ops Management, App Engine, gRPC, OpenTelemetry, and similar cloud-native technologies.
 
 [![Architecture of
 microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
@@ -54,7 +54,7 @@ Find the **gRPC protocol buffer descriptions** in the [`./pb` directory](https:/
   communicate to each other.
 * **[OpenTelemetry](https://opentelemetry.io/) Tracing:** Most services are
   instrumented using OpenTelemetry tracers and interceptors which handle trace context propagation through gRPC and HTTP.
-* **[Cloud Operations APM and SRE](https://cloud.google.com/products/operations):** Many services
+* **[Ops Management APM and SRE](https://cloud.google.com/products/operations):** Many services
   are instrumented with **Profiling**, **Tracing**, **Debugging**, **Monitoring**, **Logging** and **Error Reporting**.
 * **[Skaffold](https://github.com/GoogleContainerTools/skaffold):** A tool used for doing repeatable deployments. You can deploy to Kubernetes with a single command using Skaffold.
 * **Synthetic Load Generation:** The application demo comes with dedicated load generation service that creates realistic usage patterns on Hipster Shop website using

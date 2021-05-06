@@ -195,7 +195,7 @@ This the multi-page printable view of this section.
     
     
 	
-<li>3: <a href="#pg-b9eb58727ba90c74c0a612ad7137b653">Learn Cloud Operations</a></li>
+<li>3: <a href="#pg-b9eb58727ba90c74c0a612ad7137b653">Learn Ops Management</a></li>
 
 
     
@@ -296,13 +296,13 @@ This the multi-page printable view of this section.
 </div>
 
 <h2 id="overview">Overview</h2>
-<p>The Cloud Operations Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the <a href="http://cloud.google.com/products/operations">Cloud Operations</a> (formerly Stackdriver) product suite. Cloud Operations is a suite of tools that helps you gain full observability into your code and applications.</p>
+<p>The Cloud Operations Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the <a href="http://cloud.google.com/products/operations">Ops Management</a> (formerly Stackdriver) product suite. Ops Management is a suite of tools that helps you gain full observability into your code and applications.</p>
 <p>The Hipster Shop application used in the sandbox is intended to be sufficiently complex such that you can meaningfully experiment with it, and the Sandbox automatically provisions a new demo cluster, configures and deploys Hipster Shop, and simulates real users.</p>
-<p>With the Sandbox running, you can experiment with various Cloud Operations tools to solve problems and accomplish standard SRE tasks in a sandboxed environment without impacting your production monitoring setup.</p>
+<p>With the Sandbox running, you can experiment with various Ops Management tools to solve problems and accomplish standard SRE tasks in a sandboxed environment without impacting your production monitoring setup.</p>
 <h2 id="architecture-of-the-hipster-shop-application">Architecture of the Hipster Shop application</h2>
 <p>The Hipster Shop application consists of a number of microservices, written in a variety of languages, that talk to each other over gRPC.</p>
 <p><img src="/docs/images/user-guide/1-architecture.png" alt="image"></p>
-<p><strong>Note:</strong> We are not endorsing this architecture as the best way to build a real online store. This application is optimized for demonstration and learning purposes.  It illustrates a large number of cloud-native technologies, uses a variety of programming languages, and provides an environment that can be explored productively with Cloud Operations tools.</p>
+<p><strong>Note:</strong> We are not endorsing this architecture as the best way to build a real online store. This application is optimized for demonstration and learning purposes.  It illustrates a large number of cloud-native technologies, uses a variety of programming languages, and provides an environment that can be explored productively with Ops Management tools.</p>
 <p>The Git repository you cloned has all the source code, so you can explore the implementation details of the application. See the repository <a href="https://github.com/GoogleCloudPlatform/cloud-ops-sandbox">README</a> for a guided tour.</p>
 <h1 id="prerequisites">Prerequisites</h1>
 <p>You must have an active Google Cloud Platform Billing Account. If you already have one, you can skip this section.</p>
@@ -437,7 +437,7 @@ Click the</p>
 <p>In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you to the Kubernetes Engine (<a href="https://cloud.google.com/kubernetes-engine/docs/">documentation</a>) <strong>Workloads</strong> page for the project created by the installer:</p>
 <p><img src="/docs/images/user-guide/4-cloudconsole.png" alt="image"></p>
 <h2 id="explore-cloud-monitoring">Explore Cloud Monitoring</h2>
-<p>In a new browser tab, navigate to the GCP Monitoring Workspace URL, which takes you to the Cloud Monitoring (<a href="https://cloud.google.com/monitoring">documentation</a>) <strong>Workspace</strong> page for your new project. The console may take some time to create a new workspace. Afterward, you&rsquo;ll be able to see a few dashboards generated through Cloud Operations tools.</p>
+<p>In a new browser tab, navigate to the GCP Monitoring Workspace URL, which takes you to the Cloud Monitoring (<a href="https://cloud.google.com/monitoring">documentation</a>) <strong>Workspace</strong> page for your new project. The console may take some time to create a new workspace. Afterward, you&rsquo;ll be able to see a few dashboards generated through Ops Management tools.</p>
 <p><img src="/docs/images/user-guide/19-gcp-monitoring-overview.png" alt="image"></p>
 <h2 id="shop-like-a-hipster">Shop like a hipster!</h2>
 <p>In a new browser tab, navigate to the Hipster Shop URL, where you can &ldquo;purchase&rdquo; everything you need for your hipster lifestyle using a mock credit card number:</p>
@@ -473,24 +473,24 @@ Click the</p>
 
 <div class="td-content" style="page-break-before: always">
     
-	<h1 id="pg-b9eb58727ba90c74c0a612ad7137b653">3 - Learn Cloud Operations</h1>
+	<h1 id="pg-b9eb58727ba90c74c0a612ad7137b653">3 - Learn Ops Management</h1>
     
-	<h2 id="ops-management-overview">Cloud Operations Overview</h2>
+	<h2 id="ops-management-overview">Ops Management Overview</h2>
 <p>As the cloud-native microservice architecture, which promises scalability and flexibility benefits, gets more popular, developers and administrators need tools that can work across cloud-based distributed systems.</p>
-<p>Cloud Operations provides products for both developers and administrators; this section introduces the products and their general audiences.  The tools are covered in more detail later.</p>
-<p>Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of <strong>Application Performance Management (APM)</strong> has increased. Cloud Operations provides 3 products for APM:</p>
+<p>Ops Management provides products for both developers and administrators; this section introduces the products and their general audiences.  The tools are covered in more detail later.</p>
+<p>Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of <strong>Application Performance Management (APM)</strong> has increased. Ops Management provides 3 products for APM:</p>
 <ul>
 <li>Cloud Trace</li>
 <li>Cloud Profiler</li>
 <li>Cloud Debugger</li>
 </ul>
-<p>Similarly, cloud-native, microservice-based applications complicate traditional approaches used by administrators for monitoring system health: it&rsquo;s harder to observe your system health when the number of instances is flexible and the inter-dependencies among the many components are complicated. In the last few years, <strong>Site Reliability Engineering (SRE)</strong> has become recognized as a practical approach to managing large-scale, highly complex, distributed systems. Cloud Operations provides the following tools that are useful for SRE:</p>
+<p>Similarly, cloud-native, microservice-based applications complicate traditional approaches used by administrators for monitoring system health: it&rsquo;s harder to observe your system health when the number of instances is flexible and the inter-dependencies among the many components are complicated. In the last few years, <strong>Site Reliability Engineering (SRE)</strong> has become recognized as a practical approach to managing large-scale, highly complex, distributed systems. Ops Management provides the following tools that are useful for SRE:</p>
 <ul>
 <li>Cloud Monitoring</li>
 <li>Cloud Logging</li>
 <li>Cloud Error Reporting</li>
 </ul>
-<p>You can find the Cloud Operations products in the navigation panel on the GCP Console:</p>
+<p>You can find the Ops Management products in the navigation panel on the GCP Console:</p>
 <p><img src="/docs/images/user-guide/5-operations-products.png" alt="image"></p>
 
 </div>
