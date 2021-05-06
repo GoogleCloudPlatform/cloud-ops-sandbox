@@ -12,14 +12,14 @@ Ops Management provides products for both developers and administrators; this se
 
 Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of **Application Performance Management (APM)** has increased. Ops Management provides 3 products for APM:
 
--  [Cloud Trace](./cloud_trace)
--  [Cloud Profiler](./cloud_profiler)
+-  [Cloud Trace](./cloud_trace.md)
+-  [Cloud Profiler](./cloud_profiler.md)
 -  [Cloud Debugger](./cloud_debugger.md)
 
 Similarly, cloud-native, microservice-based applications complicate traditional approaches used by administrators for monitoring system health: it's harder to observe your system health when the number of instances is flexible and the inter-dependencies among the many components are complicated. In the last few years, **Site Reliability Engineering (SRE)** has become recognized as a practical approach to managing large-scale, highly complex, distributed systems. Ops Management provides the following tools that are useful for SRE:
 
--  [Cloud Monitoring](./cloud_monitoring)
--  [Cloud Logging](./cloud_logging)
+-  [Cloud Monitoring](./cloud_monitoring.md)
+-  [Cloud Logging](./cloud_logging.md)
 -  [Cloud Error Reporting](./cloud_error_reporting)
 
 You can find the Ops Management products in the navigation panel on the GCP Console:
