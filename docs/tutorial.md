@@ -18,7 +18,9 @@ The Git repository you cloned has all the source code, so you can explore the im
 
 ### Prerequisites
 
-You must have an active Google Cloud Platform Billing Account. If you already have one, you can skip this section.
+If you want to get *read-only* access to an existing sandbox environment - follow [this](https://console.cloud.google.com/?demoId=cloud-ops) link.
+
+In order to create a new sandbox environment, you must have an active Google Cloud Platform Billing Account. If you already have one, you can skip this section.
 
 Otherwise, to create a GCP Billing Account, do the following:
 
@@ -44,6 +46,7 @@ The URLs in this message tell you where to find the results of the installation.
 If a message does **not** appear, and the installation script is not able to run, then try running `sandboxctl create` in your Cloud Shell terminal once you have set-up your billing account.
 
 ### Recovering from session timeout
+
 Should your Cloud Shell session timeout due to user inactivity, you will need to launch the custom Cloud Shell image to access the `sandboxctl` command.
 Click the
 
@@ -51,7 +54,7 @@ Click the
 
 button from the [Cloud Operations Sandbox homepage](https://cloud-ops-sandbox.dev/) to restart the custom Cloud Shell.
 
-## Explore the Sandbox!
+## Explore the Sandbox
 
 In this tutorial, walk through a guided tour of products in Cloud Operations and explore how they can be used to work with an application.
 
@@ -67,26 +70,19 @@ In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you t
 
 Navigate to the GCP Monitoring Workspace URL, which takes you to the [Cloud Monitoring **Workspace** page](https://console.cloud.google.com/monitoring) for your new project. The console may take some time to create a new workspace. Afterward, you'll be able to see a few dashboards generated through Cloud Operations tools.
 
-## Shop like a hipster!
+## Shop like a hipster
 
 In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase" everything you need for your hipster lifestyle using a mock credit card number.
 
 ## Run the load generator
 
-Cloud Ops Sandbox comes with [Locust load generator](https://locust.io/), to simulate users traffic.  
-
-- In another browser tab, navigate to the load-generator URL(from the installation stage if it isn't populated).  
-- Enter the number of **users** and **spawn rate**. For this application, we recommend to test 100 total users with a spawn rate of 2 users per second.  
-- Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't populated.  
-- Click the **Start swarming** button to begin generating traffic to the site.
-
-This will produce traffic on the store from a loadgenerator pod:
+In another browser tab, navigate to the load-generator URL, from which you can simulate users interacting with the application to generate traffic. For this application, values like 100 total users with a spawn rate of 2 users per second are reasonable. Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't pre-populated. Click the **Start swarming** button to begin generating traffic to the site.
 
 ![Locust example](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/raw/master/docs/images/user-guide/3-locust.png "Example of Locust configuration")
 
 From here, you can explore how the application was deployed, and you can use the navigation menu to bring up other GCP tools.
 
-## Learn Cloud Operations 
+## Learn Cloud Operations
 
 ### Cloud Operations Overview
 
@@ -96,15 +92,15 @@ Cloud Operations provides products for both developers and administrators; this 
 
 Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of **Application Performance Management (APM)** has increased. Cloud Operations provides 3 products for APM:
 
--  [Cloud Trace](https://console.cloud.google.com/traces)
--  [Cloud Profiler](https://console.cloud.google.com/profiler)
--  [Cloud Debugger](https://console.cloud.google.com/debug)
+- [Cloud Trace](https://console.cloud.google.com/traces)
+- [Cloud Profiler](https://console.cloud.google.com/profiler)
+- [Cloud Debugger](https://console.cloud.google.com/debug)
 
 Similarly, cloud-native, microservice-based applications complicate traditional approaches used by administrators for monitoring system health: it's harder to observe your system health when the number of instances is flexible and the inter-dependencies among the many components are complicated. In the last few years, **Site Reliability Engineering (SRE)** has become recognized as a practical approach to managing large-scale, highly complex, distributed systems. Cloud Operations provides the following tools that are useful for SRE:
 
--  [Cloud Monitoring](https://console.cloud.google.com/monitoring)
--  [Cloud Logging](https://console.cloud.google.com/logs)
--  [Cloud Error Reporting](https://console.cloud.google.com/errors)
+- [Cloud Monitoring](https://console.cloud.google.com/monitoring)
+- [Cloud Logging](https://console.cloud.google.com/logs)
+- [Cloud Error Reporting](https://console.cloud.google.com/errors)
 
 You can find the Cloud Operations products in the navigation panel on the GCP Console:
 
