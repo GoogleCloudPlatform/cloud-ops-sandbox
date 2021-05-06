@@ -42,7 +42,6 @@ This will produce traffic on the store from a loadgenerator pod:
 ![Locust example](/docs/images/user-guide/3-locust.png)
 
 
-
 You can also run load testing from Cloud Shell using `sandboxctl` command, there are 2 available traffic patterns : 'basic' or 'step'.
 
 ```bash
