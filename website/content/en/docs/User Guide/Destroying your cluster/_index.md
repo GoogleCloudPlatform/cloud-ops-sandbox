@@ -12,3 +12,4 @@ $ sandboxctl destroy
 ```
 
 This script destroys the current Cloud Operations Sandbox project. If `sandboxctl create` were run again, a Cloud Operations Sandbox project with a new project id would be created.
+**Note:** This script destroys the current project. If `sandboxctl create` were run again, a Sandbox project with a new project id would be created.

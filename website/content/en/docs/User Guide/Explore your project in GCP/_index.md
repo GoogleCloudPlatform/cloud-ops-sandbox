@@ -42,14 +42,14 @@ This will produce traffic on the store from a loadgenerator pod:
 ![Locust example](/docs/images/user-guide/3-locust.png)
 
 
-
-You can also run load testing from Cloud Shell using `sandboxctl` command, there are 2 available traffic patterns : 'basic' or 'step'
+You can also run load testing from Cloud Shell using `sandboxctl` command, there are 2 available traffic patterns : 'basic' or 'step'.
 
 ```bash
 sandboxctl loadgen <traffic_pattern>
 ```
 
-A step load shape will increase user traffic in every step for the entire test duration([current settings](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/src/loadgenerator/locust-tasks)).
+For the entire `step test` duration ([current settings](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/src/loadgenerator/locust-tasks)), a load generator will generate step-shaped load profiles in the user traffic.
+
 ```bash
 sandboxctl loadgen step
 ```
