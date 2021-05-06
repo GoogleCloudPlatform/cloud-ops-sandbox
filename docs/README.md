@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Cloud Operations Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the [Cloud Operations](http://cloud.google.com/products/operations) (formerly Stackdriver) product suite. Cloud Operationsis a suite of tools that helps you gain full observability into your code and applications.
+The Cloud Operations Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the [Cloud Operations](http://cloud.google.com/products/operations) (formerly Stackdriver) product suite. Cloud Operations is a suite of tools that helps you gain full observability into your code and applications.
 
 The Hipster Shop application used in the sandbox is intended to be sufficiently complex such that you can meaningfully experiment with it, and the Sandbox automatically provisions a new demo cluster, configures and deploys Hipster Shop, and simulates real users.
 
@@ -90,7 +90,7 @@ In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you t
 
 ## Explore Cloud Monitoring
 
-In a new browser tab, navigate to the GCP Monitoring Workspace URL, which takes you to the Cloud Monitoring ([documentation](https://cloud.google.com/monitoring)) **Workspace** page for your new project. The console may take some time to create a new workspace. Afterward, you'll be able to see a few dashboards generated through Cloud Operationstools.
+In a new browser tab, navigate to the GCP Monitoring Workspace URL, which takes you to the Cloud Monitoring ([documentation](https://cloud.google.com/monitoring)) **Workspace** page for your new project. The console may take some time to create a new workspace. Afterward, you'll be able to see a few dashboards generated through Cloud Operations tools.
 
 ![image](./images/user-guide/19-gcp-monitoring-overview.png)
 
@@ -103,7 +103,7 @@ In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase"
 ## Run the load generator
 Cloud Ops Sandbox comes with [Locust load generator](https://locust.io/), to simulate users traffic.  
 
-- In another browser tab, navigate to the load-generator URL(from the installation stage if it isn't populated).  
+- In another browser tab, navigate to the load-generator URL (from the installation stage if it isn't populated).  
 - Enter the number of **users** and **spawn rate**. For this application, we recommend to test 100 total users with a spawn rate of 2 users per second.  
 - Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't populated.  
 - Click the **Start swarming** button to begin generating traffic to the site.
@@ -120,7 +120,7 @@ From here, you can explore how the application was deployed, and you can use the
 
 As the cloud-native microservice architecture, which promises scalability and flexibility benefits, gets more popular, developers and administrators need tools that can work across cloud-based distributed systems.
 
-Cloud Operations provides products for both developers and administrators; this section introduces the products and their general audiences.  The tools are covered in more detail later.
+Cloud Operations provides products for both developers and administrators, this section introduces the products and their general audiences.  The tools are covered in more detail later.
 
 Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of **Application Performance Management (APM)** has increased. Cloud Operations provides 3 products for APM:
 
@@ -326,9 +326,7 @@ This chart uses the  metric type `custom.googleapis.com/opencensus/ grpc.io/clie
 
 ##### Monitoring and logs-based metrics
 
-Cloud Logging lets you define metrics based on information in structured logs. For example, you can count the number of log entries containing a particular message or extract latency info from log records. These "logs-based metrics" can then be charted with Cloud Monitoring. For details, see ["Using logs-based metrics"](https://cloud.google.com/logging/docs/logs-based-metrics/).
-
-Cloud Logging defines some logs-based metrics, but you can also create your own. To see the available metrics, select **Logging> Logs-based metrics** from the navigation panel. You see a summary of the system-provided and user-defined logs-based metrics:
+Cloud Logging provides default, logs-based system metrics, but you can also create your own (see [Using logs-based metrics](https://cloud.google.com/logging/docs/logs-based-metrics/)). To see available metrics, select **Logging > Logs-based metrics** from the navigation panel. You should see both system metrics and some user-defined, logs-based metrics created in Sandbox.
 
 ![image](./images/user-guide/22-lbms.png)
 
@@ -370,7 +368,7 @@ Search for the metric type using the name you gave it ("purchasing_counter_metri
 
 #### Logging Overview
 
-On detecting unusual symptoms in the charts, operators can look into [Cloud Logging](https://console.cloud.google.com/logs)([documentation](https://cloud.google.com/logging/docs/)) to find clues of it in the log messages. Filtering lets you identify relevant logs, and logs can be exported from Cloud Logging to "sinks" for long-term storage.
+Operators can look at [logs](https://console.cloud.google.com/logs) in [Cloud Logging](https://cloud.google.com/logging/docs/) to find clues explaining any anomalies in the metrics charts. 
 
 #### Using Logging
 
@@ -419,7 +417,7 @@ Click **Create Sink**. Then follow the prompts to create a new storage bucket an
 
 #### Error Reporting Overview
 
-[Cloud Error Reporting](https://console.cloud.google.com/errors) ([documentation](https://cloud.google.com/error-reporting/docs/)) automatically groups errors depending on the stack trace message patterns and shows the frequency of each error groups. The error groups are generated automatically, based on stack traces.
+[Cloud Error Reporting](https://console.cloud.google.com/errors) ([documentation](https://cloud.google.com/error-reporting/docs/)) automatically groups errors depending on stack trace message patterns and shows the frequency of each error group. The error groups are generated automatically, based on stack traces.
 
 On opening an error group report, operators can access to the exact line in the application code where the error occurred and reason about the cause by navigating to the line of the source code on Google Cloud Source Repository. 
 

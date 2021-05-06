@@ -35,9 +35,7 @@ This chart uses the  metric type `custom.googleapis.com/opencensus/ grpc.io/clie
 
 ##### Monitoring and logs-based metrics
 
-Cloud Logging lets you define metrics based on information in structured logs. For example, you can count the number of log entries containing a particular message or extract latency info from log records. These "logs-based metrics" can then be charted with Cloud Monitoring. For details, see ["Using logs-based metrics"](https://cloud.google.com/logging/docs/logs-based-metrics/).
-
-Cloud Logging defines some logs-based metrics, but you can also create your own. To see the available metrics, select **Logging> Logs-based metrics** from the navigation panel. You see a summary of the system-provided and user-defined logs-based metrics:
+Cloud Logging provides default, logs-based system metrics, but you can also create your own (see [Using logs-based metrics](https://cloud.google.com/logging/docs/logs-based-metrics/)). To see available metrics, select **Logging > Logs-based metrics** from the navigation panel. You should see both system metrics and some user-defined, logs-based metrics created in Sandbox.
 
 ![image](/docs/images/user-guide/22-lbms.png)
 
