@@ -53,7 +53,7 @@ class TestGKECluster(unittest.TestCase):
         client = cluster_manager.ClusterManagerClient()
         cluster_info = client.get_cluster(name=TestGKECluster.name)
         node_count = cluster_info.current_node_count
-        self.assertTrue(node_count == 4)
+        self.assertTrue(node_count == 3)
 
     def testStatusOfServices(self):
         """ Test if all the service deployments are ready """
