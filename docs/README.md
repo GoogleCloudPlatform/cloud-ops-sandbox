@@ -6,7 +6,7 @@ The Cloud Operations Sandbox is intended to make it easy for you to deploy and r
 
 The Hipster Shop application used in the sandbox is intended to be sufficiently complex such that you can meaningfully experiment with it, and the Sandbox automatically provisions a new demo cluster, configures and deploys Hipster Shop, and simulates real users.
 
-With the Sandbox running, you can experiment with various Cloud Operationstools to solve problems and accomplish standard SRE tasks in a sandboxed environment without impacting your production monitoring setup.
+With the Sandbox running, you can experiment with various Cloud Operations tools to solve problems and accomplish standard SRE tasks in a sandboxed environment without impacting your production monitoring setup.
 
 ## Architecture of the Hipster Shop application
 
