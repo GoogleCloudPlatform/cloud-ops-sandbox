@@ -92,3 +92,11 @@ gcloud projects delete $YOUR_PROJECT_ID
 ```
 
 * Delete your project through Google Cloud Console's [Resource Manager web interface](https://console.cloud.google.com/cloud-resource-manager)
+
+## For Developers
+
+If you are a developer and want to contribute to the Sandbox, you can refer to [CONTIBUTING.md](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/master/CONTRIBUTING.md).
+
+---
+
+This is not an official Google project.

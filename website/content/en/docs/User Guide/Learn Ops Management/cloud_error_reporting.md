@@ -11,7 +11,7 @@ weight: 90
 
 #### Error Reporting Overview
 
-[Cloud Error Reporting](https://console.cloud.google.com/errors) ([documentation](https://cloud.google.com/error-reporting/docs/)) automatically groups errors depending on the stack trace message patterns and shows the frequency of each error groups. The error groups are generated automatically, based on stack traces.
+[Cloud Error Reporting](https://console.cloud.google.com/errors)([documentation](https://cloud.google.com/error-reporting/docs/)) automatically groups errors depending on stack trace message patterns and shows the frequency of each error group. The error groups are generated automatically, based on stack traces.
 On opening an error group report, operators can access to the exact line in the application code where the error occurred and reason about the cause by navigating to the line of the source code on Google Cloud Source Repository. 
 
 #### Using Error Reporting

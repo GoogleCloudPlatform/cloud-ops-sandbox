@@ -14,7 +14,7 @@ weight: 80
 
 #### Logging Overview
 
-On detecting unusual symptoms in the charts, operators can look into Cloud Logging ([documentation](https://cloud.google.com/logging/docs/)) to find clues of it in the log messages. Filtering lets you identify relevant logs, and logs can be exported from Cloud Logging to "sinks" for long-term storage.
+Operators can look at [logs](https://console.cloud.google.com/logs) in [Cloud Logging](https://cloud.google.com/logging/docs/) to find clues explaining any anomalies in the metrics charts. 
 
 #### Using Logging
 

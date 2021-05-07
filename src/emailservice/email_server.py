@@ -43,13 +43,16 @@ import googlecloudprofiler
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
 
-# try:
-#     googleclouddebugger.enable(
-#         module='emailserver',
-#         version='1.0.0'
-#     )
-# except:
-#     pass
+try:
+    import googleclouddebugger
+    googleclouddebugger.enable(
+        module='emailserver',
+        version='1.0.0'
+    )
+except ImportError:
+    logger.error("could not enable debugger")
+    logger.error(traceback.print_exc())
+    pass
 
 # Loads confirmation email template from file
 env = Environment(
