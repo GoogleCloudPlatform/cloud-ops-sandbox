@@ -1,4 +1,5 @@
 google-api-core==1.26.3
+google-python-cloud-debugger==2.15
 grpcio-health-checking==1.30.0
 grpcio==1.36.1
 jinja2==2.11.3
