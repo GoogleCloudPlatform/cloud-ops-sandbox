@@ -25,7 +25,7 @@ There are many pre-built monitoring pages. For example, the GKE Cluster Details 
 
 ![image](/docs/images/user-guide/20-monitoring-dashboards-kubernetes.png)
 
-You can also use the Monitoring console to create alerts and uptime checks, and to create dashboards that chart metrics you are interested in.  For example, Metrics Explorer lets you select a specific metric, configure it for charting, and then save the chart. Select **Monitoring > Metrics Explorer** from the navigation panel to bring it up.
+You can also use the Monitoring console to create alerts and uptime checks, and to create dashboards that chart metrics you are interested in. For example, Metrics Explorer lets you select a specific metric, configure it for charting, and then save the chart. Select **Monitoring > Metrics Explorer** from the navigation panel to bring it up.
 
 To search and view metrics, type the name of the metric or the type of resource, for example to search [OpenCensus metrics](https://cloud-ops-sandbox.dev/docs/user-guide/#opencensus-to-become-opentelemetry) in the **Monitoring > Metrics Explorer > ** search for `grpc.io`:
 
@@ -35,7 +35,7 @@ The following chart shows the client-side RPC calls that did not result in an OK
 
 ![image](/docs/images/user-guide/21-metrics-explorer.png)
 
-This chart uses the  metric type `custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs` (display name: "OpenCensus/grpc.io/client/completed_rpcs" ), and filters on the `grpc_client_status` label to keep only those time series where the label's value equal "OK".
+This chart uses the metric type `custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs` (display name: "OpenCensus/grpc.io/client/completed_rpcs" ), and filters on the `grpc_client_status` label to only keep time series where the label value equals "OK".
 
 The following example displays results where the `grpc_client_status` is not "OK" (e.g. PERMISSION_DENIED) and where the `grpc_client_method` does not include "google", i.e. errors from application services.
 
@@ -56,7 +56,7 @@ Cloud Logging defines some logs-based metrics, but you can also create your own.
 
 ![image](/docs/images/user-guide/22-lbms.png)
 
-All system-defined logs-based metrics are counters.  User-defined logs-based metrics can be either counter or distribution metrics.
+All system-defined logs-based metrics are counters. User-defined logs-based metrics can be either counter or distribution metrics.
 
 ##### Creating a logs-based metric
 
@@ -67,7 +67,7 @@ Creating a logs-based metric involves two general steps:
 1. Identifying the set of log entries you want to use as the source of data for your entry by using the Logs Viewer. Using the Logs Viewer is briefly described in the **Cloud Logging** section of this document.
 2. Describing the metric data to extract from these log entries by using the Metric Editor.
 
-This example creates a logs-based metric that counts the number of times a user (user ID, actually) adds an item to the HipsterShop cart.  (This is an admittedly trivial example, though it could be extended. For example, from this same set of records, you can extract the user ID, item, and quantity added.)
+This example creates a logs-based metric that counts the number of times a user (user ID, actually) adds an item to the HipsterShop cart. (This is an admittedly trivial example, though it could be extended. For example, from this same set of records, you can extract the user ID, item, and quantity added.)
 
 First, create a logs query that finds the relevant set of log entries:
 
