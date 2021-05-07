@@ -9,7 +9,6 @@ weight: 30
 As the cloud-native microservice architecture, which promises scalability and flexibility benefits, gets more popular, developers and administrators need tools that can work across cloud-based distributed systems.
 
 Cloud Operations provides products for both developers and administrators, this section introduces the products and their general audiences.  The tools are covered in more detail later.
-
 Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of **Application Performance Management (APM)** has increased. Cloud Operations provides 3 products for APM:
 
 -  [Cloud Trace](./cloud_trace.md)
