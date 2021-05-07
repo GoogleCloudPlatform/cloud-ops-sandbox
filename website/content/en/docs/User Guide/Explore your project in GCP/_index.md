@@ -32,7 +32,7 @@ In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase"
 ## Run the load generator
 Cloud Ops Sandbox comes with [Locust load generator](https://locust.io/), to simulate users traffic.  
 
-- In another browser tab, navigate to the load-generator URL(from the installation stage if it isn't populated).  
+- In another browser tab, navigate to the load-generator URL (from the installation stage if it isn't populated).  
 - Enter the number of **users** and **spawn rate**. For this application, we recommend to test 100 total users with a spawn rate of 2 users per second.  
 - Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't populated.  
 - Click the **Start swarming** button to begin generating traffic to the site.
