@@ -31,19 +31,19 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
-	money "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money"
+	pb "github.com/GoogleCloudPlatform/cloud-ops-sandbox/src/checkoutservice/genproto"
+	money "github.com/GoogleCloudPlatform/cloud-ops-sandbox/src/checkoutservice/money"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	// OpenTelemetry
 	// OTel traces -> GCP Trace direct exporter
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
-	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/standard"
-	"go.opentelemetry.io/otel/instrumentation/grpctrace"
-	apitrace "go.opentelemetry.io/otel/api/trace"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/semconv"
+	apitrace "go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -71,20 +71,22 @@ type checkoutService struct {
 	productCatalogSvcAddr string
 	productCatalogSvcConn *grpc.ClientConn
 
-	cartSvcAddr           string
+	cartSvcAddr string
 	cartSvcConn *grpc.ClientConn
 
-	currencySvcAddr       string
+	currencySvcAddr string
 	currencySvcConn *grpc.ClientConn
 
-	shippingSvcAddr       string
+	shippingSvcAddr string
 	shippingSvcConn *grpc.ClientConn
 
-	emailSvcAddr          string
+	emailSvcAddr string
 	emailSvcConn *grpc.ClientConn
 
-	paymentSvcAddr        string
+	paymentSvcAddr string
 	paymentSvcConn *grpc.ClientConn
+
+	pb.UnimplementedCheckoutServiceServer
 }
 
 func main() {
@@ -119,11 +121,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	intercepterOpt := otelgrpc.WithTracerProvider(otel.GetTracerProvider())
 	srv := grpc.NewServer(
 		grpc.StatsHandler(&ocgrpc.ServerHandler{}), // TODO: replace with OTel grpc metrics collector
 		// OpenTelemetry gRPC server channel interceptors receive trace contexts from clients.
-		grpc.UnaryInterceptor(grpctrace.UnaryServerInterceptor(global.TraceProvider().Tracer("checkout"))),
-		grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(global.TraceProvider().Tracer("checkout"))),
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor(intercepterOpt)),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor(intercepterOpt)),
 	)
 	pb.RegisterCheckoutServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
@@ -178,21 +181,17 @@ func initTraceProvider() {
 			// This is a demo app with low QPS. AlwaysSample() is used here
 			// to make sure traces are available for observation and analysis.
 			// It should not be used in production environments.
-			tp, err := sdktrace.NewProvider(sdktrace.WithConfig(
-				sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+			tp := sdktrace.NewTracerProvider(
+				sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 				sdktrace.WithSyncer(exporter),
-				// TODO: replace with predefined constant for GKE or autodetection when available
-				sdktrace.WithResource(resource.New(standard.ServiceNameKey.String("GKE"))))
-			if err == nil {
-				log.Info("initialized trace provider")
-				global.SetTraceProvider(tp)
-				return
-			} else {
-				d := time.Second * 10 * time.Duration(i)
-				log.Infof("sleeping %v to retry initializing trace provider", d)
-				time.Sleep(d)
-			}
+				sdktrace.WithResource(resource.NewWithAttributes(semconv.ServiceNameKey.String("GKE"))))
+			log.Info("initialized trace provider")
+			otel.SetTracerProvider(tp)
+			return
 		}
+		d := time.Second * 10 * time.Duration(i)
+		log.Infof("sleeping %v to retry initializing Stackdriver exporter", d)
+		time.Sleep(d)
 	}
 	log.Warn("failed to initialize trace provider")
 }
@@ -231,10 +230,14 @@ func (cs *checkoutService) Check(ctx context.Context, req *healthpb.HealthCheckR
 	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
 
+func (cs *checkoutService) Watch(req *healthpb.HealthCheckRequest, server healthpb.Health_WatchServer) error {
+	return nil
+}
+
 // Acting as gRPC server, handling PlaceOrder request from Frontend.
 func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderRequest) (*pb.PlaceOrderResponse, error) {
 	span := apitrace.SpanFromContext(ctx)
-	span.AddEvent(ctx, fmt.Sprintf("Place Order for user %q", req.UserId))
+	span.AddEvent(fmt.Sprintf("Place Order for user %q", req.UserId))
 	log.Infof("[PlaceOrder] user_id=%q user_currency=%q", req.UserId, req.UserCurrency)
 
 	orderID, err := uuid.NewUUID()
@@ -243,7 +246,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	}
 
 	// Dispatch subtasks (as gRPC client)
-	span.AddEvent(ctx, "Prepare Items from Cart")
+	span.AddEvent("Prepare Items from Cart")
 	prep, err := cs.prepareOrderItemsAndShippingQuoteFromCart(ctx, req.UserId, req.UserCurrency, req.Address)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
@@ -257,20 +260,20 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		total = money.Must(money.Sum(total, *it.Cost))
 	}
 
-	span.AddEvent(ctx, "Charge Credit Card")
+	span.AddEvent("Charge Credit Card")
 	txID, err := cs.chargeCard(ctx, &total, req.CreditCard)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to charge card: %+v", err)
 	}
 	log.Infof("payment went through (transaction_id: %s)", txID)
 
-	span.AddEvent(ctx, "Prepare Shipment")
+	span.AddEvent("Prepare Shipment")
 	shippingTrackingID, err := cs.shipOrder(ctx, req.Address, prep.cartItems)
 	if err != nil {
 		return nil, status.Errorf(codes.Unavailable, "shipping error: %+v", err)
 	}
 
-	span.AddEvent(ctx, "Empty Cart")
+	span.AddEvent("Empty Cart")
 	_ = cs.emptyUserCart(ctx, req.UserId)
 
 	orderResult := &pb.OrderResult{
@@ -281,7 +284,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		Items:              prep.orderItems,
 	}
 
-	span.AddEvent(ctx, "Send Confirmation Email")
+	span.AddEvent("Send Confirmation Email")
 	if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {
 		log.Warnf("failed to send order confirmation to %q: %+v", req.Email, err)
 	} else {
@@ -362,7 +365,7 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 		if err != nil {
 			return nil, fmt.Errorf("failed to get product #%q", item.GetProductId())
 		}
-		// Note: This log line is used in a log-based metric. Changes to the log line will not be compatible with the metric. 
+		// Note: This log line is used in a log-based metric. Changes to the log line will not be compatible with the metric.
 		log.Infof("orderedItem=%q, id=%q", product.Name, product.Id)
 		price, err := cs.convertCurrency(ctx, product.GetPriceUsd(), userCurrency)
 		if err != nil {
@@ -418,13 +421,15 @@ func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, i
 // Helper function for gRPC connections: Dial and create client once, reuse.
 func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	var err error
+	tp := otel.GetTracerProvider()
+	intercepterOpt := otelgrpc.WithTracerProvider(tp)
 	*conn, err = grpc.DialContext(ctx, addr,
 		grpc.WithInsecure(),
 		grpc.WithTimeout(time.Second*3),
 		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}), // TODO: replace with OTel grpc metrics collector
 		// OpenTelemetry gRPC client channel interceptors pass trace contexts to the server.
-		grpc.WithUnaryInterceptor(grpctrace.UnaryClientInterceptor(global.TraceProvider().Tracer("checkout"))),
-		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(global.TraceProvider().Tracer("checkout"))))
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor(intercepterOpt)),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor(intercepterOpt)))
 	if err != nil {
 		panic(fmt.Sprintf("Error %s grpc: failed to connect %s", err, addr))
 	}
