@@ -35,7 +35,7 @@ pyparsing==2.4.7          # via httplib2, packaging
 python-json-logger==0.1.11  # via -r requirements.in
 pytz==2018.9              # via google-api-core
 requests==2.24.0          # via -r requirements.in, google-api-core, google-cloud-profiler
-rsa==4.6                  # via google-auth
+rsa==4.7                  # via google-auth
 six==1.15.0               # via google-api-core, google-api-python-client, google-auth, google-auth-httplib2, google-cloud-core, grpcio, protobuf
 uritemplate==3.0.1        # via google-api-python-client
 urllib3==1.25.10          # via requests
