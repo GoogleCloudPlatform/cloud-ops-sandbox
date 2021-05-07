@@ -255,6 +255,24 @@ footer p {
   width: 180px;
 }
 
+.btn {
+  background: #fff;
+  color: var(--grey700);
+  border: 1px solid var(--grey400);
+  border-radius: 8px;
+  margin: 1em 0;
+  padding: .25em .75em;
+  text-decoration: none;
+  font-family: 'Google Sans Display', Arial, sans-serif;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+}
+
 .github-btn::after {
   content: '';
   display: inline-block;
