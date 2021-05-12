@@ -81,7 +81,7 @@ You can [configure your own SLIs and SLOs](https://cloud.google.com/stackdriver/
 
 #### Configure Burn Rate Alerts
 
-After you create the SLO, you can create[Burn Rate Alerts](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate)for those.
+After you create the SLO, you can create [Burn Rate Alerts](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate)for those.
 
 Several *predefined policies* are deployed as part of [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/master/terraform/monitoring/05_alerting_policies.tf). You can view them in the service screen, edit them, or [create your own](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate).
 
