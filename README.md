@@ -10,7 +10,7 @@ Sandbox offers:
 * **Demo Service** - an application built using microservices architecture on modern, cloud-native stack.
 * **One-click deployment**  - a script handles the work of deploying the service to Google Cloud Platform.
 * **Load Generator** - a component that produces synthetic traffic on a demo service.
-* (Soon) **SRE Runbook** - pre-built routine procedures for operating the deployed sample service that follow best SRE practices using Ops Management.
+* (Soon) **SRE Runbook** - pre-built routine procedures for operating the deployed sample service that follow best SRE practices using Cloud Operations.
 
 ## Why Sandbox
 
