@@ -2,7 +2,7 @@
 
 ![Continuous Integration](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/workflows/Continuous%20Integration/badge.svg)
 
-Cloud Operations Sandbox is an open-source tool that helps practitioners to learn Service Reliability Engineering practices from Google and apply them on their cloud services using [Ops Management](https://cloud.google.com/products/operations) (formerly Stackdriver).
+Cloud Operations Sandbox is an open-source tool that helps practitioners to learn Service Reliability Engineering practices from Google and apply them on their cloud services using [Cloud Operations](https://cloud.google.com/products/operations) (formerly Stackdriver).
 It is based on [Hipster Shop](https://github.com/GoogleCloudPlatform/microservices-demo), a cloud-native microservices application.
 
 Sandbox offers:
@@ -10,14 +10,14 @@ Sandbox offers:
 * **Demo Service** - an application built using microservices architecture on modern, cloud-native stack.
 * **One-click deployment**  - a script handles the work of deploying the service to Google Cloud Platform.
 * **Load Generator** - a component that produces synthetic traffic on a demo service.
-* (Soon) **SRE Runbook** - pre-built routine procedures for operating the deployed sample service that follow best SRE practices using Ops Management.
+* (Soon) **SRE Runbook** - pre-built routine procedures for operating the deployed sample service that follow best SRE practices using Cloud Operations.
 
 ## Why Sandbox
 
-Google Cloud Ops Management is a suite of tools that helps you gain full observability of your code and applications.
-You might want to take Ops Management to a "test drive" in order to answer the question, "will it work for my application needs"?
+Google Cloud Operations Suite is a suite of tools that helps you gain full observability of your code and applications.
+You might want to take Cloud Operations to a "test drive" in order to answer the question, "will it work for my application needs"?
 The most effective way to learn is by testing the tool in "real-life" conditions, but without risking a production system.
-With Sandbox, we provide a tool that automatically provisions a new demo cluster, which receives traffic, simulating real users. Practicioners can experiment with various Ops Management tools to solve problems and accomplish standard SRE tasks in a sandboxed environment.
+With Sandbox, we provide a tool that automatically provisions a new demo cluster, which receives traffic, simulating real users. Practitioners can experiment with various Cloud Operations tools to solve problems and accomplish standard SRE tasks in a sandboxed environment.
 
 ## Getting Started
 
@@ -84,7 +84,7 @@ It is a web-based e-commerce app called **“Hipster Shop”**, where users can 
 **Hipster Shop** is composed of many microservices, written in different languages, that talk to each other over gRPC and REST API.
 >**We are not endorsing the architecture of Hipster Shop as the best way to build such a shop!**
 > The architecture is optimized for learning purposes and includes modern stack: Kubernetes, GKE, Istio,
-> Ops Management, App Engine, gRPC, OpenTelemetry, and similar cloud-native technologies.
+> Cloud Operations, App Engine, gRPC, OpenTelemetry, and similar cloud-native technologies.
 
 [![Architecture of
 microservices](./docs/img/architecture-diagram.png)](./docs/img/architecture-diagram.png)
@@ -114,7 +114,7 @@ Find the **gRPC protocol buffer descriptions** in the [`./pb` directory](./pb).
   communicate to each other.
 * **[OpenTelemetry](https://opentelemetry.io/) Tracing:** Most services are
   instrumented using OpenTelemetry tracers and interceptors which handle trace context propagation through gRPC and HTTP.
-* **[Ops Management APM and SRE](https://cloud.google.com/products/operations):** Many services
+* **[Cloud Operations APM and SRE](https://cloud.google.com/products/operations):** Many services
   are instrumented with **Profiling**, **Tracing**, **Debugging**, **Monitoring**, **Logging** and **Error Reporting**.
 * **[Skaffold](https://github.com/GoogleContainerTools/skaffold):** A tool used for doing repeatable deployments. You can deploy to Kubernetes with a single command using Skaffold.
 * **Synthetic Load Generation:** The application demo comes with dedicated load generation service that creates realistic usage patterns on Hipster Shop website using
