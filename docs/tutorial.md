@@ -50,7 +50,7 @@ button from the [Cloud Operations Sandbox homepage](https://cloud-ops-sandbox.de
 ## Explore the Sandbox!
 
 Cloud Operations Sandbox comes with several capabilities out-of-the-box, in this tutorial, we walk through a guided tour of products in Cloud Operations and explore how they can be used to work with an application.
-For additional information please refer to the [User Guide](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/master/docs/README.md).
+For additional information please refer to the [User Guide](https://cloud-ops-sandbox.dev/docs/).
 
 Let's get started!
 
