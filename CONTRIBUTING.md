@@ -103,7 +103,7 @@ gcloud services enable container.googleapis.com
 
 gcloud container clusters create demo --zone=us-central1-a \
     --machine-type=n1-standard-2 \
-    --num-nodes=4 \
+    --num-nodes=2 \
     --enable-stackdriver-kubernetes \
     --scopes https://www.googleapis.com/auth/cloud-platform
 
