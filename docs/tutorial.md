@@ -56,13 +56,13 @@ Let's get started!
 
 ### Explore your project in GCP
 
-In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you to the Kubernetes Engine ([documentation](https://cloud.google.com/kubernetes-engine/docs/)) **Workloads** page for the project created by the installer.
+In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you to the [Kubernetes Engine **Workloads** page](https://console.cloud.google.com/kubernetes/workload) for the project created by the installer ([documentation](https://cloud.google.com/kubernetes-engine/docs/)).
 
 ### Shop like a hipster!
 
 In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase" everything you need for your hipster lifestyle using a mock credit card number.
 
-## Run the load generator
+### Run the load generator
 
 Cloud Ops Sandbox comes with [Locust load generator](https://locust.io/), to simulate users traffic.  
 
