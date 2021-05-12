@@ -32,8 +32,8 @@ __Note__: If installation stops due to billing account errors, set up the billin
 ### Next Steps
 
 * Explore your Sandbox deployment and its [architecture](#Service-Overview)
-* Follow the [User Guide](/docs/README.md) to start using Ops Management
-* Learn more about Ops Management using [Code Labs](https://codelabs.developers.google.com/s/results?q=Monitoring)
+* Follow the User Guide to start using [Cloud Operations](https://cloud-ops-sandbox.dev/docs/user-guide/learn-cloud-learn-cloud-operations/)
+* Learn more about Cloud Operations using [Code Labs](https://codelabs.developers.google.com/s/results?q=Monitoring)
 
 ### Clean Up
 
@@ -52,3 +52,11 @@ gcloud projects delete $YOUR_PROJECT_ID
 ```
 
 * Delete your project through Google Cloud Console's [Resource Manager web interface](https://console.cloud.google.com/cloud-resource-manager)
+
+## For Developers
+
+If you are a developer and want to contribute to the Sandbox, you can refer to [CONTIBUTING.md](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/master/CONTRIBUTING.md).
+
+---
+
+This is not an official Google project.
