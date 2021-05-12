@@ -35,7 +35,6 @@ __Note__: If installation stops due to billing account errors, set up the billin
 * Follow the User Guide to start using [Cloud Operations](https://cloud-ops-sandbox.dev/docs/user-guide/learn-cloud-learn-cloud-operations/)
 * Learn more about Cloud Operations using [Code Labs](https://codelabs.developers.google.com/s/results?q=Monitoring)
 
-
 ### SRE Recipes
 
 SRE Recipes is our [Chaos Engineering](https://en.wikipedia.org/wiki/Chaos_engineering) tool to test your sandbox environment. It helps users to familiarize themselves with finding the root cause of a breakage using Cloud Operations suite of tools.  
