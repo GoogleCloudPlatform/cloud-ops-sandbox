@@ -197,17 +197,10 @@ You can find all the services under [monitoring → services → Services Overvi
 
 ### Services SLOs  
 
-To view, edit or create SLOs for a service you need to go to the service page:
-![image](./images/user-guide/36-checkoutservice-overview.png)
+To view, edit or create SLOs for a service you need to go to the service page, for additional information refer to the [User Guide.](https://cloud-ops-sandbox.dev/docs/)
+> The *predefined SLOs* are also deployed as part of [Terraform code](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring/04_slos.tf) and currently are for the mentioned custom services, the Istio service and Rating service.  
 
-The *predefined SLOs* are also deployed as part of [Terraform code](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring/04_slos.tf) and currently are for the mentioned custom services, the Istio service and Rating service.  
-
-*For example for checkoutservice*:
-
-![image](./images/user-guide/47-choose-checkout-custom-service.png =250x)
-
-![image](./images/user-guide/36-checkoutservice-overview.png)
-
+![Services example](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/raw/master/docs/images/user-guide/37-services-overview.png "Example of Cloud Operations Services")
 
 ### Configure your own SLIs and SLOs
 
@@ -215,30 +208,22 @@ You can [configure your own SLIs and SLOs](https://cloud.google.com/stackdriver/
 
 > **Remember**  Our scope to examine and measure our users' happiness is User journey, so in order to create the SLO you need to identify the most important ones to the business. Then we want to *identify the metrics* that are closest to the customer experience and ingest that data.  
 
-#### Checkout auto-defined Istio service example:
-1. In the service screen we will choose Create SLO:
-![image](./images/user-guide/39-checkout-service.png )
-2.Then we will set our SLI, we need to choose SLI type and the method(request vs window based):
-![image](./images/user-guide/42-checkoutservice-sli.png)
-3. Then we wil define our metric and we can also preview it's performance based on historical data:
-![image](./images/user-guide/41-checkoutservice-define-sli.png)
-4. Then we will configure our SLO, our target in a specific time window. We can also choose between [rolling window or a calendar window](https://sre.google/workbook/implementing-slos/):
-![image](./images/user-guide/43-set-slo.png)
+1. In the service screen we will choose Create SLO
+2.Then we will set our SLI, we need to choose SLI type and the method(request vs window based)
+3. Then we wil define our metric and we can also preview it's performance based on historical data
+4. Then we will configure our SLO, our target in a specific time window. We can also choose between [rolling window or a calendar window](https://sre.google/workbook/implementing-slos/)
 
-#### Configure Burn Rate Alerts
+### Configure Burn Rate Alerts
 
 After you created the SLO, you can create [Burn Rate Alerts](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate) for those.
 
 > There are also several *predefined polices* are deployed as part of [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/master/terraform/monitoring/05_alerting_policies.tf). You can view or edit them in the service screen.
 
 5. In the service screen we will be able to see our new SLO and we will choose 'Create Alerting Policy'
-![image](./images/user-guide/46-crete-slo-burn-alert.png)
+6. Then we will want to set the alert's condition, who and how they will be notified and additional instructions
+7. After it will be created you could see it and incidents that might be triggered due to it in teh service screen and in the Alerting screen
 
-6. Then we will want to set the alert's condition, who and how they will be notified and additional instructions:  
-![image](./images/user-guide/44-set-slo-burn-alert.png)
-
-7. After it will be created you could see it and incidents that might be triggered due to it in teh service screen and in the Alerting screen:
-![image](./images/user-guide/45-burn-rate-final.png)
+For additional information refer to the [User Guide.](https://cloud-ops-sandbox.dev/docs/user-guide)
 
 ## SRE Recipes
 
