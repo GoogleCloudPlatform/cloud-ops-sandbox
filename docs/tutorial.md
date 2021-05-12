@@ -209,8 +209,8 @@ You can [configure your own SLIs and SLOs](https://cloud.google.com/stackdriver/
 > **Remember**  Our scope to examine and measure our users' happiness is User journey, so in order to create the SLO you need to identify the most important ones to the business. Then we want to *identify the metrics* that are closest to the customer experience and ingest that data.  
 
 1. In the service screen we will choose Create SLO
-2.Then we will set our SLI, we need to choose SLI type and the method(request vs window based)
-3. Then we wil define our metric and we can also preview it's performance based on historical data
+2. Then we will set our SLI, we need to choose SLI type and the method(request vs window based)
+3. Then we wil define our metric and we can also preview its performance based on historical data
 4. Then we will configure our SLO, our target in a specific time window. We can also choose between [rolling window or a calendar window](https://sre.google/workbook/implementing-slos/)
 
 ### Configure Burn Rate Alerts
