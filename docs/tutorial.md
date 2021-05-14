@@ -25,7 +25,7 @@ For more information, see ["Create a new billing account"](https://cloud.google.
 
 ## Set up
 
-The installation process takes a few minutes. When it completes, you see a message like the following:
+The installation process takes up to 20 minutes. When it completes, you will see a message like the one below, go to the next step:
 
 ```bash
 Cloud Operations Sandbox deployed successfully!
