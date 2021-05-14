@@ -48,7 +48,7 @@ spec:
               containerPort: 8089
               protocol: TCP
             - name: loc-master-api
-              containerPort: 8091
+              containerPort: 8090
               protocol: TCP
 ---
 kind: Service
