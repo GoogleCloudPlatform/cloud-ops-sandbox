@@ -12,20 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.15-alpine as builder
-RUN apk add --no-cache ca-certificates git && \
-      wget -qO/go/bin/dep https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 && \
-      chmod +x /go/bin/dep
-
+FROM golang:1.16-alpine as builder
+RUN apk add --no-cache ca-certificates git
 ENV PROJECT github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice
 WORKDIR /go/src/$PROJECT
 
 # restore dependencies
-COPY Gopkg.* ./
-RUN dep ensure --vendor-only -v
+COPY main.go go.mod go.sum ./
+COPY genproto ./genproto/
+COPY money ./money/
+RUN go mod vendor -v
 
 COPY . .
-RUN go build -gcflags='-N -l' -o /checkoutservice .
+RUN go build -gcflags='-N -l' -o /checkoutservice
 
 FROM alpine as release
 RUN apk add --no-cache ca-certificates
