@@ -28,18 +28,18 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	
+
 	// OpenTelemetry
 	// OTel traces -> GCP Trace direct exporter
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
-	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/standard"
-	"go.opentelemetry.io/otel/instrumentation/grpctrace"
-	apitrace "go.opentelemetry.io/otel/api/trace"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/semconv"
+	apitrace "go.opentelemetry.io/otel/trace"
 
-	pb "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto"
+	pb "github.com/GoogleCloudPlatform/cloud-ops-sandbox/src/shippingservice/genproto"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
@@ -79,10 +79,11 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	// TOOD: replace ocgrpc with automatic OpenTelemetry grpc metrics collector
+	intercepterOpt := otelgrpc.WithTracerProvider(otel.GetTracerProvider())
 	srv := grpc.NewServer(grpc.StatsHandler(
 		&ocgrpc.ServerHandler{}), // TODO: replace with automatic OTel grpc metrics collector when available
-		grpc.UnaryInterceptor(grpctrace.UnaryServerInterceptor(global.TraceProvider().Tracer("shipping"))),
-		grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(global.TraceProvider().Tracer("shipping"))),
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor(intercepterOpt)),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor(intercepterOpt)),
 	)
 	svc := &server{}
 	pb.RegisterShippingServiceServer(srv, svc)
@@ -104,10 +105,15 @@ func (s *server) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*
 	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
 
+// Watch is for health checking.
+func (s *server) Watch(req *healthpb.HealthCheckRequest, server healthpb.Health_WatchServer) error {
+	return nil
+}
+
 // GetQuote produces a shipping quote (cost) in USD.
 func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQuoteResponse, error) {
 	span := apitrace.SpanFromContext(ctx)
-	span.AddEvent(ctx, "Get Shipping Quote")
+	span.AddEvent("Get Shipping Quote")
 	log.Info("[GetQuote] received request")
 	defer log.Info("[GetQuote] completed request")
 
@@ -134,7 +140,7 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 // It supplies a tracking ID for notional lookup of shipment delivery status.
 func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.ShipOrderResponse, error) {
 	span := apitrace.SpanFromContext(ctx)
-	span.AddEvent(ctx, "Ship Order")
+	span.AddEvent("Ship Order")
 	log.Info("[ShipOrder] received request")
 	defer log.Info("[ShipOrder] completed request")
 	// 1. Create a Tracking ID
@@ -192,14 +198,14 @@ func initTraceProvider() {
 			// Create trace provider with the exporter.
 			// The AlwaysSample sampling policy is used here for demonstration
 			// purposes and should not be used in production environments.
-			tp, err := sdktrace.NewProvider(sdktrace.WithConfig(
-				sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+			tp := sdktrace.NewTracerProvider(
+				sdktrace.WithSampler(sdktrace.AlwaysSample()),
 				sdktrace.WithSyncer(exporter),
 				// TODO: replace with predefined constant for GKE or autodetection when available
-				sdktrace.WithResource(resource.New(standard.ServiceNameKey.String("GKE"))))
+				sdktrace.WithResource(resource.NewWithAttributes(semconv.ServiceNameKey.String("GKE"))))
 			if err == nil {
 				log.Info("initialized trace provider")
-				global.SetTraceProvider(tp)
+				otel.SetTracerProvider(tp)
 				return
 			} else {
 				d := time.Second * 10 * time.Duration(i)
