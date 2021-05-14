@@ -11,3 +11,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from . import basic_locustfile as basic_locust_tasks
+from . import step_locustfile as step_locust_tasks
+
+USER_FACING_LOCUST_USER_CLASSES = {
+    "basic": [
+        basic_locust_tasks.PurchasingUser,
+        basic_locust_tasks.WishlistUser,
+        basic_locust_tasks.BrowsingUser,
+    ],
+    "step": [
+        step_locust_tasks.PurchasingUser,
+        step_locust_tasks.WishlistUser,
+        step_locust_tasks.BrowsingUser,
+    ]
+}
+
+USER_FACING_LOCUST_LOAD_SHAPE = {
+    "basic": None,  # use default locust shape class
+    "step": step_locust_tasks.StepLoadShape()
+}
+
+
+def get_user_classes(task_type):
+    return USER_FACING_LOCUST_USER_CLASSES.get(task_type, [])
+
+
+def get_load_shape(task_type):
+    return USER_FACING_LOCUST_LOAD_SHAPE.get(task_type, None)
