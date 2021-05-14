@@ -28,7 +28,7 @@ import (
 	"syscall"
 	"time"
 
-	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
+	pb "github.com/GoogleCloudPlatform/cloud-ops-sandbox/src/productcatalogservice/genproto"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"cloud.google.com/go/profiler"
@@ -48,12 +48,12 @@ import (
 	// OpenTelemetry
 	// OTel traces -> GCP Trace direct exporter
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
-	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/standard"
-	"go.opentelemetry.io/otel/instrumentation/grpctrace"
-	apitrace "go.opentelemetry.io/otel/api/trace"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/semconv"
+	apitrace "go.opentelemetry.io/otel/trace"
 )
 
 var (
@@ -129,11 +129,13 @@ func run(port int) string {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	intercepterOpt := otelgrpc.WithTracerProvider(otel.GetTracerProvider())
 	srv := grpc.NewServer(
 		grpc.StatsHandler(&ocgrpc.ServerHandler{}), // TODO: replace with OTel grpc metrics collector
 		// OpenTelemetry gRPC server channel interceptors receive trace contexts from clients.
-		grpc.UnaryInterceptor(grpctrace.UnaryServerInterceptor(global.TraceProvider().Tracer("productcatalog"))),
-		grpc.StreamInterceptor(grpctrace.StreamServerInterceptor(global.TraceProvider().Tracer("productcatalog"))),
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor(intercepterOpt)),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor(intercepterOpt)),
 	)
 	svc := &productCatalog{}
 	pb.RegisterProductCatalogServiceServer(srv, svc)
@@ -190,14 +192,14 @@ func initTraceProvider() {
 			// Create trace provider with the exporter.
 			// The AlwaysSample sampling policy is used here for demonstration
 			// purposes and should not be used in production environments.
-			tp, err := sdktrace.NewProvider(sdktrace.WithConfig(
-				sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+			tp := sdktrace.NewTracerProvider(
+				sdktrace.WithSampler(sdktrace.AlwaysSample()),
 				sdktrace.WithSyncer(exporter),
 				// TODO: replace with predefined constant for GKE or autodetection when available
-				sdktrace.WithResource(resource.New(standard.ServiceNameKey.String("GKE"))))
+				sdktrace.WithResource(resource.NewWithAttributes(semconv.ServiceNameKey.String("GKE"))))
 			if err == nil {
 				log.Info("initialized trace provider")
-				global.SetTraceProvider(tp)
+				otel.SetTracerProvider(tp)
 				return
 			} else {
 				d := time.Second * 10 * time.Duration(i)
@@ -205,7 +207,7 @@ func initTraceProvider() {
 				time.Sleep(d)
 			}
 		}
-		
+
 	}
 	log.Warn("failed to initialize trace provider")
 }
@@ -270,15 +272,15 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, srv healthpb.He
 
 func (p *productCatalog) ListProducts(ctx context.Context, _ *pb.Empty) (*pb.ListProductsResponse, error) {
 	span := apitrace.SpanFromContext(ctx)
-	span.AddEvent(ctx, "List Products")
+	span.AddEvent("List Products")
 	time.Sleep(extraLatency)
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
 	span := apitrace.SpanFromContext(ctx)
-	span.AddEvent(ctx, fmt.Sprintf("Get Product %d", req.Id))
-	log.Info("DEBUGGG successfully get product ")
+	span.AddEvent(fmt.Sprintf("Get Product %v", req.Id))
+	log.Info("DEBUG successfully get product ")
 	time.Sleep(extraLatency)
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
@@ -287,7 +289,7 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 		}
 	}
 	if found == nil {
-		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
+		return nil, status.Errorf(codes.NotFound, "no product with ID %v", req.Id)
 	}
 	return found, nil
 }
