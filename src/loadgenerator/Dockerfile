@@ -24,10 +24,11 @@ RUN pip install -r requirements.txt
 
 # Copy tasks and runner script
 COPY run.sh .
-COPY locust-tasks ./locust-tasks
+COPY *.py .
+COPY locust_tasks ./locust_tasks
 
 # Expose the required Locust ports
-EXPOSE 5557 5558 8089
+EXPOSE 5557 5558 8089 8090
 
 # Start Locust using LOCUS_OPTS environment variable
 ENTRYPOINT ["./run.sh"]
