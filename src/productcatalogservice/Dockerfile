@@ -23,7 +23,7 @@ COPY genproto ./genproto/
 RUN go mod vendor -v
 
 COPY . .
-RUN go build -o /productcatalogservice
+RUN go build -o /server
 
 FROM alpine AS release
 RUN apk add --no-cache ca-certificates
@@ -31,8 +31,8 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.5 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 WORKDIR /productcatalogservice
-COPY --from=builder /productcatalogservice /productcatalogservice
+COPY --from=builder /server /productcatalogservice/server
 COPY products.json .
 EXPOSE 3550
-ENTRYPOINT ["/productcatalogservice"]
+ENTRYPOINT ["/productcatalogservice/server"]
 
