@@ -21,7 +21,7 @@ from flask import jsonify
 from flask import make_response
 
 
-def init_sre_recipe_web_ui(web_ui):
+def init_sre_recipe_api(web_ui):
     """Attach custom Flask request handlers to web_ui's flask app"""
     if web_ui:
         @web_ui.app.route("/api/ping")

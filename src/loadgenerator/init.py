@@ -14,7 +14,7 @@
 
 # -*- coding: utf-8 -*-
 """
-This module contains code for initialization logics such as defining command 
+This module contains code for initialization logics such as defining command
 line flags and arguments.
 """
 
@@ -60,8 +60,6 @@ def define_user_locust_flags():
 
 def define_sre_recipe_locust_flags():
     """Flags for SRE Recipe facing Locust server"""
-    flags.DEFINE_boolean(
-        'headless_sre_recipe', False, 'Start SRE Recipe facing Locust without web interface')
     flags.DEFINE_string('web_host_sre_recipe', "0.0.0.0",
                         'Hostname/IP for SRE Recipe facing locust web UI. '
                         'Defaults to 0.0.0.0')
