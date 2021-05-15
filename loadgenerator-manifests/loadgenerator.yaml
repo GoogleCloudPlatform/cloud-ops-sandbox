@@ -31,7 +31,8 @@ spec:
     spec:
       containers:
         - name: locust-main
-          image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke:latest
+          # TODO(tugan): update this to official stack-driver container image, when updated
+          image: tugan0329/cloud-ops-sandbox-loadgen:latest
           imagePullPolicy: Always
           env:
             - name: LOCUST_MODE
