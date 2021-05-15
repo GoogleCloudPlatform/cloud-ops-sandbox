@@ -81,7 +81,7 @@ class TestLoadGenerator(unittest.TestCase):
         if pattern:
             # reset deployment to use new pattern
             set_env_command = "kubectl set env deployment/loadgenerator " \
-                                f"LOCUST_TASK={pattern}_locustfile.py"
+                                f"LOCUST_TASK={pattern}"
             delete_pods_command = "kubectl delete pods -l app=loadgenerator"
             wait_command = "kubectl wait --for=condition=available" \
                             " --timeout=500s deployment/loadgenerator"
