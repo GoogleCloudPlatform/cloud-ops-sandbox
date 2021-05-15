@@ -46,6 +46,7 @@ class TestLoadGenerator(unittest.TestCase):
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
         loadgen_ip = result.stdout.replace('\n', '')
         cls.url = 'http://{0}'.format(loadgen_ip)
+        cls.api_url = 'http://{0}:81'.format(loadgen_ip)
 
 
     def testNodeMachineType(self):
@@ -106,6 +107,13 @@ class TestLoadGenerator(unittest.TestCase):
         self.assertEqual(stats['errors'], [])
         self.assertTrue(stats['user_count'] > 0)
         self.assertTrue(stats['total_rps'] > 0)
+
+    def testSreRecipeApi(self):
+        """Test if querying load generator's SRE Recipe API endpoint returns 2xx"""
+        r = requests.get(f"{TestLoadGenerator.api_url}/api/ping")
+        self.assertTrue(r.ok)
+        resp = json.loads(r.text)
+        self.assertEqual(resp['msg'], "pong")
 
 def getProjectId():
     return os.environ['GOOGLE_CLOUD_PROJECT']
