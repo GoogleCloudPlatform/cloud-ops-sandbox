@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.7-slim as base
+FROM python:3.9-slim as base
 
 FROM base as builder
 
@@ -43,7 +43,7 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.5 && \
 WORKDIR /email_server
 
 # Grab packages from builder
-COPY --from=builder /usr/local/lib/python3.7/ /usr/local/lib/python3.7/
+COPY --from=builder /usr/local/lib/python3.9/ /usr/local/lib/python3.9/
 
 # Add the application
 COPY . .
