@@ -14,6 +14,7 @@
 
 from . import basic_locustfile as basic_locust_tasks
 from . import step_locustfile as step_locust_tasks
+from . import sre_recipe_load_tasks
 
 USER_FACING_LOCUST_USER_CLASSES = {
     "basic": [
@@ -28,6 +29,13 @@ USER_FACING_LOCUST_USER_CLASSES = {
     ]
 }
 
+SRE_RECIPE_USER_CLASSES = {
+    x.sre_recipe_user_identifier: x
+    for x in [
+        sre_recipe_load_tasks.BasicPurchasingUser,
+    ]
+}
+
 USER_FACING_LOCUST_LOAD_SHAPE = {
     "basic": None,  # use default locust shape class
     "step": step_locust_tasks.StepLoadShape()
@@ -36,6 +44,10 @@ USER_FACING_LOCUST_LOAD_SHAPE = {
 
 def get_user_classes(task_type):
     return USER_FACING_LOCUST_USER_CLASSES.get(task_type, [])
+
+
+def get_sre_recipe_user_class(user_identifier):
+    return SRE_RECIPE_USER_CLASSES.get(user_identifier, None)
 
 
 def get_load_shape(task_type):
