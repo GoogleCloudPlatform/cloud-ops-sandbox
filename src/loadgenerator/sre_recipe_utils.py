@@ -17,15 +17,92 @@
 This module contains code for intergrating SRE Recipes with LoadGen
 """
 
+import gevent
+from flask import request
 from flask import jsonify
 from flask import make_response
+from functools import wraps
+from locust.env import Environment
+from locust_tasks import get_sre_recipe_user_class
 
 
-def init_sre_recipe_api(web_ui):
-    """Attach custom Flask request handlers to web_ui's flask app"""
-    if web_ui:
-        @web_ui.app.route("/api/ping")
+def return_as_json_response(fn):
+    """
+    Python helper decorator for returning status code and JSON responses from
+    a Flask request handler.
+    """
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        status_code, body = fn(*args, **kwargs)
+        resp = make_response(jsonify(body), status_code)
+        resp.headers["Content-Type"] = 'application/json'
+        return resp
+    return wrapper
+
+
+def init_sre_recipe_api(env):
+    """
+    Attach custom Flask request handlers to a locust environment's flask app
+    """
+    if env and env.web_ui:
+        @env.web_ui.app.route("/api/ping")
+        @return_as_json_response
         def ping():
-            resp = make_response(jsonify({"msg": "pong"}), 200)
-            resp.headers["Content-Type"] = 'application/json'
-            return resp
+            return 200, {"msg": "pong"}
+
+        @env.web_ui.app.route("/api/user_count")
+        @return_as_json_response
+        def user_count():
+            """Return the number of currently running users"""
+            return 200, {"user_count": env.runner.user_count}
+
+        @env.web_ui.app.route("/api/spawn/<user_identifier>", methods=['POST'])
+        @return_as_json_response
+        def spawn_by_user_identifier(user_identifier=None):
+            """
+            Spawn a number of users with the SRE Recipe user identifer.
+
+            URL Query Paramters:
+            - user_count: Required. The total number of users to spawn
+            - spawn_rate: Required. The spawn rate for the users.
+            - stop_after: Optional. If specified, run the load generation only 
+                          for the given number of seconds.
+            """
+            # Required Query Parameters
+            user_count = request.args.get("user_count", default=None, type=int)
+            spawn_rate = request.args.get("spawn_rate", default=None, type=int)
+            user_class = get_sre_recipe_user_class(user_identifier)
+
+            if user_count is None:
+                return 400, {"err": f"Must specify a valid, non-empty, integer value for query parameter 'user_count': {user_count}"}
+            elif spawn_rate is None:
+                return 400, {"err": f"Must specify a valid, non-empty, integer value for query parameter 'spawn_rate': {spawn_rate}"}
+            elif user_count <= 0:
+                return 400, {"err": f"Query parameter 'user_count' must be positive: {user_count}"}
+            elif spawn_rate <= 0:
+                return 400, {"err": f"Query parameter 'spawn_rate' must be positive: {spawn_rate}"}
+            elif user_class is None:
+                return 400, {"err": f"Cannot find SRE Recipe Load for: {user_identifier}"}
+
+            # Optional Query Parameters
+            stop_after = request.args.get("stop_after", default=None, type=int)
+            if stop_after is not None and stop_after <= 0:
+                return 400, {"err": f"Query parameter 'stop_after' must be positive: {stop_after}"}
+
+            # We currently only support running one SRE Recipe load each time
+            # for implementation simplicity.
+            env.runner.stop()  # stop existing load generating users, if any
+            env.user_classes = [user_class]  # replace with the new users
+            env.runner.start(user_count, spawn_rate)  # start generating load
+
+            if stop_after:
+                gevent.spawn_later(stop_after, lambda: env.runner.stop())
+
+            return 200, {"msg": f"Started spawning {user_count} users at {spawn_rate} users/second"}
+
+        @env.web_ui.app.route("/api/stop")
+        @return_as_json_response
+        def stop_all():
+            """Stop all currently running users"""
+            env.runner.stop()
+            return 200, {"msg": "All users stopped"}

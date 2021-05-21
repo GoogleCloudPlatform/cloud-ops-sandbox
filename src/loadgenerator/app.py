@@ -139,7 +139,7 @@ def main(argv):
         start_web_ui_now=False)
 
     if env_sre_recipe.web_ui is not None:
-        init_sre_recipe_api(env_sre_recipe.web_ui)
+        init_sre_recipe_api(env_sre_recipe)
 
         env_sre_recipe.web_ui.start()
 

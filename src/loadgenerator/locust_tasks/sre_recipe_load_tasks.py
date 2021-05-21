@@ -40,8 +40,8 @@ class BasicPurchasingUser(HttpUser):
     # User Identifier for use by SRE Recipes
     sre_recipe_user_identifier = "BasicPurchasingUser"
 
-    # wait between 10 and 60 seconds after each task
-    wait_time = between(10, 60)
+    # wait between 5 and 30 seconds after each task
+    wait_time = between(5, 30)
 
     @task
     def buy_random_product_and_checkout(self):
