@@ -25,6 +25,8 @@ from functools import wraps
 from locust.env import Environment
 from locust_tasks import get_sre_recipe_user_class
 
+WAIT_SECONDS_BEFORE_SPAWN = 2
+
 
 def return_as_json_response(fn):
     """
@@ -91,18 +93,23 @@ def init_sre_recipe_api(env):
 
             # We currently only support running one SRE Recipe load each time
             # for implementation simplicity.
-            env.runner.stop()  # stop existing load generating users, if any
+            env.runner.quit()  # stop existing load generating users, if any
             env.user_classes = [user_class]  # replace with the new users
-            env.runner.start(user_count, spawn_rate)  # start generating load
+
+            # wait a short while for all existing users to stop, then
+            # start generating new load with the new user types
+            gevent.spawn_later(WAIT_SECONDS_BEFORE_SPAWN,
+                               lambda: env.runner.start(user_count, spawn_rate))
 
             if stop_after:
-                gevent.spawn_later(stop_after, lambda: env.runner.stop())
+                gevent.spawn_later(WAIT_SECONDS_BEFORE_SPAWN + stop_after,
+                                   lambda: env.runner.quit())
 
             return 200, {"msg": f"Started spawning {user_count} users at {spawn_rate} users/second"}
 
-        @env.web_ui.app.route("/api/stop")
+        @env.web_ui.app.route("/api/stop", methods=['GET', 'POST'])
         @return_as_json_response
         def stop_all():
             """Stop all currently running users"""
-            env.runner.stop()
+            env.runner.quit()
             return 200, {"msg": "All users stopped"}
