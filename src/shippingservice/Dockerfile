@@ -21,8 +21,6 @@ WORKDIR /go/src/$PROJECT
 COPY go.mod go.sum main.go quote.go tracker.go ./
 COPY genproto ./genproto/
 RUN go mod vendor -v
-
-COPY . .
 RUN go build -gcflags='-N -l' -o /shippingservice
 
 FROM alpine as release
