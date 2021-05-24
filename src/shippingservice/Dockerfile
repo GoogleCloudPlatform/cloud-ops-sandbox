@@ -18,14 +18,14 @@ ENV PROJECT github.com/GoogleCloudPlatform/cloud-ops-sandbox/src/shippingservice
 WORKDIR /go/src/$PROJECT
 
 # restore dependencies
-COPY go.mod go.sum *.go ./
+COPY go.mod go.sum main.go quote.go tracker.go ./
 COPY genproto ./genproto/
 RUN go mod vendor -v
 RUN go build -gcflags='-N -l' -o /shippingservice
 
 FROM alpine as release
 RUN apk add --no-cache ca-certificates
-RUN GRPC_HEALTH_PROBE_VERSION=v0.3.5 && \
+RUN GRPC_HEALTH_PROBE_VERSION=v0.4.2 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 COPY --from=builder /shippingservice /shippingservice
