@@ -9,6 +9,7 @@ weight: 20
 * [Explore Cloud Monitoring](#explore-cloud-monitoring)
 * [Shop like a hipster](#shop-like-a-hipster)
 * [Run the load generator](#run-the-load-generator)
+* [SRE Recipes](#sre-recipes)
 {{% /pageinfo %}}
 
 ## Explore your project in GCP
@@ -58,3 +59,42 @@ sandboxctl loadgen step
 
 
 From here, you can explore how the application was deployed, and you can use the navigation menu to bring up other GCP tools.
+
+## SRE Recipes
+
+SRE Recipes is our [Chaos Engineering](https://en.wikipedia.org/wiki/Chaos_engineering) tool to test your sandbox environment. It helps users to familiarize themselves with finding the root cause of a breakage using Cloud Operations suite of tools.  
+Each 'recipe' simulates a different scenario of real life problems that can occur to the production system. There are several recipes that you can run and you can also [contribute your own.](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/sre-recipes#contributing)  
+
+```
+$ sandboxctl sre-recipes  
+```
+
+### Running an example SRE Recipe
+
+> **Note:** Recipe's names are not explicit by design as we don't want to allude to the problem.
+
+1. Run the recipe to manufacture errors in the demo cluster
+
+> **Note:** It may take up to 5 minutes for breakages to take effect in production.
+```
+$ sandboxctl sre-recipes break recipe0
+```
+
+2. Use Cloud Operations suite to diagnose the problem.
+
+> **Note:** If you are stuck, you can use a hint to direct you to the right direction.
+```
+$ sandboxctl sre-recipes hint recipe0
+```
+
+3. Verify your hypothesis on what could be wrong with the demo app by using command line tool
+
+```
+$ sandboxctl sre-recipes verify recipe0
+```
+
+4. After you discover the problem, you can restore the cluster to its original state.
+
+```
+$ sandboxctl sre-recipes restore recipe0
+```
