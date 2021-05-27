@@ -21,23 +21,22 @@ import traceback
 from concurrent import futures
 
 import grpc
-
-
-from opentelemetry import trace
+from grpc_health.v1 import health_pb2, health_pb2_grpc
+from opentelemetry import propagate, trace
 from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
-from opentelemetry.instrumentation.grpc import client_interceptor
-from opentelemetry.instrumentation.grpc import server_interceptor
+from opentelemetry.instrumentation.grpc import (client_interceptor,
+                                                server_interceptor)
 from opentelemetry.instrumentation.grpc.grpcext import intercept_channel
+from opentelemetry.propagators.cloud_trace_propagator import \
+    CloudTraceFormatPropagator
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleExportSpanProcessor
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
 import demo_pb2
 import demo_pb2_grpc
-from grpc_health.v1 import health_pb2
-from grpc_health.v1 import health_pb2_grpc
+from logger import get_json_logger
 
-from logger import getJSONLogger
-logger = getJSONLogger('recommendationservice-server')
+logger = get_json_logger('recommendationservice-server')
 
 try:
     import googleclouddebugger
@@ -64,7 +63,8 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         indices = random.sample(range(num_products), num_return)
         # fetch product ids from indices
         prod_list = [filtered_products[i] for i in indices]
-        logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
+        logger.info(
+            "[Recv ListRecommendations] product_ids={}".format(prod_list))
         # build and return response
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
@@ -73,9 +73,11 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def Check(self, request, context):
         return health_pb2.HealthCheckResponse(
             status=health_pb2.HealthCheckResponse.SERVING)
+
     def Watch(self, request, context):
         return health_pb2.HealthCheckResponse(
             status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
+
 
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
@@ -88,28 +90,30 @@ if __name__ == "__main__":
     # When running on GCP, the exporter handles authentication
     # using automatically default application credentials.
     # When running locally, credentials may need to be set explicitly.
-    cloud_trace_exporter = CloudTraceSpanExporter()
     trace.get_tracer_provider().add_span_processor(
-        SimpleExportSpanProcessor(cloud_trace_exporter)
+        SimpleSpanProcessor(CloudTraceSpanExporter())
     )
+    propagate.set_global_textmap(CloudTraceFormatPropagator())
 
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
     if catalog_addr == "":
-        raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
+        raise Exception(
+            'PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
     logger.info("product catalog address: " + catalog_addr)
 
     # Create the gRPC client channel to ProductCatalog (server).
     channel = grpc.insecure_channel(catalog_addr)
-    
+
     # OpenTelemetry client interceptor passes trace contexts to the server.
-    channel = intercept_channel(channel, client_interceptor(trace.get_tracer_provider()))
+    channel = intercept_channel(
+        channel, client_interceptor(trace.get_tracer_provider()))
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
     # Create the gRPC server for accepting ListRecommendations Requests from frontend (client).
     interceptor = server_interceptor(trace.get_tracer_provider())
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                       interceptors=(interceptor,))
+                         interceptors=(interceptor,))
 
     # Add RecommendationService class to gRPC server.
     service = RecommendationService()
@@ -123,7 +127,7 @@ if __name__ == "__main__":
 
     # keep alive
     try:
-         while True:
+        while True:
             time.sleep(10000)
     except KeyboardInterrupt:
-            server.stop(0)
+        server.stop(0)
