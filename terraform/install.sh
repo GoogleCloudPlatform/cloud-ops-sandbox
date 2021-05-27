@@ -216,22 +216,6 @@ authenticateCluster() {
   kubectx main=.
 }
 
-setupOperationsWorkspace() {
-  gcp_monitoring_path="https://console.cloud.google.com/monitoring?project=$project_id"
-  if [[ -z $skip_workspace_prompt ]]; then
-    YELLOW=`tput setaf 3`
-    REVERT=`tput sgr0`
-    log ""
-    log ""
-    log "${YELLOW}********************************************************************************"
-    log ""
-    log "${YELLOW}⚠️ Please create a monitoring workspace for the project by clicking on the following link:"
-    log "${YELLOW}  $gcp_monitoring_path"
-    log ""
-    read -p "${YELLOW}When you are done, please PRESS ENTER TO CONTINUE${REVERT}"
-  fi
-}
-
 installMonitoring() {
   log "Retrieving the external IP address of the application..."
   TRIES=0
@@ -421,7 +405,6 @@ if [[ -z "$project_id" ]]; then
   promptForBillingAccount;
   promptForProject;
 fi
-setupOperationsWorkspace;
 getOrCreateBucket;
 
 # deploy
