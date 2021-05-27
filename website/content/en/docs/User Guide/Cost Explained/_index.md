@@ -6,26 +6,25 @@ weight: 2
 {{% pageinfo %}}
 * [Cloud Operations Sandbox Cost Estimations](#Cloud-Operations-Sandbox-Cost-Estimations)
   * [GCP Calculator](#GCP-Calculator)
-  * [Sandbox Cost Estimations](#Sandbox-Cost-Estimations)
   * [Sandbox Compute Cost Estimations](#Sandbox-Compute-Cost-Estimations)
-  
+{{% /pageinfo %}}
  
 ## Cloud Operations Sandbox Cost Estimations
-Cloud Operations Sandbox Cost is combined from compute cost, storage and usage of network and additional services like Cloud Operations Suite. While some of the cost, like GKE infrastructure is constant, for some services cost is a factor of usage. Note, that some of Sandbox costs fall under the [free tier](https://cloud.google.com/free/docs/gcp-free-tier#free-tier), but not not all.
+Cloud Operations Sandbox Cost is made up of compute cost, storage and usage of network traffic and additional services like Cloud Operations Suite. While some of the cost, like GKE infrastructure is constant, for some services cost is a factor of usage. Note, that some of Sandbox costs fall under the [free tier](https://cloud.google.com/free/docs/gcp-free-tier#free-tier), but not not all.
 To learn more about billing and pricing please refer to: [Google Cloud Pricing Overview](https://cloud.google.com/pricing/), [Google’s Pricing philosophy](https://cloud.google.com/pricing/philosophy/), [GCP's Billing](https://cloud.google.com/billing/docs).
 
-To view billing information for your project in the console go to [billing.](https://console.cloud.google.com/billing)
+The GCP billing page will break down your expenses by resource usage. To view billing information for your project in the console go to the [Billing section](https://console.cloud.google.com/billing) in the left navigation menu.
+
 ![image](/docs/images/user-guide/57-billing-menu.png)
 
 ![image](/docs/images/user-guide/58-billing-console.png)
  
 ### GCP Calculator
-GCP has transparent pricing which is applied per resource. You can plan and estimate pricing using the [pricing calculator](https://cloud.google.com/products/calculator). Some of the really cool features of Google cloud platform are sustained use discounts that are applied as credits to your account rather than just lower costs. That allows us later to see exact costs attributed to usage, so we can more accurately reduce usage later.
+GCP has transparent pricing which is applied per resource. You can plan and estimate pricing using the [pricing calculator](https://cloud.google.com/products/calculator). One great feature of Google Cloud Platform is [sustained use discounts](https://cloud.google.com/compute/docs/sustained-use-discounts), which can save up to 30% in costs as a credit applied to your account. This allows you later to see exact costs attributed to usage, so you can more accurately reduce usage going forward."
 
-### Sandbox Cost Estimations
 To break down the cost we will use a GCP calculator. As network, storage and [observability cost](https://cloud.google.com/stackdriver/pricing) are very minimal due to the low volume, in the next section we will focus on the cost of the infrastructure. 
 
-#### Sandbox Compute Cost Estimations
+### Sandbox Compute Cost Estimations
 You can view the provisioned resources in [Terraform code](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform) you can see the exact resources created or in GCP's console.
 
 ![image](/docs/images/user-guide/59-resources-console.png)
@@ -35,7 +34,7 @@ In order to use the calculator you should first select a product from the scroll
 **Resources Information**
 Region: "us-east1" 
 - Loadgen Cluster 1x "n1-standard-1" 
-- GKE cluster(for the hypster shop microservices) 2x "n1-standard-2"
+- GKE cluster (for the hipster shop microservices) 2x "n1-standard-2"
 - App Engine (Standard, F1)
 - SQL PostgresQL - "db-f1-micro" 
 

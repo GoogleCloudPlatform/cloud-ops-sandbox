@@ -42,9 +42,9 @@ You can expand any of the messages that matches the filter to see the full stack
 
 #### Errors Manufacturing 
 
-There are several ways in which you can experiment with Error Reporting tool and manufacture errors that will be reported and displayed in the UI. For the purpose of this demonstration we will use 2 tools that are coming with Cloud Operations Sandbox: Load Generator and SRE Recipes to simulate a situation that `Sandbox break`.
+There are several ways in which you can experiment with Error Reporting tool and manufacture errors that will be reported and displayed in the UI. For the purpose of this demonstration, we will use Cloud Operations Sandbox's Load Generator and SRE Recipes features to simulate errors in the system.
 
-To simulate requests using the load generator we can use the UI or `sandboxctl`
+To simulate requests using the load generator we can use the UI or the `sandboxctl` command line tool.
 
 ```
 $sandboxctl loadgen step
@@ -53,7 +53,7 @@ Loadgenerator deployed using step pattern
 Loadgenerator web UI: http://<ExampleIP>
 ```
 
-Then to `break` the service we will use sre-recipes (recipe2)
+Then to `break` the service we will use [sre-recipes](https://cloud-ops-sandbox.dev/docs/user-guide/explore-your-project-in-gcp/#sre-recipes)(recipe2)
 
 ```
 $sandboxctl sre-recipes break recipe2
@@ -65,7 +65,7 @@ In this case you will see in Error Reporting UI you will see a new reported erro
 
 ![image](/docs/images/user-guide/51-Error-Reporting-podfailed.png)
 
-You can open it to see additional information, in the below example you can see that this error repeat itself several times in the last hour.
+You can open it to see additional information, in the below example you can see that this error repeats itself several times in the last hour.
 
 ![image](/docs/images/user-guide/52-Error-Reporting-pod.png)
 
@@ -74,8 +74,11 @@ You can also press `View logs` to view detailed log information in Cloud Operati
 ![image](/docs/images/user-guide/53-Error-Reporting-logs.png)
 
 > Note: at the end, don't forget to recover the service using `sandboxctl sre-recipes restore`. 
+
+
 Another way to `break the service` is to use the load generator to overload the service with too many requests.
 In the Load Generator UI( addressed provided about or using `sandboxctl describe`), we will start run a test with `500` users. 
+
 > Note: Currently only load test <100 users would be successful.
 
 ![image](/docs/images/user-guide/56-Error-Reporting-loadgen.png)
