@@ -56,6 +56,20 @@ spec:
           periodSeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
+      - name: otel-agent
+        image: otel/opentelemetry-collector-contrib-dev:latest
+        args:
+        - --config=/conf/otel-agent-config.yaml
+        volumeMounts:
+        - name: otel-agent-config-vol
+          mountPath: /conf
+      volumes:
+      - configMap:
+          items:
+          - key: otel-agent-config.yaml
+            path: otel-agent-config.yaml
+          name: otel-agent-config
+        name: otel-agent-config-vol
 ---
 apiVersion: v1
 kind: Service
@@ -69,3 +83,25 @@ spec:
   - name: grpc
     port: 7070
     targetPort: 7070
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-agent-config
+data:
+  otel-agent-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+    exporters:
+      otlp:
+        endpoint: "opentelemetrycollector.default.svc.cluster.local:4317"
+        insecure: true
+    processors:
+      batch:
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          exporters: [otlp]
