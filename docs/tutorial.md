@@ -193,8 +193,6 @@ Cloud operations suite provides **service oriented monitoring**, that means that
 
 You can find all the services under [monitoring → services → Services Overview](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/svc-overview) , and you can create your own [custom service.](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/define-svc)
 
-![image](./images/user-guide/37-services-overview.png)  
-
 ### Services SLOs  
 
 To view, edit or create SLOs for a service you need to go to the service page, for additional information refer to the [User Guide.](https://cloud-ops-sandbox.dev/docs/)
