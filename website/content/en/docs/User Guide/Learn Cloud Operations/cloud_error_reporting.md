@@ -7,6 +7,7 @@ weight: 90
 {{% pageinfo %}}
 * [Overview](#error-reporting-overview)
 * [Using Error Reporting](#using-error-reporting)
+* [Errors Manufacturing ](#errors-manufacturing )
 {{% /pageinfo %}}
 
 #### Error Reporting Overview
@@ -38,3 +39,49 @@ Click **View Logs** for one of the samples to see the log messages that match th
 You can expand any of the messages that matches the filter to see the full stack trace:
 
 ![image](/docs/images/user-guide/35-logdet.png)
+
+#### Errors Manufacturing 
+
+There are several ways in which you can experiment with Error Reporting tool and manufacture errors that will be reported and displayed in the UI. For the purpose of this demonstration we will use 2 tools that are coming with Cloud Operations Sandbox: Load Generator and SRE Recipes to simulate a situation that `Sandbox break`.
+
+To simulate requests using the load generator we can use the UI or `sandboxctl`
+
+```
+$sandboxctl loadgen step
+Redeploying Loadgenerator...
+Loadgenerator deployed using step pattern
+Loadgenerator web UI: http://<ExampleIP>
+```
+
+Then to `break` the service we will use sre-recipes (recipe2)
+
+```
+$sandboxctl sre-recipes break recipe2
+Breaking service operations...
+...done
+```
+
+In this case you will see in Error Reporting UI you will see a new reported error `Unhealthy pod, failed probe`
+
+![image](/docs/images/user-guide/51-Error-Reporting-podfailed.png)
+
+You can open it to see additional information, in the below example you can see that this error repeat itself several times in the last hour.
+
+![image](/docs/images/user-guide/52-Error-Reporting-pod.png)
+
+You can also press `View logs` to view detailed log information in Cloud Operations Logging.
+  
+![image](/docs/images/user-guide/53-Error-Reporting-logs.png)
+
+> Note: at the end, don't forget to recover the service using `sandboxctl sre-recipes restore`. 
+Another way to `break the service` is to use the load generator to overload the service with too many requests.
+In the Load Generator UI( addressed provided about or using `sandboxctl describe`), we will start run a test with `500` users. 
+> Note: Currently only load test <100 users would be successful.
+
+![image](/docs/images/user-guide/56-Error-Reporting-loadgen.png)
+
+In the UI you will see that the previous error `Unhealthy pod, failed probe`, in addition you can see an additional error `Container Downtime`:
+
+![image](/docs/images/user-guide/54-Error-Reporting2.png)
+
+![image](/docs/images/user-guide/55-Error-Reporting-failed-con-logs.png)
