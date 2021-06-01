@@ -17,8 +17,6 @@
 # Disable label by Drift product
 product: false
 language:
-  # Disable issue labeling (not accurate)
-  issue: false
   # Enable pr labeling
   pullrequest: true
   labelprefix: 'lang: '
