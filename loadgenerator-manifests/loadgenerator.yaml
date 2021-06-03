@@ -37,7 +37,7 @@ spec:
             - name: LOCUST_MODE
               value: standalone
             - name: LOCUST_TASK
-              value: basic_locustfile.py
+              value: basic
             - name: TARGET_HOST
               valueFrom:
                 configMapKeyRef:
@@ -46,6 +46,9 @@ spec:
           ports:
             - name: loc-master-web
               containerPort: 8089
+              protocol: TCP
+            - name: loc-master-api
+              containerPort: 8090
               protocol: TCP
 ---
 kind: Service
@@ -60,6 +63,10 @@ spec:
       targetPort: loc-master-web
       protocol: TCP
       name: loc-master-web
+    - port: 81
+      targetPort: loc-master-api
+      protocol: TCP
+      name: loc-master-api
   selector:
     app: loadgenerator
     mode: master

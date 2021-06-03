@@ -50,6 +50,7 @@ class TestLoadGenerator(unittest.TestCase):
             split(command), encoding='utf-8', capture_output=True)
         loadgen_ip = result.stdout.replace('\n', '')
         cls.url = 'http://{0}'.format(loadgen_ip)
+        cls.api_url = 'http://{0}:81'.format(loadgen_ip)
 
     def testNodeMachineType(self):
         """Test if the machine type for the nodes is as specified"""
@@ -84,7 +85,7 @@ class TestLoadGenerator(unittest.TestCase):
         if pattern:
             # reset deployment to use new pattern
             set_env_command = "kubectl set env deployment/loadgenerator " \
-                f"LOCUST_TASK={pattern}_locustfile.py"
+                                f"LOCUST_TASK={pattern}"
             delete_pods_command = "kubectl delete pods -l app=loadgenerator"
             wait_command = "kubectl wait --for=condition=available" \
                 " --timeout=500s deployment/loadgenerator"
@@ -110,6 +111,12 @@ class TestLoadGenerator(unittest.TestCase):
         self.assertTrue(stats['user_count'] > 0)
         self.assertTrue(stats['total_rps'] > 0)
 
+    def testSreRecipeApi(self):
+        """Test if querying load generator's SRE Recipe API endpoint returns 2xx"""
+        r = requests.get(f"{TestLoadGenerator.api_url}/api/ping")
+        self.assertTrue(r.ok)
+        resp = json.loads(r.text)
+        self.assertEqual(resp['msg'], "pong")
 
 def get_project_id():
     return os.environ['GOOGLE_CLOUD_PROJECT']

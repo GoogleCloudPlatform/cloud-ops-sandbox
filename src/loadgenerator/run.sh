@@ -19,15 +19,16 @@ SCRIPT_DIR=$(realpath $(dirname "$0"))
 cd $SCRIPT_DIR
 
 LOCUST_MODE=${LOCUST_MODE:-standalone}
-LOCUST_TASK=${LOCUST_TASK:-basic_locustfile.py}
-LOCUS_OPTS="-f ./locust-tasks/$LOCUST_TASK --host=$TARGET_HOST"
+LOCUST_TASK=${LOCUST_TASK:-basic}
+LOCUS_OPTS="--task=$LOCUST_TASK --host=$TARGET_HOST"
 
 if [[ "$LOCUST_MODE" = "master" ]]; then
-    LOCUS_OPTS="$LOCUS_OPTS --master"
+    LOCUS_OPTS="$LOCUS_OPTS --master --master_sre_recipe"
 elif [[ "$LOCUST_MODE" = "worker" ]]; then
-    LOCUS_OPTS="$LOCUS_OPTS --worker --master-host=$LOCUST_MASTER"
+    LOCUS_OPTS="$LOCUS_OPTS --worker --master_host=$LOCUST_MASTER"
+    LOCUS_OPTS="$LOCUS_OPTS --worker_sre_recipe --master_host_sre_recipe=$LOCUST_MASTER"
 fi
 
-echo "locust $LOCUS_OPTS"
+echo "python3 app.py $LOCUS_OPTS"
 
-locust $LOCUS_OPTS
+python3 app.py $LOCUS_OPTS
