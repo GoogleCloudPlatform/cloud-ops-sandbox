@@ -86,6 +86,8 @@ type checkoutService struct {
 
 	paymentSvcAddr string
 	paymentSvcConn *grpc.ClientConn
+
+	pb.UnimplementedCheckoutServiceServer
 }
 
 func main() {

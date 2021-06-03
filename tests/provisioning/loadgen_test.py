@@ -13,41 +13,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import print_function
-
-import os
-import unittest
-from parameterized import parameterized
-import subprocess
-from shlex import split
 import json
-import requests
+import os
+import subprocess
 import time
+import unittest
+from shlex import split
 
+import requests
 from google.cloud.container_v1.services import cluster_manager
+from parameterized import parameterized
+
 
 class TestLoadGenerator(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Get the location of GKE cluster for later queries"""
-        cls.name = 'projects/{0}/locations/{1}/clusters/loadgenerator'.format(getProjectId(), getClusterZone())
+        cls.name = 'projects/{0}/locations/{1}/clusters/loadgenerator'.format(
+            get_project_id(), get_cluster_zone())
         # authenticate container cluster
-        command=('gcloud config set project {0}'.format(getProjectId()))
+        command = ('gcloud config set project {0}'.format(get_project_id()))
         subprocess.run(split(command))
         # set kubectl context to loadgenerator
-        command=('gcloud container clusters get-credentials loadgenerator --zone {0}'.format(getClusterZone()))
+        command = (
+            'gcloud container clusters get-credentials loadgenerator --zone {0}'.format(get_cluster_zone()))
         subprocess.run(split(command))
         # obtain the context name
-        command=('kubectl config current-context')
-        result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
+        command = ('kubectl config current-context')
+        result = subprocess.run(
+            split(command), encoding='utf-8', capture_output=True)
         cls.context = result.stdout
         # obtain the public url
-        command = ("kubectl get service loadgenerator --context=%s -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" % TestLoadGenerator.context)
-        result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
+        command = (
+            "kubectl get service loadgenerator --context=%s -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" % TestLoadGenerator.context)
+        result = subprocess.run(
+            split(command), encoding='utf-8', capture_output=True)
         loadgen_ip = result.stdout.replace('\n', '')
         cls.url = 'http://{0}'.format(loadgen_ip)
         cls.api_url = 'http://{0}:81'.format(loadgen_ip)
-
 
     def testNodeMachineType(self):
         """Test if the machine type for the nodes is as specified"""
@@ -70,7 +73,7 @@ class TestLoadGenerator(unittest.TestCase):
 
     def testDifferentZone(self):
         """Test if load generator cluster is in a different zone from the Hipster Shop cluster"""
-        self.assertTrue(getClusterZone() != os.environ['ZONE'])
+        self.assertTrue(get_cluster_zone() != os.environ['ZONE'])
 
     @parameterized.expand([(None,), ('basic',), ('step',)])
     def testStartSwarm(self, pattern):
@@ -85,12 +88,12 @@ class TestLoadGenerator(unittest.TestCase):
                                 f"LOCUST_TASK={pattern}"
             delete_pods_command = "kubectl delete pods -l app=loadgenerator"
             wait_command = "kubectl wait --for=condition=available" \
-                            " --timeout=500s deployment/loadgenerator"
+                " --timeout=500s deployment/loadgenerator"
             subprocess.run(split(set_env_command))
             subprocess.run(split(delete_pods_command))
             subprocess.run(split(wait_command))
         # enable swarm
-        form_data = {'user_count':1, 'spawn_rate':1}
+        form_data = {'user_count': 1, 'spawn_rate': 1}
         requests.post(f"{TestLoadGenerator.url}/swarm", form_data)
         # wait for valid request in case of startup errors
         success, tries = False, 0
@@ -115,11 +118,13 @@ class TestLoadGenerator(unittest.TestCase):
         resp = json.loads(r.text)
         self.assertEqual(resp['msg'], "pong")
 
-def getProjectId():
+def get_project_id():
     return os.environ['GOOGLE_CLOUD_PROJECT']
 
-def getClusterZone():
+
+def get_cluster_zone():
     return os.environ['LOADGEN_ZONE']
+
 
 if __name__ == '__main__':
     unittest.main()
