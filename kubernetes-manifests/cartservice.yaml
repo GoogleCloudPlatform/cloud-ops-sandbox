@@ -40,6 +40,8 @@ spec:
           value: "redis-cart:6379"
         - name: ASPNETCORE_URLS
           value: "http://0.0.0.0:7070"
+        - name: OTEL_COLLECTOR_ADDR
+          value: "http://localhost:4317"
         resources:
           requests:
             cpu: 200m
@@ -98,10 +100,12 @@ data:
       otlp:
         endpoint: "opentelemetrycollector.default.svc.cluster.local:4317"
         insecure: true
+      logging:
+        loglevel: debug
     processors:
       batch:
     service:
       pipelines:
         traces:
           receivers: [otlp]
-          exporters: [otlp]
+          exporters: [otlp, logging]

@@ -1,0 +1,21 @@
+otel-agent-config.yaml: |
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+
+  exporters:
+    logging:
+      loglevel: debug
+  processors:
+    batch:
+
+  extensions:
+    health_check:
+
+  service:
+    extensions: [health_check]
+    pipelines:
+      traces:
+        receivers: [otlp]
+        exporters: [logging]

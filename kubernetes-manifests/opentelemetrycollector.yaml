@@ -70,6 +70,7 @@ data:
     processors:
     exporters:
       logging:
+        loglevel: debug
       googlecloud:
         # DONOTSUBMIT Change Project to env variable
         project: cloud-ops-sandbox-1446276954
@@ -78,4 +79,4 @@ data:
         traces:
           receivers: [otlp]
           processors: []
-          exporters: [logging, googlecloud
+          exporters: [googlecloud, logging]

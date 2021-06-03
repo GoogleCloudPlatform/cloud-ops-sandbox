@@ -24,5 +24,13 @@ services:
     environment:
       REDIS_ADDR: "redis:6379"
       ASPNETCORE_URLS: "http://0.0.0.0:7070"
+      OTEL_COLLECTOR_ADDR: "http://localhost:4317"
   redis:
     image: "redis:alpine"
+  otel-agent:
+    image: "otel/opentelemetry-collector-contrib-dev:latest"
+    command: ["--config=/etc/otel-agent-config.yaml", "${OTELCOL_ARGS}"]
+    volumes:
+      - ./otel-agent-config.yaml:/etc/otel-agent-config.yaml
+    ports:
+      - "4317"
