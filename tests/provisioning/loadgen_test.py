@@ -85,7 +85,7 @@ class TestLoadGenerator(unittest.TestCase):
         if pattern:
             # reset deployment to use new pattern
             set_env_command = "kubectl set env deployment/loadgenerator " \
-                                f"LOCUST_TASK={pattern}"
+                f"LOCUST_TASK={pattern}"
             delete_pods_command = "kubectl delete pods -l app=loadgenerator"
             wait_command = "kubectl wait --for=condition=available" \
                 " --timeout=500s deployment/loadgenerator"
@@ -111,12 +111,80 @@ class TestLoadGenerator(unittest.TestCase):
         self.assertTrue(stats['user_count'] > 0)
         self.assertTrue(stats['total_rps'] > 0)
 
-    def testSreRecipeApi(self):
-        """Test if querying load generator's SRE Recipe API endpoint returns 2xx"""
+    def testApiPing(self):
+        """Test if querying load generator's SRE Recipe API /ping endpoint returns 2xx"""
         r = requests.get(f"{TestLoadGenerator.api_url}/api/ping")
         self.assertTrue(r.ok)
         resp = json.loads(r.text)
         self.assertEqual(resp['msg'], "pong")
+
+    @parameterized.expand([(10, None,), (None, 1,), ('foo', 1,), (1, 1.15,)])
+    def testApiSpawnFormValidation(self, user_count, spawn_rate):
+        """
+        Test if querying load generator's SRE Recipe API /spawn endpoint returns
+        error for invalid form data format
+        """
+        form_data = {}
+        if user_count:
+            form_data["user_count"] = user_count
+        if spawn_rate:
+            form_data["spawn_rate"] = spawn_rate
+
+        r = requests.post(
+            f"{TestLoadGenerator.api_url}/api/spawn/BasicPurchasingUser", form_data)
+        self.assertFalse(r.ok)
+        resp = json.loads(r.text)
+        self.assertTrue(len(resp.get("err", "")) > 0)
+
+    def testApiSpawnUserClassExists(self):
+        """
+        Test if querying load generator's SRE Recipe API /spawn endpoint returns
+        error for unknown user class
+        """
+        r = requests.post(
+            f"{TestLoadGenerator.api_url}/api/spawn/NotExistUser", {'user_count': 1, 'spawn_rate': 1})
+        self.assertFalse(r.ok)
+        resp = json.loads(r.text)
+        self.assertEqual(
+            resp['err'], "Cannot find SRE Recipe Load for: NotExistUser")
+
+    def testApiSpawnEndToEnd(self):
+        """
+        Test if starting load using load generator's SRE Recipe API /spawn 
+        endpoint actually generated load, with timeout, correctly.
+
+        We do not separate them into different tests for now, due to possible
+        race conditions between concurrent execution of tests
+        """
+
+        # spawn some users, and auto stop after 15 seconds
+        form_data = {'user_count': 10, 'spawn_rate': 5, "stop_after": 10}
+        r = requests.post(
+            f"{TestLoadGenerator.api_url}/api/spawn/BasicPurchasingUser", form_data)
+        self.assertTrue(r.ok)
+        resp = json.loads(r.text)
+        self.assertEqual(
+            resp['msg'], "Started spawning 10 users at 5 users/second")
+
+        # Wait and check if all users are spawned after 5 seconds
+        # This should be true because it takes 2 seconds for 10 users to
+        # be spawned at 5 users/second, and we leave 3 more seconds as buffer
+        time.sleep(5)
+        resp = requests.get(f"{TestLoadGenerator.api_url}/stats/requests")
+        self.assertTrue(resp.ok)
+        stats = json.loads(resp.text)
+        self.assertGreater(stats.get("total_rps", 0), 0)
+        self.assertEqual(stats.get("user_count", 0), 10)
+
+        # wait 10 more seconds and check if all users are stopped
+        # This should be true because it will have elapsed 15 seconds at least
+        # since the spawn command, and we have 5 seconds of buffer.
+        time.sleep(10)
+        resp = requests.get(f"{TestLoadGenerator.api_url}/stats/requests")
+        self.assertTrue(resp.ok)
+        stats = json.loads(resp.text)
+        self.assertEqual(stats.get("user_count", 10), 0)
+
 
 def get_project_id():
     return os.environ['GOOGLE_CLOUD_PROJECT']
