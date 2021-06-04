@@ -30,9 +30,7 @@ spec:
     spec:
       containers:
         - name: locust-main
-          # TODO(tugan): update the image back after testing using cloud shell
-          # image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke:latest
-          image: docker.io/tugan0329/cloud-ops-loadgen:latest
+          image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke:latest
           imagePullPolicy: Always
           env:
             - name: LOCUST_MODE
