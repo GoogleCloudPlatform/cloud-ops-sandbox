@@ -27,21 +27,36 @@ spec:
       labels:
         app: opentelemetrycollector
     spec:
+      initContainers:
+      - name: otel-gateway-init
+        image: gcr.io/google.com/cloudsdktool/cloud-sdk:326.0.0-alpine
+        command:
+        - '/bin/bash'
+        - '-c'
+        - |
+           sed "s/{{PROJECT_ID}}/$(curl -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/project/project-id)/" /template/collector-gateway-config-template.yaml >> /conf/collector-gateway-config.yaml
+        volumeMounts:
+        - name: collector-gateway-config-template
+          mountPath: /template
+        - name: collector-gateway-config
+          mountPath: /conf
       containers:
       - name: otel-gateway
         args:
         - --config=/conf/collector-gateway-config.yaml
         image: otel/opentelemetry-collector-contrib-dev:latest
         volumeMounts:
-        - mountPath: /conf
-          name: collector-gateway-config
+        - name: collector-gateway-config
+          mountPath: /conf
       volumes:
-      - configMap:
+      - name: collector-gateway-config-template
+        configMap:
           items:
-          - key: collector-gateway-config.yaml
-            path: collector-gateway-config.yaml
-          name: collector-gateway-config
-        name: collector-gateway-config
+          - key: collector-gateway-config-template.yaml
+            path: collector-gateway-config-template.yaml
+          name: collector-gateway-config-template
+      - name: collector-gateway-config
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -60,9 +75,9 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: collector-gateway-config
+  name: collector-gateway-config-template
 data:
-  collector-gateway-config.yaml: |
+  collector-gateway-config-template.yaml: |
     receivers:
       otlp:
         protocols: 
@@ -72,11 +87,10 @@ data:
       logging:
         loglevel: debug
       googlecloud:
-        # DONOTSUBMIT Change Project to env variable
-        project: cloud-ops-sandbox-1446276954
+        project: {{PROJECT_ID}}
     service:
       pipelines:
         traces:
           receivers: [otlp]
           processors: []
-          exporters: [googlecloud, logging]
+          exporters: [googlecloud]
