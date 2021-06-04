@@ -64,15 +64,15 @@ def init_sre_recipe_api(env):
             """
             Spawn a number of users with the SRE Recipe user identifer.
 
-            URL Query Paramters:
+            Form Paramters:
             - user_count: Required. The total number of users to spawn
             - spawn_rate: Required. The spawn rate for the users.
             - stop_after: Optional. If specified, run the load generation only 
                           for the given number of seconds.
             """
             # Required Query Parameters
-            user_count = request.args.get("user_count", default=None, type=int)
-            spawn_rate = request.args.get("spawn_rate", default=None, type=int)
+            user_count = request.form.get("user_count", default=None, type=int)
+            spawn_rate = request.form.get("spawn_rate", default=None, type=int)
             user_class = get_sre_recipe_user_class(user_identifier)
 
             if user_count is None:
@@ -87,7 +87,7 @@ def init_sre_recipe_api(env):
                 return 400, {"err": f"Cannot find SRE Recipe Load for: {user_identifier}"}
 
             # Optional Query Parameters
-            stop_after = request.args.get("stop_after", default=None, type=int)
+            stop_after = request.form.get("stop_after", default=None, type=int)
             if stop_after is not None and stop_after <= 0:
                 return 400, {"err": f"Query parameter 'stop_after' must be positive: {stop_after}"}
 
@@ -107,7 +107,7 @@ def init_sre_recipe_api(env):
 
             return 200, {"msg": f"Started spawning {user_count} users at {spawn_rate} users/second"}
 
-        @env.web_ui.app.route("/api/stop", methods=['GET', 'POST'])
+        @env.web_ui.app.route("/api/stop", methods=['POST'])
         @return_as_json_response
         def stop_all():
             """Stop all currently running users"""
