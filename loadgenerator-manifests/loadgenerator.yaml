@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,7 +30,9 @@ spec:
     spec:
       containers:
         - name: locust-main
-          image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke:latest
+          # TODO(tugan): update the image back after testing using cloud shell
+          # image: gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke:latest
+          image: tugan0329/cloud-ops-loadgen:latest
           imagePullPolicy: Always
           env:
             - name: LOCUST_MODE
