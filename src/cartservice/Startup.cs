@@ -67,11 +67,6 @@ namespace cartservice
                     builder.AddAspNetCoreInstrumentation()
                         .AddOtlpExporter(options =>
                             options.Endpoint = new Uri(Configuration["OTEL_COLLECTOR_ADDR"]));
-                    Console.WriteLine($"Exporting Otel to: {Configuration["OTEL_COLLECTOR_ADDR"]}");
-                    if (cartStore is RedisCartStore redisCartStore)
-                    {
-                        builder.AddRedisInstrumentation(redisCartStore.RedisConnectionMultiplexer);
-                    }
                 }
             );
         }

@@ -27,7 +27,6 @@ namespace cartservice.cartstore
         private const int REDIS_RETRY_NUM = 5;
 
         private volatile ConnectionMultiplexer redis;
-        public ConnectionMultiplexer RedisConnectionMultiplexer => redis;
         private volatile bool isRedisConnectionOpened = false;
 
         private readonly object locker = new object();
