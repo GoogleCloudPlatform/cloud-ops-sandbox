@@ -1,0 +1,46 @@
+name: Currency Recipe
+description: >
+  This implements recipe 0, which purposefully introduces latency into the 
+  frontend service by doing a lot of unnecessary currency conversions.
+config:
+  break:
+    - type: set_env_variable
+      service: deployment/frontend
+      feature_flag: CONVERT_CURRENCIES
+      feature_value: true
+      restart_wait_seconds: 600
+  restore:
+    - type: set_env_variable
+      service: deployment/frontend
+      feature_flag: CONVERT_CURRENCIES
+      feature_value: false
+      restart_wait_seconds: 600
+  hint: >
+    Visit the external IP of the demo application to see if there are any 
+    visible changes. You can also use monitoring dashboards to see metrics 
+    associated with each service. Note: It may take up to 5 minutes for 
+    monitoring metrics to be updated
+  verify:
+    broken_service:
+      choices:
+        - 0. Ad
+        - 1. Cart
+        - 2. Checkout
+        - 3. Currency
+        - 4. Email
+        - 5. Frontend
+        - 6. Payment
+        - 7. Product Catalog
+        - 8. Rating
+        - 9. Recommendation
+        - 10. Shipping
+      answer: 5
+    broken_cause:
+      choices:
+        - 0. Dropped Requests
+        - 1. Failed connections to other services
+        - 2. High latency
+        - 3. High memory usage
+        - 4. Memory Quota Exceeded
+        - 5. Internal Server Error
+      answer: 2

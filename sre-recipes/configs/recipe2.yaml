@@ -1,0 +1,41 @@
+name: Ratings Freshness Recipe
+description: >
+  This implements recipe 2, which purposefully stops ratings service recollect 
+  API calls to rating service, so the ratings will become stale.
+config:
+  break:
+    - type: update_gcloud_scheduler
+      job_name: ratingservice-recollect-job
+      action: pause
+  restore:
+    - type: update_gcloud_scheduler
+      job_name: ratingservice-recollect-job
+      action: resume
+  hint: >
+    Product ratings are managed by the "rating service", hosted on Google AppEngine.
+    The service provides APIs that allow other services to get and update products' ratings.
+    The rating data is kept up-to-date by periodically calling an API endpoint that collects,
+    all recently sent new rating scores for each product and calculates the new rating,
+    based on the old value and the new scores. Try to check if the rating service operates normally.
+  verify:
+    broken_service:
+      choices:
+        - 0. Ad
+        - 1. Cart
+        - 2. Checkout
+        - 3. Currency
+        - 4. Email
+        - 5. Frontend
+        - 6. Payment
+        - 7. Product Catalog
+        - 8. Rating
+        - 9. Recommendation
+        - 10. Shipping
+      answer: 5
+    broken_cause:
+      choices:
+        - 0. Rating service does not run
+        - 1. Rating votes data is missing in the database
+        - 2. Scheduler job that sends recollect request to rating service does not work
+        - 3. New ratings are calculated incorrectly
+      answer: 2
