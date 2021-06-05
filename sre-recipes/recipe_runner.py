@@ -15,107 +15,98 @@
 # -*- coding: utf-8 -*-
 
 from os import path
-import subprocess
+import utils
 import logging
 import yaml
-
-# A convenient library of common commands
-COMMAND_LIB = {
-    "GET_EXTERNAL_IP": "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'",
-    "GET_GCLOUD_PROJECT_ID": "gcloud config list --format value(core.project)",
-    "GET_GCLOUD_CLUSTER_ZONE": "gcloud container clusters list --filter name:{cluster_name} --project {project_id} --format value(zone)",
-    "GET_GCLOUD_CLUSTER_AUTH_COMMAND": "gcloud container clusters get-credentials {cluster_name} --project {project_id} --zone {zone}",
-}
 
 
 class RecipeRunner:
 
-    def __init__(self):
-        self.config_root_dir = path.join(
-            path.dirname(path.abspath(__file__)), "configs")
+    def __init__(self, recipe_name):
+        filepath = path.join(path.dirname(
+            path.abspath(__file__)), "configs", f"{recipe_name}.yaml")
+        with open(filepath, "r") as file:
+            self.recipe = yaml.safe_load(file.read())
 
-    def load_recipe(self, name):
-        """Load a SRE Recipe in YAML config format"""
-        with open(path.join(self.config_root_dir, f"{name}.yaml")) as file:
-            config = yaml.load(file.read())
-            return config
+    @property
+    def name(self):
+        return self.recipe.get("name", "No name found")
 
-    ############################## Shell Commands #############################
+    @property
+    def description(self):
+        return self.recipe.get("description", "No description found")
 
-    def run_command(self, command, decode_output=True):
-        """
-        Runs the given command and returns any output and error
-        If `decode_output` is True, try to decode output with UTF-8 encoding,
-        as well as removing any single quote.
-        """
-        process = subprocess.Popen(
-            command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        output, error = process.communicate()
-        if output is not None and decode_output:
-            output = output.decode("utf-8").replace("'", '')
-        return output, error
+    @property
+    def config(self):
+        return self.recipe.get("config", {})
 
-    ####################### GCloud & Kubernetes Commands #######################
+    @property
+    def hint(self):
+        return self.config.get("hint", "This recipe has no hints.")
 
-    def get_project_id(self):
-        """Get the Google Cloud Project ID"""
-        project_id, err = self.run_command(
-            COMMAND_LIB["GET_GCLOUD_PROJECT_ID"])
-        if not project_id:
-            logging.error(f"Could not retrieve project id: {err}")
-        return project_id, err
+    ############################ Run Recipe ###################################
 
-    def get_external_ip(self):
-        """Get the IP Address for the external loadBalancer"""
-        ip_addr, err = self.run_command(
-            COMMAND_LIB["GET_EXTERNAL_IP"])
-        if not ip_addr:
-            logging.error(f"No external IP found: {err}")
-        return ip_addr, err
+    def run_break(self):
+        self.handle_actions(self.config.get("break", None))
 
-    def get_cluster_zone(self, project_id, cluster_name):
-        zone, err = self.run_command(
-            COMMAND_LIB["GET_GCLOUD_CLUSTER_ZONE"].format(
-                project_id=project_id, cluster_name=cluster_name))
-        if not zone:
+    def run_restore(self):
+        self.handle_actions(self.config.get("restore", None))
+
+    def run_hint(self):
+        print(self.hint)
+
+    def run_verify(self):
+        raise NotImplementedError()
+
+    ########################## Recipe Action Handlers ##########################
+
+    def handle_actions(self, actions):
+        for action in actions:
+            action_type = action.get("type", None)
+            if action_type == 'set_env_variable':
+                self.handle_set_env_variable(action)
+            elif action_type == 'update_gcloud_scheduler':
+                self.handle_update_gcloud_scheduler(action)
+            else:
+                logging.error(
+                    f"Unimplemented action '{action_type}' found in '{self.name}'")
+                exit(1)
+
+    def handle_set_env_variable(self, action):
+        for field in ["service", "selector", "feature_flag", "feature_value"]:
+            if field not in action:
+                logging.error(
+                    f"Can't run set_env_variable. Missing '{field}' flag in config")
+                exit(1)
+
+        utils.set_env_vars(
+            action["service"],
+            f'{action["feature_flag"]}={action["feature_value"]}')
+
+        pod_name, _ = utils.get_pod_name_by_selector(
+            f'app={action["selector"]}')
+        if not pod_name:
             logging.error(
-                f"No zone found for {cluster_name} in project {project_id}"
-            )
-        return zone, err
-
-    def auth_cluster(self, cluster_name="cloud-ops-sandbox"):
-        """
-        Authenticates cluster with kubectl commands.
-
-        @param cluster_name: the Kubernetes cluster name
-                Options: 
-                  - cloud-ops-sandbox
-                  - loadgenerator
-        """
-        logging.info("Trying to authenticate cluster...")
-        # Locate project ID
-        project_id, _ = self.get_project_id()
-        if not project_id:
-            logging.error("Can't authenticate cluster. No project ID found.")
+                f"Can't run set_env_variable. Failed to get pod name")
             exit(1)
-        # Get cluster zone
-        zone, _ = self.get_cluster_zone(project_id, cluster_name)
-        if not zone:
-            logging.error("Can't authenticate cluster. No zone found.")
-            exit(1)
-        # Get authentication command
-        auth_command, err = self.run_command(
-            COMMAND_LIB["GET_GCLOUD_CLUSTER_AUTH_COMMAND"].format(
-                project_id=project_id, cluster_name=cluster_name, zone=zone))
-        if not auth_command:
-            logging.error("Can't get authentication command")
-            exit(1)
-        # Authenticate!
-        _ = self.run_command(auth_command, decode_output=False)
-        logging.info("Cluster has been authenticated")
+
+        utils.delete_pod_by_name(pod_name)
+        utils.wait_for_service(
+            action["service"], action.get("restart_wait_seconds", 600),
+            condition="available")
+
+    def handle_update_gcloud_scheduler(self, action):
+        raise NotImplementedError()
 
 
-runner = RecipeRunner()
-# print(runner.load_recipe("recipe2"))
-print(runner.auth_cluster())
+runner = RecipeRunner("recipe0")
+# print(runner.config)
+# print(utils.get_project_id())
+print(runner.name)
+# print(runner.description)
+# print(runner.break_config)
+# print(runner.restore_config)
+print(runner.hint)
+# print(runner.verify_config)
+print(runner.run_break())
+print(runner.run_restore())
