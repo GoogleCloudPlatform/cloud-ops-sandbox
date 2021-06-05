@@ -88,7 +88,7 @@ class RecipeRunner:
             f'{action["feature_flag"]}={action["feature_value"]}')
 
         pod_name, _ = utils.get_pod_name_by_selector(
-            f'app={action["selector"]}')
+            action["selector"])
         if not pod_name:
             logging.error(
                 f"Can't run set_env_variable. Failed to get pod name")
