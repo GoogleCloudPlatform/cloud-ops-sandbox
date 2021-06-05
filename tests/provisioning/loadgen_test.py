@@ -157,8 +157,8 @@ class TestLoadGenerator(unittest.TestCase):
         race conditions between concurrent execution of tests
         """
 
-        # spawn some users, and auto stop after 15 seconds
-        form_data = {'user_count': 10, 'spawn_rate': 5, "stop_after": 10}
+        # spawn some users and auto stop after 20 seconds for cleanup
+        form_data = {'user_count': 10, 'spawn_rate': 5, "stop_after": 20}
         r = requests.post(
             f"{TestLoadGenerator.api_url}/api/spawn/BasicPurchasingUser", form_data)
         self.assertTrue(r.ok)
@@ -166,20 +166,24 @@ class TestLoadGenerator(unittest.TestCase):
         self.assertEqual(
             resp['msg'], "Started spawning 10 users at 5 users/second")
 
-        # Wait and check if all users are spawned after 5 seconds
-        # This should be true because it takes 2 seconds for 10 users to
-        # be spawned at 5 users/second, and we leave 3 more seconds as buffer
-        time.sleep(5)
-        resp = requests.get(f"{TestLoadGenerator.api_url}/stats/requests")
-        self.assertTrue(resp.ok)
-        stats = json.loads(resp.text)
-        self.assertGreater(stats.get("total_rps", 0), 0)
-        self.assertEqual(stats.get("user_count", 0), 10)
+        tries = 0
+        all_users_spawned = False
+        has_rps = False
+        while tries < 10 and not (all_users_spawned and has_rps):
+            time.sleep(1)
+            resp = requests.get(f"{TestLoadGenerator.api_url}/stats/requests")
+            self.assertTrue(resp.ok)
+            stats = json.loads(resp.text)
+            if stats["user_count"] == 10:
+                all_users_spawned = True
+            if stats["total_rps"] > 0:
+                has_rps = True
+            tries += 1
+        self.assertTrue(all_users_spawned and has_rps)
 
-        # wait 10 more seconds and check if all users are stopped
-        # This should be true because it will have elapsed 15 seconds at least
-        # since the spawn command, and we have 5 seconds of buffer.
-        time.sleep(10)
+        # wait 20 more seconds and check if all users are stopped
+        # This give us a plenty of buffer for auto stop conditions
+        time.sleep(20)
         resp = requests.get(f"{TestLoadGenerator.api_url}/stats/requests")
         self.assertTrue(resp.ok)
         stats = json.loads(resp.text)
