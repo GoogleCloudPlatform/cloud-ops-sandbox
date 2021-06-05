@@ -1,5 +1,5 @@
 name: Encoding Recipe
-description: >
+description: |
   This implements recipe 1, which purposefully breaks encoding logic in the 
   email service, which is a part of the checkout flow for sending order 
   confirmation emails.
@@ -18,7 +18,7 @@ config:
       feature_flag: ENCODE_EMAIL
       feature_value: false
       restart_wait_seconds: 600
-  hint: >
+  hint: |
     Visit the external IP of the demo application and try buying some products. 
     You can also use monitoring dashboards to see metrics associated with each 
     service, and use Cloud Logging to view logs exported by each service. 

@@ -1,5 +1,5 @@
 name: Currency Recipe
-description: >
+description: |
   This implements recipe 0, which purposefully introduces latency into the 
   frontend service by doing a lot of unnecessary currency conversions.
 config:
@@ -17,7 +17,7 @@ config:
       feature_flag: CONVERT_CURRENCIES
       feature_value: false
       restart_wait_seconds: 600
-  hint: >
+  hint: |
     Visit the external IP of the demo application to see if there are any 
     visible changes. You can also use monitoring dashboards to see metrics 
     associated with each service. Note: It may take up to 5 minutes for 

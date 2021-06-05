@@ -1,5 +1,5 @@
 name: Ratings Freshness Recipe
-description: >
+description: |
   This implements recipe 2, which purposefully stops ratings service recollect 
   API calls to rating service, so the ratings will become stale.
 config:
@@ -11,7 +11,7 @@ config:
     - type: update_gcloud_scheduler
       job_name: ratingservice-recollect-job
       action: resume
-  hint: >
+  hint: |
     Product ratings are managed by the "rating service", hosted on Google AppEngine.
     The service provides APIs that allow other services to get and update products' ratings.
     The rating data is kept up-to-date by periodically calling an API endpoint that collects,
