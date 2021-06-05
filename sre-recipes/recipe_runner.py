@@ -47,13 +47,17 @@ class RecipeRunner:
     ############################ Run Recipe ###################################
 
     def run_break(self):
-        self.handle_actions(self.config.get("break", None))
+        print('Deploying broken service...')
+        self.handle_actions(self.config.get("break", []))
+        print('Done. Deployed broken service')
 
     def run_restore(self):
-        self.handle_actions(self.config.get("restore", None))
+        print('Restoring broken service...')
+        self.handle_actions(self.config.get("restore", []))
+        print('Done. Restored broken service to working state.')
 
     def run_hint(self):
-        print(self.hint)
+        print(f'Here is your hint!\n\n{self.hint}')
 
     def run_verify(self):
         raise NotImplementedError()
@@ -103,10 +107,10 @@ runner = RecipeRunner("recipe0")
 # print(runner.config)
 # print(utils.get_project_id())
 print(runner.name)
-# print(runner.description)
+print(runner.description)
 # print(runner.break_config)
 # print(runner.restore_config)
-print(runner.hint)
+runner.run_hint()
 # print(runner.verify_config)
-print(runner.run_break())
-print(runner.run_restore())
+# print(runner.run_break())
+# print(runner.run_restore())
