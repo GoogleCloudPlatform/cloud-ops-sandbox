@@ -24,19 +24,21 @@ For information on how to run the CLI, run the following:
 `python3 sandboxctl --help`
 """
 
-from enum import Enum
 import logging
 import os
-import sys
 import signal
 import subprocess
-from os.path import dirname, abspath
-from pkgutil import iter_modules
-from pathlib import Path
+import sys
 from importlib import import_module
 from inspect import isclass
+from os.path import abspath, dirname
+from pathlib import Path
+from pkgutil import iter_modules
+
 import click
+
 from recipe import Recipe
+
 
 def get_valid_recipes(attributes):
     """
@@ -45,7 +47,6 @@ def get_valid_recipes(attributes):
     """
 
     recipe_objs = {}
-    recipe_num = 0
     for (attribute_name, attribute) in attributes:
         if isclass(attribute) and attribute is not Recipe and issubclass(attribute, Recipe):
             try:
@@ -53,14 +54,11 @@ def get_valid_recipes(attributes):
                 name = recipe_obj.get_name()
                 if recipe_obj.is_active():
                     recipe_objs[name] = recipe_obj
-                    recipe_num += 1
             except TypeError:
-                logging.warning('%s needs to implement all abstract methods', \
-                    attribute_name)
-                pass
-            except:
-                logging.warning('Unexpected error: %s', sys.exc_info()[0])
-                pass
+                logging.warning(
+                    f"{attribute_name} needs to implement all abstract methods")
+            except Exception as e:
+                logging.warning(f"Unexpected error: {e}")
     return recipe_objs
 
 
@@ -71,62 +69,69 @@ def get_recipes():
     """
 
     root_dir = Path(dirname(abspath(__file__))) / 'recipes'
-    modules = [f"recipes.{subdir}.{name}" 
-                    for subdir in os.listdir(root_dir)
-                    for _, name, _ in iter_modules([root_dir / subdir])]
+    modules = [f"recipes.{subdir}.{name}"
+               for subdir in os.listdir(root_dir)
+               for _, name, _ in iter_modules([root_dir / subdir])]
     recipe_modules = [import_module(module) for module in modules]
     attributes = [(attribute_name, getattr(recipe_module, attribute_name))
-                    for recipe_module in recipe_modules
-                    for attribute_name in dir(recipe_module)]
+                  for recipe_module in recipe_modules
+                  for attribute_name in dir(recipe_module)]
     recipes = get_valid_recipes(attributes)
     return recipes
+
 
 def get_loadgen_ip():
     Recipe._auth_cluster('LOADGEN')
     get_ip_command = "kubectl get service loadgenerator -o "\
-                        "jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+        "jsonpath='{.status.loadBalancer.ingress[0].ip}'"
     ip_addr, _ = Recipe._run_command(get_ip_command)
     ip_addr = ip_addr.decode('utf-8').strip("'")
-    
+
     return ip_addr
+
 
 def get_external_ip():
     return Recipe._get_external_ip()
 
+
 def get_project_id():
     return Recipe._get_project_id()
+
 
 cli = click.Group()
 
 RECIPES = get_recipes()
+
+
 @cli.command()
 @click.argument('action', type=click.Choice(
     ['break', 'restore', 'verify', 'hint']))
 @click.argument('recipe_name', type=click.Choice(RECIPES.keys()))
 def sre_recipes(action, recipe_name):
     """Performs an action on a recipe."""
-    logging.basicConfig(filename='srerecipes.log', level=logging.INFO, \
-        format='%(asctime)s %(message)s')
+    logging.basicConfig(filename='srerecipes.log', level=logging.INFO,
+                        format='%(asctime)s %(message)s')
     recipe = RECIPES[recipe_name]
     if action == 'break':
-        logging.info('Breaking %s', recipe_name)
+        logging.info(f"Breaking {recipe_name}")
         recipe.break_service()
     elif action == 'restore':
-        logging.info('Restoring %s', recipe_name)
+        logging.info(f"Restoring {recipe_name}")
         recipe.restore_service()
     elif action == 'verify':
-        logging.info('Verifying %s', recipe_name)
+        logging.info(f"Verifying {recipe_name}")
         recipe.verify()
     elif action == 'hint':
-        logging.info('Giving hint for %s', recipe_name)
+        logging.info(f"Giving hint for {recipe_name}")
         recipe.hint()
+
 
 @cli.command()
 @click.argument('traffic_pattern', type=click.Choice(['basic', 'step']))
 def loadgen(traffic_pattern):
     """Change traffic patterns for the loadgenerator service"""
     set_env_command = "kubectl set env deployment/loadgenerator "\
-                        f"LOCUST_TASK={traffic_pattern}_locustfile.py"
+        f"LOCUST_TASK={traffic_pattern}_locustfile.py"
     delete_pods_command = "kubectl delete pods -l app=loadgenerator"
 
     print('Redeploying Loadgenerator...')
@@ -138,8 +143,9 @@ def loadgen(traffic_pattern):
         print(f"Loadgenerator web UI: http://{ip_addr}")
     Recipe._auth_cluster('APP')
 
+
 @cli.command()
-@click.option('--project','-p', default=None,
+@click.option('--project', '-p', default=None,
               help='GCP project to deploy Cloud Operations Sandbox to')
 @click.option('--verbose', '-v', default=False, is_flag=True,
               help='print commands as they run (set -x)')
@@ -172,6 +178,7 @@ def create(project, *args, **kwargs):
         if not complete:
             os.killpg(0, signal.SIGTERM)
 
+
 @cli.command()
 def describe():
     """Show information about an existing sandbox"""
@@ -181,13 +188,12 @@ def describe():
     external_ip = "http://" + get_external_ip()
     gcp_kubernetes_path = gcp_path + '/kubernetes/workload?project=' + project_id
     gcp_monitoring_path = gcp_path + '/monitoring?project=' + project_id
-    print("""
-    Cloud Operations Sandbox info for project {}:
-    - Load generator web interface: {}
-    - Hipstershop web app address: {}
-    - Google Cloud Console KBE Dashboard: {}
-    - Google Cloud Console Monitoring Workspace {}""".format(project_id, loadgen_ip, external_ip, gcp_kubernetes_path, gcp_monitoring_path)
-    )
+    print(f"""Cloud Operations Sandbox info for project: {project_id}
+    "- Load generator web interface: {loadgen_ip}
+    "- Hipstershop web app address: {external_ip}
+    "- Google Cloud Console KBE Dashboard: {gcp_kubernetes_path}
+    "- Google Cloud Console Monitoring Workspace {gcp_monitoring_path}""")
+
 
 @cli.command()
 def destroy():
@@ -195,6 +201,7 @@ def destroy():
     os.chdir(os.path.abspath(sys.path[0]))
     destroy_command = "../terraform/destroy.sh"
     Recipe._run_command(destroy_command)
+
 
 if __name__ == "__main__":
     cli()
