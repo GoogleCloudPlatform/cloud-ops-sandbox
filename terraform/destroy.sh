@@ -20,7 +20,7 @@ set -o errexit  # Exit on error
 #set -x
 
 log() { echo "$1" >&2;  }
-
+echo 'Start shutting down resources and deleteing the project, this should take about 20 mins. Please don't close the session.'
 IFS=$'\n'
 acct=$(gcloud info --format="value(config.account)")
 
