@@ -55,7 +55,12 @@ def init_sre_recipe_api(env):
         @env.web_ui.app.route("/api/user_count")
         @return_as_json_response
         def user_count():
-            """Return the number of currently running users"""
+            """
+            Return the number of total users spawend for load generation.
+
+            Response:
+              - user_count: int
+            """
             return 200, {"user_count": env.runner.user_count}
 
         @env.web_ui.app.route("/api/spawn/<user_identifier>", methods=['POST'])
@@ -69,11 +74,19 @@ def init_sre_recipe_api(env):
             - spawn_rate: Required. The spawn rate for the users.
             - stop_after: Optional. If specified, run the load generation only 
                           for the given number of seconds.
+
+            Response:
+              On success, returns status code 200 and an acknowledgement 'msg'
+              On error, returns status code 400 for invalid arguments, and 404
+              if load pattern for 'user_identifier' is not found, as well as an
+              'err' message.
             """
             # Required Query Parameters
             user_count = request.form.get("user_count", default=None, type=int)
             spawn_rate = request.form.get("spawn_rate", default=None, type=int)
+            # The function returns None, if user_identifier is not found
             user_class = get_sre_recipe_user_class(user_identifier)
+            
 
             if user_count is None:
                 return 400, {"err": f"Must specify a valid, non-empty, integer value for query parameter 'user_count': {user_count}"}
@@ -84,7 +97,7 @@ def init_sre_recipe_api(env):
             elif spawn_rate <= 0:
                 return 400, {"err": f"Query parameter 'spawn_rate' must be positive: {spawn_rate}"}
             elif user_class is None:
-                return 400, {"err": f"Cannot find SRE Recipe Load for: {user_identifier}"}
+                return 404, {"err": f"Cannot find SRE Recipe Load for: {user_identifier}"}
 
             # Optional Query Parameters
             stop_after = request.form.get("stop_after", default=None, type=int)
@@ -105,7 +118,7 @@ def init_sre_recipe_api(env):
                 gevent.spawn_later(WAIT_SECONDS_BEFORE_SPAWN + stop_after,
                                    lambda: env.runner.quit())
 
-            return 200, {"msg": f"Started spawning {user_count} users at {spawn_rate} users/second"}
+            return 200, {"msg": f"Spawn Request Received: spawning {user_count} users at {spawn_rate} users/second"}
 
         @env.web_ui.app.route("/api/stop", methods=['POST'])
         @return_as_json_response
