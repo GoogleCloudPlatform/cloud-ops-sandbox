@@ -119,10 +119,13 @@ class TestLoadGenerator(unittest.TestCase):
         self.assertEqual(resp['msg'], "pong")
 
     @parameterized.expand([(10, None,), (None, 1,), ('foo', 1,), (1, 1.15,)])
-    def testApiSpawnFormValidation(self, user_count, spawn_rate):
+    def testApiSpawnErrorOnInvalidRequestParameter(self, user_count, spawn_rate):
         """
         Test if querying load generator's SRE Recipe API /spawn endpoint returns
-        error for invalid form data format
+        error for invalid form data format.
+
+        Specifically, we expect both user_count and spawn_rate to be required,
+        non-zero, valid integers.
         """
         form_data = {}
         if user_count:
@@ -133,10 +136,11 @@ class TestLoadGenerator(unittest.TestCase):
         r = requests.post(
             f"{TestLoadGenerator.api_url}/api/spawn/BasicPurchasingUser", form_data)
         self.assertFalse(r.ok)
+        self.assertEqual(r.status_code, 400)
         resp = json.loads(r.text)
         self.assertTrue(len(resp.get("err", "")) > 0)
 
-    def testApiSpawnUserClassExists(self):
+    def testApiSpawnErrorOnUserNotFound(self):
         """
         Test if querying load generator's SRE Recipe API /spawn endpoint returns
         error for unknown user class
@@ -144,6 +148,7 @@ class TestLoadGenerator(unittest.TestCase):
         r = requests.post(
             f"{TestLoadGenerator.api_url}/api/spawn/NotExistUser", {'user_count': 1, 'spawn_rate': 1})
         self.assertFalse(r.ok)
+        self.assertEqual(r.status_code, 404)
         resp = json.loads(r.text)
         self.assertEqual(
             resp['err'], "Cannot find SRE Recipe Load for: NotExistUser")
