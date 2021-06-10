@@ -19,15 +19,15 @@ from locust import task, between, HttpUser
 
 
 PRODUCTS = [
-    '0PUK6V6EV0',
-    '1YMWWN1N4O',
-    '2ZYFJ3GM2N',
-    '66VCHSJNUP',
-    '6E92ZMYYFZ',
-    '9SIQT8TOJO',
-    'L9ECAV7KIM',
-    'LS4PSXUNUM',
-    'OLJCESPC7Z',
+    '0PUK6V6EV0', # Vintage Record Player
+    '1YMWWN1N4O', # Home Barista Kit
+    '2ZYFJ3GM2N', # Film Camera
+    '66VCHSJNUP', # Vintage Camera Lens
+    '6E92ZMYYFZ', # Air Plant
+    '9SIQT8TOJO', # City Bike
+    'L9ECAV7KIM', # Terrarium
+    'LS4PSXUNUM', # Metal Camping Mug
+    'OLJCESPC7Z', # Vintage Typewriter
 ]
 
 
@@ -62,7 +62,7 @@ class BasicPurchasingUser(HttpUser):
             'city': 'Mountain View',
             'state': 'CA',
             'country': 'United States',
-            'credit_card_number': '4432-8015-6152-0454',
+            'credit_card_number': '1111-1111-1111-1111',
             'credit_card_expiration_month': '1',
             'credit_card_expiration_year': '2039',
             'credit_card_cvv': '672',
