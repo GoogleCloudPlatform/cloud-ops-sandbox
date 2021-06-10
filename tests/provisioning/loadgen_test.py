@@ -169,7 +169,7 @@ class TestLoadGenerator(unittest.TestCase):
         self.assertTrue(r.ok)
         resp = json.loads(r.text)
         self.assertEqual(
-            resp['msg'], "Started spawning 10 users at 5 users/second")
+            resp['msg'], "Spawn Request Received: spawning 10 users at 5 users/second")
 
         tries = 0
         all_users_spawned = False
