@@ -18,7 +18,7 @@ configargparse==1.2.3
     # via locust
 flask-basicauth==0.2.0
     # via locust
-flask==1.1.2
+flask==1.1.4
     # via
     #   flask-basicauth
     #   locust
