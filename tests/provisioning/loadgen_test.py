@@ -119,10 +119,10 @@ class TestLoadGenerator(unittest.TestCase):
         self.assertEqual(resp['msg'], "pong")
 
     @parameterized.expand([(10, None,), (None, 1,), ('foo', 1,), (1, 1.15,)])
-    def testApiSpawnErrorOnInvalidRequestParameter(self, user_count, spawn_rate):
+    def testApiSpawnErrorOnInvalidRequiredRequestParameter(self, user_count, spawn_rate):
         """
         Test if querying load generator's SRE Recipe API /spawn endpoint returns
-        error for invalid form data format.
+        error for invalid form data format for required parameters.
 
         Specifically, we expect both user_count and spawn_rate to be required,
         non-zero, valid integers.
@@ -133,6 +133,26 @@ class TestLoadGenerator(unittest.TestCase):
         if spawn_rate:
             form_data["spawn_rate"] = spawn_rate
 
+        r = requests.post(
+            f"{TestLoadGenerator.api_url}/api/spawn/BasicPurchasingUser", form_data)
+        self.assertFalse(r.ok)
+        self.assertEqual(r.status_code, 400)
+        resp = json.loads(r.text)
+        self.assertTrue(len(resp.get("err", "")) > 0)
+
+    @parameterized.expand([('foo',), (1.15,)])
+    def testApiSpawnErrorOnInvalidOptionalRequestParameter(self, stop_after):
+        """
+        Test if querying load generator's SRE Recipe API /spawn endpoint returns
+        error for invalid form data format for optional parameters.
+
+        Specifically, we expect the stop_after to be valid integers.
+        """
+        form_data = {
+            "user_count": 10,
+            "spawn_rate": 1,
+            "stop_after": stop_after
+        }
         r = requests.post(
             f"{TestLoadGenerator.api_url}/api/spawn/BasicPurchasingUser", form_data)
         self.assertFalse(r.ok)
