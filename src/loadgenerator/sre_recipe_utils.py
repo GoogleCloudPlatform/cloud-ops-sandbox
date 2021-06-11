@@ -17,6 +17,7 @@
 This module contains code for intergrating SRE Recipes with LoadGen
 """
 
+import time
 import gevent
 from flask import request
 from flask import jsonify
@@ -35,10 +36,24 @@ def return_as_json_response(fn):
     """
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        status_code, body = fn(*args, **kwargs)
-        resp = make_response(jsonify(body), status_code)
-        resp.headers["Content-Type"] = 'application/json'
-        return resp
+        try:
+            body = fn(*args, **kwargs)
+            resp = make_response(jsonify(body), 200)
+            resp.headers["Content-Type"] = 'application/json'
+            return resp
+        except LookupError as e:
+            resp = make_response(jsonify({"err": str(e)}), 404)
+            resp.headers["Content-Type"] = 'application/json'
+            return resp
+        except ValueError as e:
+            resp = make_response(jsonify({"err": str(e)}), 400)
+            resp.headers["Content-Type"] = 'application/json'
+            return resp
+        except Exception as e:
+            resp = make_response(jsonify({"err": str(e)}), 500)
+            resp.headers["Content-Type"] = 'application/json'
+            return resp
+
     return wrapper
 
 
@@ -50,7 +65,7 @@ def init_sre_recipe_api(env):
         @env.web_ui.app.route("/api/ping")
         @return_as_json_response
         def ping():
-            return 200, {"msg": "pong"}
+            return {"msg": "pong"}
 
         @env.web_ui.app.route("/api/user_count")
         @return_as_json_response
@@ -61,7 +76,7 @@ def init_sre_recipe_api(env):
             Response:
               - user_count: int
             """
-            return 200, {"user_count": env.runner.user_count}
+            return {"user_count": env.runner.user_count}
 
         @env.web_ui.app.route("/api/spawn/<user_identifier>", methods=['POST'])
         @return_as_json_response
@@ -89,40 +104,52 @@ def init_sre_recipe_api(env):
             
 
             if user_count is None:
-                return 400, {"err": f"Must specify a valid, non-empty, integer value for query parameter 'user_count': {user_count}"}
+                raise ValueError(f"Must specify a valid, non-empty, integer value for query parameter 'user_count': {request.form.get('user_count', default=None)}")
             elif spawn_rate is None:
-                return 400, {"err": f"Must specify a valid, non-empty, integer value for query parameter 'spawn_rate': {spawn_rate}"}
+                raise ValueError(f"Must specify a valid, non-empty, integer value for query parameter 'spawn_rate': {request.form.get('spawn_rate', default=None)}")
             elif user_count <= 0:
-                return 400, {"err": f"Query parameter 'user_count' must be positive: {user_count}"}
+                raise ValueError(f"Query parameter 'user_count' must be positive: {user_count}")
             elif spawn_rate <= 0:
-                return 400, {"err": f"Query parameter 'spawn_rate' must be positive: {spawn_rate}"}
+                raise ValueError(f"Query parameter 'spawn_rate' must be positive: {spawn_rate}")
             elif user_class is None:
-                return 404, {"err": f"Cannot find SRE Recipe Load for: {user_identifier}"}
+                raise LookupError(f"Cannot find SRE Recipe Load for: {user_identifier}")
 
             # Optional Query Parameters
             stop_after = request.form.get("stop_after", default=None, type=int)
             if stop_after is not None and stop_after <= 0:
-                return 400, {"err": f"Query parameter 'stop_after' must be positive: {stop_after}"}
+                raise ValueError(f"Query parameter 'stop_after' must be positive: {stop_after}")
+            elif stop_after is None and "stop_after" in request.form:
+                raise ValueError(f"stop_after must be valid integer value: {request.form['stop_after']}")
 
             # We currently only support running one SRE Recipe load each time
             # for implementation simplicity.
             env.runner.quit()  # stop existing load generating users, if any
             env.user_classes = [user_class]  # replace with the new users
 
-            # wait a short while for all existing users to stop, then
-            # start generating new load with the new user types
-            gevent.spawn_later(WAIT_SECONDS_BEFORE_SPAWN,
-                               lambda: env.runner.start(user_count, spawn_rate))
+            def spawn_when_all_users_stopped():
+                # Wait at most 10 seconds until all existing users are stopped, then
+                # start generating new load with the new user types
+                tries = 0
+                while tries < 10:
+                    if env.runner.user_count == 0:
+                        env.runner.start(user_count, spawn_rate)
+                        break
+                    tries += 1
+                    time.sleep(1)
+                # Start anyway.
+                if tries == 10:
+                    env.runner.start(user_count, spawn_rate)
+                # Stop later if applicable
+                if stop_after:
+                    gevent.spawn_later(stop_after,
+                                       lambda: env.runner.quit())
 
-            if stop_after:
-                gevent.spawn_later(WAIT_SECONDS_BEFORE_SPAWN + stop_after,
-                                   lambda: env.runner.quit())
-
-            return 200, {"msg": f"Spawn Request Received: spawning {user_count} users at {spawn_rate} users/second"}
+            gevent.spawn(spawn_when_all_users_stopped);
+            return {"msg": f"Spawn Request Received: spawning {user_count} users at {spawn_rate} users/second"}
 
         @env.web_ui.app.route("/api/stop", methods=['POST'])
         @return_as_json_response
         def stop_all():
             """Stop all currently running users"""
             env.runner.quit()
-            return 200, {"msg": "All users stopped"}
+            return {"msg": "All users stopped"}
