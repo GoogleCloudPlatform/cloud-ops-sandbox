@@ -26,8 +26,6 @@ from functools import wraps
 from locust.env import Environment
 from locust_tasks import get_sre_recipe_user_class
 
-WAIT_SECONDS_BEFORE_SPAWN = 2
-
 
 def return_as_json_response(fn):
     """
