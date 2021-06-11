@@ -100,12 +100,10 @@ data:
       otlp:
         endpoint: "opentelemetrycollector.default.svc.cluster.local:4317"
         insecure: true
-      logging:
-        loglevel: debug
     processors:
       batch:
     service:
       pipelines:
         traces:
           receivers: [otlp]
-          exporters: [otlp, logging]
+          exporters: [otlp]

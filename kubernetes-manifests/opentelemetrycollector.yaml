@@ -84,8 +84,6 @@ data:
           grpc:
     processors:
     exporters:
-      logging:
-        loglevel: debug
       googlecloud:
         project: {{PROJECT_ID}}
     service:
