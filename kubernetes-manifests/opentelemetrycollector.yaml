@@ -44,7 +44,7 @@ spec:
       - name: otel-gateway
         args:
         - --config=/conf/collector-gateway-config.yaml
-        image: otel/opentelemetry-collector-contrib-dev:latest
+        image: otel/opentelemetry-collector-contrib:0.28.0
         volumeMounts:
         - name: collector-gateway-config
           mountPath: /conf

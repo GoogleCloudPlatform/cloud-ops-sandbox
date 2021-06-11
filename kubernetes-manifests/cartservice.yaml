@@ -59,7 +59,7 @@ spec:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
       - name: otel-agent
-        image: otel/opentelemetry-collector-contrib-dev:latest
+        image: otel/opentelemetry-collector-contrib:0.28.0
         args:
         - --config=/conf/otel-agent-config.yaml
         volumeMounts:

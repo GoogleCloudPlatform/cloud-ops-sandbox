@@ -28,7 +28,7 @@ services:
   redis:
     image: "redis:alpine"
   otel-agent:
-    image: "otel/opentelemetry-collector-contrib-dev:latest"
+    image: "otel/opentelemetry-collector-contrib:0.28.0"
     command: ["--config=/etc/otel-agent-config.yaml", "${OTELCOL_ARGS}"]
     volumes:
       - ./otel-agent-config.yaml:/etc/otel-agent-config.yaml
