@@ -59,13 +59,19 @@ class Recipe(abc.ABC):
         """
 
     @staticmethod
-    def _run_command(command):
-        """Runs the given command and returns any output and error"""
-        process = subprocess.Popen(
-            command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        output, error = process.communicate()
-        return output, error
+    def _run_command(command, capture_output=True):
+        """
+        Runs the given command and returns any captured output and error.
+
+        If 'capture_output' is True (default), we will capture all the stdout
+        and stderr stream, and return the values the caller.
+
+        If 'capture_output' is False, stdout and stderr of current process is
+        used -- all outputs will be streamed to the caller. This function
+        will return (None, None) for this case, since no values are captured.
+        """
+        ret = subprocess.run(command.split(), capture_output=capture_output)
+        return ret.stdout, ret.stderr
 
     @staticmethod
     def _get_project_id():
