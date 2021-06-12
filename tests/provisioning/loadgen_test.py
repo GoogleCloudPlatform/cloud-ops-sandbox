@@ -85,7 +85,7 @@ class TestLoadGenerator(unittest.TestCase):
         if pattern:
             # reset deployment to use new pattern
             set_env_command = "kubectl set env deployment/loadgenerator " \
-                                f"LOCUST_TASK={pattern}"
+                f"LOCUST_TASK={pattern}"
             delete_pods_command = "kubectl delete pods -l app=loadgenerator"
             wait_command = "kubectl wait --for=condition=available" \
                 " --timeout=500s deployment/loadgenerator"
@@ -111,12 +111,109 @@ class TestLoadGenerator(unittest.TestCase):
         self.assertTrue(stats['user_count'] > 0)
         self.assertTrue(stats['total_rps'] > 0)
 
-    def testSreRecipeApi(self):
-        """Test if querying load generator's SRE Recipe API endpoint returns 2xx"""
+    def testApiPing(self):
+        """Test if querying load generator's SRE Recipe API /ping endpoint returns 2xx"""
         r = requests.get(f"{TestLoadGenerator.api_url}/api/ping")
         self.assertTrue(r.ok)
         resp = json.loads(r.text)
         self.assertEqual(resp['msg'], "pong")
+
+    @parameterized.expand([(10, None,), (None, 1,), ('foo', 1,), (1, 1.15,)])
+    def testApiSpawnErrorOnInvalidRequiredRequestParameter(self, user_count, spawn_rate):
+        """
+        Test if querying load generator's SRE Recipe API /spawn endpoint returns
+        error for invalid form data format for required parameters.
+
+        Specifically, we expect both user_count and spawn_rate to be required,
+        non-zero, valid integers.
+        """
+        form_data = {}
+        if user_count:
+            form_data["user_count"] = user_count
+        if spawn_rate:
+            form_data["spawn_rate"] = spawn_rate
+
+        r = requests.post(
+            f"{TestLoadGenerator.api_url}/api/spawn/BasicPurchasingUser", form_data)
+        self.assertFalse(r.ok)
+        self.assertEqual(r.status_code, 400)
+        resp = json.loads(r.text)
+        self.assertTrue(len(resp.get("err", "")) > 0)
+
+    @parameterized.expand([('foo',), (1.15,)])
+    def testApiSpawnErrorOnInvalidOptionalRequestParameter(self, stop_after):
+        """
+        Test if querying load generator's SRE Recipe API /spawn endpoint returns
+        error for invalid form data format for optional parameters.
+
+        Specifically, we expect the stop_after to be valid integers.
+        """
+        form_data = {
+            "user_count": 10,
+            "spawn_rate": 1,
+            "stop_after": stop_after
+        }
+        r = requests.post(
+            f"{TestLoadGenerator.api_url}/api/spawn/BasicPurchasingUser", form_data)
+        self.assertFalse(r.ok)
+        self.assertEqual(r.status_code, 400)
+        resp = json.loads(r.text)
+        self.assertTrue(len(resp.get("err", "")) > 0)
+
+    def testApiSpawnErrorOnUserNotFound(self):
+        """
+        Test if querying load generator's SRE Recipe API /spawn endpoint returns
+        error for unknown user class
+        """
+        r = requests.post(
+            f"{TestLoadGenerator.api_url}/api/spawn/NotExistUser", {'user_count': 1, 'spawn_rate': 1})
+        self.assertFalse(r.ok)
+        self.assertEqual(r.status_code, 404)
+        resp = json.loads(r.text)
+        self.assertEqual(
+            resp['err'], "Cannot find SRE Recipe Load for: NotExistUser")
+
+    def testApiSpawnEndToEnd(self):
+        """
+        Test if starting load using load generator's SRE Recipe API /spawn 
+        endpoint actually generated load, with timeout, correctly.
+
+        We do not separate them into different tests for now, due to possible
+        race conditions between concurrent execution of tests
+        """
+
+        # spawn some users and auto stop after 20 seconds for cleanup
+        form_data = {'user_count': 10, 'spawn_rate': 5, "stop_after": 20}
+        r = requests.post(
+            f"{TestLoadGenerator.api_url}/api/spawn/BasicPurchasingUser", form_data)
+        self.assertTrue(r.ok)
+        resp = json.loads(r.text)
+        self.assertEqual(
+            resp['msg'], "Spawn Request Received: spawning 10 users at 5 users/second")
+
+        tries = 0
+        all_users_spawned = False
+        has_rps = False
+        while tries < 10 and not (all_users_spawned and has_rps):
+            time.sleep(1)
+            resp = requests.get(f"{TestLoadGenerator.api_url}/stats/requests")
+            self.assertTrue(resp.ok)
+            stats = json.loads(resp.text)
+            if stats["user_count"] == 10:
+                all_users_spawned = True
+            if stats["total_rps"] > 0:
+                has_rps = True
+            tries += 1
+        self.assertTrue(all_users_spawned and has_rps)
+
+        # wait 20 more seconds and check if users are being stopped
+        # This give us a plenty of buffer for auto stop conditions
+        time.sleep(20)
+        resp = requests.get(f"{TestLoadGenerator.api_url}/stats/requests")
+        self.assertTrue(resp.ok)
+        stats = json.loads(resp.text)
+        self.assertLess(stats["user_count"], 10)
+
 
 def get_project_id():
     return os.environ['GOOGLE_CLOUD_PROJECT']
