@@ -4,15 +4,10 @@ SRE Recipes is a tool to help users familiarize themselves with finding the root
 
 ## Usage
 
-Currently available, active recipes names include:
-
-- recipe0
-- recipe2
-
-To view which recipes exist, run the command below in this directory:
+To view which active recipes exist, run the command below in this directory:
 
 ```
-$ ./sandboxctl --help
+$ ./sandboxctl sre-recipes --help
 ```
 To simulate a break in a specific recipe, run:
 ```
