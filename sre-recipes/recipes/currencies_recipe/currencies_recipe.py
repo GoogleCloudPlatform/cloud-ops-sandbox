@@ -57,6 +57,7 @@ class CurrenciesRecipe(Recipe):
             logging.info(f"Trying to stop any load generation: {loadgen_command}")
             Recipe._run_command(loadgen_command)
 
+        Recipe._auth_cluster(cluster="APP")
         state_str = str(state).lower()
         set_env_command = f"kubectl set env deployment/frontend CONVERT_CURRENCIES={state_str}"
         get_pod_command = """kubectl get pod -l app=frontend -o \
@@ -96,7 +97,6 @@ class CurrenciesRecipe(Recipe):
         broken version of the given service
         """
         print('Deploying broken service...')
-        Recipe._auth_cluster()
         self._deploy_state(True)
         print('Done')
         logging.info('Deployed broken service')
@@ -107,7 +107,6 @@ class CurrenciesRecipe(Recipe):
         working version of the given service
         """
         print('Deploying working service...')
-        Recipe._auth_cluster()
         self._deploy_state(False)
         print('Done')
         logging.info('Deployed working service')
