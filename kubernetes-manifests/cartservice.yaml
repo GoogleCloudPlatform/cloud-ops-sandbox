@@ -58,6 +58,7 @@ spec:
           periodSeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
+      # Add a 'sidecar' container running the OpenTelemetry collector
       - name: otel-agent
         image: otel/opentelemetry-collector-contrib:0.28.0
         args:
@@ -90,6 +91,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: otel-agent-config
+# Open Telemetry Collector config
+# https://opentelemetry.io/docs/collector/configuration
 data:
   otel-agent-config.yaml: |
     receivers:
@@ -98,12 +101,12 @@ data:
           grpc:
     exporters:
       otlp:
-        endpoint: "opentelemetrycollector.default.svc.cluster.local:4317"
+        endpoint: "opentelemetrycollector.default.svc.cluster.local:4317" # Forward traces to collector gateway in cluster
         insecure: true
     processors:
       batch:
     service:
       pipelines:
         traces:
-          receivers: [otlp]
-          exporters: [otlp]
+          receivers: [otlp] # Receive otlp-formatted data from microservice using OpenTelemetry SDK
+          exporters: [otlp] # Export to OpenTelemtry collector agent on same host
