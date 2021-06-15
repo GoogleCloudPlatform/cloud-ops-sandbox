@@ -121,7 +121,8 @@ def init_sre_recipe_api(env):
 
             # We currently only support running one SRE Recipe load each time
             # for implementation simplicity.
-            env.runner.quit()  # stop existing load generating users, if any
+            if env.runner.user_count > 0:
+                env.runner.quit()  # stop existing load generating users, if any
             env.user_classes = [user_class]  # replace with the new users
 
             def spawn_when_all_users_stopped():
