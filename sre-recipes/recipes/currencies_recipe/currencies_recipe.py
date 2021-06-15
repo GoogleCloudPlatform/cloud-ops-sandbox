@@ -77,7 +77,7 @@ class CurrenciesRecipe(Recipe):
         availability_command = "kubectl wait --for=condition=available --timeout=600s deployment/frontend"
         Recipe._run_command(availability_command)
 
-        if state:
+        if loadgen_ip and state:
             # If we are breaking the service, start generating loads to the 
             # frontend, after it is available, in order to expose the high 
             # latency (caused by this recipe) in the frontend metrics. 
