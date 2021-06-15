@@ -93,7 +93,7 @@ data:
           grpc:
     processors:
     exporters:
-      googleßcloud:
+      googlecloud:
         project: {{PROJECT_ID}}
     service:
       pipelines:
