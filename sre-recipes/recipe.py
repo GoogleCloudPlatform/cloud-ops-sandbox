@@ -70,11 +70,8 @@ class Recipe(abc.ABC):
     @staticmethod
     def _run_command_interactive(command):
         """Runs the given interactive command that waits for user input and returns any output and error"""
-        process = subprocess.Popen(
-            command.split(), shell=True, stderr=subprocess.PIPE
-        )
-        output, error = process.communicate()
-        return output, error
+        process = subprocess.run(command.split())
+        return 
 
 
     @staticmethod
