@@ -33,6 +33,8 @@ namespace cartservice.cartstore
         private readonly byte[] emptyCartBytes;
         private readonly string connectionString;
 
+        public IConnectionMultiplexer RedisConnectionMultiplexer => redis;
+
         private readonly ConfigurationOptions redisConnectionOptions;
 
         public RedisCartStore(string redisAddress)
@@ -94,7 +96,7 @@ namespace cartservice.cartstore
                 redis.ConnectionRestored += (o, e) => 
                 {
                     isRedisConnectionOpened = true;
-                    Console.WriteLine("Connection to redis was retored successfully"); 
+                    Console.WriteLine("Connection to redis was restored successfully"); 
                 };
                 redis.ConnectionFailed += (o, e) => 
                 {
