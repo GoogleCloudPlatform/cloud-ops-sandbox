@@ -1,0 +1,14 @@
+name: "Comment Bot"
+on: pull_request
+jobs:
+  commenter:
+    name: open-in-cloudshell
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post Comment
+        uses: unsplash/comment-on-pr@85a56be792d927ac4bfa2f4326607d38e80e6e60
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: "[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/${{ github.repository  }}.git&cloudshell_git_branch=${{ github.head_ref }}&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:latest)"
+          check_for_duplicate_msg: true
