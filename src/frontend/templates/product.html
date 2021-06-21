@@ -15,58 +15,100 @@
 -->
 
 {{ define "product" }}
-    {{ template "header" . }}
+{{ template "header" . }}
 
-    <main role="main">
-        <div class="py-5">
-            <div class="container bg-light py-3 px-lg-5 py-lg-5">
-                <div class="row">
-                    <div class="col-12 col-lg-5">
-                            <img class="img-fluid border" style="width: 100%;"
-                            src="{{$.product.Item.Picture}}" />
-                    </div>
-                    <div class="col-12 col-lg-7">
-                            <h2>{{$.product.Item.Name}}</h2>
-                            
-                            <p class="text-muted">
-                                {{ renderMoney $.product.Price}}
-                            </p>
-                            <hr/>
-                            <p>
-                                <h6>Product Description:</h6>
-                                {{$.product.Item.Description}}
-                            </p>
-                            <hr/>
-
-                            <form method="POST" action="/cart" class="form-inline text-muted">
-                                <input type="hidden" name="product_id" value="{{$.product.Item.Id}}"/>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <label class="input-group-text" for="quantity">Quantity</label>
-                                    </div>
-                                    <select name="quantity" id="quantity" class="custom-select form-control form-control-lg">
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                        <option>10</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-info btn-lg ml-3">Add to Cart</button>
-                                </div>
-                            </form>
-                    </div>
+<main role="main">
+    <div class="py-5">
+        <div class="container bg-light py-3 px-lg-5 py-lg-5">
+            <div class="row">
+                <div class="col-12 col-lg-5">
+                    <img class="img-fluid border" style="width: 100%;" src="{{$.product.Item.Picture}}" />
                 </div>
-                
-                {{ if $.recommendations}}
-                    <hr/>
-                    {{ template "recommendations" $.recommendations }}
-                {{ end }}
-                
-                {{ with $.ad }}{{ template "text_ad" . }}{{ end}}
+                <div class="col-12 col-lg-7">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <h2>{{$.product.Item.Name}}</h2>
+                        </div>
+                        <div class="col-md-3 justify-content-end">
+                            <div class="rating-5starts" style="--rating: {{$.product.Rating}}"></div>
+                        </div>
+                    </div>
+                    <p class="text-muted">
+                        {{ renderMoney $.product.Price}}
+                    </p>
+                    <hr />
+                    <p>
+                    <h6>Product Description:</h6>
+                    {{$.product.Item.Description}}
+                    </p>
+                    <form id="vote_form" method="POST" action="/product/{{$.product.Item.Id}}/rating" class="form-inline text-muted">
+                        <div class="input-group">
+                            <select name="rating" id="rating_select" class="custom-select form-control form-control-lg" onchange="enableVoteButton()">
+                                <option selected="" disabled="" class="text-hide">Place rating</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                            <button id="vote_btn" type="button" onclick="submitVote()" class="btn btn-info btn-lg ml-3" disabled>Vote</button>
+                        </div>
+                    </form>
+                    <hr />
+                    <form method="POST" action="/cart" class="form-inline text-muted">
+                        <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="quantity">Quantity</label>
+                            </div>
+                            <select name="quantity" id="quantity" class="custom-select form-control form-control-lg">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option>10</option>
+                            </select>
+                            <button type="submit" class="btn btn-info btn-lg ml-3">Add to Cart</button>
+                        </div>
+                    </form>
+                </div>
             </div>
+
+            {{ if $.recommendations}}
+            <hr />
+            {{ template "recommendations" $.recommendations }}
+            {{ end }}
+
+            {{ with $.ad }}{{ template "text_ad" . }}{{ end}}
         </div>
-    
-    </main>
-    {{ template "footer" . }}
+    </div>
+</main>
+{{ template "footer" . }}
+<script type="text/javascript">
+    function submitVote() {
+        const form = document.getElementById('vote_form');
+        form.classList.add('invisible');
+        const fd = new FormData(form)
+        const xhr = new XMLHttpRequest()
+        xhr.open(form.method, form.action)
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+        let data = ""
+        for (var f of fd.entries()) {
+            if (data !== "") {
+                data += "&"
+            }
+            data += f[0] + "=" + f[1]
+        }
+        xhr.send(data)
+    }
+
+    function enableVoteButton() {
+        var select = document.getElementById('rating_select');
+        if (select.value !== "") {
+            var btn = document.getElementById('vote_btn');
+            btn.disabled = false;
+        }
+    }
+</script>
 {{ end }}

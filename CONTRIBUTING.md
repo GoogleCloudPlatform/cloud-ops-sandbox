@@ -38,14 +38,17 @@ Guidelines](https://opensource.google.com/conduct/).
 > **Note:** The first build can take up to 30 minutes. Subsequent builds
 > will be faster.
 
-### Option 1: Running locally with “Docker for Desktop”
+### Option 1: Running locally
 
-> 💡 Recommended if you're planning to develop the application.
+> 💡 Recommended if you're planning to develop the application.  
+> ℹ️  Prerequisite: [Cloud SDK should be installed.](https://cloud.google.com/sdk/docs/quickstart)  
+
+#### ![kubernetes](docs/img/kubernetes.png) Run Kubernetes micro-services with “Docker for Desktop”
 
 1. Install tools to run a Kubernetes cluster locally:
 
    * kubectl (can be installed via `gcloud components install kubectl`)
-   * Docker for Desktop (Mac/Windows): It provides Kubernetes support as [noted
+   * [Docker for Desktop (Mac/Windows)](https://docs.docker.com/desktop/#download-and-install), It provides Kubernetes support as [noted
      here](https://docs.docker.com/docker-for-mac/kubernetes/).
    * [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
      (ensure version ≥v0.20)
@@ -65,9 +68,29 @@ Guidelines](https://opensource.google.com/conduct/).
    application frontend should be available at <http://localhost:80> on your
    machine.
 
-### Option 2: Running on Google Kubernetes Engine (GKE)
+#### ![app engine](docs/img/app-engine.png) Run App Engine (rating) micro-service
+
+> ℹ️   This task requires a running PostgreSQL DB instance with the configured rating database schema.
+
+1. Follow the [Testing and deploying](https://cloud.google.com/appengine/docs/standard/python3/testing-and-deploying-your-app).
+   * Install Python 3 (for example [download binaries](https://www.python.org/downloads/))
+   * Install the service dependencies (via `pip3 -r requirements.txt`)
+   * Define the required environment variables: `DB_HOST` -- PostgreSQL DB hostname; `DB_NAME` -- the name of the database where ratings are stored (usually "rating-db"); `DB_USERNAME` and `DB_PASSWORD` -- connecting credentials
+   * Run the service (via `python3 main.py`)
+   **NOTE:** If you run PostgreSQL DB locally you can reference [configure_rating_db.sh](terraform/ratingservice/configure_rating_db.sh) for the schema MDL
+
+1. Configure frontend service to use the rating service endpoint.
+   * Run `kubectl set env deployment/frontend RATING_SERVICE_ADDR=http://[host]:8080` where `[host]` is TBD
+   * Restart frontend service pods: `kubectl rollout restart deployment/frontend`
+
+1. When required to refresh the ratings according to recent votes send HTTP POST request to `http://[host]:8080/ratings:recollect`.
+
+### Option 2: Running on GCP
 
 > 💡  Recommended for demos and making it available publicly.
+
+#### ![kubernetes](docs/img/kubernetes.png) Run Kubernetes micro-services on Google Kubernetes Engine (GKE)
+
 > ℹ️   This task can be automated with `make cluster PROJECT_ID=my-project`
 
 1. Install tools specified in the previous section (Docker, kubectl, skaffold)
@@ -80,7 +103,7 @@ gcloud services enable container.googleapis.com
 
 gcloud container clusters create demo --zone=us-central1-a \
     --machine-type=n1-standard-2 \
-    --num-nodes=4 \
+    --num-nodes=2 \
     --enable-stackdriver-kubernetes \
     --scopes https://www.googleapis.com/auth/cloud-platform
 
@@ -121,22 +144,63 @@ echo "$INGRESS_HOST"
 curl -v "http://$INGRESS_HOST"
 ```
 
-1. To create monitoring examples in GCP, navigate to the monitoring folder and run 
+1. To create monitoring examples in GCP, navigate to the monitoring folder and run
 the `terraform apply` command.
 
-   2. Please note that in order to do this you will need the external IP address, project ID, 
-   and an email address. The project ID can be found in GCP or with the command `gcloud config get-value project`
+2. Please note that in order to do this you will need the external IP address, project ID,
+and an email address. The project ID can be found in GCP or with the command `gcloud config get-value project`
 
 ```bash
 cd ./monitoring
-
 terraform apply
 ```
+
 > **Troubleshooting:** A Kubernetes bug (will be fixed in 1.12) combined with
 > a Skaffold [bug](https://github.com/GoogleContainerTools/skaffold/issues/887)
 > causes the load balancer to not work, even after getting an IP address. If you
 > are seeing this, run `kubectl get service frontend-external -o=yaml | kubectl apply -f-`
 > to trigger load-balancer reconfiguration.
+
+#### ![app engine](docs/img/app-engine.png) Run App Engine micro-service on Google App Engine (GAE)
+
+> ℹ️   This task requires a running PostgreSQL DB instance with the configured rating database schema.
+> ℹ️   This task requires having App Engine application created in the project.
+
+1. Create `app.yaml` file in the `src/ratingservice` folder with the following content:
+
+```yaml
+runtime: python38
+env: standard
+service: ratingservice
+version: prod
+entrypoint: uwsgi --http-socket :8080 --wsgi-file main.py --callable app --master --processes 1 --threads 10
+env_variables:
+    DB_HOST: '[Place database hostname or IP]'
+    DB_NAME: '[Place database name]'
+    DB_USERNAME: '[Place username credential]'
+    DB_PASSWORD: '[Place password credential]'
+    MAX_DB_CONNECTIONS: 10
+basic_scaling:
+  max_instances: 10
+  idle_timeout: 10m
+```
+
+1. Deploy rating service: `gcloud app deploy --project [PROJECT_ID]`. You have to run the command from the `src/ratingservice` folder.
+
+1. Configure frontend service to use the rating service endpoint:
+
+```bash
+AE_DOMAIN=$(gcloud app describe --project=$project_id --format="value(defaultHostname)" 2>/dev/null)
+kubectl set env deployment/frontend RATING_SERVICE_ADDR=https://ratingservice-dot-$AE_DOMAIN
+kubectl rollout restart deployment/frontend
+```
+
+1. When required to refresh the ratings according to recent votes run:
+
+```bash
+AE_DOMAIN=$(gcloud app describe --project=$project_id --format="value(defaultHostname)" 2>/dev/null)
+curl -X POST 'https://ratingservice-dot-$AE_DOMAIN/ratings:recollect'
+```
 
 ### Option 3: Using Static Images
 
@@ -156,6 +220,7 @@ echo "$INGRESS_HOST"
 curl -v "http://$INGRESS_HOST"
 ```
 
+**NOTE:** To run App Engine micro-service use the instructions from Option 2.
 
 ### Generate Synthetic Traffic
 
@@ -175,7 +240,7 @@ The project contains an optional makefile to automate several common development
 make cluster PROJECT_ID=my-project
 ```
 
-2. Building and deploying from source
+2. Building and deploying Kubernetes micro-services from source
 
   - a) Standard (single deploy)
 ```bash
@@ -195,7 +260,7 @@ make logs SERVICE=x
 
 ### (Optional) Building and Running Individual Services Locally
 
-> 💡 Recommended for quick, repeatable debugging an individual microservice.
+> 💡 Recommended for quick, repeatable debugging an individual Kubernetes microservice.
 
 Each service runs in its own docker container; you can view the container images pushed to your GCP project's [Container Registry](https://console.cloud.google.com/gcr/images/). Instead of using something like GCP Cloud Build, you can also build and run each container locally.
 

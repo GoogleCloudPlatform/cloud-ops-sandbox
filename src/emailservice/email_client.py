@@ -15,37 +15,44 @@
 # limitations under the License.
 
 import grpc
+from opentelemetry import propagate, trace
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from opentelemetry.instrumentation.grpc import client_interceptor
+from opentelemetry.propagators.cloud_trace_propagator import CloudTraceFormatPropagator
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
 import demo_pb2
 import demo_pb2_grpc
+from logger import get_json_logger
 
-from logger import getJSONLogger
-logger = getJSONLogger('emailservice-client')
+logger = get_json_logger("emailservice-client")
 
-from opencensus.trace.tracer import Tracer
-from opencensus.trace.exporters import stackdriver_exporter
-from opencensus.trace.ext.grpc import client_interceptor
 
 try:
-    exporter = stackdriver_exporter.StackdriverExporter()
-    tracer = Tracer(exporter=exporter)
-    tracer_interceptor = client_interceptor.OpenCensusClientInterceptor(tracer, host_port='0.0.0.0:8080')
-except:
-    tracer_interceptor = client_interceptor.OpenCensusClientInterceptor()
+    trace.set_tracer_provider(TracerProvider())
+    trace.get_tracer_provider().add_span_processor(
+        SimpleSpanProcessor(CloudTraceSpanExporter())
+    )
+    propagate.set_global_textmap(CloudTraceFormatPropagator())
+    tracer_interceptor = client_interceptor(trace.get_tracer_provider())
+except Exception as e:
+    raise Exception("{}".format(e))
+
 
 def send_confirmation_email(email, order):
-  channel = grpc.insecure_channel('0.0.0.0:8080')
-  channel = grpc.intercept_channel(channel, tracer_interceptor)
-  stub = demo_pb2_grpc.EmailServiceStub(channel)
-  try:
-    response = stub.SendOrderConfirmation(demo_pb2.SendOrderConfirmationRequest(
-      email = email,
-      order = order
-    ))
-    logger.info('Request sent.')
-  except grpc.RpcError as err:
-    logger.error(err.details())
-    logger.error('{}, {}'.format(err.code().name, err.code().value))
+    channel = grpc.insecure_channel("0.0.0.0:8080")
+    channel = grpc.intercept_channel(channel, tracer_interceptor)
+    stub = demo_pb2_grpc.EmailServiceStub(channel)
+    try:
+        response = stub.SendOrderConfirmation(
+            demo_pb2.SendOrderConfirmationRequest(email=email, order=order)
+        )
+        logger.info("Request sent. response: {}".format(response))
+    except grpc.RpcError as err:
+        logger.error(err.details())
+        logger.error("{}, {}".format(err.code().name, err.code().value))
 
-if __name__ == '__main__':
-  logger.info('Client for email service.')
+
+if __name__ == "__main__":
+    logger.info("Client for email service.")

@@ -22,7 +22,7 @@ echo "### Begin install istio control plane"
 echo "### "
 
 # Set vars for DIRs
-ISTIO_VERSION="${ISTIO_VERSION:-1.6.2}"
+ISTIO_VERSION=1.7.1
 
 # Set the working directory to our current directory (/sandbox/terraform/istio)
 export SCRIPTPATH=$(dirname $(realpath $0))
@@ -53,8 +53,9 @@ kubectl create clusterrolebinding cluster-admin-binding \
     --clusterrole=cluster-admin \
     --user=$(gcloud config get-value core/account)
 
+# Can also set flag here if values isn't actually being read...https://istio.io/v1.4/docs/setup/install/istioctl/
 # install using operator config - https://istio.io/docs/setup/install/istioctl/#customizing-the-configuration
-${WORK_DIR}/istioctl manifest apply -f ${WORK_DIR}/istio_operator.yaml
+${WORK_DIR}/istioctl manifest install -f ${WORK_DIR}/istio_operator.yaml --skip-confirmation
 
 # apply manifests
 kubectl apply -f ${WORK_DIR}/../../istio-manifests

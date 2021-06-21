@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -52,6 +53,12 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve products"), http.StatusInternalServerError)
 		return
 	}
+	ratings, err := fe.getAllRatings(r.Context())
+	if err != nil {
+		log.WithField("error", err).Error("Cannot retrieve product ratings")
+		ratings = map[string]float64{}
+	}
+
 	cart, err := fe.getCart(r.Context(), sessionID(r))
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve cart"), http.StatusInternalServerError)
@@ -59,8 +66,9 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type productView struct {
-		Item  *pb.Product
-		Price *pb.Money
+		Item   *pb.Product
+		Price  *pb.Money
+		Rating float64
 	}
 	ps := make([]productView, len(products))
 	for i, p := range products {
@@ -69,7 +77,19 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 			renderHTTPError(log, r, w, errors.Wrapf(err, "failed to do currency conversion for product %s", p.GetId()), http.StatusInternalServerError)
 			return
 		}
-		ps[i] = productView{p, price}
+		rating, found := ratings[p.Id]
+		if !found {
+			log.WithField("product", p.Id).Error("Product rating is missing")
+			rating = 0.0
+		}
+		ps[i] = productView{p, price, rating}
+	}
+
+	// Feature: convert currency for product to all currencies
+	if strings.ToLower(os.Getenv("CONVERT_CURRENCIES")) == "true" {
+		for i := 0; i < 10*len(currencies); i++ {
+			fe.convertAllCurrencies(r, products, currencies)
+		}
 	}
 
 	if err := templates.ExecuteTemplate(w, "home", map[string]interface{}{
@@ -125,10 +145,17 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	rating, _, err := fe.getRating(r.Context(), id)
+	if err != nil {
+		log.WithField("product", id).Error("Product rating is missing")
+		rating = 0.0
+	}
+
 	product := struct {
-		Item  *pb.Product
-		Price *pb.Money
-	}{p, price}
+		Item   *pb.Product
+		Price  *pb.Money
+		Rating float64
+	}{p, price, rating}
 
 	if err := templates.ExecuteTemplate(w, "product", map[string]interface{}{
 		"session_id":      sessionID(r),
@@ -311,6 +338,25 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// postNewRatingHandler posts new rating vote for product.
+// It ignores the error responses on the vote request since it is not critical.
+func (fe *frontendServer) submitRatingHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	productID := mux.Vars(r)["id"]
+	if productID == "" {
+		renderHTTPError(log, r, w, errors.New("product id not specified"), http.StatusBadRequest)
+		return
+	}
+	rating, _ := strconv.ParseInt(r.FormValue("rating"), 10, 32)
+	log.WithField("product", productID).WithField("rating", rating).Debug("vote new rating")
+
+	err := fe.postNewRating(r.Context(), productID, int32(rating))
+	if err != nil {
+		log.WithField("error", err).Warn("failed to post new rating")
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("logging out")
@@ -353,6 +399,26 @@ func (fe *frontendServer) chooseAd(ctx context.Context, ctxKeys []string, log lo
 		return nil
 	}
 	return ads[rand.Intn(len(ads))]
+}
+
+// Converts a product's currency to every other currency
+// The error is logged as a warning since it is not critical.
+func (fe *frontendServer) convertCurrenciesForProduct(r *http.Request, product *pb.Product, currencies []string) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	for _, c := range currencies {
+		_, err := fe.convertCurrency(r.Context(), product.GetPriceUsd(), c)
+		if err != nil {
+			log.WithField("error", err).Warn("Failed converting currencies for products.")
+			return
+		}
+	}
+}
+
+// Converts the currency for all products into every other currency
+func (fe *frontendServer) convertAllCurrencies(r *http.Request, products []*pb.Product, currencies []string) {
+	for _, p := range products {
+		fe.convertCurrenciesForProduct(r, p, currencies)
+	}
 }
 
 func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWriter, err error, code int) {

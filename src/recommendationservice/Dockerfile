@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.7-slim
+FROM python:3.9-slim
 RUN apt-get update -qqy && \
 	apt-get -qqy install wget && \
 	rm -rf /var/lib/apt/lists/*
@@ -20,9 +20,14 @@ RUN apt-get update -qqy && \
 ENV PYTHONUNBUFFERED=0
 
 # download the grpc health probe
-RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \
+RUN GRPC_HEALTH_PROBE_VERSION=v0.3.5 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
+
+# install gcc (not included in slim image)
+RUN apt-get update \
+&& apt-get install gcc g++ -y \
+&& apt-get clean
 
 # get packages
 WORKDIR /recommendationservice

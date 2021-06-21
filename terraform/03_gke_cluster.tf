@@ -17,13 +17,14 @@
 # This is another example of the random provider. Here we're using it to pick a
 # zone in us-central1 at random.
 resource "random_shuffle" "zone" {
-  input = ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"]
+  # TODO: add us-central1-a and us-central1-c once GKE completely rolls out Oct 2 release
+  input = ["us-central1-b", "us-central1-f"]
 
   # Seeding the RNG is technically optional but while building this we
   # found that it only ever picked `us-central-1c` unless we seeded it. Here
   # we're using the ID of the project as a seed because it is unique to the
   # project but will not change, thereby guaranteeing stability of the results.
-  seed = "${google_project.project.id}"
+  seed = data.google_project.project.project_id
 }
 
 # First we create the cluster. If you're wondering where all the sizing details
@@ -40,15 +41,21 @@ resource "random_shuffle" "zone" {
 # replicates what the Hipster Shop README creates. If you want to see what else
 # is possible, check out the docs: https://www.terraform.io/docs/providers/google/r/container_cluster.html
 resource "google_container_cluster" "gke" {
-  project = "${google_project.project.id}"
+  provider = google-beta
+  project  = data.google_project.project.project_id
 
   # Here's how you specify the name
-  name = "stackdriver-sandbox"
+  name = "cloud-ops-sandbox"
 
   # Set the zone by grabbing the result of the random_shuffle above. It
   # returns a list so we have to pull the first element off. If you're looking
   # at this and thinking "huh terraform syntax looks a clunky" you are NOT WRONG
-  zone = "${element(random_shuffle.zone.result, 0)}"
+  location = element(random_shuffle.zone.result, 0)
+
+  # Enable Workload Identity for cluster
+  workload_identity_config {
+    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+  }
 
   # Using an embedded resource to define the node pool. Another
   # option would be to create the node pool as a separate resource and link it
@@ -63,21 +70,28 @@ resource "google_container_cluster" "gke" {
   # it's deployed, so it makes sense to accept the tradeoff for the convenience
   # of having it inline.
   #
-  # Many of the paramaters below are self-explanatory so I'll only call out
+  # Many of the parameters below are self-explanatory so I'll only call out
   # interesting things.
   node_pool {
     node_config {
+      machine_type = "n1-standard-2"
+
       oauth_scopes = [
-        "https://www.googleapis.com/auth/cloud-platform"  
+        "https://www.googleapis.com/auth/cloud-platform"
       ]
 
       labels = {
         environment = "dev",
-        cluster = "stackdriver-sandbox-main"   
+        cluster     = "cloud-ops-sandbox-main"
+      }
+
+      # Enable Workload Identity for node pool
+      workload_metadata_config {
+        node_metadata = "GKE_METADATA_SERVER"
       }
     }
-    
-    initial_node_count = 7
+
+    initial_node_count = 2
 
     autoscaling {
       min_node_count = 3
@@ -90,49 +104,66 @@ resource "google_container_cluster" "gke" {
     }
   }
 
-  # Specifies the use of "new" Stackdriver logging and monitoring
+  # Specifies the use of "new" Cloud logging and monitoring
   # https://cloud.google.com/kubernetes-engine-monitoring/
-  logging_service = "logging.googleapis.com/kubernetes"
+  logging_service    = "logging.googleapis.com/kubernetes"
   monitoring_service = "monitoring.googleapis.com/kubernetes"
 
   # Stores the zone of created gke cluster
   provisioner "local-exec" {
     command = "gcloud config set compute/zone ${element(random_shuffle.zone.result, 0)}"
   }
-  
+
   # add a hint that the service resource must be created (i.e., the service must
   # be enabled) before the cluster can be created. This will not address the
   # eventual consistency problems we have with the API but it will make sure
   # that we're at least trying to do things in the right order.
-  depends_on = ["google_project_service.gke"]
+  depends_on = [google_project_service.gke]
 }
 
 
-# Set current project 
+# Set current project
 resource "null_resource" "current_project" {
   provisioner "local-exec" {
-    command = "gcloud config set project ${google_project.project.id}"
+    command = "gcloud config set project ${data.google_project.project.project_id}"
   }
 }
 
-#resource "null_resource" "sleeping_subprocess" {
-#  provisioner "local-exec" {
-#      command = "sleep 60 >./stdout.log 2>./stderr.log & echo \"sleeping in PID\" $!"
-#  }
-#
-#  depends_on = ["google_container_cluster.gke"]
-#}
+# Gets the default Compute Engine Service Account of GKE
+data "google_compute_default_service_account" "default" {
+  project = data.google_project.project.project_id
+  depends_on = [
+    google_container_cluster.gke,
+    null_resource.current_project
+  ]
+}
 
-# Setting kubectl context to currently deployed GKE cluster
-resource "null_resource" "set_gke_context" {
-  provisioner "local-exec" {
-    command = "gcloud container clusters get-credentials stackdriver-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${google_project.project.id}"
+# Create GSA/KSA binding: let IAM auth KSAs as a svc.id.goog member name
+resource "google_service_account_iam_binding" "set_gsa_binding" {
+  service_account_id = data.google_compute_default_service_account.default.name // google_service_account.set_gsa.name
+  role = "roles/iam.workloadIdentityUser"
+
+  members = [
+    "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[default/default]"
+  ]
+
+  depends_on = [data.google_compute_default_service_account.default]
+}
+
+# Annotate KSA
+resource "null_resource" "annotate_ksa" {
+  triggers = {
+    cluster_ep = google_container_cluster.gke.endpoint #kubernetes cluster endpoint
   }
 
-  depends_on = [
-    "google_container_cluster.gke", 
-    "null_resource.current_project"
-  ]
+  provisioner "local-exec" {
+    command = <<EOT
+      gcloud container clusters get-credentials cloud-ops-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${data.google_project.project.project_id}
+      kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-service-account=${data.google_compute_default_service_account.default.email}
+    EOT
+  }
+
+  depends_on = [google_service_account_iam_binding.set_gsa_binding]
 }
 
 # Install Istio into the GKE cluster
@@ -141,16 +172,30 @@ resource "null_resource" "install_istio" {
     command = "./istio/install_istio.sh"
   }
 
-  depends_on = ["null_resource.set_gke_context"]
+  depends_on = [null_resource.annotate_ksa]
 }
 
-# Deploy microservices into GKE cluster 
+# Deploy microservices into GKE cluster
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ../kubernetes-manifests"
+    command = <<-EOT
+    kubectl apply -f ../kubernetes-manifests/redis.yaml
+    kubectl apply -f ../kubernetes-manifests/adservice.yaml
+    kubectl apply -f ../kubernetes-manifests/cartservice.yaml
+    kubectl apply -f ../kubernetes-manifests/checkoutservice.yaml
+    kubectl apply -f ../kubernetes-manifests/currencyservice.yaml
+    kubectl apply -f ../kubernetes-manifests/emailservice.yaml
+    kubectl apply -f ../kubernetes-manifests/frontend.yaml
+    kubectl apply -f ../kubernetes-manifests/opentelemetrycollector.yaml
+    kubectl apply -f ../kubernetes-manifests/paymentservice.yaml
+    kubectl apply -f ../kubernetes-manifests/productcatalogservice.yaml
+    kubectl apply -f ../kubernetes-manifests/recommendationservice.yaml
+    kubectl apply -f ../kubernetes-manifests/shippingservice.yaml
+    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${module.ratingservice.service_url}
+  EOT
   }
 
-  depends_on = ["null_resource.install_istio"]
+  depends_on = [null_resource.install_istio]
 }
 
 # We wait for all of our microservices to become available on kubernetes
@@ -163,14 +208,20 @@ resource "null_resource" "delay" {
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/currencyservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/emailservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/frontend
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/opentelemetrycollector
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/paymentservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/productcatalogservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/recommendationservice
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/shippingservice
   EOT
   }
 
   triggers = {
-    "before" = "${null_resource.deploy_services.id}"
+    "before" = null_resource.deploy_services.id
   }
 }
 
+data "external" "terraform_vars" {
+  program    = ["/bin/bash", "${path.module}/get_terraform_vars.sh"]
+  depends_on = [null_resource.delay]
+}

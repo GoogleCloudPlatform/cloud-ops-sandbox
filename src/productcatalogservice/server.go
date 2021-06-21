@@ -28,7 +28,7 @@ import (
 	"syscall"
 	"time"
 
-	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
+	pb "github.com/GoogleCloudPlatform/cloud-ops-sandbox/src/productcatalogservice/genproto"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"cloud.google.com/go/profiler"
@@ -37,14 +37,23 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/examples/exporter"
-	"go.opencensus.io/metric/metricdata"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	// OpenTelemetry
+	// OTel traces -> GCP Trace direct exporter
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/semconv"
+	apitrace "go.opentelemetry.io/otel/trace"
 )
 
 var (
@@ -78,7 +87,8 @@ func init() {
 }
 
 func main() {
-	initStackDriverTracing()
+	initOpenCensusStats()
+	initTraceProvider()
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
 	// set injected latency
@@ -119,7 +129,14 @@ func run(port int) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	srv := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+
+	intercepterOpt := otelgrpc.WithTracerProvider(otel.GetTracerProvider())
+	srv := grpc.NewServer(
+		grpc.StatsHandler(&ocgrpc.ServerHandler{}), // TODO: replace with OTel grpc metrics collector
+		// OpenTelemetry gRPC server channel interceptors receive trace contexts from clients.
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor(intercepterOpt)),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor(intercepterOpt)),
+	)
 	svc := &productCatalog{}
 	pb.RegisterProductCatalogServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
@@ -127,21 +144,10 @@ func run(port int) string {
 	return l.Addr().String()
 }
 
-func initStats(exporter *stackdriver.Exporter) {
-	exporter.StartMetricsExporter()
-	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		log.Info("Error registering default server views")
-	} else {
-		log.Info("Registered default server views")
-	}
-}
-
-func initStackDriverTracing() {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
+// Initialize Stats using OpenCensus
+// TODO: remove this after conversion to using OpenTelemetry Metrics
+func initOpenCensusStats() {
 	for i := 1; i <= 3; i++ {
-		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-
 		view.RegisterExporter(&exporter.PrintExporter{})
 		exporter, err := stackdriver.NewExporter(stackdriver.Options{
 			ProjectID:         "test-exemplar-project",
@@ -151,10 +157,12 @@ func initStackDriverTracing() {
 		if err != nil {
 			log.Warnf("failed to initialize stackdriver exporter: %+v", err)
 		} else {
-			log.Info("registered stackdriver tracing")
-
-			// Register the views to collect server stats.
-			initStats(exporter)
+			exporter.StartMetricsExporter()
+			if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
+				log.Info("Error registering default grpc server views")
+			} else {
+				log.Info("Registered default grpc server views")
+			}
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
@@ -162,6 +170,46 @@ func initStackDriverTracing() {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
+}
+
+// Initialize OTel trace provider that exports to Cloud Trace
+func initTraceProvider() {
+	// When running on GCP, authentication is handled automatically
+	// using default credentials. This environment variable check
+	// is to help debug projects running locally. It's possible for this
+	// warning to be printed while the exporter works normally. See
+	// https://developers.google.com/identity/protocols/application-default-credentials
+	// for more details.
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	if len(projectID) == 0 {
+		log.Warn("GOOGLE_CLOUD_PROJECT not set")
+	}
+	for i := 1; i <= 3; i++ {
+		exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
+		if err != nil {
+			log.Infof("failed to initialize exporter: %v", err)
+		} else {
+			// Create trace provider with the exporter.
+			// The AlwaysSample sampling policy is used here for demonstration
+			// purposes and should not be used in production environments.
+			tp := sdktrace.NewTracerProvider(
+				sdktrace.WithSampler(sdktrace.AlwaysSample()),
+				sdktrace.WithSyncer(exporter),
+				// TODO: replace with predefined constant for GKE or autodetection when available
+				sdktrace.WithResource(resource.NewWithAttributes(semconv.ServiceNameKey.String("GKE"))))
+			if err == nil {
+				log.Info("initialized trace provider")
+				otel.SetTracerProvider(tp)
+				return
+			} else {
+				d := time.Second * 10 * time.Duration(i)
+				log.Infof("sleeping %v to retry initializing trace provider", d)
+				time.Sleep(d)
+			}
+		}
+
+	}
+	log.Warn("failed to initialize trace provider")
 }
 
 func initProfiling(service, version string) {
@@ -186,7 +234,9 @@ func initProfiling(service, version string) {
 	log.Warn("could not initialize stackdriver profiler after retrying, giving up")
 }
 
-type productCatalog struct{}
+type productCatalog struct {
+	pb.UnimplementedProductCatalogServiceServer
+}
 
 func readCatalogFile(catalog *pb.ListProductsResponse) error {
 	catalogMutex.Lock()
@@ -222,27 +272,17 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, srv healthpb.He
 	return nil
 }
 
-func getSpanCtxAttachment(ctx context.Context) metricdata.Attachments {
-	attachments := map[string]interface{}{}
-	span := trace.FromContext(ctx)
-	if span == nil {
-		return attachments
-	}
-	spanCtx := span.SpanContext()
-	if spanCtx.IsSampled() {
-		attachments[metricdata.AttachmentKeySpanContext] = spanCtx
-	}
-	log.Info("DEBUGGG attachment ", attachments)
-	return attachments
-}
-
-func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
+func (p *productCatalog) ListProducts(ctx context.Context, _ *pb.Empty) (*pb.ListProductsResponse, error) {
+	span := apitrace.SpanFromContext(ctx)
+	span.AddEvent("List Products")
 	time.Sleep(extraLatency)
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
-	log.Info("DEBUGGG successfully get product ")
+	span := apitrace.SpanFromContext(ctx)
+	span.AddEvent(fmt.Sprintf("Get Product %v", req.Id))
+	log.Info("DEBUG successfully get product ")
 	time.Sleep(extraLatency)
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
@@ -251,7 +291,7 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 		}
 	}
 	if found == nil {
-		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
+		return nil, status.Errorf(codes.NotFound, "no product with ID %v", req.Id)
 	}
 	return found, nil
 }

@@ -17,6 +17,22 @@
 # Creating this variable but leaving it empty means that the user will be
 # prompted for a value when terraform is run
 variable "billing_account" {
-  type        = "string"
+  default     = null
+  type        = string
   description = "The name of your billing account. Case-sensitive."
+}
+
+variable "project_id" {
+  type        = string
+  description = "The id of your project. Case-sensitive."
+}
+
+variable "bucket_name" {
+  type        = string
+  description = "The name of your bucket to store the state file. Case-sensitive."
+}
+
+variable "skip_loadgen" {
+  default     = false
+  description = "If true, the load generator will not be deployed."
 }

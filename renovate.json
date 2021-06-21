@@ -2,12 +2,13 @@
   "extends": [
     "config:base"
   ],
-
   "pinVersions": false,
   "rebaseStalePrs": true,
+  "timezone": "America/Los_Angeles",
   "schedule": [
-    "after 9am and before 3pm"
+    "after 9am and before 3pm every tuesday"
   ],
+  "prConcurrentLimit": 5,
   "gitAuthor": null,
   "packageRules": [
     {
@@ -15,7 +16,17 @@
       "groupName": "linters"
     }
   ],
-  "labels": ["dependencies"],
-  "prConcurrentLimit": 5,
-  "reviewersFromCodeOwners": true
+  "reviewers": ["nicoleczhu"],
+  "labels": [
+    "dependencies",
+    "type: cleanup",
+    "priority: p2"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "recreateClosed": true
+  },
+  "ignoreDeps": [
+    "com.google.protobuf:protoc"
+  ]
 }

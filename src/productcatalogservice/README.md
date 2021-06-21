@@ -2,7 +2,7 @@
 
 Run the following command to restore dependencies to `vendor/` directory:
 
-    dep ensure --vendor-only
+    go mod vendor -v
 
 ## Dynamic catalog reloading / artificial delay
 

@@ -20,19 +20,34 @@ import time
 import traceback
 from concurrent import futures
 
-import googleclouddebugger
 import grpc
-from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
-from opencensus.ext.grpc import server_interceptor
-from opencensus.trace import samplers
+from grpc_health.v1 import health_pb2, health_pb2_grpc
+from opentelemetry import propagate, trace
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from opentelemetry.instrumentation.grpc import (client_interceptor,
+                                                server_interceptor)
+from opentelemetry.instrumentation.grpc.grpcext import intercept_channel
+from opentelemetry.propagators.cloud_trace_propagator import \
+    CloudTraceFormatPropagator
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
 import demo_pb2
 import demo_pb2_grpc
-from grpc_health.v1 import health_pb2
-from grpc_health.v1 import health_pb2_grpc
+from logger import get_json_logger
 
-from logger import getJSONLogger
-logger = getJSONLogger('recommendationservice-server')
+logger = get_json_logger('recommendationservice-server')
+
+try:
+    import googleclouddebugger
+    googleclouddebugger.enable(
+        module='recommendationservice',
+        version='1.0.0'
+    )
+except ImportError:
+    logger.error("could not enable debugger")
+    logger.error(traceback.print_exc())
+    pass
 
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
@@ -48,7 +63,8 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         indices = random.sample(range(num_products), num_return)
         # fetch product ids from indices
         prod_list = [filtered_products[i] for i in indices]
-        logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
+        logger.info(
+            "[Recv ListRecommendations] product_ids={}".format(prod_list))
         # build and return response
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
@@ -57,42 +73,49 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def Check(self, request, context):
         return health_pb2.HealthCheckResponse(
             status=health_pb2.HealthCheckResponse.SERVING)
+
     def Watch(self, request, context):
         return health_pb2.HealthCheckResponse(
             status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
 
+
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
-    try:
-        sampler = samplers.AlwaysOnSampler()
-        exporter = stackdriver_exporter.StackdriverExporter()
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-    except:
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+    # OpenTelemetry Tracing
+    # TracerProvider provides global state and access to tracers.
+    trace.set_tracer_provider(TracerProvider())
 
-    try:
-        googleclouddebugger.enable(
-            module='recommendationserver',
-            version='1.0.0'
-        )
-    except (Exception, err):
-        logger.error("could not enable debugger")
-        logger.error(traceback.print_exc())
-        pass
+    # Export traces to Google Cloud Trace
+    # When running on GCP, the exporter handles authentication
+    # using automatically default application credentials.
+    # When running locally, credentials may need to be set explicitly.
+    trace.get_tracer_provider().add_span_processor(
+        SimpleSpanProcessor(CloudTraceSpanExporter())
+    )
+    propagate.set_global_textmap(CloudTraceFormatPropagator())
 
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
     if catalog_addr == "":
-        raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
+        raise Exception(
+            'PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
     logger.info("product catalog address: " + catalog_addr)
+
+    # Create the gRPC client channel to ProductCatalog (server).
     channel = grpc.insecure_channel(catalog_addr)
+
+    # OpenTelemetry client interceptor passes trace contexts to the server.
+    channel = intercept_channel(
+        channel, client_interceptor(trace.get_tracer_provider()))
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
-    # create gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10)) # ,interceptors=(tracer_interceptor,))
+    # Create the gRPC server for accepting ListRecommendations Requests from frontend (client).
+    interceptor = server_interceptor(trace.get_tracer_provider())
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
+                         interceptors=(interceptor,))
 
-    # add class to gRPC server
+    # Add RecommendationService class to gRPC server.
     service = RecommendationService()
     demo_pb2_grpc.add_RecommendationServiceServicer_to_server(service, server)
     health_pb2_grpc.add_HealthServicer_to_server(service, server)
@@ -104,7 +127,7 @@ if __name__ == "__main__":
 
     # keep alive
     try:
-         while True:
+        while True:
             time.sleep(10000)
     except KeyboardInterrupt:
-            server.stop(0)
+        server.stop(0)

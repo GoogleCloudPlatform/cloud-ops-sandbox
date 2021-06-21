@@ -1,27 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.2.1" />
-    <PackageReference Include="Google.Protobuf" Version="3.12.3" />
-    <PackageReference Include="Google.Protobuf.Tools" Version="3.12.3" />
-    <PackageReference Include="grpc" Version="1.22.1" />
-    <PackageReference Include="Grpc.HealthCheck" Version="1.22.1" />
-    <PackageReference Include="grpc.tools" Version="1.22.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
-    <PackageReference Include="OpenCensus" Version="0.1.0-alpha-33381" />
-    <PackageReference Include="OpenCensus.Exporter.Stackdriver" Version="0.1.0-alpha-33381" />
-    <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
+    <Protobuf Include="Protos\Cart.proto" GrpcServices="Server" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Dockerfile">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.38.0" />
+    <PackageReference Include="OpenTelemetry" Version="1.1.0-beta4" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.1.0-beta4" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc5" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc5" />
+    <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
+    <PackageReference Include="Grpc.HealthCheck" Version="2.38.0" />
   </ItemGroup>
+
 </Project>

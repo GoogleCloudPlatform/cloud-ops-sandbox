@@ -13,24 +13,16 @@
 // limitations under the License.
 
 using System;
-using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using cartservice.interfaces;
-using Google.Protobuf;
 using Grpc.Core;
-using Hipstershop;
 using StackExchange.Redis;
-using OpenCensus.Trace;
-using OpenCensus.Trace.Sampler;
+using Google.Protobuf;
 
 namespace cartservice.cartstore
 {
     public class RedisCartStore : ICartStore
     {
-        private static ITracer tracer = Tracing.Tracer;
-
         private const string CART_FIELD_NAME = "cart";
         private const int REDIS_RETRY_NUM = 5;
 
@@ -47,7 +39,7 @@ namespace cartservice.cartstore
         {
             // Serialize empty cart into byte array.
             var cart = new Hipstershop.Cart();
-            emptyCartBytes = cart.ToByteArray();
+            emptyCartBytes = ToByteArray(cart);
             connectionString = $"{redisAddress},ssl=false,allowAdmin=true,connectRetry=5";
             
             redisConnectionOptions = ConfigurationOptions.Parse(connectionString);
@@ -80,10 +72,8 @@ namespace cartservice.cartstore
                     return;
                 }
 
-                tracer.CurrentSpan.AddAnnotation("Connecting to Redis Cache");
                 Console.WriteLine("Connecting to Redis: " + connectionString);
                 redis = ConnectionMultiplexer.Connect(redisConnectionOptions);
-                tracer.CurrentSpan.AddAnnotation("Finished connecting to Redis Cache");
                 if (redis == null || !redis.IsConnected)
                 {
                     Console.WriteLine("Wasn't able to connect to redis");
@@ -150,7 +140,7 @@ namespace cartservice.cartstore
                     }
                 }
 
-                await db.HashSetAsync(userId, new[]{ new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
+                await db.HashSetAsync(userId, new[]{ new HashEntry(CART_FIELD_NAME, ToByteArray(cart)) });
             }
             catch (Exception ex)
             {
@@ -216,6 +206,15 @@ namespace cartservice.cartstore
             {
                 return false;
             }
+        }
+
+        private static byte[] ToByteArray(Hipstershop.Cart cart)
+        {
+            if (cart == null)
+            {
+                return null;
+            }
+            return cart.ToByteArray();
         }
     }
 }

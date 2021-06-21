@@ -1,0 +1,207 @@
+#!/usr/bin/env python3
+#
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# -*- coding: utf-8 -*-
+"""
+This CLI is the interface for sre recipes. It deploys and rolls back
+broken services as well as verifies that the user found the correct
+cause of the broken service.
+
+For information on how to run the CLI, run the following:
+`python3 sandboxctl --help`
+"""
+
+import logging
+import os
+import signal
+import subprocess
+import sys
+from importlib import import_module
+from inspect import isclass
+from os.path import abspath, dirname
+from pathlib import Path
+from pkgutil import iter_modules
+
+import click
+
+from recipe import Recipe
+
+
+def get_valid_recipes(attributes):
+    """
+    Gets all valid recipes from the given list of tuples of attribute names
+    and attributes, and returns a map containing recipe names and recipe objects
+    """
+
+    recipe_objs = {}
+    for (attribute_name, attribute) in attributes:
+        if isclass(attribute) and attribute is not Recipe and issubclass(attribute, Recipe):
+            try:
+                recipe_obj = attribute()
+                name = recipe_obj.get_name()
+                if recipe_obj.is_active():
+                    recipe_objs[name] = recipe_obj
+            except TypeError:
+                logging.warning(
+                    f"{attribute_name} needs to implement all abstract methods")
+            except Exception as e:
+                logging.warning(f"Unexpected error: {e}")
+    return recipe_objs
+
+
+def get_recipes():
+    """
+    Gets all valid recipes in sre-recipes/recipes, and returns
+    a map containing recipe names and recipe objects
+    """
+
+    root_dir = Path(dirname(abspath(__file__))) / 'recipes'
+    modules = [f"recipes.{subdir}.{name}"
+               for subdir in os.listdir(root_dir)
+               for _, name, _ in iter_modules([root_dir / subdir])]
+    recipe_modules = [import_module(module) for module in modules]
+    attributes = [(attribute_name, getattr(recipe_module, attribute_name))
+                  for recipe_module in recipe_modules
+                  for attribute_name in dir(recipe_module)]
+    recipes = get_valid_recipes(attributes)
+    return recipes
+
+
+def get_loadgen_ip():
+    Recipe._auth_cluster('LOADGEN')
+    get_ip_command = "kubectl get service loadgenerator -o "\
+        "jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+    ip_addr, _ = Recipe._run_command(get_ip_command)
+    ip_addr = ip_addr.decode('utf-8').strip("'")
+
+    return ip_addr
+
+
+def get_external_ip():
+    return Recipe._get_external_ip()
+
+
+def get_project_id():
+    return Recipe._get_project_id()
+
+
+cli = click.Group()
+
+RECIPES = get_recipes()
+
+
+@cli.command()
+@click.argument('action', type=click.Choice(
+    ['break', 'restore', 'verify', 'hint']))
+@click.argument('recipe_name', type=click.Choice(RECIPES.keys()))
+def sre_recipes(action, recipe_name):
+    """Performs an action on a recipe."""
+    logging.basicConfig(filename='srerecipes.log', level=logging.INFO,
+                        format='%(asctime)s %(message)s')
+    recipe = RECIPES[recipe_name]
+    if action == 'break':
+        logging.info(f"Breaking {recipe_name}")
+        recipe.break_service()
+    elif action == 'restore':
+        logging.info(f"Restoring {recipe_name}")
+        recipe.restore_service()
+    elif action == 'verify':
+        logging.info(f"Verifying {recipe_name}")
+        recipe.verify()
+    elif action == 'hint':
+        logging.info(f"Giving hint for {recipe_name}")
+        recipe.hint()
+
+
+@cli.command()
+@click.argument('traffic_pattern', type=click.Choice(['basic', 'step']))
+def loadgen(traffic_pattern):
+    """Change traffic patterns for the loadgenerator service"""
+    set_env_command = "kubectl set env deployment/loadgenerator "\
+        f"LOCUST_TASK={traffic_pattern}_locustfile.py"
+    delete_pods_command = "kubectl delete pods -l app=loadgenerator"
+
+    print('Redeploying Loadgenerator...')
+    Recipe._run_command(set_env_command)
+    Recipe._run_command(delete_pods_command)
+    print(f'Loadgenerator deployed using {traffic_pattern} pattern')
+    ip_addr = get_loadgen_ip()
+    if ip_addr:
+        print(f"Loadgenerator web UI: http://{ip_addr}")
+    Recipe._auth_cluster('APP')
+
+
+@cli.command()
+@click.option('--project', '-p', default=None,
+              help='GCP project to deploy Cloud Operations Sandbox to')
+@click.option('--verbose', '-v', default=False, is_flag=True,
+              help='print commands as they run (set -x)')
+@click.option('--skip-workspace-prompt', default=False, is_flag=True,
+              help="Don't pause for Cloud Monitoring workspace set up")
+@click.option('--skip-loadgenerator', default=False,  is_flag=True,
+              help="Don't deploy a loadgenerator instance")
+@click.option('--service-wait', default=False,  is_flag=True,
+              help='Wait indefinitely for services to be detected by Cloud Monitoring')
+def create(project, *args, **kwargs):
+    """Create a new sandbox"""
+    os.chdir(os.path.abspath(sys.path[0]))
+    command = "../terraform/install.sh"
+    # add optional project argument
+    if project:
+        command += f' --project {project}'
+    # add flags passed in to function
+    for (arg, value) in kwargs.items():
+        if value:
+            command += f' --{arg.replace("_", "-")}'
+    os.setpgrp()
+    complete = False
+    try:
+        # run install.sh in a background shell
+        process = subprocess.Popen(command, bufsize=0, shell=True)
+        process.communicate()
+        complete = True
+    finally:
+        # kill background process if script is terminated
+        if not complete:
+            os.killpg(0, signal.SIGTERM)
+
+
+@cli.command()
+def describe():
+    """Show information about an existing sandbox"""
+    gcp_path = "https://console.cloud.google.com"
+    project_id = get_project_id()
+    loadgen_ip = "http://" + get_loadgen_ip()
+    external_ip = "http://" + get_external_ip()
+    gcp_kubernetes_path = gcp_path + '/kubernetes/workload?project=' + project_id
+    gcp_monitoring_path = gcp_path + '/monitoring?project=' + project_id
+    print(f"""Cloud Operations Sandbox info for project: {project_id}
+    "- Load generator web interface: {loadgen_ip}
+    "- Hipstershop web app address: {external_ip}
+    "- Google Cloud Console KBE Dashboard: {gcp_kubernetes_path}
+    "- Google Cloud Console Monitoring Workspace {gcp_monitoring_path}""")
+
+
+@cli.command()
+def destroy():
+    """Delete an existing sandbox"""
+    os.chdir(os.path.abspath(sys.path[0]))
+    destroy_command = "../terraform/destroy.sh"
+    Recipe._run_command_interactive(destroy_command)
+
+
+if __name__ == "__main__":
+    cli()

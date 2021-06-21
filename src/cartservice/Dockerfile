@@ -12,32 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM microsoft/dotnet:2.1-sdk-alpine as builder
+FROM mcr.microsoft.com/dotnet/sdk:5.0.102-ca-patch-buster-slim as builder
 WORKDIR /app
+COPY cartservice.csproj .
+RUN dotnet restore cartservice.csproj -r linux-musl-x64
 COPY . .
-RUN dotnet restore && \
-    dotnet build && \
-    dotnet publish -c release -r linux-musl-x64 -o /cartservice
+RUN dotnet publish cartservice.csproj -p:PublishSingleFile=true -r linux-musl-x64 --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c release -o cart_out --no-restore
 
-# cartservice
-FROM alpine:3.8
-
-RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \
+FROM mcr.microsoft.com/dotnet/runtime-deps:5.0.1-alpine3.12-amd64
+RUN GRPC_HEALTH_PROBE_VERSION=v0.3.5 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
-
-# Dependencies for runtime
-# busybox-extras => telnet
-RUN apk add --no-cache \
-    busybox-extras \
-    libc6-compat \
-    libunwind \
-    libuuid \
-    libgcc \
-    libstdc++ \
-    libintl \
-    openssl \
-    icu
 WORKDIR /app
-COPY --from=builder /cartservice .
-ENTRYPOINT ["./cartservice", "start"]
+COPY --from=builder /app/cart_out ./
+ENTRYPOINT ["/app/cartservice"]

@@ -1,0 +1,129 @@
+{
+  "displayName": "Rating Service Dashboard",
+  "gridLayout": {
+    "columns": 2,
+    "widgets": [
+      {
+        "title": "Responses Count by Code",
+        "xyChart": {
+          "chartOptions": {
+            "mode": "COLOR"
+          },
+          "dataSets": [
+            {
+              "legendTemplate": "${metric.labels.response_code}",
+              "minAlignmentPeriod": "60s",
+              "plotType": "LINE",
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "aggregation": {
+                    "crossSeriesReducer": "REDUCE_SUM",
+                    "groupByFields": [
+                      "metric.label.\"response_code\""
+                    ],
+                    "perSeriesAligner": "ALIGN_SUM"
+                  },
+                  "filter": "metric.type=\"appengine.googleapis.com/http/server/response_count\" resource.type=\"gae_app\" resource.label.\"version_id\"=\"prod\" resource.label.\"module_id\"=\"ratingservice\""
+                }
+              }
+            }
+          ],
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "HTTP Response Latency",
+        "xyChart": {
+          "chartOptions": {
+            "mode": "COLOR"
+          },
+          "dataSets": [
+            {
+              "minAlignmentPeriod": "60s",
+              "plotType": "LINE",
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_PERCENTILE_95"
+                  },
+                  "filter": "metric.type=\"appengine.googleapis.com/http/server/response_latencies\" resource.type=\"gae_app\" resource.label.\"module_id\"=\"ratingservice\" resource.label.\"version_id\"=\"prod\""
+                },
+                "unitOverride": "1"
+              }
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "Instance Count by State",
+        "xyChart": {
+          "chartOptions": {
+            "mode": "COLOR"
+          },
+          "dataSets": [
+            {
+              "legendTemplate": "${metric.labels.state}",
+              "minAlignmentPeriod": "60s",
+              "plotType": "LINE",
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "aggregation": {
+                    "crossSeriesReducer": "REDUCE_MEAN",
+                    "groupByFields": [
+                      "metric.label.\"state\""
+                    ],
+                    "perSeriesAligner": "ALIGN_MEAN"
+                  },
+                  "filter": "metric.type=\"appengine.googleapis.com/system/instance_count\" resource.type=\"gae_app\" resource.label.\"module_id\"=\"ratingservice\" resource.label.\"version_id\"=\"prod\""
+                }
+              }
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "HTTP Denied From Over Quota",
+        "xyChart": {
+          "chartOptions": {
+            "mode": "COLOR"
+          },
+          "dataSets": [
+            {
+              "minAlignmentPeriod": "60s",
+              "plotType": "LINE",
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_RATE"
+                  },
+                  "filter": "metric.type=\"appengine.googleapis.com/http/server/quota_denial_count\" resource.type=\"gae_app\"",
+                  "secondaryAggregation": {
+                    "perSeriesAligner": "ALIGN_MAX"
+                  }
+                }
+              }
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          }
+        }
+      }
+    ]
+  }
+}

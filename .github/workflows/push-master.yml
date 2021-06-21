@@ -18,6 +18,8 @@ on:
     # run on pushes to master
     branches:
       - master
+env:
+  PROJECT_ID: stackdriver-sandbox-230822
 jobs:
   push-master:
     runs-on: [self-hosted, push-privilege]
@@ -29,10 +31,21 @@ jobs:
         set -x
         skaffold config set --global local-cluster false
         # tag with git hash
-        skaffold build --default-repo=gcr.io/$PROJECT_ID \
+        skaffold build --default-repo=gcr.io/${{ env.PROJECT_ID }} \
                        --tag=$GITHUB_SHA
         # tag as latest
-        skaffold build --default-repo=gcr.io/$PROJECT_ID \
+        skaffold build --default-repo=gcr.io/${{ env.PROJECT_ID }} \
                        --tag=latest
-      env:
-        PROJECT_ID: ${{ secrets.PROJECT_ID }}
+    - name: Push Load Generator Image to GCR
+      timeout-minutes: 20
+      run: |
+        set -x
+        gcloud auth configure-docker --quiet
+        # build and tag with git hash
+        IMAGE_SHA=gcr.io/${{ env.PROJECT_ID }}/sandbox/loadgenerator/gke:$GITHUB_SHA
+        docker build -t $IMAGE_SHA ./src/loadgenerator
+        docker push $IMAGE_SHA
+        # build and tag with latest
+        IMAGE_LATEST=gcr.io/${{ env.PROJECT_ID }}/sandbox/loadgenerator/gke:latest
+        docker build -t $IMAGE_LATEST ./src/loadgenerator
+        docker push $IMAGE_LATEST

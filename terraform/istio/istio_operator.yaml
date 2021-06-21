@@ -110,15 +110,6 @@ spec:
             maxSurge: "100%"
             maxUnavailable: "25%"
 
-    # Security feature
-    citadel:
-      enabled: false
-      k8s:
-        strategy:
-          rollingUpdate:
-            maxSurge: "100%"
-            maxUnavailable: "25%"
-
     # Istio Gateway feature
     ingressGateways:
     - name: istio-ingressgateway
@@ -177,7 +168,6 @@ spec:
     global:
       istioNamespace: istio-system
       istiod:
-        enabled: true
         enableAnalysis: false
       logging:
         level: "default:info"
@@ -207,11 +197,9 @@ spec:
         excludeOutboundPorts: ""
         excludeInboundPorts: ""
         autoInject: enabled
-        envoyStatsd:
-          enabled: false
-          host: # example: statsd-svc.istio-system
-          port: # example: 9125
         tracer: "zipkin"
+        # Controls if sidecar is injected at the front of the container list and blocks the start of the other containers until the proxy is ready
+        holdApplicationUntilProxyStarts: true
       proxy_init:
         image: proxyv2
         resources:

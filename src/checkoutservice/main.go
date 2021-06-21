@@ -27,14 +27,24 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
-	money "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money"
+	pb "github.com/GoogleCloudPlatform/cloud-ops-sandbox/src/checkoutservice/genproto"
+	money "github.com/GoogleCloudPlatform/cloud-ops-sandbox/src/checkoutservice/money"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+
+	// OpenTelemetry
+	// OTel traces -> GCP Trace direct exporter
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/semconv"
+	apitrace "go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -60,15 +70,30 @@ func init() {
 
 type checkoutService struct {
 	productCatalogSvcAddr string
-	cartSvcAddr           string
-	currencySvcAddr       string
-	shippingSvcAddr       string
-	emailSvcAddr          string
-	paymentSvcAddr        string
+	productCatalogSvcConn *grpc.ClientConn
+
+	cartSvcAddr string
+	cartSvcConn *grpc.ClientConn
+
+	currencySvcAddr string
+	currencySvcConn *grpc.ClientConn
+
+	shippingSvcAddr string
+	shippingSvcConn *grpc.ClientConn
+
+	emailSvcAddr string
+	emailSvcConn *grpc.ClientConn
+
+	paymentSvcAddr string
+	paymentSvcConn *grpc.ClientConn
+
+	pb.UnimplementedCheckoutServiceServer
 }
 
 func main() {
-	go initStackDriverTracing()
+	ctx := context.Background()
+	go initOpenCensusStats()
+	initTraceProvider()
 	go initProfiling("checkoutservice", "1.0.0")
 
 	port := listenPort
@@ -84,13 +109,26 @@ func main() {
 	mustMapEnv(&svc.emailSvcAddr, "EMAIL_SERVICE_ADDR")
 	mustMapEnv(&svc.paymentSvcAddr, "PAYMENT_SERVICE_ADDR")
 
+	mustConnGRPC(ctx, &svc.shippingSvcConn, svc.shippingSvcAddr)
+	mustConnGRPC(ctx, &svc.productCatalogSvcConn, svc.productCatalogSvcAddr)
+	mustConnGRPC(ctx, &svc.cartSvcConn, svc.cartSvcAddr)
+	mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr)
+	mustConnGRPC(ctx, &svc.emailSvcConn, svc.emailSvcAddr)
+	mustConnGRPC(ctx, &svc.paymentSvcConn, svc.paymentSvcAddr)
+
 	log.Infof("service config: %+v", svc)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
 		log.Fatal(err)
 	}
-	srv := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+	intercepterOpt := otelgrpc.WithTracerProvider(otel.GetTracerProvider())
+	srv := grpc.NewServer(
+		grpc.StatsHandler(&ocgrpc.ServerHandler{}), // TODO: replace with OTel grpc metrics collector
+		// OpenTelemetry gRPC server channel interceptors receive trace contexts from clients.
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor(intercepterOpt)),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor(intercepterOpt)),
+	)
 	pb.RegisterCheckoutServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
 	log.Infof("starting to listen on tcp: %q", lis.Addr().String())
@@ -98,29 +136,22 @@ func main() {
 	log.Fatal(err)
 }
 
-func initStats(exporter *stackdriver.Exporter) {
-	view.SetReportingPeriod(60 * time.Second)
-	view.RegisterExporter(exporter)
-	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		log.Warn("Error registering default server views")
-	} else {
-		log.Info("Registered default server views")
-	}
-}
-
-func initStackDriverTracing() {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
+// Initialize Stats collection using OpenCensus
+// TOOD: remove this after conversion to OpenTelemetry Metrics
+func initOpenCensusStats() {
 	for i := 1; i <= 3; i++ {
 		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 		if err != nil {
 			log.Infof("failed to initialize stackdriver exporter: %+v", err)
 		} else {
-			trace.RegisterExporter(exporter)
-			log.Info("registered stackdriver tracing")
-
 			// Register the views to collect server stats.
-			initStats(exporter)
+			view.SetReportingPeriod(60 * time.Second)
+			view.RegisterExporter(exporter)
+			if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
+				log.Warn("Error registering default server views")
+			} else {
+				log.Info("Registered default server views")
+			}
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
@@ -128,6 +159,46 @@ func initStackDriverTracing() {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
+}
+
+// Initialize OTel trace provider that exports to Cloud Trace
+func initTraceProvider() {
+	// When running on GCP, authentication is handled automatically
+	// using default credentials. This environment variable check
+	// is to help debug projects running locally. It's possible for this
+	// warning to be printed while the exporter works normally. See
+	// https://developers.google.com/identity/protocols/application-default-credentials
+	// for more details.
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	if len(projectID) == 0 {
+		log.Warn("GOOGLE_CLOUD_PROJECT not set")
+	}
+	for i := 1; i <= 3; i++ {
+		exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
+		if err != nil {
+			log.Infof("failed to initialize exporter: %v", err)
+		} else {
+			// Create trace provider with the exporter.
+			// This is a demo app with low QPS. AlwaysSample() is used here
+			// to make sure traces are available for observation and analysis.
+			// It should not be used in production environments.
+			tp := sdktrace.NewTracerProvider(
+				sdktrace.WithSampler(sdktrace.AlwaysSample()),
+				sdktrace.WithSyncer(exporter),
+				// TODO: replace with predefined constant for GKE or autodetection when available
+				sdktrace.WithResource(resource.NewWithAttributes(semconv.ServiceNameKey.String("GKE"))))
+			if err == nil {
+				log.Info("initialized trace provider")
+				otel.SetTracerProvider(tp)
+				return
+			} else {
+				d := time.Second * 10 * time.Duration(i)
+				log.Infof("sleeping %v to retry initializing trace provider", d)
+				time.Sleep(d)
+			}
+		}
+	}
+	log.Warn("failed to initialize trace provider")
 }
 
 func initProfiling(service, version string) {
@@ -160,11 +231,20 @@ func mustMapEnv(target *string, envKey string) {
 	*target = v
 }
 
+// Watch is for health checking.
 func (cs *checkoutService) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
 	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
 
+// Watch is for health checking.
+func (cs *checkoutService) Watch(req *healthpb.HealthCheckRequest, server healthpb.Health_WatchServer) error {
+	return nil
+}
+
+// Acting as gRPC server, handling PlaceOrder request from Frontend.
 func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderRequest) (*pb.PlaceOrderResponse, error) {
+	span := apitrace.SpanFromContext(ctx)
+	span.AddEvent(fmt.Sprintf("Place Order for user %q", req.UserId))
 	log.Infof("[PlaceOrder] user_id=%q user_currency=%q", req.UserId, req.UserCurrency)
 
 	orderID, err := uuid.NewUUID()
@@ -172,6 +252,8 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		return nil, status.Errorf(codes.Internal, "failed to generate order uuid")
 	}
 
+	// Dispatch subtasks (as gRPC client)
+	span.AddEvent("Prepare Items from Cart")
 	prep, err := cs.prepareOrderItemsAndShippingQuoteFromCart(ctx, req.UserId, req.UserCurrency, req.Address)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
@@ -185,17 +267,20 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		total = money.Must(money.Sum(total, *it.Cost))
 	}
 
+	span.AddEvent("Charge Credit Card")
 	txID, err := cs.chargeCard(ctx, &total, req.CreditCard)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to charge card: %+v", err)
 	}
 	log.Infof("payment went through (transaction_id: %s)", txID)
 
+	span.AddEvent("Prepare Shipment")
 	shippingTrackingID, err := cs.shipOrder(ctx, req.Address, prep.cartItems)
 	if err != nil {
 		return nil, status.Errorf(codes.Unavailable, "shipping error: %+v", err)
 	}
 
+	span.AddEvent("Empty Cart")
 	_ = cs.emptyUserCart(ctx, req.UserId)
 
 	orderResult := &pb.OrderResult{
@@ -206,6 +291,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		Items:              prep.orderItems,
 	}
 
+	span.AddEvent("Send Confirmation Email")
 	if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {
 		log.Warnf("failed to send order confirmation to %q: %+v", req.Email, err)
 	} else {
@@ -246,16 +332,9 @@ func (cs *checkoutService) prepareOrderItemsAndShippingQuoteFromCart(ctx context
 	return out, nil
 }
 
+// Acting as gRPC client
 func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Address, items []*pb.CartItem) (*pb.Money, error) {
-	conn, err := grpc.DialContext(ctx, cs.shippingSvcAddr,
-		grpc.WithInsecure(),
-		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
-	if err != nil {
-		return nil, fmt.Errorf("could not connect shipping service: %+v", err)
-	}
-	defer conn.Close()
-
-	shippingQuote, err := pb.NewShippingServiceClient(conn).
+	shippingQuote, err := pb.NewShippingServiceClient(cs.shippingSvcConn).
 		GetQuote(ctx, &pb.GetQuoteRequest{
 			Address: address,
 			Items:   items})
@@ -265,48 +344,36 @@ func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Addres
 	return shippingQuote.GetCostUsd(), nil
 }
 
+// Acting as gPRC client
 func (cs *checkoutService) getUserCart(ctx context.Context, userID string) ([]*pb.CartItem, error) {
-	conn, err := grpc.DialContext(ctx, cs.cartSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
-	if err != nil {
-		return nil, fmt.Errorf("could not connect cart service: %+v", err)
-	}
-	defer conn.Close()
-
-	cart, err := pb.NewCartServiceClient(conn).GetCart(ctx, &pb.GetCartRequest{UserId: userID})
+	cart, err := pb.NewCartServiceClient(cs.cartSvcConn).GetCart(ctx, &pb.GetCartRequest{UserId: userID})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user cart during checkout: %+v", err)
 	}
 	return cart.GetItems(), nil
 }
 
+// Acting as gPRC client
 func (cs *checkoutService) emptyUserCart(ctx context.Context, userID string) error {
-	conn, err := grpc.DialContext(ctx, cs.cartSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
-	if err != nil {
-		return fmt.Errorf("could not connect cart service: %+v", err)
-	}
-	defer conn.Close()
-
-	if _, err = pb.NewCartServiceClient(conn).EmptyCart(ctx, &pb.EmptyCartRequest{UserId: userID}); err != nil {
+	if _, err := pb.NewCartServiceClient(cs.cartSvcConn).EmptyCart(ctx, &pb.EmptyCartRequest{UserId: userID}); err != nil {
 		return fmt.Errorf("failed to empty user cart during checkout: %+v", err)
 	}
 	return nil
 }
 
+// Acting as gPRC client
 func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartItem, userCurrency string) ([]*pb.OrderItem, error) {
 	out := make([]*pb.OrderItem, len(items))
 
-	conn, err := grpc.DialContext(ctx, cs.productCatalogSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
-	if err != nil {
-		return nil, fmt.Errorf("could not connect product catalog service: %+v", err)
-	}
-	defer conn.Close()
-	cl := pb.NewProductCatalogServiceClient(conn)
+	cl := pb.NewProductCatalogServiceClient(cs.productCatalogSvcConn)
 
 	for i, item := range items {
 		product, err := cl.GetProduct(ctx, &pb.GetProductRequest{Id: item.GetProductId()})
 		if err != nil {
 			return nil, fmt.Errorf("failed to get product #%q", item.GetProductId())
 		}
+		// Note: This log line is used in a log-based metric. Changes to the log line will not be compatible with the metric.
+		log.Infof("orderedItem=%q, id=%q", product.Name, product.Id)
 		price, err := cs.convertCurrency(ctx, product.GetPriceUsd(), userCurrency)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert price of %q to %s", item.GetProductId(), userCurrency)
@@ -318,13 +385,9 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 	return out, nil
 }
 
+// Acting as gPRC client
 func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, toCurrency string) (*pb.Money, error) {
-	conn, err := grpc.DialContext(ctx, cs.currencySvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
-	if err != nil {
-		return nil, fmt.Errorf("could not connect currency service: %+v", err)
-	}
-	defer conn.Close()
-	result, err := pb.NewCurrencyServiceClient(conn).Convert(context.TODO(), &pb.CurrencyConversionRequest{
+	result, err := pb.NewCurrencyServiceClient(cs.currencySvcConn).Convert(ctx, &pb.CurrencyConversionRequest{
 		From:   from,
 		ToCode: toCurrency})
 	if err != nil {
@@ -333,14 +396,9 @@ func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, 
 	return result, err
 }
 
+// Acting as gPRC client
 func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, paymentInfo *pb.CreditCardInfo) (string, error) {
-	conn, err := grpc.DialContext(ctx, cs.paymentSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
-	if err != nil {
-		return "", fmt.Errorf("failed to connect payment service: %+v", err)
-	}
-	defer conn.Close()
-
-	paymentResp, err := pb.NewPaymentServiceClient(conn).Charge(ctx, &pb.ChargeRequest{
+	paymentResp, err := pb.NewPaymentServiceClient(cs.paymentSvcConn).Charge(ctx, &pb.ChargeRequest{
 		Amount:     amount,
 		CreditCard: paymentInfo})
 	if err != nil {
@@ -350,24 +408,15 @@ func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, pay
 }
 
 func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email string, order *pb.OrderResult) error {
-	conn, err := grpc.DialContext(ctx, cs.emailSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
-	if err != nil {
-		return fmt.Errorf("failed to connect email service: %+v", err)
-	}
-	defer conn.Close()
-	_, err = pb.NewEmailServiceClient(conn).SendOrderConfirmation(ctx, &pb.SendOrderConfirmationRequest{
+	_, err := pb.NewEmailServiceClient(cs.emailSvcConn).SendOrderConfirmation(ctx, &pb.SendOrderConfirmationRequest{
 		Email: email,
 		Order: order})
 	return err
 }
 
+// Acting as gPRC client
 func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, items []*pb.CartItem) (string, error) {
-	conn, err := grpc.DialContext(ctx, cs.shippingSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
-	if err != nil {
-		return "", fmt.Errorf("failed to connect email service: %+v", err)
-	}
-	defer conn.Close()
-	resp, err := pb.NewShippingServiceClient(conn).ShipOrder(ctx, &pb.ShipOrderRequest{
+	resp, err := pb.NewShippingServiceClient(cs.shippingSvcConn).ShipOrder(ctx, &pb.ShipOrderRequest{
 		Address: address,
 		Items:   items})
 	if err != nil {
@@ -376,4 +425,18 @@ func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, i
 	return resp.GetTrackingId(), nil
 }
 
-// TODO: Dial and create client once, reuse.
+// Helper function for gRPC connections: Dial and create client once, reuse.
+func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
+	var err error
+	intercepterOpt := otelgrpc.WithTracerProvider(otel.GetTracerProvider())
+	*conn, err = grpc.DialContext(ctx, addr,
+		grpc.WithInsecure(),
+		grpc.WithTimeout(time.Second*3),
+		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}), // TODO: replace with OTel grpc metrics collector
+		// OpenTelemetry gRPC client channel interceptors pass trace contexts to the server.
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor(intercepterOpt)),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor(intercepterOpt)))
+	if err != nil {
+		panic(fmt.Sprintf("Error %s grpc: failed to connect %s", err, addr))
+	}
+}
