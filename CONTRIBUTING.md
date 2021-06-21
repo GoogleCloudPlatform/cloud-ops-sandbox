@@ -315,10 +315,8 @@ gcr.io/[PROJECT_ID]/[IMAGE]
 ## Open in Cloud Shell Links
 
 When developing sandbox, it can be useful to launch a new Cloud Shell session straight from your branch. You can do this by modifying
-the following url:
+and opening the following url:
 
-```
 https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=**your-branch-here**&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:latest
-```
 
 When you're ready to open a PR, a GitHub Actions bot will attach an Open in Cloud Shell button directing to your changes automatically

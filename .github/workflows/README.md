@@ -116,7 +116,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
     - rebuilds tagged versions of the custom cloud shell image from the base cloud shell image (including the latest version)
 - prints logs from Cloud Build trigger run
 
-### pr-comment-bot.yml
+### PR-Comment-Bot.yml
 
 #### Triggers
 - on each new PR
