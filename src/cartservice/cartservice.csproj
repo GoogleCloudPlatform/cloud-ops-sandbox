@@ -15,7 +15,7 @@
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc5" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc5" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
-    <PackageReference Include="Grpc.HealthCheck" Version="2.38.0" />
+    <PackageReference Include="Grpc.HealthCheck" Version="2.38.1" />
   </ItemGroup>
 
 </Project>
