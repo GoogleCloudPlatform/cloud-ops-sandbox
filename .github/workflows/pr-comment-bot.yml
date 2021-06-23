@@ -24,5 +24,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          msg: "[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/${{ github.repository  }}.git&cloudshell_git_branch=${{ github.head_ref }}&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:latest)"
+          msg: |
+            [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/${{ github.repository  }}.git&cloudshell_git_branch=${{ github.head_ref }}&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:latest)
+            ---
+            > Note: Open in Cloud Shell may not work properly if this PR contains changes to the custom Cloud Shell image
           check_for_duplicate_msg: true
