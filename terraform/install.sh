@@ -192,13 +192,13 @@ applyTerraform() {
 
   log "Initialize terraform backend with bucket ${bucket_name}"
 
-  if terraform init -backend-config "bucket=${bucket_name}" -lock=false 2> /dev/null; then
+  if terraform init -backend-config "bucket=${bucket_name}" -lockfile=false 2> /dev/null; then
     log "Credential check OK..."
   else
     log ""
     log "Credential check failed. Please login..."
     gcloud auth application-default login
-    terraform init -backend-config "bucket=${bucket_name}" -lock=false # lock-free to prevent access fail
+    terraform init -backend-config "bucket=${bucket_name}" -lockfile=false # lock-free to prevent access fail
   fi
 
   log "Apply Terraform automation"
@@ -237,7 +237,7 @@ installMonitoring() {
   python3 monitoring/istio_service_setup.py $project_id $CLUSTER_ZONE $service_wait
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
-  terraform init -lock=false
+  terraform init -lockfile=false
   terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}" -var="zone=${CLUSTER_ZONE}"
   popd
 }

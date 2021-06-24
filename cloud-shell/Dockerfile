@@ -14,9 +14,9 @@
 
 FROM gcr.io/cloudshell-images/cloudshell:latest
 
-# install Terraform 0.13.1
+# install Terraform 1.0.0
 RUN sudo apt-get install unzip && \
-  wget -q https://releases.hashicorp.com/terraform/0.13.1/terraform_0.13.1_linux_amd64.zip -O ./terraform.zip && \
+  wget -q https://releases.hashicorp.com/terraform/1.0.0/terraform_1.0.0_linux_amd64.zip -O ./terraform.zip && \
   unzip -o terraform.zip && \
   sudo install terraform /usr/local/bin
 
