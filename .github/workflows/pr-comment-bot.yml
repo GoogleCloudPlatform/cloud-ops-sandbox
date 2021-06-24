@@ -1,0 +1,31 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "Comment Bot"
+on: pull_request
+jobs:
+  commenter:
+    name: open-in-cloudshell
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post Comment
+        uses: unsplash/comment-on-pr@85a56be792d927ac4bfa2f4326607d38e80e6e60
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: |
+            [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/${{ github.repository  }}.git&cloudshell_git_branch=${{ github.head_ref }}&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:latest)
+            ---
+            > Note: Open in Cloud Shell may not work properly if this PR contains changes to the custom Cloud Shell image
+          check_for_duplicate_msg: true

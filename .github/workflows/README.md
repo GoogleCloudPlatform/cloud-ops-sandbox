@@ -115,3 +115,11 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 - runs Cloud Build trigger, which runs the logic in `../../cloudshell-image/Cloudbuild.yaml`. This logic:
     - rebuilds tagged versions of the custom cloud shell image from the base cloud shell image (including the latest version)
 - prints logs from Cloud Build trigger run
+
+### PR-Comment-Bot.yml
+
+#### Triggers
+- on each new PR
+
+#### Actions
+- leaves a comment containing an "Open in Cloud Shell" button
