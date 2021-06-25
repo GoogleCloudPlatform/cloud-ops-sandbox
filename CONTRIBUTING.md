@@ -42,6 +42,11 @@ Guidelines](https://opensource.google.com/conduct/).
 
 > 💡 Recommended if you're planning to develop the application.  
 > ℹ️  Prerequisite: [Cloud SDK should be installed.](https://cloud.google.com/sdk/docs/quickstart)  
+> ℹ️  Prerequisite: (if using macbook) Run the following:
+
+```bash  
+brew install coreutils
+```
 
 #### ![kubernetes](docs/img/kubernetes.png) Run Kubernetes micro-services with “Docker for Desktop”
 
