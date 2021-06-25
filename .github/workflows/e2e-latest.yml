@@ -71,7 +71,6 @@ jobs:
         # run install script
         docker run --rm \
           -e project_id=${{ env.PROJECT_ID }} \
-          -e skip_workspace_prompt=1 \
           -e service_wait=1 \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \
@@ -121,7 +120,6 @@ jobs:
         # run install script
         docker run --rm \
           -e project_id=${{ env.PROJECT_ID }} \
-          -e skip_workspace_prompt=1 \
           -e service_wait=1 \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \

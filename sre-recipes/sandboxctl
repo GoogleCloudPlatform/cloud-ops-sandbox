@@ -149,8 +149,6 @@ def loadgen(traffic_pattern):
               help='GCP project to deploy Cloud Operations Sandbox to')
 @click.option('--verbose', '-v', default=False, is_flag=True,
               help='print commands as they run (set -x)')
-@click.option('--skip-workspace-prompt', default=False, is_flag=True,
-              help="Don't pause for Cloud Monitoring workspace set up")
 @click.option('--skip-loadgenerator', default=False,  is_flag=True,
               help="Don't deploy a loadgenerator instance")
 @click.option('--service-wait', default=False,  is_flag=True,

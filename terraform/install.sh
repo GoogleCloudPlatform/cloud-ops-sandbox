@@ -355,10 +355,6 @@ parseArguments() {
         exit 1
       fi
       ;;
-    --skip-workspace-prompt)
-      skip_workspace_prompt=1
-      shift
-      ;;
     --skip-loadgenerator)
       skip_loadgen=1
       shift
@@ -377,7 +373,6 @@ parseArguments() {
       log "options:"
       log "-p|--project|--project-id     GCP project to deploy Cloud Operations Sandbox to"
       log "-v|--verbose                  print commands as they run (set -x)"
-      log "--skip-workspace-prompt       Don't pause for Cloud Monitoring workspace set up"
       log "--skip-loadgenerator          Don't deploy a loadgenerator instance"
       log "--service-wait                Wait indefinitely for services to be detected by Cloud Monitoring"
       log ""

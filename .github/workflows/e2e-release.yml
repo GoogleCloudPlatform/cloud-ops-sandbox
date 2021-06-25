@@ -56,7 +56,6 @@ jobs:
         # ISTIO_VERSION is fix for v0.5.0. Can be removed after next release
         docker run --rm \
           -e project_id=${{ env.PROJECT_ID }} \
-          -e skip_workspace_prompt=1 \
           -e release_repo=${{ steps.website_variables.outputs.repo }} \
           -e release_branch=${{ steps.website_variables.outputs.branch }} \
           -e ISTIO_VERSION=1.7.1 \
