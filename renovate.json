@@ -16,7 +16,7 @@
       "groupName": "linters"
     }
   ],
-  "reviewers": ["nicoleczhu"],
+  "reviewers": ["GoogleCloudPlatform/observability-devx"],
   "labels": [
     "dependencies",
     "type: cleanup",
