@@ -32,6 +32,7 @@
     gtag('config', 'UA-137862890-1');
   </script>
   <!-- End of Google Analytics -->
+  <script type="text/javascript" src='https://www.google.com/tools/feedback/api.js'></script>
 </head>
 <body>
   <section class="page">
@@ -55,7 +56,6 @@
       <h2>Get started now</h2>
       <div class="steps">
         <div class="step step-1">
-          <!--label>Step 1</label-->
           <a class="console-btn" href="https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=v0.6.0&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:v0.6.0&cloudshell_tutorial=docs/tutorial.md"
              target="_blank">Open in Google Cloud Shell</a>
         </div>
@@ -68,7 +68,6 @@
       <div class="steps">
         <div class="step step-2">
           <label><a class="docs-btn" href="/docs/">User Guide</a></label>
-	  <!--<a class="github-btn" href="https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/master/docs/README.md">View on GitHub</a> -->
 	</div>
       </div>
     </section>
@@ -76,7 +75,8 @@
 
   <footer>
     <p class="fineprint">* Note: This is <b>NOT</b> an official Google product. Customers will be billed for using cloud resources when creating a sandbox cluster.
-      </p>
+      <button onclick="userfeedback.api.startFeedback({ 'productId': '5235454', 'productVersion': 'v0.6.0' });">Submit Feedback</button>
+    </p>
   </footer>
 </body>
 </html>

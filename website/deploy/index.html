@@ -34,7 +34,7 @@
 
     gtag('config', 'UA-137862890-1');
   </script>
-  
+  <script type="text/javascript" src='https://www.google.com/tools/feedback/api.js'></script>
 </head>
 <body>
   <section class="page">
@@ -76,9 +76,9 @@
       </div>
     </section>
   </section>
-
   <footer>
-    <p class="fineprint">* Note: This is <b>NOT</b> an official Google product. Customers will be billed for using cloud resources when creating a sandbox cluster.
+    <p class="fineprint">* Note: This is <b>NOT</b> an official Google product. Customers will be billed for using cloud resources when creating a sandbox cluster. 
+    <button onclick="userfeedback.api.startFeedback({ 'productId': '5235454', 'productVersion': 'v0.6.0' });">Submit Feedback</button>
       </p>
   </footer>
 </body>
