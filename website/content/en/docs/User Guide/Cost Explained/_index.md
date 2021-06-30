@@ -33,7 +33,7 @@ In order to use the calculator you should first select a product from the scroll
  
 **Resources Information**
 Region: "us-east1" 
-- Loadgen Cluster 1x "n1-standard-1" 
+- Loadgen Cluster 4x "n1-standard-2" 
 - GKE cluster (for the hipster shop microservices) 2x "n1-standard-2"
 - App Engine (Standard, F1)
 - SQL PostgresQL - "db-f1-micro" 
@@ -44,7 +44,7 @@ Choose GKE Standard -> fill the number of machines, machine type and region and 
 ![image](/docs/images/user-guide/60-gke-billing.png)
 
 **App Engine**
-For AppEngine -we should choose 'Standard' - F1, as AppEngine scale to 0 when not used in our learning environment with periodical test our cost fall under the free tier([AppEngine pricing] (https://cloud.google.com/appengine/pricing)) 
+For AppEngine -we should choose 'Standard' - F1, as AppEngine scale to 0 when not used in our learning environment with periodical test our cost fall under the free tier ([AppEngine pricing](https://cloud.google.com/appengine/pricing)) 
 ![image](/docs/images/user-guide/61-AppEngine-billing.png)
 
 > You can see detailed usage and billing cost in the [AppEngine console](https://console.cloud.google.com/appengine)
@@ -61,8 +61,8 @@ Similarly we can also add to the estimation the cost of our storage(buckets),  i
 You can view this information easily using Metrics Explorer, by choosing Resource Type: `GCS Bucket` and Metric `Total bytes`
 
 ![image](/docs/images/user-guide/63-storage-metrics.png)
-As you can see it is well below 1GB which costs 0.02$.
-At the end you will have an estimation that includes all the components, and you also save it or email it to be referenced later. Which is ˜130$ a month for Sandbox components.
+As you can see it is well below 1GB which costs $0.02.
+At the end you will have an estimation that includes all the components, and you also save it or email it to be referenced later. Which is ~$290 a month for Sandbox components.
 
 > Please note that is only estimation for the compute components and additional charges like networking and metrics will be added based on usage. 
 
