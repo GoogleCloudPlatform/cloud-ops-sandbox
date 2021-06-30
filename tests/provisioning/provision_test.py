@@ -46,7 +46,7 @@ class TestGKECluster(unittest.TestCase):
         client = cluster_manager.ClusterManagerClient()
         cluster_info = client.get_cluster(name=TestGKECluster.name)
         machine_type = cluster_info.node_config.machine_type
-        self.assertEqual(machine_type, 'n1-standard-2')
+        self.assertEqual(machine_type, 'n1-standard-1')
 
     def testNumberOfNode(self):
         """ Test if the number of nodes in the node pool is as specified """
