@@ -33,8 +33,8 @@ In order to use the calculator you should first select a product from the scroll
  
 **Resources Information**
 Region: "us-east1" 
-- Loadgen Cluster 4x "n1-standard-2" 
-- GKE cluster (for the hipster shop microservices) 2x "n1-standard-2"
+- Loadgen Cluster 2x "n1-standard-2" 
+- GKE cluster (for the hipster shop microservices) 4x "n1-standard-2"
 - App Engine (Standard, F1)
 - SQL PostgresQL - "db-f1-micro" 
 
