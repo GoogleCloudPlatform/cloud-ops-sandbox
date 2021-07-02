@@ -100,9 +100,24 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 #### Actions
 - ensure end-to-end test project has deleted all test resources
 - scrape latest release information from https://stackdriver-sandbox.dev/
-- download 
 - run install.sh script against end-to-end test project
 - clean up resources in test project
+
+### E2E-Upgrade.yaml
+
+#### Triggers
+- daily at 10pm
+- on demand (through UI)
+
+#### Actions
+- ensure end-to-end test project has deleted all test resources
+- scrape latest release information from https://stackdriver-sandbox.dev/
+- run install.sh script with previous release
+- build fresh containers for all services and the custom cloud shell image
+- run install.sh script with latest code in repo, to make sure it is backwards-compatible
+- clean up resources in test project
+
+### Update-Custom-Image.yaml
 
 ### Update-Custom-Image.yaml
 
