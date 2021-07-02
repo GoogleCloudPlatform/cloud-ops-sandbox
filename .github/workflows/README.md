@@ -60,15 +60,22 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
   - ensures HTTP request to frontend returns HTTP status 200
 
 
-### Push-Master.yaml
+### Push-Develop.yaml
 
 #### Triggers
-- commits pushed to master
+- commits pushed to develop or master branches
 
 #### Actions
 - builds and pushes images to official GCR repo tagged with git commit
 - builds and pushes images to official GCR repo tagged as latest
 
+### Push-Master.yaml
+
+#### Triggers
+- release merged and commits pushed to master
+
+#### Actions
+- push new prod version of the website to App Engine
 
 ### Push-Tags.yaml
 

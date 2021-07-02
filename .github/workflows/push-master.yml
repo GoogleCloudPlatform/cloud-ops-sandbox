@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Push Master Image"
+name: "Push Master"
 on:
   push:
-    # run on pushes to master
+    # run on pushes to master (after merging release branches)
     branches:
       - master
 env:
@@ -25,27 +25,8 @@ jobs:
     runs-on: [self-hosted, push-privilege]
     steps:
     - uses: actions/checkout@v2
-    - name: Push to GCR
+    - name: Deploy Website to App Engine
       timeout-minutes: 20
       run: |
         set -x
-        skaffold config set --global local-cluster false
-        # tag with git hash
-        skaffold build --default-repo=gcr.io/${{ env.PROJECT_ID }} \
-                       --tag=$GITHUB_SHA
-        # tag as latest
-        skaffold build --default-repo=gcr.io/${{ env.PROJECT_ID }} \
-                       --tag=latest
-    - name: Push Load Generator Image to GCR
-      timeout-minutes: 20
-      run: |
-        set -x
-        gcloud auth configure-docker --quiet
-        # build and tag with git hash
-        IMAGE_SHA=gcr.io/${{ env.PROJECT_ID }}/sandbox/loadgenerator/gke:$GITHUB_SHA
-        docker build -t $IMAGE_SHA ./src/loadgenerator
-        docker push $IMAGE_SHA
-        # build and tag with latest
-        IMAGE_LATEST=gcr.io/${{ env.PROJECT_ID }}/sandbox/loadgenerator/gke:latest
-        docker build -t $IMAGE_LATEST ./src/loadgenerator
-        docker push $IMAGE_LATEST
+        gcloud app deploy website/app.yaml

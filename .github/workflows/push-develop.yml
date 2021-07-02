@@ -12,34 +12,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Push Tagged Images"
+name: "Push Develop Image"
 on:
   push:
-    tags:
-      - 'v*'
+    # run on pushes to develop or master
+    branches:
+      - develop
+      - master
 env:
   PROJECT_ID: stackdriver-sandbox-230822
 jobs:
-  push-tags:
+  push-master:
     runs-on: [self-hosted, push-privilege]
     steps:
     - uses: actions/checkout@v2
-    - name: Get the version
-      id: get_version
-      run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
-    - name: Push Service Images to GCR
+    - name: Push to GCR
       timeout-minutes: 20
       run: |
         set -x
         skaffold config set --global local-cluster false
-        # tag with release version
+        # tag with git hash
         skaffold build --default-repo=gcr.io/${{ env.PROJECT_ID }} \
-                       --tag=${{ steps.get_version.outputs.VERSION  }}
+                       --tag=$GITHUB_SHA
+        # tag as latest
+        skaffold build --default-repo=gcr.io/${{ env.PROJECT_ID }} \
+                       --tag=latest
     - name: Push Load Generator Image to GCR
       timeout-minutes: 20
       run: |
         set -x
         gcloud auth configure-docker --quiet
-        IMAGE=gcr.io/${{ env.PROJECT_ID }}/sandbox/loadgenerator/gke:${{ steps.get_version.outputs.VERSION }}
-        docker build -t $IMAGE ./src/loadgenerator
-        docker push $IMAGE
+        # build and tag with git hash
+        IMAGE_SHA=gcr.io/${{ env.PROJECT_ID }}/sandbox/loadgenerator/gke:$GITHUB_SHA
+        docker build -t $IMAGE_SHA ./src/loadgenerator
+        docker push $IMAGE_SHA
+        # build and tag with latest
+        IMAGE_LATEST=gcr.io/${{ env.PROJECT_ID }}/sandbox/loadgenerator/gke:latest
+        docker build -t $IMAGE_LATEST ./src/loadgenerator
+        docker push $IMAGE_LATEST

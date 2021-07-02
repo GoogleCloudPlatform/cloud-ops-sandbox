@@ -18,9 +18,10 @@ on:
     # run daily at midnight
     - cron: '0 0 * * *'
   push:
-    # run on pushes to master
+    # run on pushes to develop or master
     branches:
       - master
+      - develop
     # run after pushing new tags
     tags:
       - 'v*'
