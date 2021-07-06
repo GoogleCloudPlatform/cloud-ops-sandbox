@@ -188,6 +188,10 @@ createProject() {
 }
 
 applyTerraform() {
+  if [[ -n "$VERSION" ]]; then
+    app_ver="$(echo $VERSION | tr "." "_")"
+  fi
+  
   rm -f .terraform/terraform.tfstate
 
   log "Initialize terraform backend with bucket ${bucket_name}"
@@ -201,12 +205,27 @@ applyTerraform() {
     terraform init -backend-config "bucket=${bucket_name}" -lockfile=false # lock-free to prevent access fail
   fi
 
-  log "Apply Terraform automation"
+  #build Terraform apply command 
+  terraform_command="terraform apply -auto-approve -var=\"project_id=${project_id}\" -var=\"bucket_name=${bucket_name}\" -var=\"skip_loadgen=${skip_loadgen:-false}\""
+
+  #If billing account provided specify it 
   if [[ -n "$billing_id" ]]; then
-    terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}"
-  else
-    terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"  -var="skip_loadgen=${skip_loadgen:-false}"
+    terraform_command+=" -var=\"billing_account=${billing_acct}\"" 
   fi
+
+  #check if new installtion or if cluster already and what is the version
+  gke_location="$(gcloud container clusters list --format="value(location)" --filter name=cloud-ops-sandbox)"
+  if [[ -n "$gke_location" ]]; then 
+    gke_version="$(gcloud container clusters describe cloud-ops-sandbox --region "${gke_location}"  --format="value(resourceLabels.version)")"
+  fi
+  #If cluster exist and it's older version use backward comp. params
+  if [[ -n "$gke_location"  && -z "$gke_version" ]]; then 
+    terraform_command+=' -var="app_version=0"'
+  else
+    terraform_command+=" -var=\"app_version=${app_ver}\"" 
+  fi 
+  log "Apply Terraform automation"
+  eval $terraform_command
 }
 
 authenticateCluster() {

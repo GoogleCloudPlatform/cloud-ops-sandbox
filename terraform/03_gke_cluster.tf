@@ -57,6 +57,10 @@ resource "google_container_cluster" "gke" {
     identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
+  resource_labels = {
+    "version" = var.app_version
+  }
+
   # Using an embedded resource to define the node pool. Another
   # option would be to create the node pool as a separate resource and link it
   # to this cluster. There are tradeoffs to each approach.
@@ -141,7 +145,7 @@ data "google_compute_default_service_account" "default" {
 # Create GSA/KSA binding: let IAM auth KSAs as a svc.id.goog member name
 resource "google_service_account_iam_binding" "set_gsa_binding" {
   service_account_id = data.google_compute_default_service_account.default.name // google_service_account.set_gsa.name
-  role = "roles/iam.workloadIdentityUser"
+  role               = "roles/iam.workloadIdentityUser"
 
   members = [
     "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[default/default]"
