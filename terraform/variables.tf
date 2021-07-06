@@ -36,3 +36,8 @@ variable "skip_loadgen" {
   default     = false
   description = "If true, the load generator will not be deployed."
 }
+
+variable "app_version" {
+  type        = string
+  description = "Cloud Operastions Sandbox's Version."
+}
