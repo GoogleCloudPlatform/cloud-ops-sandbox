@@ -68,7 +68,7 @@ resource "google_container_cluster" "gke_loadgen" {
   # interesting things.
   node_pool {
     node_config {
-      machine_type = "n1-standard-1"
+      machine_type = "n1-standard-2"
 
       oauth_scopes = [
         "https://www.googleapis.com/auth/cloud-platform"  
@@ -84,7 +84,7 @@ resource "google_container_cluster" "gke_loadgen" {
 
     autoscaling {
       min_node_count = 1
-      max_node_count = 3
+      max_node_count = 10
     }
 
     management {
