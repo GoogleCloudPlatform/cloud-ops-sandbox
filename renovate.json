@@ -29,5 +29,6 @@
   "ignoreDeps": [
     "com.google.protobuf:protoc"
   ],
-  "semanticCommits" : "enabled"
+  "semanticCommits" : "enabled",
+  "baseBranches": ["develop"]
 }
