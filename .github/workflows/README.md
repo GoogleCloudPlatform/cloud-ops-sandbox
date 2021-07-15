@@ -123,3 +123,20 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 
 #### Actions
 - leaves a comment containing an "Open in Cloud Shell" button
+
+### Gitflow-Enforcer.yml
+
+#### Triggers
+- on each new PR to main
+
+#### Actions
+- Only allow "release/" PRs against master
+
+### Check-Tags.yml
+
+#### Triggers
+- on each new PR to main or develop
+
+#### Actions
+- Checks kubernetes manifests to ensure develop is pinned to `latest`, and main is pinned to a version
+- Checks telemetry id to ensure develop is on `test` and main is on `prod`
