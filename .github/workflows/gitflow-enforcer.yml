@@ -14,13 +14,12 @@
 
 name: "Gitflow Enforcer Bot"
 on:
-  pull_request:
-    branches:
-      - main
-      - master
+  pull_request
+    #branches:
+    #  - main
+    #  - master
 jobs:
-  gitflow-enforcer:
-    name: open-in-cloudshell
+  warning-comment:
     runs-on: ubuntu-latest
     steps:
       - name: Post Warning
@@ -32,3 +31,13 @@ jobs:
           msg: |
             | ⚠️  *Warning:* only release PRs should be merged into main
           check_for_duplicate_msg: true
+  check-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check For Release Branch
+        run: |
+          if [[ "${{ github.head_ref  }}" == "release/"*  ]]; then
+            return 0
+          else
+            return 1
+          fi
