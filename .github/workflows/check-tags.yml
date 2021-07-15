@@ -1,0 +1,51 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "Tag Check"
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+jobs:
+  check-develop-tags:
+    runs-on: ubuntu-latest
+    if: ${{ github.base_ref == '/refs/heads/develop' }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Check Develop Tags
+      run |
+      set -x
+      num_files=$(cat kubernetes-manifests/* | grep image | grep stackdriver-sandbox-230822 | wc -l)
+      num_latest=$(cat kubernetes-manifests/* | grep image | grep stackdriver-sandbox-230822 | grep ":latest$" | wc -l)
+      if [[ "$num_latest" != "$num_files" ]]; then
+        echo "manifests found without latest tag on develop"
+      fi
+      # check for test telemetry topic
+      cat terraform/telemetry.py| grep "topic_id =" | grep test
+  check-release-tags:
+    runs-on: ubuntu-latest
+    if: ${{ github.base_ref == '/refs/heads/main'  }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Check Release Tags
+      run |
+      set -x
+      num_files=$(cat kubernetes-manifests/* | grep image | grep stackdriver-sandbox-230822 | wc -l)
+      num_latest=$(cat kubernetes-manifests/* | grep image | grep stackdriver-sandbox-230822 | ":v[0-9]\+\.[0-9]\+\.[0-9]\+$" | wc -l)
+      if [[ "$num_latest" != "$num_files" ]]; then
+        echo "manifests found without version tag on main"
+      fi
+      # check for test telemetry topic
+      cat terraform/telemetry.py| grep "topic_id =" | grep test
