@@ -15,9 +15,9 @@
 name: "Gitflow Enforcer Bot"
 on:
   pull_request
-    #branches:
-    #  - main
-    #  - master
+    branches:
+      - main
+      - master
 jobs:
   warning-comment:
     runs-on: ubuntu-latest
