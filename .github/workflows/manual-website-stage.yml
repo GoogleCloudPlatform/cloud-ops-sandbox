@@ -14,6 +14,9 @@
 
 name: "Stage Website"
 on:
+    # run on pushes to develop
+    branches:
+      - develop
   workflow_dispatch:
     inputs:
       name:
