@@ -28,13 +28,15 @@ jobs:
         set -x
 
         if [[ ${{ github.base_ref }} == 'main' ]]; then
+            # if merging into main, manifests should be tagged with explict version
             expected_tag_regex=":v[0-9]\+\.[0-9]\+\.[0-9]\+$"
             expected_telemetry="prod"
         else
+            # if merging into develop, manifests should be pinned to latest
             expected_tag_regex=":latest"
             expected_telemetry="test"
         fi
-
+        # check manifests
         num_files=$(cat kubernetes-manifests/* | grep image | grep stackdriver-sandbox-230822 | wc -l)
         num_tagged=$(cat kubernetes-manifests/* | grep image | grep stackdriver-sandbox-230822 | grep "$expected_tag_regex" | wc -l)
         if [[ "$num_tagged" != "$num_files" ]]; then
