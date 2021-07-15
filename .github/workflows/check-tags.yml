@@ -23,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     #if: ${{ github.base_ref == '/refs/heads/develop' }}
     steps:
+    - uses: actions/checkout@v2
     - name: Check Develop Tags
       run: |
         set -x
@@ -37,6 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     #if: ${{ github.base_ref == '/refs/heads/main'  }}
     steps:
+    - uses: actions/checkout@v2
     - name: Check Release Tags
       run: |
         set -x
