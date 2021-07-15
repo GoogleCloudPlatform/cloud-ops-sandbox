@@ -40,6 +40,7 @@ jobs:
         num_files=$(cat *-manifests/* | grep image | grep stackdriver-sandbox-230822 | wc -l)
         num_tagged=$(cat *-manifests/* | grep image | grep stackdriver-sandbox-230822 | grep "$expected_tag_regex" | wc -l)
         if [[ "$num_tagged" -lt 11 ]]; then
+            # sanity check: we expect at least 11 manifests
             echo "missing manifests"
             exit 1
         fi
