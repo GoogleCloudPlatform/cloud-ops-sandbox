@@ -21,7 +21,7 @@ on:
 jobs:
   check-develop-tags:
     runs-on: ubuntu-latest
-    #if: ${{ github.base_ref == '/refs/heads/develop' }}
+    if: ${{ github.base_ref == '/refs/heads/develop' }}
     steps:
     - uses: actions/checkout@v2
     - name: Check Develop Tags
@@ -37,7 +37,7 @@ jobs:
         cat terraform/telemetry.py| grep "topic_id =" | grep test
   check-release-tags:
     runs-on: ubuntu-latest
-    #if: ${{ github.base_ref == '/refs/heads/main'  }}
+    if: ${{ github.base_ref == '/refs/heads/main'  }}
     steps:
     - uses: actions/checkout@v2
     - name: Check Release Tags
