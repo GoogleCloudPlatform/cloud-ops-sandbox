@@ -17,6 +17,7 @@ on:
   pull_request:
     branches:
       - main
+      - master
 jobs:
   gitflow-enforcer:
     name: open-in-cloudshell
