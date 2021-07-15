@@ -13,20 +13,21 @@
 # limitations under the License.
 
 name: "Gitflow Enforcer Bot"
-on: pull_request
-    #branches:
-    #  - main
+on:
+  pull_request:
+    branches:
+      - main
 jobs:
   gitflow-enforcer:
     name: open-in-cloudshell
     runs-on: ubuntu-latest
     steps:
       - name: Post Warning
-        #if: !contains(github.head_ref, 'release/')
+        if: !contains(github.head_ref, 'release/')
         uses: unsplash/comment-on-pr@85a56be792d927ac4bfa2f4326607d38e80e6e60
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           msg: |
-            > ⚠️  Warning: only release PRs should be merged into main
+            | ⚠️  *Warning:* only release PRs should be merged into main
           check_for_duplicate_msg: true
