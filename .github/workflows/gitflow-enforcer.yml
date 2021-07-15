@@ -14,9 +14,9 @@
 
 name: "Gitflow Enforcer Bot"
 on: pull_request
-  pull_request:
-    branches:
-      - main
+  pull_request
+    #branches:
+    #  - main
 jobs:
   gitflow-enforcer:
     name: open-in-cloudshell
