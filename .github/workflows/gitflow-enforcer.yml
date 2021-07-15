@@ -22,7 +22,7 @@ jobs:
     name: open-in-cloudshell
     runs-on: ubuntu-latest
     steps:
-      - name: Post Comment
+      - name: Post Warning
         if: !contains(github.head_ref, 'release/')
         uses: unsplash/comment-on-pr@85a56be792d927ac4bfa2f4326607d38e80e6e60
         env:
