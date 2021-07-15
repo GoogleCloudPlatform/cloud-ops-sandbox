@@ -37,8 +37,10 @@ sed -i -e "s/uncertified:v\([0-9\.]\+\)/uncertified:${NEW_VERSION}/g" ${REPO_ROO
 
 # update website deployment tag
 sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/website/layouts/index.html;
+sed -i -e "s/productVersion': 'v\([0-9\.]\+\)/productVersion': '${NEW_VERSION}/g" ${REPO_ROOT}/website/layouts/index.html;
 sed -i -e "s/uncertified:v\([0-9\.]\+\)/uncertified:${NEW_VERSION}/g" ${REPO_ROOT}/website/layouts/index.html;
 sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/website/deploy/index.html;
+sed -i -e "s/productVersion': 'v\([0-9\.]\+\)/productVersion': '${NEW_VERSION}/g" ${REPO_ROOT}/website/deploy/index.html;
 sed -i -e "s/uncertified:v\([0-9\.]\+\)/uncertified:${NEW_VERSION}/g" ${REPO_ROOT}/website/deploy/index.html;
 
 
