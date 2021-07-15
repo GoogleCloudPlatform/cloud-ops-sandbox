@@ -19,7 +19,7 @@ on:
       - main
       - master
 jobs:
-  warning-comment:
+  non-release-pr:
     runs-on: ubuntu-latest
     if: "!contains(github.head_ref, 'release/')"
     steps:
@@ -31,14 +31,7 @@ jobs:
           msg: |
             | ⚠️  **Error:** only release PRs should be merged into main
           check_for_duplicate_msg: true
-  check-release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check For Release Branch
+      - name: Fail Check
         run: |
-          echo "branch name: ${{ github.head_ref }}"
-          if [[ "${{ github.head_ref  }}" == "release/"*  ]]; then
-            exit 0
-          else
-            exit 1
-          fi
+          echo "not a release branch: ${{ github.head_ref }}"
+          exit 1
