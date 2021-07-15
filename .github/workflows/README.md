@@ -47,9 +47,8 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 
 #### Triggers
 
-- commits pushed to master
-- PRs to master
-- PRs to release/ branches
+- commits pushed to main or develop
+- PRs to main or develop
 
 #### Actions
 
@@ -60,19 +59,19 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
   - ensures HTTP request to frontend returns HTTP status 200
 
 
-### Push-Develop.yaml
+### Push-Containers.yaml
 
 #### Triggers
-- commits pushed to develop or master branches
+- commits pushed to develop or main branches
 
 #### Actions
 - builds and pushes images to official GCR repo tagged with git commit
 - builds and pushes images to official GCR repo tagged as latest
 
-### Push-Master.yaml
+### Update-Website.yaml
 
 #### Triggers
-- release merged and commits pushed to master
+- release merged and commits pushed to main
 
 #### Actions
 - push new prod version of the website to App Engine
@@ -88,8 +87,8 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 ### E2E-Latest.yaml
 
 #### Triggers
-- on each commit to master
-- on each commit to a release branch
+- on each commit to main or develop
+- on each PR to main or develop
 
 #### Actions
 - ensure end-to-end test project has deleted all test resources
@@ -103,6 +102,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 #### Triggers
 - daily at 8pm
 - on demand (through UI)
+- on pushes to main branch
 
 #### Actions
 - ensure end-to-end test project has deleted all test resources
@@ -114,7 +114,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 ### Update-Custom-Image.yaml
 
 #### Triggers
-- on each commit to master
+- on each commit to main or develop
 - on each new tag pushed to repo
 - every 24 hours
 

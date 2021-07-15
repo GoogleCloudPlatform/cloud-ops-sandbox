@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Push Develop Image"
+name: "Push Containers"
 on:
   push:
-    # run on pushes to develop or master
+    # run on pushes to develop or main
     branches:
       - develop
-      - master
+      - main
 env:
   PROJECT_ID: stackdriver-sandbox-230822
 jobs:
