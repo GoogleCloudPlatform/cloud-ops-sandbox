@@ -28,11 +28,11 @@ jobs:
         set -x
 
         if [[ ${{ github.base_ref }} == 'main' ]]; then
-            expected_tag_regex = ":v[0-9]\+\.[0-9]\+\.[0-9]\+$"
-            expected_telemetry = "prod"
+            expected_tag_regex=":v[0-9]\+\.[0-9]\+\.[0-9]\+$"
+            expected_telemetry="prod"
         else
-            expected_tag_regex = ":latest"
-            expected_telemetry = "test"
+            expected_tag_regex=":latest"
+            expected_telemetry="test"
         fi
 
         num_files=$(cat kubernetes-manifests/* | grep image | grep stackdriver-sandbox-230822 | wc -l)
