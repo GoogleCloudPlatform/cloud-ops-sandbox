@@ -30,6 +30,7 @@ jobs:
         with:
           msg: |
             | ⚠️  **Error:** only release PRs should be merged into main
+            | See our [Contributing Guide](/CONTRIBUTING.md) for more information.
           check_for_duplicate_msg: true
       - name: Fail Check
         run: |
