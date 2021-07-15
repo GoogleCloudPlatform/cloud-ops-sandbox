@@ -23,9 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     #if: ${{ github.base_ref == '/refs/heads/develop' }}
     steps:
-    - uses: actions/checkout@v2
     - name: Check Develop Tags
-      run |
+      run: |
       set -x
       num_files=$(cat kubernetes-manifests/* | grep image | grep stackdriver-sandbox-230822 | wc -l)
       num_latest=$(cat kubernetes-manifests/* | grep image | grep stackdriver-sandbox-230822 | grep ":latest$" | wc -l)
@@ -38,9 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     #if: ${{ github.base_ref == '/refs/heads/main'  }}
     steps:
-    - uses: actions/checkout@v2
     - name: Check Release Tags
-      run |
+      run: |
       set -x
       num_files=$(cat kubernetes-manifests/* | grep image | grep stackdriver-sandbox-230822 | wc -l)
       num_latest=$(cat kubernetes-manifests/* | grep image | grep stackdriver-sandbox-230822 | ":v[0-9]\+\.[0-9]\+\.[0-9]\+$" | wc -l)
