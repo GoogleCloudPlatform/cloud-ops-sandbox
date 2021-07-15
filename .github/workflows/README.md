@@ -13,7 +13,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 5. Set GitHub Actions as a background service
     - `sudo ~/actions-runner/svc.sh install ; sudo ~/actions-runner/svc.sh start`
 6. Run the following command to install dependencies
-    - `wget -O - https://raw.githubusercontent.com/GoogleCloudPlatform/cloud-ops-sandbox/master/.github/workflows/install-dependencies.sh | bash`
+    - `wget -O - https://raw.githubusercontent.com/GoogleCloudPlatform/cloud-ops-sandbox/main/.github/workflows/install-dependencies.sh | bash`
 
 ## Tags
 - `kind-cluster`

@@ -21,7 +21,7 @@ on:
 env:
   PROJECT_ID: stackdriver-sandbox-230822
 jobs:
-  push-master:
+  update-website:
     runs-on: [self-hosted, push-privilege]
     steps:
     - uses: actions/checkout@v2
