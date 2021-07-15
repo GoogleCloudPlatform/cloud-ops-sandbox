@@ -36,6 +36,7 @@ jobs:
     steps:
       - name: Check For Release Branch
         run: |
+          echo "branch name: ${{ github.head_ref }}"
           if [[ "${{ github.head_ref  }}" == "release/"*  ]]; then
             exit 0
           else
