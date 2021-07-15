@@ -29,7 +29,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           msg: |
-            | ⚠️  *Warning:* only release PRs should be merged into main
+            | ⚠️  **Error:** only release PRs should be merged into main
           check_for_duplicate_msg: true
   check-release:
     runs-on: ubuntu-latest
@@ -37,7 +37,7 @@ jobs:
       - name: Check For Release Branch
         run: |
           if [[ "${{ github.head_ref  }}" == "release/"*  ]]; then
-            return 0
+            exit 0
           else
-            return 1
+            exit 1
           fi
