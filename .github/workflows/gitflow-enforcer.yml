@@ -29,7 +29,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           msg: |
-            ⚠️  **Error:** only release PRs should be merged into `main`, feature PRs should use `develop`.\n\nSee our [Contributing Guide](https://github.com/${{ github.repository }}/blob/develop/CONTRIBUTING.md#git-workflow) for more information.
+            ⚠️  **Error:** only release PRs should be merged into `main`, feature PRs should use `develop`
+
+            See our [Contributing Guide](https://github.com/${{ github.repository }}/blob/develop/CONTRIBUTING.md#git-workflow) for more information.
           check_for_duplicate_msg: true
       - name: Fail Check
         run: |
