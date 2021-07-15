@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Comment Bot"
+name: "Gitflow Enforcer Bot"
 on: pull_request
   pull_request:
     branches:
       - main
 jobs:
-  commenter:
+  gitflow-enforcer:
     name: open-in-cloudshell
     runs-on: ubuntu-latest
     steps:
