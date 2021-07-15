@@ -14,16 +14,16 @@
 
 name: "Gitflow Enforcer Bot"
 on:
-  pull_request
-    #branches:
-    #  - main
-    #  - master
+  pull_request:
+    branches:
+      - main
+      - master
 jobs:
   warning-comment:
     runs-on: ubuntu-latest
+    if: !contains(github.head_ref, 'release/')
     steps:
       - name: Post Warning
-        if: !contains(github.head_ref, 'release/')
         uses: unsplash/comment-on-pr@85a56be792d927ac4bfa2f4326607d38e80e6e60
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
