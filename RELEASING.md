@@ -18,8 +18,8 @@ to produce both at once.
    [`push-tags` CI job](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/main/.github/workflows/push-tags.yml).
    Check that the job completed successfully, and the tagged images appear in the
    [`stackdriver-sandbox-230822` GCR repo](http://console.cloud.google.com/gcr/images/stackdriver-sandbox-230822)
-1. When the PR has been reviewed and thoroughly tested, merge it into main
-   - Create a merge commit so the history is preserved in main
+1. When the PR has been reviewed and thoroughly tested, use the GitHub to merge it into main
+   - If given an option, make sure to create a merge commit rather than squash so the history is preserved in `main`
 1. The merge to main should kick off a
    [`update-website` CI job](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/main/.github/workflows/update-website.yml)
    to re-build the website. Ensure that [cloud-ops-sandbox.dev](https://stackdriver-sandbox.dev/)

@@ -36,10 +36,19 @@ Guidelines](https://opensource.google.com/conduct/).
 ## Git Workflow
 
 This project conforms to the [Gitflow Workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-wokflow).
-The repo contains two important branches: the `main` branch stores the official release history, and the `develop` branch contains
-the current working codebase.
+The repo contains two important branches:
+- the `main` branch stores the official release history
+- the `develop` branch contains the current working codebase.
 
-As a contributor, your workflow will be to create a temporary branch off of `develop`, add your code, and create a PR back to `develop`.
+As a contributor, your workflow will be to create a temporary branch off of `develop`, add your code, and create a PR back to `develop`
+
+```
+git checkout develop
+git checkout -b new_branch
+git commit -m "new commit"
+git push --set-upstream otigin new_branch
+```
+
 Periodically, we will coordinate to publish release PRs to merge the latest state of `develop` back into `main`.
 
 
