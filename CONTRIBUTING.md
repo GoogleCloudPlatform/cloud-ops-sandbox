@@ -40,13 +40,14 @@ The repo contains two important branches:
 - the `main` branch stores the official release history
 - the `develop` branch contains the current working codebase.
 
-As a contributor, your workflow will be to create a temporary branch off of `develop`, add your code, and create a PR back to `develop`
+As a contributor, your workflow will be to create a temporary branch off of `develop`, add your code, and create a PR back to `develop`:
 
 ```
 git checkout develop
 git checkout -b new_branch
 git commit -m "new commit"
-git push --set-upstream otigin new_branch
+git push --set-upstream origin new_branch
+# create a PR on GitHub
 ```
 
 Periodically, we will coordinate to publish release PRs to merge the latest state of `develop` back into `main`.
