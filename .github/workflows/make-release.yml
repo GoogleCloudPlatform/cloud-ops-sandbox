@@ -1,0 +1,141 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "Make Release"
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'New Version Number'
+        required: true
+jobs:
+  make-release:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Validation
+        run: |
+          set -x
+          export NEW_VERSION=${{ github.event.inputs.version }}
+          # validate version number (format: v0.0.0)
+          if [[ ! "${NEW_VERSION}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "${NEW_VERSION} argument must conform to regex string:  ^v[0-9]+\.[0-9]+\.[0-9]+$ "
+              echo "ex. v1.0.1"
+              exit 1
+          fi
+          # ensure not duplicate
+          if [[ "$NEW_VERSION" == $(git tag | grep $NEW_VERSION | cat) ]]; then
+            echo "$NEW_VERSION" already exists in project
+            exit 1
+          fi
+      - name: Git Setup
+        run: |
+          set -x
+          git clone https://github.com/daniel-sanche/cloud-ops-sandbox.git
+          cd cloud-ops-sandbox
+          git checkout develop
+          git config --global user.email "ci@cloud-ops-sandbox.dev"
+          git config --global user.name "CI"
+
+          git fetch
+          git checkout -b "release/${{ github.event.inputs.version }}"
+          git merge --strategy-option theirs main
+      - name: Rewrite Files
+        run: |
+          set -x
+          export NEW_VERSION=${{ github.event.inputs.version }}
+          export REPO_ROOT=./cloud-ops-sandbox
+
+          # pin manifests to :$NEW_VERSION
+          find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s/:v\([0-9\.]\+\)/:${NEW_VERSION}/g" {} \;
+          find "${REPO_ROOT}/loadgenerator-manifests" -name '*.yaml' -exec sed -i -e "s/:v\([0-9\.]\+\)/:${NEW_VERSION}/g" {} \;
+
+          # update README
+          sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/README.md;
+          sed -i -e "s/uncertified:v\([0-9\.]\+\)/uncertified:${NEW_VERSION}/g" ${REPO_ROOT}/README.md;
+
+          # update website deployment tag
+          sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/website/layouts/index.html;
+          sed -i -e "s/productVersion': 'v\([0-9\.]\+\)/productVersion': '${NEW_VERSION}/g" ${REPO_ROOT}/website/layouts/index.html;
+          sed -i -e "s/uncertified:v\([0-9\.]\+\)/uncertified:${NEW_VERSION}/g" ${REPO_ROOT}/website/layouts/index.html;
+          sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/website/deploy/index.html;
+          sed -i -e "s/productVersion': 'v\([0-9\.]\+\)/productVersion': '${NEW_VERSION}/g" ${REPO_ROOT}/website/deploy/index.html;
+          sed -i -e "s/uncertified:v\([0-9\.]\+\)/uncertified:${NEW_VERSION}/g" ${REPO_ROOT}/website/deploy/index.html;
+          # update custom Cloud Shell image variable
+          sed -i -e "s/VERSION=v\([0-9\.]\+\)/VERSION=${NEW_VERSION}/g" ${REPO_ROOT}/cloud-shell/Dockerfile;
+
+           # update telemetry Pub/Sub topic in telemetry.py from "Test" topic to "Production" topic
+           PROD_TOPIC="telemetry_prod"
+           TEST_TOPIC="telemetry_test"
+           sed -i -e "s/topic_id = \"${TEST_TOPIC}\"/topic_id = \"${PROD_TOPIC}\"/g" ${REPO_ROOT}/terraform/telemetry.py;
+      - name: Commit Changes
+        run: |
+          set -x
+          export NEW_VERSION=${{ github.event.inputs.version }}
+          REPO_ROOT=cloud-ops-sandbox
+          cd $REPO_ROOT
+          git add .
+          git commit -m "ignore: update tags for release ${NEW_VERSION}"
+          git tag "${NEW_VERSION}"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch:  "release/${{ github.event.inputs.version  }}"
+          directory: cloud-ops-sandbox
+          tags: true
+      - name: Build PR Body
+        run: |
+          cd cloud-ops-sandbox
+          # start at the base of
+          FIRST_HASH=$(git rev-parse develop)
+          LAST_HASH=$(git rev-parse main)
+          DIFF=$(git log ${LAST_HASH}...${FIRST_HASH} --oneline)
+          echo -e $DIFF
+
+          # print version number as title
+          export NEW_VERSION=${{ github.event.inputs.version  }}
+          echo "## [$NEW_VERSION](https://www.github.com/${{ github.repository }}/compare/$LAST_HASH...$FIRST_HASH)" > PR.txt
+
+          # build category buckets
+          # format: title/prefix|prefix|prefix...
+          array=( "Features/feat" "Bug Fixes/fix" "Documentation/docs" "Tests/test|ci" "Miscellaneous/chore|style|refactor" )
+          for i in "${array[@]}"; do
+            title=$(echo $i | tr "/" "\n" | head -n 1)
+            regexes=$(echo $i | tr "/" "\n" | tail -n 1)
+            # create grep statements for each regex
+            grep_formatted_regex=$(echo "--grep ^$regexes" | awk -F'|' -v OFS=" --grep ^" '$1=$1')
+            if [[ ! -z $(git log ${LAST_HASH}...${FIRST_HASH} $grep_formatted_regex)  ]]; then
+              # print the category title
+              echo "### $title" >> PR.txt
+              # print the commits in the category
+              git log ${LAST_HASH}...${FIRST_HASH} $grep_formatted_regex --oneline | cut -d " " -f2- | awk '{print "- " $0}' >> PR.txt
+              echo "" >> PR.txt
+            fi
+          done
+
+          # print result
+          cat PR.txt
+          # save to environment file
+          echo 'PULL_REQUEST_BODY<<EOF' >> $GITHUB_ENV
+          cat PR.txt >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+      - name: Create Pull Request
+        uses: vsoch/pull-request-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_PREFIX: "release/"
+          PULL_REQUEST_FROM_BRANCH: "release/${{ github.event.inputs.version }}"
+          PULL_REQUEST_TITLE: "chore: release/${{ github.event.inputs.version  }}"
+          PULL_REQUEST_BRANCH: "main"
