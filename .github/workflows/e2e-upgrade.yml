@@ -142,9 +142,6 @@ jobs:
         RATING_SERVICE_URL="https://ratingservice-dot-$(gcloud app describe --format='value(defaultHostname)' --project=${{ env.PROJECT_ID }})"
         # run test
         python3 tests/ratingservice/main_test.py $RATING_SERVICE_URL
-
-
-
     - name: Clean Project State
       timeout-minutes: 30
       if: ${{ always()  }}
