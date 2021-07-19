@@ -62,6 +62,7 @@ jobs:
         # use newly built containers instead of latest pushed
         find "./kubernetes-manifests" "./loadgenerator-manifests" -name '*.yaml' -exec sed -i -e "s#$OLD_PATH#$NEW_PATH#g" {} \;
         find "./kubernetes-manifests" "./loadgenerator-manifests" -name '*.yaml' -exec sed -i -e "s#:latest#:$GITHUB_SHA#g" {} \;
+        find "./kubernetes-manifests" "./loadgenerator-manifests" -name '*.yaml' -exec sed -i -e "s#:v\([0-9\.]\+\)#:$GITHUB_SHA#g" {} \;
     - name: Run Install Script
       timeout-minutes: 30
       run: |
