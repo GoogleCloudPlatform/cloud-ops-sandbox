@@ -21,6 +21,9 @@ on:
     # run on pushes to test branch
     branches:
       - e2e*
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
     # trigger through UI or API
 env:
