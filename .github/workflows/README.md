@@ -130,3 +130,13 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 
 #### Actions
 - leaves a comment containing an "Open in Cloud Shell" button
+
+### Staging-Website.yml
+
+#### Triggers
+- on each new push to develop
+- on manual trigger
+
+#### Actions
+- sets up a pre-prod GAE website deployment in `stackdriver-sandbox-230822`
+
