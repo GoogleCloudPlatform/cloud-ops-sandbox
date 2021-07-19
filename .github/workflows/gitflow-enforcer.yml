@@ -12,21 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Comment Bot"
-on: pull_request
+name: "Gitflow Enforcer Bot"
+on:
+  pull_request:
+    branches:
+      - main
+      - master
 jobs:
-  commenter:
-    name: open-in-cloudshell
+  non-release-pr:
     runs-on: ubuntu-latest
+    if: "!contains(github.head_ref, 'release/')"
     steps:
-      - name: Post Comment
+      - name: Post Warning
         uses: unsplash/comment-on-pr@85a56be792d927ac4bfa2f4326607d38e80e6e60
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           msg: |
-            [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/${{ github.repository  }}.git&cloudshell_git_branch=${{ github.head_ref }}&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:latest)
-            You can also use the [Stage Website Action](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/actions/workflows/manual-website-stage.yml) if there were updates to the website.
-            ---
-            > Note: Open in Cloud Shell may not work properly if this PR contains changes to the custom Cloud Shell image
+            ⚠️  **Error:** only release PRs should be merged into `main`, feature PRs should use `develop`
+
+            See our [Contributing Guide](https://github.com/${{ github.repository }}/blob/develop/CONTRIBUTING.md#git-workflow) for more information.
           check_for_duplicate_msg: true
+      - name: Fail Check
+        run: |
+          echo "not a release branch: ${{ github.head_ref }}"
+          exit 1

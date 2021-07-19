@@ -12,33 +12,64 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "End to End - Latest"
+name: "End to End - Upgrade"
 on:
+  schedule:
+    # run every day at 10pm
+    - cron:  '0 22 * * *'
   push:
-    # run on pushes to main, develop, or prefixed with e2e
+    # run on pushes to test branch
     branches:
-      - main
-      - develop
       - e2e*
   pull_request:
     branches:
-    # run on PRs to main or develop
       - main
-      - develop
   workflow_dispatch:
-  # trigger through UI or API
+    # trigger through UI or API
 env:
   PROJECT_ID: stackdriver-sandbox-e2e
 jobs:
-  end-to-end-latest:
+  end-to-end-upgrade:
     runs-on: [self-hosted, e2e-worker]
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: develop
     - name: Clean Project State
       timeout-minutes: 30
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
+    - name: Extract Website Values
+      timeout-minutes: 30
+      id: website_variables
+      run: |
+        set -x
+        BTN_CONTENT=$(curl https://cloud-ops-sandbox.dev/ | grep console-btn)
+        REPO=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_repo\=).*?(?=&)')
+        echo ::set-output name=repo::${REPO}
+        BRANCH=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_git_branch\=).*?(?=&)')
+        echo ::set-output name=branch::${BRANCH}
+        CLOUDSHELL_IMAGE=$(echo $BTN_CONTENT | grep -o -P '(?<=cloudshell_image\=).*?(?=&)')
+        echo ::set-output name=cloudshell_image::${CLOUDSHELL_IMAGE}
+    - name: Install Previous Version
+      timeout-minutes: 30
+      run: |
+        set -x
+        docker pull ${{ steps.website_variables.outputs.cloudshell_image }}
+        # run install script
+        # ISTIO_VERSION is fix for v0.5.0. Can be removed after next release
+        docker run --rm \
+          -e project_id=${{ env.PROJECT_ID }} \
+          -e release_repo=${{ steps.website_variables.outputs.repo }} \
+          -e release_branch=${{ steps.website_variables.outputs.branch }} \
+          -e ISTIO_VERSION=1.7.1 \
+          -v ~/.config:/root/.config \
+          -v `pwd`:/sandbox-shared \
+          --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
+          ${{ steps.website_variables.outputs.cloudshell_image }}
+
+    # build new version and deploy on top
     - name: Build Sandbox Kubernetes Services
       run: |
         set -x
@@ -113,21 +144,9 @@ jobs:
         RATING_SERVICE_URL="https://ratingservice-dot-$(gcloud app describe --format='value(defaultHostname)' --project=${{ env.PROJECT_ID }})"
         # run test
         python3 tests/ratingservice/main_test.py $RATING_SERVICE_URL
-    - name: Test Using Existing Project
-      timeout-minutes: 30
-      run: |
-        set -x
-        # run install script
-        docker run --rm \
-          -e project_id=${{ env.PROJECT_ID }} \
-          -e service_wait=1 \
-          -v ~/.config:/root/.config \
-          -v `pwd`:/sandbox-shared \
-          --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
-          test-cloud-shell:$GITHUB_SHA
     - name: Clean Project State
-      if: ${{ always()  }}
       timeout-minutes: 30
+      if: ${{ always()  }}
       run: |
         # clean GCP resources
         .github/workflows/e2e_scripts/clean.sh
