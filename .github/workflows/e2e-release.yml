@@ -18,9 +18,10 @@ on:
     # run every day at 8pm
     - cron:  '0 20 * * *'
   push:
-    # run on pushes to test branch
+    # run on pushes to test branch, or main
     branches:
       - e2e*
+      - main
   workflow_dispatch:
     # trigger through UI or API
 env:
