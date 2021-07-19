@@ -1,6 +1,6 @@
 # Releasing
 
-There are two artifacts that make up a Stackdriver Sandbox release:
+There are two artifacts that make up a Cloud Operations Sandbox release:
 - A set of tagged container images in "gcr.io/stackdriver-sandbox-230822/service_name"
 - A set of manifests and code, saved as a git tag in this repository
 
@@ -18,14 +18,14 @@ There are two artifacts that make up a Stackdriver Sandbox release:
     - website/deploy/index.html""
     - terraform/telemetry.py should be set to prod
   - a new git tag should have been pushed for the new release version
-  - the new tags should trigger a [CI job](https://github.com/GoogleCloudPlatform/stackdriver-sandbox/blob/master/.github/workflows/push-tags.yml),
+  - the new tags should trigger a [CI job](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/main/.github/workflows/push-tags.yml),
     and updated container images should appear in the [`stackdriver-sandbox-230822` GCR repo](http://console.cloud.google.com/gcr/images/stackdriver-sandbox-230822)
 1. Review the new release pull request.
   - If any issues arise, delete the branch and tag, push new changes to develop, and start the release process again (see [Reverting Faulty Releases](#reverting-faulty-releases))
-1. When the PR has been reviewed and thoroughly tested, merge it into master
+1. When the PR has been reviewed and thoroughly tested, merge it into main
    - Don't squash; we want to keep the git history
 1. Manually promote the tag to a release on the [GitHub Releases page](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/releases)
-1. The merge to master should kick off a [CI job](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/actions/workflows/update-website.yml)
+1. The merge to main should kick off a [CI job](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/actions/workflows/update-website.yml)
     to re-build the website. Ensure that [cloud-ops-sandbox.dev](https://cloud-ops-sandbox.dev/)
     was updated to use the new tag when you press the "Open in Cloud Shell" button
 1. Do a manual sanity check, running through a deployment on [cloud-ops-sandbox.dev](https://cloud-ops-sandbox.dev/) to make sure everything still works
