@@ -13,7 +13,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 5. Set GitHub Actions as a background service
     - `sudo ~/actions-runner/svc.sh install ; sudo ~/actions-runner/svc.sh start`
 6. Run the following command to install dependencies
-    - `wget -O - https://raw.githubusercontent.com/GoogleCloudPlatform/cloud-ops-sandbox/master/.github/workflows/install-dependencies.sh | bash`
+    - `wget -O - https://raw.githubusercontent.com/GoogleCloudPlatform/cloud-ops-sandbox/main/.github/workflows/install-dependencies.sh | bash`
 
 ## Tags
 - `kind-cluster`
@@ -47,9 +47,8 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 
 #### Triggers
 
-- commits pushed to master
-- PRs to master
-- PRs to release/ branches
+- commits pushed to main or develop
+- PRs to main or develop
 
 #### Actions
 
@@ -60,15 +59,22 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
   - ensures HTTP request to frontend returns HTTP status 200
 
 
-### Push-Master.yaml
+### Push-Containers.yaml
 
 #### Triggers
-- commits pushed to master
+- commits pushed to develop or main branches
 
 #### Actions
 - builds and pushes images to official GCR repo tagged with git commit
 - builds and pushes images to official GCR repo tagged as latest
 
+### Update-Website.yaml
+
+#### Triggers
+- release merged and commits pushed to main
+
+#### Actions
+- push new prod version of the website to App Engine
 
 ### Push-Tags.yaml
 
@@ -81,8 +87,8 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 ### E2E-Latest.yaml
 
 #### Triggers
-- on each commit to master
-- on each commit to a release branch
+- on each commit to main or develop
+- on each PR to main or develop
 
 #### Actions
 - ensure end-to-end test project has deleted all test resources
@@ -96,6 +102,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 #### Triggers
 - daily at 8pm
 - on demand (through UI)
+- on pushes to main branch
 
 #### Actions
 - ensure end-to-end test project has deleted all test resources
@@ -107,7 +114,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 ### Update-Custom-Image.yaml
 
 #### Triggers
-- on each commit to master
+- on each commit to main or develop
 - on each new tag pushed to repo
 - every 24 hours
 
@@ -123,6 +130,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 
 #### Actions
 - leaves a comment containing an "Open in Cloud Shell" button
+
 
 ### Gitflow-Enforcer.yml
 
@@ -140,3 +148,13 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 #### Actions
 - Checks kubernetes manifests to ensure develop is pinned to `latest`, and main is pinned to a version
 - Checks telemetry id to ensure develop is on `test` and main is on `prod`
+
+### Staging-Website.yml
+
+#### Triggers
+- on each new push to develop
+- on manual trigger
+
+#### Actions
+- sets up a pre-prod GAE website deployment in `stackdriver-sandbox-230822`
+

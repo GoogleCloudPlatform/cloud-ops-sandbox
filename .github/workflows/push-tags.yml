@@ -43,8 +43,3 @@ jobs:
         IMAGE=gcr.io/${{ env.PROJECT_ID }}/sandbox/loadgenerator/gke:${{ steps.get_version.outputs.VERSION }}
         docker build -t $IMAGE ./src/loadgenerator
         docker push $IMAGE
-    - name: Deploy Website to App Engine
-      timeout-minutes: 20
-      run: |
-        set -x
-        gcloud app deploy website/app.yaml
