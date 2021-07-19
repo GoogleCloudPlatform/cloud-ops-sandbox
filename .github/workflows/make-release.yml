@@ -36,7 +36,11 @@ jobs:
           fi
           # ensure not duplicate
           if [[ "$NEW_VERSION" == $(git tag | grep $NEW_VERSION | cat) ]]; then
-            echo "$NEW_VERSION" already exists in project
+            echo "$NEW_VERSION" tag already exists in project
+            exit 1
+          fi
+          if [[ "$NEW_VERSION" == $(git branch | grep "release/$NEW_VERSION" | cat) ]]; then
+            echo "$NEW_VERSION" branch already exists in project
             exit 1
           fi
       - name: Git Setup
@@ -79,17 +83,8 @@ jobs:
            PROD_TOPIC="telemetry_prod"
            TEST_TOPIC="telemetry_test"
            sed -i -e "s/topic_id = \"${TEST_TOPIC}\"/topic_id = \"${PROD_TOPIC}\"/g" ${REPO_ROOT}/terraform/telemetry.py;
-      - name: Commit Changes
-        run: |
-          set -x
-          export NEW_VERSION=${{ github.event.inputs.version }}
-          REPO_ROOT=cloud-ops-sandbox
-          cd $REPO_ROOT
-          git add .
-          git commit -m "ignore: update tags for release ${NEW_VERSION}"
-          git tag "${NEW_VERSION}"
       - name: Push changes
-        uses: ad-m/github-push-action@65392840bda2e77
+        uses: ad-m/github-push-action@65392840bda2e774394d5cd38ca33e5918aec2d3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch:  "release/${{ github.event.inputs.version  }}"
@@ -98,10 +93,10 @@ jobs:
       - name: Build PR Body
         run: |
           cd cloud-ops-sandbox
-          # start at the base of
-          FIRST_HASH=$(git rev-parse develop)
-          LAST_HASH=$(git rev-parse main)
-          DIFF=$(git log ${LAST_HASH}...${FIRST_HASH} --oneline)
+          # find the changes commited to develop since last release
+          PREV_HASH=$(git merge-base develop main)
+          RECENT_HASH=$(git rev-parse develop)
+          DIFF=$(git log ${PREV_HASH}...${RECENT_HASH} --oneline)
           echo -e $DIFF
 
           # print version number as title
@@ -124,15 +119,23 @@ jobs:
               echo "" >> PR.txt
             fi
           done
-
           # print result
           cat PR.txt
           # save to environment file
           echo 'PULL_REQUEST_BODY<<EOF' >> $GITHUB_ENV
           cat PR.txt >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
+      - name: Commit Changes
+        run: |
+          set -x
+          export NEW_VERSION=${{ github.event.inputs.version }}
+          REPO_ROOT=cloud-ops-sandbox
+          cd $REPO_ROOT
+          git add .
+          git commit -m "chore: update tags for release ${NEW_VERSION}"
+          git tag "${NEW_VERSION}"
       - name: Create Pull Request
-        uses: vsoch/pull-request-action@29dbfc0acd2ac
+        uses: vsoch/pull-request-action@29dbfc0acd2ac96b0ec14b9fd53fa12136130058
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH_PREFIX: "release/"
