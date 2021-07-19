@@ -89,7 +89,7 @@ jobs:
           git commit -m "ignore: update tags for release ${NEW_VERSION}"
           git tag "${NEW_VERSION}"
       - name: Push changes
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@65392840bda2e77
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch:  "release/${{ github.event.inputs.version  }}"
@@ -132,7 +132,7 @@ jobs:
           cat PR.txt >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
       - name: Create Pull Request
-        uses: vsoch/pull-request-action@master
+        uses: vsoch/pull-request-action@29dbfc0acd2ac
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH_PREFIX: "release/"
