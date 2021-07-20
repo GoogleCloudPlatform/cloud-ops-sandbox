@@ -18,9 +18,10 @@ on:
     # run daily at midnight
     - cron: '0 0 * * *'
   push:
-    # run on pushes to master
+    # run on pushes to develop or main
     branches:
-      - master
+      - main
+      - develop
     # run after pushing new tags
     tags:
       - 'v*'
@@ -29,9 +30,11 @@ on:
 jobs:
   build-trigger:
     runs-on: [self-hosted, push-privilege]
-    timeout-minutes: 30
+    timeout-minutes: 100
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: develop
     - name: Run Cloud Build Trigger
       id: cloud_build
       run: |
