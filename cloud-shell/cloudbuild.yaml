@@ -29,7 +29,7 @@ steps:
     # build images for each releases, and repo HEAD
     UNCERTIFIED_PATH=gcr.io/$PROJECT_ID/cloudshell-image/uncertified
     # build latest image
-    git checkout fix-cloud-build
+    git checkout develop
     docker build -t $$UNCERTIFIED_PATH:latest ./cloud-shell
     docker push $$UNCERTIFIED_PATH:latest
     # re-build recent tags
