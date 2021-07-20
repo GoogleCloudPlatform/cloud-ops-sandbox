@@ -189,16 +189,16 @@ You can expand any of the messages that matches the filter to see the full stack
 
 Cloud operations sandbox comes with several predefined SLOs(Service level objectives), that allow us to measure our users happiness. To learn more about SLIs and SLOs [visit here.](https://cloud.google.com/blog/products/devops-sre/sre-fundamentals-slis-slas-and-slos)
 
-Cloud operations suite provides **service oriented monitoring**, that means that we are configuring SLIs, SLOs and Burning Rates Alerts for a 'service'. Cloud Operations Sandbox' services are already detected since Istio automatically detects and creates services for us. But to demonstrate that you can create your own services, it also deploys custom services using [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring).
+Cloud operations suite provides **service oriented monitoring**, that means that we are configuring SLIs, SLOs and Burning Rates Alerts for a 'service'. Cloud Operations Sandbox' services are already detected since Istio automatically detects and creates services for us. But to demonstrate that you can create your own services, it also deploys custom services using [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/main/terraform/monitoring).
 
 You can find all the services under [monitoring → services → Services Overview](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/svc-overview) , and you can create your own [custom service.](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/define-svc)
 
 ### Services SLOs  
 
 To view, edit or create SLOs for a service you need to go to the service page, for additional information refer to the [User Guide.](https://cloud-ops-sandbox.dev/docs/)
-> The *predefined SLOs* are also deployed as part of [Terraform code](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring/04_slos.tf) and currently are for the mentioned custom services, the Istio service and Rating service.  
+> The *predefined SLOs* are also deployed as part of [Terraform code](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/main/terraform/monitoring/04_slos.tf) and currently are for the mentioned custom services, the Istio service and Rating service.  
 
-![Services example](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/raw/master/docs/images/user-guide/37-services-overview.png "Example of Cloud Operations Services")
+![Services example](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/raw/main/docs/images/user-guide/37-services-overview.png "Example of Cloud Operations Services")
 
 ### Configure your own SLIs and SLOs
 
@@ -215,7 +215,7 @@ You can [configure your own SLIs and SLOs](https://cloud.google.com/stackdriver/
 
 After you created the SLO, you can create [Burn Rate Alerts](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate) for those.
 
-> There are also several *predefined polices* are deployed as part of [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/master/terraform/monitoring/05_alerting_policies.tf). You can view or edit them in the service screen.
+> There are also several *predefined polices* are deployed as part of [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/main/terraform/monitoring/05_alerting_policies.tf). You can view or edit them in the service screen.
 
 5. In the service screen we will be able to see our new SLO and we will choose 'Create Alerting Policy'
 6. Then we will want to set the alert's condition, who and how they will be notified and additional instructions
@@ -226,7 +226,7 @@ For additional information refer to the [User Guide.](https://cloud-ops-sandbox.
 ## SRE Recipes
 
 SRE Recipes is our [Chaos Engineering](https://en.wikipedia.org/wiki/Chaos_engineering) tool to test your sandbox environment. It helps users to familiarize themselves with finding the root cause of a breakage using Cloud Operations suite of tools.  
-Each 'recipe' simulates a different scenario of real life problems that can occur to the production system. There are several recipes that you can run and you can also [contribute your own.](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/sre-recipes#contributing)  
+Each 'recipe' simulates a different scenario of real life problems that can occur to the production system. There are several recipes that you can run and you can also [contribute your own.](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/main/sre-recipes#contributing)  
 
 ```
 $ sandboxctl sre-recipes  

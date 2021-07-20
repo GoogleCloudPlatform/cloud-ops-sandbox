@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Push Master Image"
+name: "Push Containers"
 on:
   push:
-    # run on pushes to master
+    # run on pushes to develop or main
     branches:
-      - master
+      - develop
+      - main
 env:
   PROJECT_ID: stackdriver-sandbox-230822
 jobs:
-  push-master:
+  push-containers:
     runs-on: [self-hosted, push-privilege]
     steps:
     - uses: actions/checkout@v2
