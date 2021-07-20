@@ -32,8 +32,8 @@ steps:
     git checkout fix-cloud-build
     docker build -t $$UNCERTIFIED_PATH:latest ./cloud-shell
     docker push $$UNCERTIFIED_PATH:latest
-    # build tags
-    for TAG in $(git tag | sort -V); do
+    # re-build recent tags
+    for TAG in $(git tag | sort -V | tail -3); do
         echo "checking out $$TAG"
         git checkout $$TAG
         # if cloud-build directory exists, build new container
