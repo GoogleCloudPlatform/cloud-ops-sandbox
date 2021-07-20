@@ -33,7 +33,7 @@ In order to use the calculator you should first select a product from the scroll
  
 **Resources Information**
 Region: "us-east1" 
-- Loadgen Cluster 2x "n1-standard-2" 
+- Loadgen Cluster 1x "n1-standard-2" 
 - GKE cluster (for the hipster shop microservices) 4x "n1-standard-2"
 - App Engine (Standard, F1)
 - SQL PostgresQL - "db-f1-micro" 
@@ -62,7 +62,7 @@ You can view this information easily using Metrics Explorer, by choosing Resourc
 
 ![image](/docs/images/user-guide/63-storage-metrics.png)
 As you can see it is well below 1GB which costs $0.02.
-At the end you will have an estimation that includes all the components, and you also save it or email it to be referenced later. Which is ~$290 a month for Sandbox components.
+At the end you will have an estimation that includes all the components, and you also save it or email it to be referenced later. Which is ~$250 a month for Sandbox components.
 
 > Please note that is only estimation for the compute components and additional charges like networking and metrics will be added based on usage. 
 

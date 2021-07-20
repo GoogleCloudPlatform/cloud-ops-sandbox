@@ -18,7 +18,7 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
-  timeout: 1800s
+  timeout: 6000s
   args:
   - '-c'
   - |-
@@ -29,9 +29,11 @@ steps:
     # build images for each releases, and repo HEAD
     UNCERTIFIED_PATH=gcr.io/$PROJECT_ID/cloudshell-image/uncertified
     # build latest image
+    git checkout develop
     docker build -t $$UNCERTIFIED_PATH:latest ./cloud-shell
     docker push $$UNCERTIFIED_PATH:latest
-    for TAG in $(git tag | sort -V); do
+    # re-build recent tags
+    for TAG in $(git tag | sort -V | tail -3); do
         echo "checking out $$TAG"
         git checkout $$TAG
         # if cloud-build directory exists, build new container
@@ -54,4 +56,4 @@ steps:
     docker push $$CERTIFIED_PATH:latest
     docker push $$CERTIFIED_PATH:$$LATEST_TAG
 logsBucket: 'gs://sandbox-cloud-build-logs'
-timeout: 1800s
+timeout: 6000s

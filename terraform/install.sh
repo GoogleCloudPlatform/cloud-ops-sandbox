@@ -330,7 +330,7 @@ displaySuccessMessage() {
     log "********************************************************************************"
     log "Cloud Operations Sandbox deployed successfully!"
     log ""
-    log "     Google Cloud Console KBE Dashboard: $gcp_kubernetes_path"
+    log "     Google Cloud Console GKE Dashboard: $gcp_kubernetes_path"
     log "     Google Cloud Console Monitoring Workspace: $gcp_monitoring_path"
     log "     Hipstershop web app address: http://$external_ip"
     if [[ -z "${skip_loadgen}" ]]; then

@@ -15,14 +15,15 @@
 name: "Continuous Integration"
 on:
   push:
-    # run on pushes to master or release/*
-    branches:    
-      - master
-      - release/*
+    # run on all pushes to develop or main
+      branches:
+      - main
+      - develop
   pull_request:
-    # run on pull requests targeting master
+    # run on pull requests targeting main or develop
     branches:
-      - master
+      - main
+      - develop
 jobs:
   run-tests:
     runs-on: [self-hosted, kind-cluster]
