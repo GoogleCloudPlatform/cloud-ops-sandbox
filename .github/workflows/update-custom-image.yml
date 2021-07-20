@@ -33,6 +33,8 @@ jobs:
     timeout-minutes: 100
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: develop
     - name: Run Cloud Build Trigger
       id: cloud_build
       run: |
