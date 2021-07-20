@@ -24,9 +24,9 @@ RUN sudo apt-get install unzip && \
 RUN sudo apt-get -y install postgresql-client jq
 
 # install python libraries
-RUN python3 -m pip install google-cloud-pubsub
-RUN python3 -m pip install click
-RUN python3 -m pip install google-cloud-monitoring
+RUN python3 -m pip install google-cloud-pubsub==2.6.0
+RUN python3 -m pip install click==8.0.1
+RUN python3 -m pip install google-cloud-monitoring==2.4.0
 
 # set env var
 RUN echo "VERSION=develop" >> /etc/environment
