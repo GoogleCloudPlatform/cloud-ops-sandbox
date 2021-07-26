@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module "ratingservice" {
-  source          = "./ratingservice"
-  gcp_project_id  = data.google_project.project.project_id
-  gcp_region_name = "us-east1"
+module "loadgen" {
+  source      = "./loadgen"
+  count       = var.skip_loadgen ? 0 : 1
+  external_ip = google_container_cluster.gke.endpoint
+  project_id  = data.google_project.project.project_id
+  depends_on  = [null_resource.delay]
 }

@@ -28,11 +28,11 @@ variable "project_id" {
 }
 
 variable "project_owner_email" {
-	type	      = string
-	description = "The email to receive alerts caused by violations of alerting policies."
+  type        = string
+  description = "The email to receive alerts caused by violations of alerting policies."
 }
 
 variable "zone" {
   type        = string
-  description = "The Zone of the Cloud Operations Sandbox cluster."
+  description = "GKE cluser zone, needed for istio services monitoring. Can be revealed by running \"gcloud container clusters list --filter='name:cloud-ops-sandbox' --project $project_id --format='value(zone)')\" from Google Cloud CLI"
 }

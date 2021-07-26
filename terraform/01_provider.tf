@@ -22,17 +22,16 @@
 # TODO:  we can consider configuring it via env vars
 # that were populated appropriately at runtime.
 
-provider "google" {
-  # pin provider to 2.x
-  version = "~> 3.0"
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">=3.23.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 2.0"
+    }
 
-  # credentials = "/path/to/creds.json"
-  # project = "project-id"
-  # region = "default-region"
-  # zone = "default-zone"
-}
-
-# we also use the random provider so let's pin that too
-provider "random" {
-  version = "~> 2.0"
+  }
 }
