@@ -47,8 +47,7 @@ class ProductCatalogLatencyRecipe(Recipe):
         else:
             latency_seconds="0s"
         set_env_command = f"kubectl set env deployment/productcatalogservice EXTRA_LATENCY={latency_seconds}"
-        get_pod_command = """kubectl get pod -l app=productcatalogservice -o \
-            jsonpath=\"{.items[0].metadata.name}\"""
+        get_pod_command = 'kubectl get pod -l app=productcatalogservice -o jsonpath="{.items[0].metadata.name}"'
         logging.info('Setting env variable: %s', set_env_command)
         logging.info('Getting pod: %s', get_pod_command)
 
