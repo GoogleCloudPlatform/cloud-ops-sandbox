@@ -43,9 +43,9 @@ class ProductCatalogLatencyRecipe(Recipe):
         and updates the state accordingly
         """
         if state:
-            latency_seconds=10
+            latency_seconds="10.0s"
         else:
-            latency_seconds=0
+            latency_seconds="0s"
         set_env_command = f"kubectl set env deployment/productcatalogservice EXTRA_LATENCY={latency_seconds}"
         get_pod_command = """kubectl get pod -l app=productcatalogservice -o \
             jsonpath=\"{.items[0].metadata.name}\"""
