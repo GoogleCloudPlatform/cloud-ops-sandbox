@@ -134,6 +134,7 @@ def loadgen(traffic_pattern):
         f"LOCUST_TASK={traffic_pattern}"
     delete_pods_command = "kubectl delete pods -l app=loadgenerator"
 
+    Recipe._auth_cluster('LOADGEN')
     print('Redeploying Loadgenerator...')
     Recipe._run_command(set_env_command)
     Recipe._run_command(delete_pods_command)
