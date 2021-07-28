@@ -13,6 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# add sandboxctl to path
+SCRIPT_DIR=$(dirname $(realpath -s $0))
+SRE_RECIPES_DIR=$(realpath ../../sre-recipes)
+export PATH=$PATH:$SRE_RECIPES_DIR
+
 set -e
 echo "Testing Recommendation Crash SRE Recipe"
 
