@@ -21,18 +21,19 @@
 #
 # TODO:  we can consider configuring it via env vars
 # that were populated appropriately at runtime.
+terraform {
+  # The module has 0.12 syntax and is not compatible with any versions below 0.12.
+  required_version = ">= 0.12"
 
-provider "google" {
-  # pin provider to 2.x
-  version = "~> 3.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">=3.23.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 2.0"
+    }
 
-  # credentials = "/path/to/creds.json"
-  # project = "project-id"
-  # region = "default-region"
-  # zone = "default-zone"
-}
-
-# we also use the random provider so let's pin that too
-provider "random" {
-  version = "~> 2.0"
+  }
 }
