@@ -97,7 +97,7 @@ jobs:
       timeout-minutes: 30
       run: |
         set -x
-        ./tests/recipes/recommendation_crash_recipe.sh
+        ./tests/recipes/test_recommendation_crash_recipe.sh
     - name: Run Monitoring Integration Tests
       timeout-minutes: 30
       run: |
