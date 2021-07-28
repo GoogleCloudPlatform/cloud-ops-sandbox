@@ -22,12 +22,11 @@
 # TODO:  we can consider configuring it via env vars
 # that were populated appropriately at runtime.
 
-provider "google" {
-  # pin provider to 3.23.0
-  version = ">=3.23.0"
-
-  # credentials = "/path/to/creds.json"
-  project = var.project_id
-  # region = "default-region"
-  # zone = "default-zone"
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">=3.23.0"
+    }
+  }
 }

@@ -21,8 +21,8 @@
 #
 # TODO:  we can consider configuring it via env vars
 # that were populated appropriately at runtime.
-
 terraform {
+  required_version = ">= 0.12"
   required_providers {
     google = {
       source  = "hashicorp/google"
