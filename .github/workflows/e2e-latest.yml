@@ -96,10 +96,14 @@ jobs:
     - name: Run SRE Recipes Tests
       timeout-minutes: 30
       run: |
-        # add sandboxctl to path
-        export PATH=$PATH:$PWD/sre-recipes
-        # run tests
-        ./tests/recipes/test_recommendation_crash_recipe.sh
+        # build cloud shell image
+        docker build -t test-cloud-shell:$GITHUB_SHA ./cloud-shell
+        # run test script
+        docker run --rm \
+          -v ~/.config:/root/.config \
+          -v `pwd`:/sandbox-shared \
+          --entrypoint /sandbox-shared/tests/recipes/test_recommendation_crash_recipe.sh \
+          test-cloud-shell:$GITHUB_SHA
     - name: Run Monitoring Integration Tests
       timeout-minutes: 30
       run: |
