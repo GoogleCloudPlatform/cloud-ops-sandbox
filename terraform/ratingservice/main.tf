@@ -14,23 +14,6 @@
  * limitations under the License.
  */
 
-
-terraform {
-  # The module has 0.12 syntax and is not compatible with any versions below 0.12.
-  required_version = ">= 0.12"
-}
-
-provider "google" {
-  version = "~> 3.0"
-
-  project = var.gcp_project_id
-  region  = var.gcp_region_name
-}
-
-provider "random" {
-  version = "~> 2.0"
-}
-
 resource "google_project_service" "gae" {
   service                    = "appengine.googleapis.com"
   disable_dependent_services = true
@@ -189,8 +172,8 @@ resource "google_app_engine_standard_app_version" "ratingservice" {
       min_instances = 1
     }
     max_concurrent_requests = 9
-    min_idle_instances = 1
-    max_idle_instances = 1
+    min_idle_instances      = 1
+    max_idle_instances      = 1
   }
 
   delete_service_on_destroy = true
