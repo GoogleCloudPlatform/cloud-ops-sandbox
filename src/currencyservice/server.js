@@ -29,16 +29,15 @@ const opentelemetry = require('@opentelemetry/api');
 const {NodeTracerProvider} = require('@opentelemetry/node');
 const {BatchSpanProcessor} = require('@opentelemetry/tracing');
 const {TraceExporter} = require('@google-cloud/opentelemetry-cloud-trace-exporter');
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
 
 // OpenTelemetry tracing with exporter to Google Cloud Trace
-const provider = new NodeTracerProvider({
-  // Use grpc plugin to receive trace contexts from clients.
-  plugins: {
-    grpc: {
-      enabled: true,
-      path: '@opentelemetry/plugin-grpc',
-    }
-  }
+const provider = new NodeTracerProvider();
+provider.register();
+
+registerInstrumentations({
+  instrumentations: [new GrpcInstrumentation()]
 });
 
 // Enable OpenTelemetry exporters to export traces to Google Cloud Trace.
@@ -48,7 +47,6 @@ const provider = new NodeTracerProvider({
 // you don't need to provide auth credentials or a project id.
 const exporter = new TraceExporter();
 provider.addSpanProcessor(new BatchSpanProcessor(exporter));
-provider.register();
 const tracer = opentelemetry.trace.getTracer('currency');
 
 const path = require('path');
@@ -70,7 +68,7 @@ const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
 const logger = pino({
   name: 'currencyservice-server',
   messageKey: 'message',
-  changeLevelName: 'severity',
+  levelKey: 'severity',
   useLevelLabels: true
 });
 
@@ -141,9 +139,7 @@ function _carry (amount) {
 function getSupportedCurrencies (call, callback) {
   // Extract the span context received from the gRPC client.
   // Create a child span and add an event.
-  const currentSpan = tracer.getCurrentSpan();
   const span = tracer.startSpan('currencyservice:GetSupportedCurrencies()', {
-    parent: currentSpan,
     kind: 1, // server
   });
   span.addEvent('Get Supported Currencies');
@@ -160,9 +156,7 @@ function getSupportedCurrencies (call, callback) {
 function convert (call, callback) {
   // Extract the span context received from the gRPC client.
   // Create a child span and add an event.
-  const currentSpan = tracer.getCurrentSpan();
   const span = tracer.startSpan('currencyservice:Convert()', {
-    parent: currentSpan,
     kind: 1, // server
   });
   logger.info('received conversion request');
