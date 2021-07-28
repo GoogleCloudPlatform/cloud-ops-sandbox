@@ -22,10 +22,10 @@ import subprocess
 from recipe import Recipe
 
 
-class ProductCatalogLatencyRecipe(Recipe):
+class RecommendationCrashRecipe(Recipe):
     """
-    This class implements recipe 3, which adds latency and warnings
-    to the productcatalogservice.
+    This class implements recipe 3, which adds a crashing bug
+    to the recommendationservice.
     """
     name = "recipe3"
 
@@ -34,20 +34,19 @@ class ProductCatalogLatencyRecipe(Recipe):
 
     def is_active(self):
         # recipe temporarily disabled until it is easier to solve
-        # TODO: improve and re-enable recipe
         return True
 
     def deploy_state(self, state):
         """
-        Sets an environment variable ENCODE_EMAIL to given state
-        and updates the state accordingly
+        Sets the environment variable MAX_RESPONSES to "5.0" in the
+        recommendationservice, which will cause an exception in request processing
         """
         if state:
-            latency_seconds="10.0s"
+            var_str="MAX_RESPONSES=5.0"
         else:
-            latency_seconds="0s"
-        set_env_command = f"kubectl set env deployment/productcatalogservice EXTRA_LATENCY={latency_seconds}"
-        get_pod_command = 'kubectl get pod -l app=productcatalogservice -o jsonpath="{.items[0].metadata.name}"'
+            var_str="MAX_RESPONSES-"
+        set_env_command = f"kubectl set env deployment/recommendationservice {var_str}"
+        get_pod_command = 'kubectl get pod -l app=recommendationservice -o jsonpath="{.items[0].metadata.name}"'
         logging.info('Setting env variable: %s', set_env_command)
         logging.info('Getting pod: %s', get_pod_command)
 
@@ -61,7 +60,7 @@ class ProductCatalogLatencyRecipe(Recipe):
         delete_pod_command = f"kubectl delete pod {service}"
         logging.info('Deleting pod: %s', delete_pod_command)
         Recipe._run_command(delete_pod_command)
-        availability_command = "kubectl wait --for=condition=available --timeout=600s deployment/productcatalogservice"
+        availability_command = "kubectl wait --for=condition=available --timeout=600s deployment/recommendationservice"
         Recipe._run_command(availability_command)
 
     def break_service(self):
@@ -97,6 +96,7 @@ class ProductCatalogLatencyRecipe(Recipe):
             print('No project ID found.')
             logging.error('No project ID found.')
             exit(1)
+        print('Browse your website until you encounter an issue.')
         print('Use Cloud Logging to view logs exported by each service: https://console.cloud.google.com/logs?project={}'.format(project_id))
 
     def verify_broken_service(self):
@@ -106,7 +106,7 @@ class ProductCatalogLatencyRecipe(Recipe):
         """
         prompt = 'Which service has an issue?'
         choices = ['email service', 'recommendation service', 'productcatalog service', 'cart service', 'frontend service']
-        answer = 'productcatalog service'
+        answer = 'recommendation service'
         Recipe._generate_multiple_choice(prompt, choices, answer)
 
     def verify_broken_cause(self):
@@ -116,7 +116,7 @@ class ProductCatalogLatencyRecipe(Recipe):
         """
         prompt =  'What was the cause of the break?'
         choices = ['high latency', 'internal service errors', 'failed connection to other services', 'memory quota exceeded']
-        answer = 'high latency'
+        answer = 'internal service errors'
         Recipe._generate_multiple_choice(prompt, choices, answer)
 
     def verify(self):
