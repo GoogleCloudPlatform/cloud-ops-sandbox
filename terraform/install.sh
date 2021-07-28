@@ -188,10 +188,7 @@ createProject() {
 }
 
 applyTerraform() {
-  if [[ -n "$VERSION" ]]; then
-    app_ver="$(echo $VERSION | tr "." "_")"
-  fi
-  
+
   rm -f .terraform/terraform.tfstate
 
   log "Initialize terraform backend with bucket ${bucket_name}"
@@ -212,18 +209,22 @@ applyTerraform() {
   if [[ -n "$billing_id" ]]; then
     terraform_command+=" -var=\"billing_account=${billing_acct}\"" 
   fi
-
-  #check if new installtion or if cluster already and what is the version
+  #Check application version
+  #If cluster already exist leave original version
   gke_location="$(gcloud container clusters list --format="value(location)" --filter name=cloud-ops-sandbox)"
   if [[ -n "$gke_location" ]]; then 
     gke_version="$(gcloud container clusters describe cloud-ops-sandbox --region "${gke_location}"  --format="value(resourceLabels.version)")"
-  fi
-  #If cluster exist and it's older version use backward comp. params
-  if [[ -n "$gke_location"  && -z "$gke_version" ]]; then 
-    terraform_command+=' -var="app_version=0"'
+    #If cluster exist and it's older version use backward comp params
+    if [[ -n "$gke_version" ]]; then 
+       app_ver=$gke_version
+    fi
+  elif [[ -n "$VERSION" ]]; then
+    app_ver="$(echo $VERSION | tr "." "_")"
   else
-    terraform_command+=" -var=\"app_version=${app_ver}\"" 
-  fi 
+    app_ver="0" 
+  fi     
+  terraform_command+=" -var=\"app_version=${app_ver}\"" 
+  
   log "Apply Terraform automation"
   eval $terraform_command
 }
