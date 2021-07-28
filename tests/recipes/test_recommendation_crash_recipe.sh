@@ -14,19 +14,29 @@
 # limitations under the License.
 
 set -e
-set -x
+echo "Testing Recommendation Crash SRE Recipe"
 
 HTTP_ADDR=$(sandboxctl describe | grep "Hipstershop web app address" | awk '{ print $NF  }')
+echo "Hipstershop endpoint: $HTTP_ADDR"
 
-# page should load and show a typewriter
+echo "- testing request before changes..."
 curl --show-error --fail $HTTP_ADDR/product/OLJCESPC7Z | grep Typewriter
+
+echo "- breaking sandbox..."
 sandboxctl sre-recipes break recipe3
-sleep 5
-# page should now return a 500 server error
+sleep 10
+
+echo "- expecting to see 500 error..."
 curl -I --no-fail $HTTP_ADDR/product/OLJCESPC7Z | grep "500 Internal Server Error" 
-sandboxctl sre-recipes restore recipe3
-sleep 5
-# check for expected log in recommendationservice
+
+echo "- checking for expected recomendationservice log..."
 kubectl logs deploy/recommendationservice server | grep "invalid literal for int() with base 10: '5.0'"
-# after restoring, site should load properly again
+
+echo "- restoring sandbox"
+sandboxctl sre-recipes restore recipe3
+sleep 10
+
+echo "- testing restored website..."
 curl --show-error --fail $HTTP_ADDR/product/OLJCESPC7Z | grep Typewriter
+
+echo "✓ Tests Passed"
