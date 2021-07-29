@@ -14,7 +14,6 @@
 # limitations under the License.
 
 # add sandboxctl to path
-set -x
 SCRIPT_DIR=$(dirname $(realpath -s $0))
 SRE_RECIPES_DIR=$(realpath $SCRIPT_DIR/../../sre-recipes)
 export PATH=$PATH:$SRE_RECIPES_DIR
