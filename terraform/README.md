@@ -2,21 +2,19 @@ Hipster Shop Terraform
 ================================================================================
 
 This directory contains a heavily documented, [Terraform]
-config for deploying [Hipster Shop]. It's part of the [Stackdriver Sandbox]
+config for deploying [Hipster Shop]. It's part of the [Google Cloud Operations Sandbox]
 project. The goal of the project is to provide a one-click installer that builds
 a fullly functional environment including Hipster Shop and a preconfigured
-Stackdriver environment suitable for learning and experimentation.
+Google Cloud Operations environment suitable for learning and experimentation.
 
 [Terraform]: https://www.terraform.io/
 [Hipster Shop]: https://github.com/GoogleCloudPlatform/microservices-demo
-[Stackdriver Sandbox]: https://stackdriver-sandbox.dev
+[Google Cloud Operations Sandbox]: https://stackdriver-sandbox.dev
 
 tl;dr
 --------------------------------------------------------------------------------
 
 * Terraform can easily provision the infrastructure necessary
-* Stackdriver support in the GCP provider is limited due to
-  API availability
 
 [Cloud Graphite]: https://github.com/terraform-providers/terraform-provider-google
 [GCP provider]: https://www.terraform.io/docs/providers/google/index.html
@@ -63,9 +61,11 @@ comments are available in each file, but here's the short version:
 
 * `00_state.tf` -- configure state storage
 * `01_provider.tf` -- configure the terraform provider
-* `02_project.tf` -- create a GCP project, set up billing, and enable services
-* `03_gke_cluster.tf` -- provision a GKE cluster per to the Hipster Shop README
-* `03_ratingservice.tf` -- provision and populates Postgres DB over CloudSQL and deploy ranking service to AppEngine. Creates scheduled task to aggregate new placed ratings.
+* `02_variables.tf` -- configure the variables  
+* `03_project.tf` -- create a GCP project, set up billing, and enable services
+* `04_ratingservice.tf` -- provision and populates Postgres DB over CloudSQL and deploy ranking service to AppEngine. Creates scheduled task to aggregate new placed ratings.
+* `05_gke_cluster.tf` -- provision a GKE cluster per to the Hipster Shop README
+* `06_loadgen.tf` -- provision a loadgen cluster per to the Hipster Shop README
 
 The assumption is that a system under user control would run terraform and create resources on the user's behalf.
 The user would not be aware of the underlying tool.
@@ -73,8 +73,5 @@ The user would not be aware of the underlying tool.
 Monitoring Examples
 --------------------------------------------------------------------------------
 
-To provision monitoring examples for the Stackdriver Sandbox, navigate
-to the `monitoring` folder and run the command `terraform apply`. Please note that in order to run this command
-you must have first created a [Monitoring Workspace] for the Google Cloud Project.
-
-[Monitoring Workspace]: https://cloud.google.com/monitoring/workspaces/create
+To provision monitoring examples for the Cloud Operations Sandbox, navigate
+to the `monitoring` folder and run the command `terraform apply`. 
