@@ -65,11 +65,11 @@ spec:
             value: "http://some.host"
           resources:
             requests:
-              cpu: 100m
-              memory: 64Mi
-            limits:
               cpu: 200m
               memory: 128Mi
+            limits:
+              cpu: 320m
+              memory: 256Mi
 ---
 apiVersion: v1
 kind: Service
