@@ -91,5 +91,7 @@ function cloudshell_open {
   # add terraform directory to path
   export PATH="~/cloudshell_open/cloud-ops-sandbox/terraform:$PATH"
   export PATH="~/cloudshell_open/stackdriver-sandbox/terraform:$PATH"
+  # ensure version environment variable is set
+  source /etc/environment
   sandboxctl create # This line automatically runs the install script when cloudshell button is pressed
 }
