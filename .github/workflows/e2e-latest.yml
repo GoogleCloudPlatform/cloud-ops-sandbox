@@ -73,6 +73,7 @@ jobs:
         docker run --rm \
           -e project_id=${{ env.PROJECT_ID }} \
           -e service_wait=1 \
+          -e PYTHONDONTWRITEBYTECODE=1 \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
@@ -90,9 +91,22 @@ jobs:
         docker run --rm \
           -e GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }} \
           -e ZONE=$CLUSTER_ZONE \
+          -e PYTHONDONTWRITEBYTECODE=1 \
           -e LOADGEN_ZONE=$LOADGEN_ZONE \
           -v ~/.config:/root/.config \
           test-provisioning:$GITHUB_SHA
+    - name: Run SRE Recipes Tests
+      timeout-minutes: 30
+      run: |
+        # build cloud shell image
+        docker build -t test-cloud-shell:$GITHUB_SHA ./cloud-shell
+        # run test script
+        docker run --rm \
+          -v ~/.config:/root/.config \
+          -v `pwd`:/sandbox-shared \
+          -e PYTHONDONTWRITEBYTECODE=1 \
+          --entrypoint /sandbox-shared/tests/recipes/test_recommendation_crash_recipe.sh \
+          test-cloud-shell:$GITHUB_SHA
     - name: Run Monitoring Integration Tests
       timeout-minutes: 30
       run: |
