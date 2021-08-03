@@ -52,7 +52,7 @@ def get_telemetry_msg(session, project_id, event, version):
 # returns False along with an error message if not
 def validate_args(session, project_id, event, version):
     args_exp = {
-        "version": r"^v\d.\d.\d$",
+        "version": r"^(v\d.\d.\d|develop)$",
         "project_id": r"^cloud-ops-sandbox-(\d){6,12}$",
         "v4uuid": r"^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}$"
     }
