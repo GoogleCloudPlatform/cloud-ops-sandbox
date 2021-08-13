@@ -17,6 +17,7 @@ config:
     The rating data is kept up-to-date by periodically calling an API endpoint that collects,
     all recently sent new rating scores for each product and calculates the new rating,
     based on the old value and the new scores. Try to check if the rating service operates normally.
+    You can also use `sandboxctl describe` to get information (such as core URLs) for your sandbox.
   verify:
     broken_service:
       choices:

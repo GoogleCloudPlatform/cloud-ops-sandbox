@@ -22,7 +22,9 @@ config:
     Visit the external IP of the demo application and try buying some products. 
     You can also use monitoring dashboards to see metrics associated with each 
     service, and use Cloud Logging to view logs exported by each service. 
-    Note: It may take up to 5 minutes for monitoring metrics to be updated
+    Note: It may take up to 5 minutes for monitoring metrics to be updated.
+    You can also use `sandboxctl describe` to get information (such as core
+    URLs) for your sandbox.
   verify:
     broken_service:
       choices:
