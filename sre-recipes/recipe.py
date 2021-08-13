@@ -23,7 +23,8 @@ import abc
 import subprocess
 import logging
 
-
+# This is the legacy class-based SRE Recipe implementation.
+# Do not use, if you can implement your SRE Recipe using `configs` folder.
 class Recipe(abc.ABC):
     """
     This abstract base class outlines the required behavior of a recipe.
