@@ -33,6 +33,34 @@ information on using pull requests.
 This project follows [Google's Open Source Community
 Guidelines](https://opensource.google.com/conduct/).
 
+## Git Workflow
+
+This project conforms to the [Gitflow Workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-wokflow).
+The repo contains two important branches:
+- the `main` branch stores the official release history
+- the `develop` branch contains the current working codebase.
+
+As a contributor, your workflow will be to create a temporary branch off of `develop`, add your code, and create a PR back to `develop`:
+
+```
+git checkout develop
+git checkout -b new_branch
+git commit -m "new commit"
+git push --set-upstream origin new_branch
+# create a PR on GitHub
+```
+
+Periodically, we will coordinate to publish release PRs to merge the latest state of `develop` back into `main`.
+
+
+## Conventional Commits
+
+This project expects PR titles to conform to the [conventional commits standard](https://www.conventionalcommits.org/en/v1.0.0/).
+In brief, your PR titles should be prefixes with `feat:`, `fix:`, `chore:`, `docs:`, or `test:`, to make it easy to parse for change logs.
+A bot will enforce this as part of our PR checks.
+
+Note that intermediate commits as part of a PR can ignore this policy, as they will be squashed when the PR is merged.
+
 ## Build Sandbox Locally
 
 > **Note:** The first build can take up to 30 minutes. Subsequent builds
@@ -42,6 +70,11 @@ Guidelines](https://opensource.google.com/conduct/).
 
 > 💡 Recommended if you're planning to develop the application.  
 > ℹ️  Prerequisite: [Cloud SDK should be installed.](https://cloud.google.com/sdk/docs/quickstart)  
+> ℹ️  Prerequisite: (if using macbook) Run the following:
+
+```bash  
+brew install coreutils
+```
 
 #### ![kubernetes](docs/img/kubernetes.png) Run Kubernetes micro-services with “Docker for Desktop”
 
@@ -311,3 +344,12 @@ PORT=8080 && docker run \
 -v $GOOGLE_APPLICATION_CREDENTIALS:[FILE_NAME] \
 gcr.io/[PROJECT_ID]/[IMAGE]
 ```
+
+## Open in Cloud Shell Links
+
+When developing sandbox, it can be useful to launch a new Cloud Shell session straight from your branch. You can do this by modifying
+and opening the following url:
+
+https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=**your-branch-here**&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:latest
+
+When you're ready to open a PR, a GitHub Actions bot will attach an Open in Cloud Shell button directing to your changes automatically

@@ -11,19 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# test redis with cart service with
-# docker-compose up --build
-#
-version: "3.8"
-services:
-  web:
-    build: .
-    ports:
-      - "7070:7070"
-    environment:
-      REDIS_ADDR: "redis:6379"
-      ASPNETCORE_URLS: "http://0.0.0.0:7070"
-      OTEL_COLLECTOR_ADDR: "http://localhost:4317"
-  redis:
-    image: "redis:alpine"

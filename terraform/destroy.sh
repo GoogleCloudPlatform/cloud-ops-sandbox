@@ -83,7 +83,7 @@ gcloud projects delete $PROJECT_ID
 
 
 # if user backed out or deletion failed, stop script
-found=$(gcloud projects list --filter="${PROJECT_ID}" --format="value(projectId)")
+found=$(gcloud projects describe ${PROJECT_ID} --flatten="lifecycleState" |grep "ACTIVE")
 if [[ -n "${found}" ]]; then
     log "project $PROJECT_ID not deleted"
     sendTelemetry $PROJECT_ID sandbox-not-destroyed

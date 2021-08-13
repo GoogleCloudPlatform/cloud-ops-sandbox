@@ -91,10 +91,10 @@ resource "google_container_cluster" "gke" {
       }
     }
 
-    initial_node_count = 2
+    initial_node_count = 4
 
     autoscaling {
-      min_node_count = 3
+      min_node_count = 2
       max_node_count = 10
     }
 
@@ -186,6 +186,7 @@ resource "null_resource" "deploy_services" {
     kubectl apply -f ../kubernetes-manifests/currencyservice.yaml
     kubectl apply -f ../kubernetes-manifests/emailservice.yaml
     kubectl apply -f ../kubernetes-manifests/frontend.yaml
+    kubectl apply -f ../kubernetes-manifests/opentelemetrycollector.yaml
     kubectl apply -f ../kubernetes-manifests/paymentservice.yaml
     kubectl apply -f ../kubernetes-manifests/productcatalogservice.yaml
     kubectl apply -f ../kubernetes-manifests/recommendationservice.yaml
@@ -207,6 +208,7 @@ resource "null_resource" "delay" {
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/currencyservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/emailservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/frontend
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/opentelemetrycollector
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/paymentservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/productcatalogservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/recommendationservice

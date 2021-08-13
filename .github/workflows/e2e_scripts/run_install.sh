@@ -37,13 +37,11 @@ fi
 # enable debug mode
 export DEBUG=1
 
-# print environment variables
-echo $skip_workspace_prompt
+# print project environment variable
 echo $project_id
 
 # trigger install script through cloudshell_open function
-# environment variables project_id and skip_workspace_prompt
-# must be set properly to run in headless mode
+# environment variable project_id  must be set properly to run in headless mode
 echo "running install.sh"
 source /google/devshell/bashrc.google.d/cloudshell_open.sh
 cloudshell_open

@@ -11,19 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# test redis with cart service with
-# docker-compose up --build
-#
-version: "3.8"
-services:
-  web:
-    build: .
-    ports:
-      - "7070:7070"
-    environment:
-      REDIS_ADDR: "redis:6379"
-      ASPNETCORE_URLS: "http://0.0.0.0:7070"
-      OTEL_COLLECTOR_ADDR: "http://localhost:4317"
-  redis:
-    image: "redis:alpine"
+
+name: "Update Website"
+on:
+  push:
+    # run on pushes to main (after merging release branches)
+    branches:
+      - main
+env:
+  PROJECT_ID: stackdriver-sandbox-230822
+jobs:
+  update-website:
+    runs-on: [self-hosted, push-privilege]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Deploy Website to App Engine
+      timeout-minutes: 20
+      run: |
+        set -x
+        gcloud app deploy website/app.yaml

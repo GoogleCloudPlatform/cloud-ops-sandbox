@@ -61,6 +61,14 @@ resource "google_project_service" "cloudtrace" {
   disable_dependent_services = true
 }
 
+resource "google_project_service" "cloudprofiler" {
+  project = data.google_project.project.project_id
+
+  service = "cloudprofiler.googleapis.com"
+
+  disable_dependent_services = true
+}
+
 resource "google_project_service" "errorreporting" {
   project = data.google_project.project.project_id
 

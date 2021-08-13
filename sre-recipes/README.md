@@ -4,7 +4,7 @@ SRE Recipes is a tool to help users familiarize themselves with finding the root
 
 ## Usage
 
-To view which recipes exist, run the command below in this directory:
+To view which active recipes exist, run the command below in this directory:
 
 ```
 $ ./sandboxctl sre-recipes --help
@@ -25,6 +25,7 @@ To receive a hint about the root cause of the breakage, run:
 ```
 $ ./sandboxctl sre-recipes hint <recipe_name>
 ```
+
 ## Contributing
 
 To contribute a new recipe, create a new folder in the [recipes directory](./recipes). The directory must include a class that extends the abstract base class found in [recipe.py](recipe.py).

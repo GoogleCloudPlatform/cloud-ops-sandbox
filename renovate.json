@@ -8,7 +8,7 @@
   "schedule": [
     "after 9am and before 3pm every tuesday"
   ],
-  "prConcurrentLimit": 5,
+  "prConcurrentLimit": 3,
   "gitAuthor": null,
   "packageRules": [
     {
@@ -16,7 +16,7 @@
       "groupName": "linters"
     }
   ],
-  "reviewers": ["nicoleczhu"],
+  "reviewers": ["GoogleCloudPlatform/observability-devx"],
   "labels": [
     "dependencies",
     "type: cleanup",
@@ -28,5 +28,7 @@
   },
   "ignoreDeps": [
     "com.google.protobuf:protoc"
-  ]
+  ],
+  "semanticCommits" : "enabled",
+  "baseBranches": ["develop"]
 }

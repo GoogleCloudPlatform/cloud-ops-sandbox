@@ -19,16 +19,32 @@ from locust import task, between, HttpUser
 
 
 PRODUCTS = [
-    '0PUK6V6EV0', # Vintage Record Player
-    '1YMWWN1N4O', # Home Barista Kit
-    '2ZYFJ3GM2N', # Film Camera
-    '66VCHSJNUP', # Vintage Camera Lens
-    '6E92ZMYYFZ', # Air Plant
-    '9SIQT8TOJO', # City Bike
-    'L9ECAV7KIM', # Terrarium
-    'LS4PSXUNUM', # Metal Camping Mug
-    'OLJCESPC7Z', # Vintage Typewriter
+    '0PUK6V6EV0',  # Vintage Record Player
+    '1YMWWN1N4O',  # Home Barista Kit
+    '2ZYFJ3GM2N',  # Film Camera
+    '66VCHSJNUP',  # Vintage Camera Lens
+    '6E92ZMYYFZ',  # Air Plant
+    '9SIQT8TOJO',  # City Bike
+    'L9ECAV7KIM',  # Terrarium
+    'LS4PSXUNUM',  # Metal Camping Mug
+    'OLJCESPC7Z',  # Vintage Typewriter
 ]
+
+
+class BasicHomePageViewingUser(HttpUser):
+    """
+    A user that simply visits the home page.
+    This load pattern is useful for SRE Recipes that want to expose
+    potential bugs or high page load latency in the frontend.
+    """
+    sre_recipe_user_identifier = "BasicHomePageViewingUser"
+
+    # wait between 1 and 10 seconds after each task
+    wait_time = between(1, 10)
+
+    @task
+    def visit_home_page(self):
+        self.client.get("/")
 
 
 class BasicPurchasingUser(HttpUser):

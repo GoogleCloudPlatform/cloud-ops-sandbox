@@ -51,6 +51,7 @@ deploy:
     - ./kubernetes-manifests/currencyservice.yaml
     - ./kubernetes-manifests/emailservice.yaml
     - ./kubernetes-manifests/frontend.yaml
+    - ./kubernetes-manifests/opentelemetrycollector.yaml
     - ./kubernetes-manifests/paymentservice.yaml
     - ./kubernetes-manifests/productcatalogservice.yaml
     - ./kubernetes-manifests/recommendationservice.yaml

@@ -32,6 +32,7 @@ USER_FACING_LOCUST_USER_CLASSES = {
 SRE_RECIPE_USER_CLASSES = {
     x.sre_recipe_user_identifier: x
     for x in [
+        sre_recipe_load_tasks.BasicHomePageViewingUser,
         sre_recipe_load_tasks.BasicPurchasingUser,
     ]
 }
