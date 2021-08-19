@@ -131,9 +131,10 @@ def sre_recipes(action, recipe_name):
 def loadgen(traffic_pattern):
     """Change traffic patterns for the loadgenerator service"""
     set_env_command = "kubectl set env deployment/loadgenerator "\
-        f"LOCUST_TASK={traffic_pattern}_locustfile.py"
+        f"LOCUST_TASK={traffic_pattern}"
     delete_pods_command = "kubectl delete pods -l app=loadgenerator"
 
+    Recipe._auth_cluster('LOADGEN')
     print('Redeploying Loadgenerator...')
     Recipe._run_command(set_env_command)
     Recipe._run_command(delete_pods_command)
@@ -187,10 +188,10 @@ def describe():
     gcp_kubernetes_path = gcp_path + '/kubernetes/workload?project=' + project_id
     gcp_monitoring_path = gcp_path + '/monitoring?project=' + project_id
     print(f"""Cloud Operations Sandbox info for project: {project_id}
-    "- Load generator web interface: {loadgen_ip}
-    "- Hipstershop web app address: {external_ip}
-    "- Google Cloud Console KBE Dashboard: {gcp_kubernetes_path}
-    "- Google Cloud Console Monitoring Workspace {gcp_monitoring_path}""")
+    - Load generator web interface: {loadgen_ip}
+    - Hipstershop web app address: {external_ip}
+    - Google Cloud Console KBE Dashboard: {gcp_kubernetes_path}
+    - Google Cloud Console Monitoring Workspace {gcp_monitoring_path}""")
 
 
 @cli.command()
