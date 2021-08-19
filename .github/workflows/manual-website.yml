@@ -15,9 +15,6 @@
 name: "Stage Website - Manual"
 on:
   push:
-    # run on pushes to develop
-    branches:
-    - develop
   workflow_dispatch:
     inputs:
       name:
