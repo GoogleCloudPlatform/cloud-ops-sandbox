@@ -60,6 +60,7 @@ jobs:
           -e release_repo=${{ steps.website_variables.outputs.repo }} \
           -e release_branch=${{ steps.website_variables.outputs.branch }} \
           -e ISTIO_VERSION=1.7.1 \
+          -e PYTHONDONTWRITEBYTECODE=1 \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
@@ -87,6 +88,7 @@ jobs:
           -e GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }} \
           -e ZONE=$CLUSTER_ZONE \
           -e LOADGEN_ZONE=$LOADGEN_ZONE \
+          -e PYTHONDONTWRITEBYTECODE=1 \
           -v ~/.config:/root/.config \
           test-provisioning:$GITHUB_SHA-release
     - name: Run Monitoring Integration Tests
@@ -115,6 +117,7 @@ jobs:
           -e release_dir=${{ steps.website_variables.outputs.dir }} \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \
+          -e PYTHONDONTWRITEBYTECODE=1 \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
           ${{ steps.website_variables.outputs.cloudshell_image }}
     - name: Clean Project State
