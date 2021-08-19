@@ -139,7 +139,9 @@ function _carry (amount) {
 function getSupportedCurrencies (call, callback) {
   // Extract the span context received from the gRPC client.
   // Create a child span and add an event.
+  const currentSpan = opentelemetry.trace.getSpan(opentelemetry.context.active())
   const span = tracer.startSpan('currencyservice:GetSupportedCurrencies()', {
+    parent: currentSpan,
     kind: 1, // server
   });
   span.addEvent('Get Supported Currencies');
@@ -156,7 +158,9 @@ function getSupportedCurrencies (call, callback) {
 function convert (call, callback) {
   // Extract the span context received from the gRPC client.
   // Create a child span and add an event.
+  const currentSpan = opentelemetry.trace.getSpan(opentelemetry.context.active())
   const span = tracer.startSpan('currencyservice:Convert()', {
+    parent: currentSpan,
     kind: 1, // server
   });
   logger.info('received conversion request');
