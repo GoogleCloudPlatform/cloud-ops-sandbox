@@ -27,7 +27,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       containers:
-      - name: server
+      - name: recommendationservice
         image: gcr.io/stackdriver-sandbox-230822/sandbox/recommendationservice:latest
         ports:
         - containerPort: 8080
