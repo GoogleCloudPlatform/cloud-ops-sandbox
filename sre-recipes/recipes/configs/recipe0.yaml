@@ -6,14 +6,14 @@ config:
   break:
     - type: set_env_variable
       service: deployment/frontend
-      selector: app=frontend
+      pod_selector: app=frontend
       feature_flag: CONVERT_CURRENCIES
       feature_value: true
       restart_wait_seconds: 600
   restore:
     - type: set_env_variable
       service: deployment/frontend
-      selector: app=frontend
+      pod_selector: app=frontend
       feature_flag: CONVERT_CURRENCIES
       feature_value: false
       restart_wait_seconds: 600

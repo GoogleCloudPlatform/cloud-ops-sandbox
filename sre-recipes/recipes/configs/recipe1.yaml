@@ -7,14 +7,14 @@ config:
   break:
     - type: set_env_variable
       service: deployment/emailservice
-      selector: app=emailservice
+      pod_selector: app=emailservice
       feature_flag: ENCODE_EMAIL
       feature_value: true
       restart_wait_seconds: 600
   restore:
     - type: set_env_variable
       service: deployment/emailservice
-      selector: app=emailservice
+      pod_selector: app=emailservice
       feature_flag: ENCODE_EMAIL
       feature_value: false
       restart_wait_seconds: 600
