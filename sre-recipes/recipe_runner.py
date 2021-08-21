@@ -44,12 +44,12 @@ class RecipeRunner:
 
     def run_break(self):
         print('Deploying broken service...')
-        self.__run_steps(self.config.get("break", {}))
+        self.__handle_actions(self.config.get("break", {}))
         print('Done. Deployed broken service')
 
     def run_restore(self):
         print('Restoring broken service...')
-        self.__run_steps(self.config.get("restore", {}))
+        self.__handle_actions(self.config.get("restore", {}))
         print('Done. Restored broken service to working state.')
 
     def run_hint(self):
@@ -75,27 +75,35 @@ class RecipeRunner:
             output = output.decode("utf-8").replace("'", '').strip()
         return output, error
 
-    def __run_steps(self, steps):
-        if type(steps) != list:
+    def __handle_actions(self, actions):
+        """
+        Runs a list of `actions`, each of which is a dict of parameters.
+
+        As of now, we only support running shell commands in the `run` field.
+
+        Example:
+            actions = [{'run': 'echo "Hello World!"'}]
+        """
+        if type(actions) != list:
             logging.error(
-                f"Expect `steps` to be list. Found {type(steps)}: {steps}")
+                f"Expect `actions` to be list. Found {type(actions)}: {actions}")
             exit(1)
-        elif not steps:
-            logging.error("There are no steps configured.")
+        elif not actions:
+            logging.error("There are no actions configured.")
             exit(1)
 
-        for step in steps:
-            if type(step) != dict:
+        for action in actions:
+            if type(action) != dict:
                 raise ValueError(
-                    f"Expect `step` to be dict. Found {type(step)}")
-            logging.info(f"Runing step: {step}")
-            if "run" in step:
-                output, err = self.__run_shell_command(step["run"])
+                    f"Expect `action` to be dict. Found {type(action)}")
+            logging.info(f"Runing action: {action}")
+            if "run" in action:
+                output, err = self.__run_shell_command(action["run"])
                 if err:
-                    logging.error(f"Failed to run step {step}: {err}")
+                    logging.error(f"Failed to run action {action}: {err}")
                     exit(1)
             else:
-                raise NotImplementedError(f"Step not supported: {step}")
+                raise NotImplementedError(f"action not supported: {action}")
 
 
 # runner = RecipeRunner("recipe1")
@@ -109,3 +117,4 @@ class RecipeRunner:
 # # print(runner.verify_config)
 # runner.run_break()
 # runner.run_restore()
+# runner.run_verify()
