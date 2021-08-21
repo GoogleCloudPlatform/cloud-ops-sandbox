@@ -58,18 +58,31 @@ class RecipeRunner:
 
     def run_verify(self):
         verify_config = self.config.get("verify", {})
-        broken_service_config = verify_config.get("broken_service", {})
-        broken_cause_config = verify_config.get("broken_cause", {})
+        if not verify_config:
+            logging.error("Verify is not configured")
+            exit(1)
 
-        self.__run_interactive_multiple_choice(
-            "Which service has an issue?",
-            broken_service_config.get("choices", []),
-            broken_service_config["answer"])
+        affected_service_config = verify_config.get("affected_service", {})
+        if affected_service_config:
+            if "answer" not in affected_service_config:
+                logging.error(
+                    "Correct answer is not specified for affected_service quiz.")
+                exit(1)
+            self.__run_interactive_multiple_choice(
+                "Which service has an issue?",
+                affected_service_config.get("choices", []),
+                affected_service_config["answer"])
 
-        self.__run_interactive_multiple_choice(
-            "Which was the cause of the issue?",
-            broken_cause_config.get("choices", []),
-            broken_cause_config["answer"])
+        incident_cause_config = verify_config.get("incident_cause", {})
+        if incident_cause_config:
+            if "answer" not in incident_cause_config:
+                logging.error(
+                    "Correct answer is not specified for incident_cause quiz.")
+                exit(1)
+            self.__run_interactive_multiple_choice(
+                "Which was the cause of the issue?",
+                incident_cause_config.get("choices", []),
+                incident_cause_config["answer"])
 
     ########################## Recipe Action Handlers ##########################
 
@@ -104,6 +117,10 @@ class RecipeRunner:
         correct_answer: int
             The (0-based) index for the correct answer in the `choices` params.
         """
+        if not choices:
+            logging.info("Skipped. Empty multiple choice.")
+            return
+
         if correct_answer < 0 or correct_answer >= len(choices):
             logging.error(
                 "Correct answer is not in the pool of potential answers.")
