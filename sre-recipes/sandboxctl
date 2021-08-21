@@ -26,6 +26,7 @@ For information on how to run the CLI, run the following:
 
 import logging
 import os
+import glob
 import signal
 import subprocess
 import sys
@@ -36,8 +37,10 @@ from pathlib import Path
 from pkgutil import iter_modules
 
 import click
+import utils
 
 from recipe import Recipe
+from recipe_runner import ConfigBasedRecipeRunner
 
 
 def get_valid_recipes(attributes):
@@ -81,21 +84,21 @@ def get_recipes():
 
 
 def get_loadgen_ip():
-    Recipe._auth_cluster('LOADGEN')
+    utils.auth_cluster('loadgenerator')
     get_ip_command = "kubectl get service loadgenerator -o "\
         "jsonpath='{.status.loadBalancer.ingress[0].ip}'"
-    ip_addr, _ = Recipe._run_command(get_ip_command)
+    ip_addr, _ = utils.run_command(get_ip_command)
     ip_addr = ip_addr.decode('utf-8').strip("'")
 
     return ip_addr
 
 
 def get_external_ip():
-    return Recipe._get_external_ip()
+    return utils.get_external_ip()
 
 
 def get_project_id():
-    return Recipe._get_project_id()
+    return utils.get_project_id()
 
 
 cli = click.Group()
@@ -103,27 +106,62 @@ cli = click.Group()
 RECIPES = get_recipes()
 
 
+# @cli.command()
+# @click.argument('action', type=click.Choice(
+#     ['break', 'restore', 'verify', 'hint']))
+# @click.argument('recipe_name', type=click.Choice(RECIPES.keys()))
+# def sre_recipes(action, recipe_name):
+#     """Performs an action on a recipe."""
+#     logging.basicConfig(filename='srerecipes.log', level=logging.INFO,
+#                         format='%(asctime)s %(message)s')
+#     recipe = RECIPES[recipe_name]
+#     if action == 'break':
+#         logging.info(f"Breaking {recipe_name}")
+#         recipe.break_service()
+#     elif action == 'restore':
+#         logging.info(f"Restoring {recipe_name}")
+#         recipe.restore_service()
+#     elif action == 'verify':
+#         logging.info(f"Verifying {recipe_name}")
+#         recipe.verify()
+#     elif action == 'hint':
+#         logging.info(f"Giving hint for {recipe_name}")
+#         recipe.hint()
+
+def get_enabled_sre_recipe_names():
+    dir_path = os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), f"recipes/configs")
+    config_files = glob.glob(f"{dir_path}/*.yaml")
+    recipe_names = [os.path.basename(x).split(".")[0] for x in config_files]
+    return recipe_names
+
+
 @cli.command()
 @click.argument('action', type=click.Choice(
     ['break', 'restore', 'verify', 'hint']))
-@click.argument('recipe_name', type=click.Choice(RECIPES.keys()))
+@click.argument('recipe_name', type=click.Choice(get_enabled_sre_recipe_names()))
 def sre_recipes(action, recipe_name):
     """Performs an action on a recipe."""
     logging.basicConfig(filename='srerecipes.log', level=logging.INFO,
                         format='%(asctime)s %(message)s')
-    recipe = RECIPES[recipe_name]
-    if action == 'break':
-        logging.info(f"Breaking {recipe_name}")
-        recipe.break_service()
-    elif action == 'restore':
-        logging.info(f"Restoring {recipe_name}")
-        recipe.restore_service()
-    elif action == 'verify':
-        logging.info(f"Verifying {recipe_name}")
-        recipe.verify()
-    elif action == 'hint':
-        logging.info(f"Giving hint for {recipe_name}")
-        recipe.hint()
+
+    try:
+        recipe = ConfigBasedRecipeRunner(recipe_name)
+        if action == 'break':
+            logging.info(f"Breaking {recipe_name}")
+            recipe.run_break()
+        elif action == 'restore':
+            logging.info(f"Restoring {recipe_name}")
+            recipe.run_restore()
+        elif action == 'verify':
+            logging.info(f"Verifying {recipe_name}")
+            recipe.run_verify()
+        elif action == 'hint':
+            logging.info(f"Giving hint for {recipe_name}")
+            recipe.run_hint()
+    except (FileNotFoundError, AttributeError, ValueError) as e:
+        print(f"Failed to run SRE Recipe {recipe_name}: {e}")
+        exit(1)
 
 
 @cli.command()
@@ -134,15 +172,15 @@ def loadgen(traffic_pattern):
         f"LOCUST_TASK={traffic_pattern}"
     delete_pods_command = "kubectl delete pods -l app=loadgenerator"
 
-    Recipe._auth_cluster('LOADGEN')
+    utils.auth_cluster('loadgenerator')
     print('Redeploying Loadgenerator...')
-    Recipe._run_command(set_env_command)
-    Recipe._run_command(delete_pods_command)
+    utils.run_command(set_env_command)
+    utils.run_command(delete_pods_command)
     print(f'Loadgenerator deployed using {traffic_pattern} pattern')
     ip_addr = get_loadgen_ip()
     if ip_addr:
         print(f"Loadgenerator web UI: http://{ip_addr}")
-    Recipe._auth_cluster('APP')
+    utils.auth_cluster('cloud-ops-sandbox')
 
 
 @cli.command()
@@ -199,7 +237,7 @@ def destroy():
     """Delete an existing sandbox"""
     os.chdir(os.path.abspath(sys.path[0]))
     destroy_command = "../terraform/destroy.sh"
-    Recipe._run_command_interactive(destroy_command)
+    utils.run_command_interactive(destroy_command)
 
 
 if __name__ == "__main__":

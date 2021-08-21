@@ -21,13 +21,15 @@ import yaml
 import utils
 
 
-class RecipeRunner:
+class ConfigBasedRecipeRunner:
 
     def __init__(self, recipe_name):
         filepath = path.join(path.dirname(
             path.abspath(__file__)), f"recipes/configs/{recipe_name}.yaml")
         with open(filepath, "r") as file:
             self.recipe = yaml.safe_load(file.read())
+        if not self.recipe:
+            raise ValueError("Cannot parse config as YAML.")
 
     @property
     def name(self):
