@@ -62,7 +62,7 @@ def get_external_ip():
 def get_cluster_zone(project_id, cluster_name):
     """Get the zone for a cluster in a given project"""
     zone, err = run_shell_command(
-        f"gcloud container clusters list --filter name:{cluster_name} --project {project_id} --format value(zone)")
+        f"gcloud container clusters list --filter name:{cluster_name} --project {project_id} --format 'value(zone)'")
     if not zone:
         logging.error(
             f"No zone found for {cluster_name} in project {project_id}"
