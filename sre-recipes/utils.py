@@ -32,13 +32,11 @@ def run_command(command, decode_output=True):
         output = output.decode("utf-8").replace("'", '').strip()
     return output, error
 
-####################### GCloud & Kubernetes Commands #######################
-
 
 def get_project_id():
     """Get the Google Cloud Project ID"""
     project_id, err = run_command(
-        "gcloud config list --format value(core.project)")
+        "gcloud config list --format 'value(core.project)'")
     if not project_id:
         logging.error(f"Could not retrieve project id: {err}")
     return project_id, err
@@ -93,31 +91,3 @@ def auth_cluster(cluster_name="cloud-ops-sandbox"):
     # Authenticate!
     run_command(auth_command, decode_output=False)
     logging.info("Cluster has been authenticated")
-
-
-def set_env_vars(service, key_value_pairs):
-    """Set the environment variable for a kubernetes service"""
-    run_command(
-        f"kubectl set env {service} {key_value_pairs}")
-
-
-def wait_for_service(service, timeout_seconds, condition):
-    """Wait for a kubernetes service on a condition, with timeout."""
-    run_command(
-        f"kubectl wait --for=condition={condition} --timeout={timeout_seconds} {service}")
-
-
-def get_pod_name_by_selector(selector):
-    """Get the pod name by a selector string"""
-    name, err = run_command(
-        f"kubectl get pod -l {selector} -o jsonpath='{{.items[0].metadata.name}}'")
-    if not name:
-        logging.error(
-            f"No pod name found with selector '{selector}': {err}")
-    return name, err
-
-
-def delete_pod_by_name(name):
-    """Delete a Kubernetes pod"""
-    run_command(
-        f"kubectl delete pod {name}")

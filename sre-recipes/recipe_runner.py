@@ -18,6 +18,7 @@ from os import path
 import subprocess
 import logging
 import yaml
+import utils
 
 
 class RecipeRunner:
@@ -97,20 +98,6 @@ class RecipeRunner:
 
     ########################## Recipe Action Handlers ##########################
 
-    def __run_shell_command(self, command, decode_output=True):
-        """
-        Runs the given command and returns any output and error
-        If `decode_output` is True, try to decode output with UTF-8 encoding,
-        as well as removing any single quote.
-        """
-        process = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-        )
-        output, error = process.communicate()
-        if output is not None and decode_output:
-            output = output.decode("utf-8").replace("'", '').strip()
-        return output, error
-
     def __handle_actions(self, actions):
         """
         Runs a list of `actions`, each of which is a dict of parameters.
@@ -130,7 +117,7 @@ class RecipeRunner:
                     f"Expect `action` to be dict. Found {type(action)}")
             logging.info(f"Runing action: {action}")
             if "run" in action:
-                output, err = self.__run_shell_command(action["run"])
+                output, err = utils.__run_shell_command(action["run"])
                 if err:
                     logging.error(f"Failed to run action {action}: {err}")
                     print(err)
