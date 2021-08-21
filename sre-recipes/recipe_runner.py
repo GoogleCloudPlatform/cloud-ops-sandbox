@@ -25,7 +25,7 @@ class ConfigBasedRecipeRunner:
 
     def __init__(self, recipe_name):
         filepath = path.join(path.dirname(
-            path.abspath(__file__)), f"recipes/configs/{recipe_name}.yaml")
+            path.abspath(__file__)), f"recipes/configs_based/{recipe_name}.yaml")
         with open(filepath, "r") as file:
             self.recipe = yaml.safe_load(file.read())
         if not self.recipe:

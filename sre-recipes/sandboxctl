@@ -130,7 +130,7 @@ RECIPES = get_recipes()
 
 def get_enabled_sre_recipe_names():
     dir_path = os.path.join(os.path.dirname(
-        os.path.abspath(__file__)), f"recipes/configs")
+        os.path.abspath(__file__)), f"recipes/configs_based")
     config_files = glob.glob(f"{dir_path}/*.yaml")
     recipe_names = [os.path.basename(x).split(".")[0] for x in config_files]
     return recipe_names

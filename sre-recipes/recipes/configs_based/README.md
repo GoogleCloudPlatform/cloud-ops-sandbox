@@ -1,6 +1,6 @@
 # SRE Recipe Configs
 
-This directory contains configs for supported SRE Recipes.
+This directory contains configs for supported config-based SRE Recipes.
 
 ## Writing the Config
 
