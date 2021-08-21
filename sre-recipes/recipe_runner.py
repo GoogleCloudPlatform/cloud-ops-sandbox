@@ -31,19 +31,17 @@ class ConfigBasedRecipeRunner:
         if not self.recipe:
             raise ValueError("Cannot parse config as YAML.")
 
-    @property
-    def name(self):
+    def get_name(self):
         return self.recipe.get("name", "No name found")
 
-    @property
-    def description(self):
+    def get_description(self):
         return self.recipe.get("description", "No description found")
+
+    ############################ Run Recipe ###################################
 
     @property
     def config(self):
         return self.recipe.get("config", {})
-
-    ############################ Run Recipe ###################################
 
     def run_break(self):
         print('Deploying broken service...')
