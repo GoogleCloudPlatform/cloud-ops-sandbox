@@ -16,7 +16,6 @@
 
 import abc
 import importlib
-import logging
 import subprocess
 import yaml
 
@@ -31,35 +30,22 @@ class ImplBasedRecipeRunner:
     """A SRE Recipe runner for running recipes implemented as class objects.
 
     Given a `recipe_name`, it tries to run `recipes/impl_based/recipe_name.py`.
+
+    This runner will propgate all exceptions to the caller, and it is caller's
+    responsibility to handle any exception and to perform any error logging.
     """
 
     def __init__(self, recipe_name):
         self.recipe = None
-        try:
-            module = importlib.import_module(
-                f"recipes.impl_based.{recipe_name}")
-        except ModuleNotFoundError as e:
-            print(
-                f"Cannot find Recipe implementation for `{recipe_name}` recipe: {e}")
-            exit(1)
-
+        module = importlib.import_module(f"recipes.impl_based.{recipe_name}")
         for attribute_name in dir(module):
             attr = getattr(module, attribute_name)
             if isclass(attr) and attr is not BaseRecipeImpl and issubclass(attr, BaseRecipeImpl):
-                try:
-                    self.recipe = attr()
-                except TypeError:
-                    print(
-                        f"{attribute_name} needs to implement all abstract methods")
-                    exit(1)
-                except Exception as e:
-                    print(f"Unexpected error: {e}")
-                    exit(1)
-
+                self.recipe = attr()
+                break
         if not self.recipe:
-            print(
+            raise NotImplementedError(
                 f"No valid implementation exists for `{recipe_name}` recipe.")
-            exit(1)
 
     def get_name(self):
         return self.recipe.get_name()
@@ -68,22 +54,25 @@ class ImplBasedRecipeRunner:
         return self.recipe.get_description()
 
     def run_break(self):
-        self.recipe.run_break()
+        return self.recipe.run_break()
 
     def run_restore(self):
-        self.recipe.run_restore()
+        return self.recipe.run_restore()
 
     def run_hint(self):
-        self.recipe.run_hint()
+        return self.recipe.run_hint()
 
     def run_verify(self):
-        self.recipe.run_verify()
+        return self.recipe.run_verify()
 
 
 class ConfigBasedRecipeRunner:
     """A SRE Recipe runner for running recipes implemented using configs.
 
     Given a `recipe_name`, it tries to load `recipes/configs_based/recipe_name.yaml`.
+
+    This runner will propgate all exceptions to the caller, and it is caller's
+    responsibility to handle any exception and to perform any error logging.
     """
 
     def __init__(self, recipe_name):
@@ -126,19 +115,16 @@ class ConfigBasedRecipeRunner:
     def run_verify(self):
         verify_config = self.config.get("verify", {})
         if not verify_config:
-            logging.error("Verify is not configured")
-            exit(1)
+            raise NotImplementedError("Verify is not configured")
 
         affected_service_config = verify_config.get("affected_service", {})
         if affected_service_config:
             if "answer" not in affected_service_config:
-                logging.error(
+                raise ValueError(
                     "Correct answer is not specified for affected service quiz.")
-                exit(1)
             elif "choices" not in affected_service_config:
-                logging.error(
+                raise ValueError(
                     "No answer choices configured in affected service quiz.")
-                exit(1)
             utils.run_interactive_multiple_choice(
                 "Which service has an issue?",
                 affected_service_config["choices"],
@@ -147,13 +133,11 @@ class ConfigBasedRecipeRunner:
         incident_cause_config = verify_config.get("incident_cause", {})
         if incident_cause_config:
             if "answer" not in incident_cause_config:
-                logging.error(
+                raise ValueError(
                     "Correct answer is not specified for incident cause quiz.")
-                exit(1)
             elif "choices" not in incident_cause_config:
-                logging.error(
+                raise ValueError(
                     "No answer choices configured in incident cause quiz.")
-                exit(1)
             utils.run_interactive_multiple_choice(
                 "What was the cause of the issue?",
                 incident_cause_config["choices"],
@@ -163,27 +147,17 @@ class ConfigBasedRecipeRunner:
 
     def __handle_actions(self, actions):
         """
-        Runs a list of `actions`, each of which is a dict of parameters.
+        Dispatch and handle a list of actions synchronously.
 
-        As of now, we only support running shell commands in the `run` field.
-        Example:
-            actions = [{'run': 'echo "Hello World!"'}]
+        Paramters
+        ---------
+        actions: a list of dictionary of paramters.
+            Example: [{'run': 'echo "Hello World!"'}]
         """
-        if type(actions) != list:
-            logging.error(
-                f"Expect `actions` to be list. Found {type(actions)}: {actions}")
-            exit(1)
-
         for action in actions:
-            if type(action) != dict:
-                raise ValueError(
-                    f"Expect `action` to be dict. Found {type(action)}")
-            logging.info(f"Runing action: {action}")
             if "run" in action:
                 output, err = utils.run_shell_command(action["run"])
                 if err:
-                    logging.error(f"Failed to run action {action}: {err}")
-                    print(err)
-                    exit(1)
+                    raise RuntimeError(f"Failed to run action {action}: {err}")
             else:
                 raise NotImplementedError(f"action not supported: {action}")

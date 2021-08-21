@@ -161,7 +161,8 @@ def sre_recipes(action, recipe_name):
         elif action == 'hint':
             logging.info(f"Giving hint for {recipe_name}")
             recipe.run_hint()
-    except (FileNotFoundError, AttributeError, ValueError) as e:
+    except Exception as e:
+        logging.error(e)
         print(f"Failed to run SRE Recipe {recipe_name}: {e}")
         exit(1)
 
