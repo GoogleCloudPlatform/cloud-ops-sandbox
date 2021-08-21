@@ -20,7 +20,7 @@ config:
     You can also use `sandboxctl describe` to get information (such as project 
     ID, logs, core URLs) for your sandbox.
   verify:
-    broken_service:
+    affected_service:
       choices:
         - Ad  # 0
         - Cart  # 1
@@ -34,7 +34,7 @@ config:
         - Recommendation  # 9
         - Shipping  # 10
       answer: 4
-    broken_cause:
+    incident_cause:
       choices:
         - Dropped Requests # 0
         - Failed connections to other services # 1
