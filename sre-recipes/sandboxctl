@@ -39,7 +39,7 @@ from pkgutil import iter_modules
 import click
 import utils
 
-from recipe import Recipe
+from recipe_runner import ImplBasedRecipeRunner
 from recipe_runner import ConfigBasedRecipeRunner
 
 
@@ -103,50 +103,52 @@ def get_project_id():
 
 cli = click.Group()
 
-RECIPES = get_recipes()
 
-
-# @cli.command()
-# @click.argument('action', type=click.Choice(
-#     ['break', 'restore', 'verify', 'hint']))
-# @click.argument('recipe_name', type=click.Choice(RECIPES.keys()))
-# def sre_recipes(action, recipe_name):
-#     """Performs an action on a recipe."""
-#     logging.basicConfig(filename='srerecipes.log', level=logging.INFO,
-#                         format='%(asctime)s %(message)s')
-#     recipe = RECIPES[recipe_name]
-#     if action == 'break':
-#         logging.info(f"Breaking {recipe_name}")
-#         recipe.break_service()
-#     elif action == 'restore':
-#         logging.info(f"Restoring {recipe_name}")
-#         recipe.restore_service()
-#     elif action == 'verify':
-#         logging.info(f"Verifying {recipe_name}")
-#         recipe.verify()
-#     elif action == 'hint':
-#         logging.info(f"Giving hint for {recipe_name}")
-#         recipe.hint()
-
-def get_enabled_sre_recipe_names():
-    dir_path = os.path.join(os.path.dirname(
-        os.path.abspath(__file__)), f"recipes/configs_based")
-    config_files = glob.glob(f"{dir_path}/*.yaml")
-    recipe_names = [os.path.basename(x).split(".")[0] for x in config_files]
+def get_config_based_recipes():
+    files = glob.glob(os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), "recipes/configs_based/*.yaml"))
+    recipe_names = [os.path.basename(x).split(".")[0] for x in files]
     return recipe_names
+
+
+def get_impl_based_recipes():
+    files = glob.glob(os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), "recipes/impl_based/*recipe*.py"))
+    recipe_names = [os.path.basename(x).split(".")[0] for x in files]
+    return recipe_names
+
+
+CONFIG_RECIPES = get_config_based_recipes()
+IMPL_RECIPES = get_impl_based_recipes()
 
 
 @cli.command()
 @click.argument('action', type=click.Choice(
     ['break', 'restore', 'verify', 'hint']))
-@click.argument('recipe_name', type=click.Choice(get_enabled_sre_recipe_names()))
+@click.argument('recipe_name', type=click.Choice(
+    sorted(CONFIG_RECIPES + IMPL_RECIPES)))
 def sre_recipes(action, recipe_name):
     """Performs an action on a recipe."""
     logging.basicConfig(filename='srerecipes.log', level=logging.INFO,
                         format='%(asctime)s %(message)s')
 
     try:
-        recipe = ConfigBasedRecipeRunner(recipe_name)
+        has_config = recipe_name in CONFIG_RECIPES
+        has_impl = recipe_name in IMPL_RECIPES
+
+        recipe = None
+        if has_config and has_impl:
+            print(f"Find conflicting config & impl for {recipe_name}")
+            return
+        elif has_config:
+            recipe = ConfigBasedRecipeRunner(recipe_name)
+        elif has_impl:
+            recipe = ImplBasedRecipeRunner(recipe_name)
+        else:
+            # should not reach here due to 'click.Choice' above
+            print(f"Cannot find config or impl for {recipe_name}")
+            return
+
         if action == 'break':
             logging.info(f"Breaking {recipe_name}")
             recipe.run_break()
