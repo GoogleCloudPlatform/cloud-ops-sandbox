@@ -240,7 +240,7 @@ def destroy():
     """Delete an existing sandbox"""
     os.chdir(os.path.abspath(sys.path[0]))
     destroy_command = "../terraform/destroy.sh"
-    utils.run_command_interactive(destroy_command)
+    utils.run_interactive_shell_command(destroy_command)
 
 
 if __name__ == "__main__":

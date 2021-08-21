@@ -33,6 +33,14 @@ def run_shell_command(command, decode_output=True):
     return output, error
 
 
+def run_interactive_shell_command(command):
+    """
+    Runs the given interactive command that waits for user input and
+    returns any output and error
+    """
+    subprocess.run(command.split())
+
+
 def get_project_id():
     """Get the Google Cloud Project ID"""
     project_id, err = run_shell_command(
