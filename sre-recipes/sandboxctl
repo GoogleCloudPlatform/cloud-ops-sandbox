@@ -87,7 +87,7 @@ def get_loadgen_ip():
     utils.auth_cluster('loadgenerator')
     get_ip_command = "kubectl get service loadgenerator -o "\
         "jsonpath='{.status.loadBalancer.ingress[0].ip}'"
-    ip_addr, _ = utils.run_command(get_ip_command)
+    ip_addr, _ = utils.run_shell_command(get_ip_command)
     ip_addr = ip_addr.decode('utf-8').strip("'")
 
     return ip_addr
@@ -177,8 +177,8 @@ def loadgen(traffic_pattern):
 
     utils.auth_cluster('loadgenerator')
     print('Redeploying Loadgenerator...')
-    utils.run_command(set_env_command)
-    utils.run_command(delete_pods_command)
+    utils.run_shell_command(set_env_command)
+    utils.run_shell_command(delete_pods_command)
     print(f'Loadgenerator deployed using {traffic_pattern} pattern')
     ip_addr = get_loadgen_ip()
     if ip_addr:

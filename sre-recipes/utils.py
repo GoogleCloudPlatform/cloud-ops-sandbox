@@ -46,7 +46,7 @@ def get_project_id():
     project_id, err = run_shell_command(
         "gcloud config list --format 'value(core.project)'")
     if not project_id:
-        logging.error(f"Could not retrieve project id: {err}")
+        logging.warning(f"Could not retrieve project id.")
     return project_id, err
 
 
@@ -55,7 +55,18 @@ def get_external_ip():
     ip_addr, err = run_shell_command(
         "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{{.status.loadBalancer.ingress[0].ip}}'")
     if not ip_addr:
-        logging.error(f"No external IP found: {err}")
+        logging.warning(f"No external IP found.")
+    return ip_addr, err
+
+
+def get_loadgen_ip():
+    """Get the IP Address for the load generator"""
+    auth_cluster('loadgenerator')
+    ip_addr, err = run_shell_command(
+        "kubectl get service loadgenerator -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
+    if not ip_addr:
+        logging.warning(f"No loadgeen IP found.")
+    auth_cluster('cloud-ops-sandbox')
     return ip_addr, err
 
 
@@ -64,7 +75,7 @@ def get_cluster_zone(project_id, cluster_name):
     zone, err = run_shell_command(
         f"gcloud container clusters list --filter name:{cluster_name} --project {project_id} --format 'value(zone)'")
     if not zone:
-        logging.error(
+        logging.warninig(
             f"No zone found for {cluster_name} in project {project_id}"
         )
     return zone, err
@@ -81,23 +92,28 @@ def auth_cluster(cluster_name="cloud-ops-sandbox"):
     """
     logging.info("Trying to authenticate cluster...")
     # Locate project ID
-    project_id, _ = get_project_id()
-    if not project_id:
-        logging.error("Can't authenticate cluster. No project ID found.")
+    project_id, err = get_project_id()
+    if err or not project_id:
+        logging.error(
+            f"Can't authenticate cluster. Failed too get project ID: {err}")
         exit(1)
     # Get cluster zone
-    zone, _ = get_cluster_zone(project_id, cluster_name)
-    if not zone:
-        logging.error("Can't authenticate cluster. No zone found.")
+    zone, err = get_cluster_zone(project_id, cluster_name)
+    if err or not zone:
+        logging.error(f"Can't authenticate cluster. Failed to get zone: {err}")
         exit(1)
     # Get authentication command
     auth_command, err = run_shell_command(
         f"gcloud container clusters get-credentials {cluster_name} --project {project_id} --zone {zone}")
-    if not auth_command:
-        logging.error("Can't get authentication command")
+    if err or not auth_command:
+        logging.error(f"Failed to get authentication command: {err}")
         exit(1)
     # Authenticate!
-    run_shell_command(auth_command, decode_output=False)
+    _, err = run_shell_command(auth_command, decode_output=False)
+    if err:
+        logging.error(
+            f"Failed to run authentication command `{auth_command}`: {err}")
+        exit(1)
     logging.info("Cluster has been authenticated")
 
 
