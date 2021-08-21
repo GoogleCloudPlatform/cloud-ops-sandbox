@@ -30,58 +30,12 @@ import glob
 import signal
 import subprocess
 import sys
-from importlib import import_module
-from inspect import isclass
-from os.path import abspath, dirname
-from pathlib import Path
-from pkgutil import iter_modules
 
 import click
-import utils
 
+import utils
 from recipe_runner import ImplBasedRecipeRunner
 from recipe_runner import ConfigBasedRecipeRunner
-
-
-def get_valid_recipes(attributes):
-    """
-    Gets all valid recipes from the given list of tuples of attribute names
-    and attributes, and returns a map containing recipe names and recipe objects
-    """
-
-    recipe_objs = {}
-    for (attribute_name, attribute) in attributes:
-        if isclass(attribute) and attribute is not Recipe and issubclass(attribute, Recipe):
-            try:
-                recipe_obj = attribute()
-                name = recipe_obj.get_name()
-                if recipe_obj.is_active():
-                    recipe_objs[name] = recipe_obj
-            except TypeError:
-                logging.warning(
-                    f"{attribute_name} needs to implement all abstract methods")
-            except Exception as e:
-                logging.warning(f"Unexpected error: {e}")
-    return recipe_objs
-
-
-def get_recipes():
-    """
-    Gets all valid recipes in sre-recipes/recipes, and returns
-    a map containing recipe names and recipe objects
-    """
-
-    root_dir = Path(dirname(abspath(__file__))) / 'recipes'
-    modules = [f"recipes.{subdir}.{name}"
-               for subdir in os.listdir(root_dir)
-               for _, name, _ in iter_modules([root_dir / subdir])]
-    recipe_modules = [import_module(module) for module in modules]
-    attributes = [(attribute_name, getattr(recipe_module, attribute_name))
-                  for recipe_module in recipe_modules
-                  for attribute_name in dir(recipe_module)]
-    recipes = get_valid_recipes(attributes)
-    return recipes
-
 
 cli = click.Group()
 
