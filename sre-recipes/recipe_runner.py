@@ -14,14 +14,77 @@
 
 # -*- coding: utf-8 -*-
 
-from os import path
-import subprocess
+import abc
+import importlib
 import logging
+import subprocess
 import yaml
+
+from inspect import isclass
+from os import path
+
 import utils
+from recipes.impl_based.base import BaseRecipeImpl
+
+
+class ImplBasedRecipeRunner:
+    """A SRE Recipe runner for running recipes implemented as class objects.
+
+    Given a `recipe_name`, it tries to run `recipes/impl_based/recipe_name.py`.
+    """
+
+    def __init__(self, recipe_name):
+        self.recipe = None
+        try:
+            module = importlib.import_module(
+                f"recipes.impl_based.{recipe_name}")
+        except ModuleNotFoundError as e:
+            print(
+                f"Cannot find Recipe implementation for `{recipe_name}` recipe: {e}")
+            exit(1)
+
+        for attribute_name in dir(module):
+            attr = getattr(module, attribute_name)
+            if isclass(attr) and attr is not BaseRecipeImpl and issubclass(attr, BaseRecipeImpl):
+                try:
+                    self.recipe = attr()
+                except TypeError:
+                    print(
+                        f"{attribute_name} needs to implement all abstract methods")
+                    exit(1)
+                except Exception as e:
+                    print(f"Unexpected error: {e}")
+                    exit(1)
+
+        if not self.recipe:
+            print(
+                f"No valid implementation exists for `{recipe_name}` recipe.")
+            exit(1)
+
+    def get_name(self):
+        return self.recipe.get_name()
+
+    def get_description(self):
+        return self.recipe.get_description()
+
+    def run_break(self):
+        self.recipe.run_break()
+
+    def run_restore(self):
+        self.recipe.run_restore()
+
+    def run_hint(self):
+        self.recipe.run_hint()
+
+    def run_verify(self):
+        self.recipe.run_verify()
 
 
 class ConfigBasedRecipeRunner:
+    """A SRE Recipe runner for running recipes implemented using configs.
+
+    Given a `recipe_name`, it tries to load `recipes/configs_based/recipe_name.yaml`.
+    """
 
     def __init__(self, recipe_name):
         filepath = path.join(path.dirname(
@@ -39,7 +102,7 @@ class ConfigBasedRecipeRunner:
 
     ############################ Run Recipe ###################################
 
-    @property
+    @ property
     def config(self):
         return self.recipe.get("config", {})
 
@@ -76,7 +139,7 @@ class ConfigBasedRecipeRunner:
                 logging.error(
                     "No answer choices configured in affected service quiz.")
                 exit(1)
-            self.__run_interactive_multiple_choice(
+            utils.run_interactive_multiple_choice(
                 "Which service has an issue?",
                 affected_service_config["choices"],
                 affected_service_config["answer"])
@@ -91,7 +154,7 @@ class ConfigBasedRecipeRunner:
                 logging.error(
                     "No answer choices configured in incident cause quiz.")
                 exit(1)
-            self.__run_interactive_multiple_choice(
+            utils.run_interactive_multiple_choice(
                 "What was the cause of the issue?",
                 incident_cause_config["choices"],
                 incident_cause_config["answer"])
@@ -117,74 +180,10 @@ class ConfigBasedRecipeRunner:
                     f"Expect `action` to be dict. Found {type(action)}")
             logging.info(f"Runing action: {action}")
             if "run" in action:
-                output, err = utils.__run_shell_command(action["run"])
+                output, err = utils.run_shell_command(action["run"])
                 if err:
                     logging.error(f"Failed to run action {action}: {err}")
                     print(err)
                     exit(1)
             else:
                 raise NotImplementedError(f"action not supported: {action}")
-
-    def __run_interactive_multiple_choice(self, prompt, choices, correct_answer):
-        """Runs an interactive multiple choice Quiz.
-
-        Example Layout:
-            ===============================================================
-                                MULTIPLE CHOICE QUIZ
-            ===============================================================
-            Question: Which service has an issue?
-            Choices
-              0: Ad
-              1: Cart
-              2: Checkout
-              3: Currency
-              4: Email
-              5: Frontend
-              6: Payment
-              7: Product Catalog
-              8: Rating
-              9: Recommendation
-              10: Shipping
-            Enter your answer: 
-
-        Paramters
-        ---------
-        prompt: string
-            The question prompt to display.
-        choices: string[]
-            A list of potential answers to choose from.
-        correct_answer: int
-            The (0-based) index for the correct answer in the `choices` params.
-        """
-        if not choices:
-            logging.info("Skipped. Empty multiple choice.")
-            return
-
-        if correct_answer < 0 or correct_answer >= len(choices):
-            logging.error(
-                "Correct answer is not in the pool of potential answers.")
-            exit(1)
-
-        # Show the question
-        print("===============================================================")
-        print("                     MULTIPLE CHOICE QUIZ                      ")
-        print("===============================================================")
-        print(f"Question: {prompt}")
-        print("Choices")
-        for i, choice in enumerate(choices):
-            print(f"  {i}: {choice}")
-
-        # Asks for answer
-        while True:
-            user_answer = input("Enter your answer: ").strip()
-            try:
-                user_answer = int(user_answer)
-                if user_answer < 0 or user_answer >= len(choices):
-                    print("Not a valid choice")
-                elif user_answer == correct_answer:
-                    print("Congratulations! You are correct.")
-                    return
-                else:
-                    print("Incorrect. Please try again.")
-            except ValueError:
-                print("Please enter the number of your selected answer.")

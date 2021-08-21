@@ -18,7 +18,7 @@ import subprocess
 import logging
 
 
-def run_command(command, decode_output=True):
+def run_shell_command(command, decode_output=True):
     """
     Runs the given command and returns any output and error
     If `decode_output` is True, try to decode output with UTF-8 encoding,
@@ -35,7 +35,7 @@ def run_command(command, decode_output=True):
 
 def get_project_id():
     """Get the Google Cloud Project ID"""
-    project_id, err = run_command(
+    project_id, err = run_shell_command(
         "gcloud config list --format 'value(core.project)'")
     if not project_id:
         logging.error(f"Could not retrieve project id: {err}")
@@ -44,7 +44,7 @@ def get_project_id():
 
 def get_external_ip():
     """Get the IP Address for the external LoadBalancer"""
-    ip_addr, err = run_command(
+    ip_addr, err = run_shell_command(
         "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{{.status.loadBalancer.ingress[0].ip}}'")
     if not ip_addr:
         logging.error(f"No external IP found: {err}")
@@ -53,7 +53,7 @@ def get_external_ip():
 
 def get_cluster_zone(project_id, cluster_name):
     """Get the zone for a cluster in a given project"""
-    zone, err = run_command(
+    zone, err = run_shell_command(
         f"gcloud container clusters list --filter name:{cluster_name} --project {project_id} --format value(zone)")
     if not zone:
         logging.error(
@@ -83,11 +83,76 @@ def auth_cluster(cluster_name="cloud-ops-sandbox"):
         logging.error("Can't authenticate cluster. No zone found.")
         exit(1)
     # Get authentication command
-    auth_command, err = run_command(
+    auth_command, err = run_shell_command(
         f"gcloud container clusters get-credentials {cluster_name} --project {project_id} --zone {zone}")
     if not auth_command:
         logging.error("Can't get authentication command")
         exit(1)
     # Authenticate!
-    run_command(auth_command, decode_output=False)
+    run_shell_command(auth_command, decode_output=False)
     logging.info("Cluster has been authenticated")
+
+
+def run_interactive_multiple_choice(prompt, choices, correct_answer):
+    """Runs an interactive multiple choice Quiz.
+
+    Example Layout:
+        ===============================================================
+                            MULTIPLE CHOICE QUIZ
+        ===============================================================
+        Question: Which service has an issue?
+        Choices
+          0: Ad
+          1: Cart
+          2: Checkout
+          3: Currency
+          4: Email
+          5: Frontend
+          6: Payment
+          7: Product Catalog
+          8: Rating
+          9: Recommendation
+          10: Shipping
+        Enter your answer: 
+
+    Paramters
+    ---------
+    prompt: string
+        The question prompt to display.
+    choices: string[]
+        A list of potential answers to choose from.
+    correct_answer: int
+        The (0-based) index for the correct answer in the `choices` params.
+    """
+    if not choices:
+        logging.info("Skipped. Empty multiple choice.")
+        return
+
+    if correct_answer < 0 or correct_answer >= len(choices):
+        logging.error(
+            "Correct answer is not in the pool of potential answers.")
+        exit(1)
+
+    # Show the question
+    print("===============================================================")
+    print("                     MULTIPLE CHOICE QUIZ                      ")
+    print("===============================================================")
+    print(f"Question: {prompt}")
+    print("Choices")
+    for i, choice in enumerate(choices):
+        print(f"  {i}: {choice}")
+
+    # Asks for answer
+    while True:
+        user_answer = input("Enter your answer: ").strip()
+        try:
+            user_answer = int(user_answer)
+            if user_answer < 0 or user_answer >= len(choices):
+                print("Not a valid choice")
+            elif user_answer == correct_answer:
+                print("Congratulations! You are correct.")
+                return
+            else:
+                print("Incorrect. Please try again.")
+        except ValueError:
+            print("Please enter the number of your selected answer.")
