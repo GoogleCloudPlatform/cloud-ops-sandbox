@@ -77,7 +77,7 @@ class RecipeRunner:
                 exit(1)
             self.__run_interactive_multiple_choice(
                 "Which service has an issue?",
-                affected_service_config.get["choices"],
+                affected_service_config["choices"],
                 affected_service_config["answer"])
 
         incident_cause_config = verify_config.get("incident_cause", {})
@@ -92,7 +92,7 @@ class RecipeRunner:
                 exit(1)
             self.__run_interactive_multiple_choice(
                 "What was the cause of the issue?",
-                incident_cause_config.get["choices"],
+                incident_cause_config["choices"],
                 incident_cause_config["answer"])
 
     ########################## Recipe Action Handlers ##########################
@@ -133,6 +133,7 @@ class RecipeRunner:
                 output, err = self.__run_shell_command(action["run"])
                 if err:
                     logging.error(f"Failed to run action {action}: {err}")
+                    print(err)
                     exit(1)
             else:
                 raise NotImplementedError(f"action not supported: {action}")
