@@ -20,22 +20,22 @@ config:
   verify:
     broken_service:
       choices:
-        - 0. Ad
-        - 1. Cart
-        - 2. Checkout
-        - 3. Currency
-        - 4. Email
-        - 5. Frontend
-        - 6. Payment
-        - 7. Product Catalog
-        - 8. Rating
-        - 9. Recommendation
-        - 10. Shipping
+        - Ad  # 0
+        - Cart  # 1
+        - Checkout  # 2
+        - Currency  # 3
+        - Email # 4
+        - Frontend  # 5
+        - Payment # 6
+        - Product Catalog # 7
+        - Rating  # 8
+        - Recommendation  # 9
+        - Shipping  # 10
       answer: 9
     broken_cause:
       choices:
-        - 0. High Latency
-        - 1. Internal Service Error
-        - 2. Failed Connection to Other Services
-        - 3. Memory Quota Issues
+        - High Latency # 0
+        - Internal Service Error # 1
+        - Failed Connection to Other Services # 2
+        - Memory Quota Issues # 3
       answer: 1

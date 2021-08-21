@@ -57,9 +57,81 @@ class RecipeRunner:
         print(f'Here is your hint!\n\n{hint}')
 
     def run_verify(self):
-        raise NotImplementedError()
+        verify_config = self.config.get("verify", {})
+        broken_service_config = verify_config.get("broken_service", {})
+        broken_cause_config = verify_config.get("broken_cause", {})
+
+        self.__run_interactive_multiple_choice(
+            "Which service has an issue?",
+            broken_service_config.get("choices", []),
+            broken_service_config["answer"])
+
+        self.__run_interactive_multiple_choice(
+            "Which was the cause of the issue?",
+            broken_cause_config.get("choices", []),
+            broken_cause_config["answer"])
 
     ########################## Recipe Action Handlers ##########################
+
+    def __run_interactive_multiple_choice(self, prompt, choices, correct_answer):
+        """Runs an interactive multiple choice Quiz.
+
+        Example Layout:
+            ===============================================================
+                                MULTIPLE CHOICE QUIZ
+            ===============================================================
+            Question: Which service has an issue?
+            Choices
+              0: Ad
+              1: Cart
+              2: Checkout
+              3: Currency
+              4: Email
+              5: Frontend
+              6: Payment
+              7: Product Catalog
+              8: Rating
+              9: Recommendation
+              10: Shipping
+            Enter your answer: 
+
+        Paramters
+        ---------
+        prompt: string
+            The question prompt to display.
+        choices: string[]
+            A list of potential answers to choose from.
+        correct_answer: int
+            The (0-based) index for the correct answer in the `choices` params.
+        """
+        if correct_answer < 0 or correct_answer >= len(choices):
+            logging.error(
+                "Correct answer is not in the pool of potential answers.")
+            exit(1)
+
+        # Show the question
+        print("===============================================================")
+        print("                     MULTIPLE CHOICE QUIZ")
+        print("===============================================================")
+        print(f"Question: {prompt}")
+        print("Choices")
+        for i, choice in enumerate(choices):
+            print(f"  {i}: {choice}")
+
+        # Asks for answer
+        while True:
+            user_answer = input("Enter your answer: ").strip()
+            try:
+                user_answer = int(user_answer)
+                if user_answer < 0 or user_answer >= len(choices):
+                    print("[Error] Not a valid choice")
+                elif user_answer == correct_answer:
+                    print("Congratulations! You are correct.")
+                    return
+                else:
+                    print("Incorrect. Please try again.")
+            except ValueError:
+                print("Please enter the number of your selected answer.")
 
     def __run_shell_command(self, command, decode_output=True):
         """
@@ -104,17 +176,3 @@ class RecipeRunner:
                     exit(1)
             else:
                 raise NotImplementedError(f"action not supported: {action}")
-
-
-# runner = RecipeRunner("recipe1")
-# # print(runner.config)
-# # print(utils.get_project_id())
-# print(runner.name)
-# print(runner.description)
-# # print(runner.break_config)
-# # print(runner.restore_config)
-# runner.run_hint()
-# # print(runner.verify_config)
-# runner.run_break()
-# runner.run_restore()
-# runner.run_verify()
