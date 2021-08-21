@@ -116,16 +116,12 @@ class RecipeRunner:
         Runs a list of `actions`, each of which is a dict of parameters.
 
         As of now, we only support running shell commands in the `run` field.
-
         Example:
             actions = [{'run': 'echo "Hello World!"'}]
         """
         if type(actions) != list:
             logging.error(
                 f"Expect `actions` to be list. Found {type(actions)}: {actions}")
-            exit(1)
-        elif not actions:
-            logging.error("There are no actions configured.")
             exit(1)
 
         for action in actions:

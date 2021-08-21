@@ -25,7 +25,7 @@ def run_command(command, decode_output=True):
     as well as removing any single quote.
     """
     process = subprocess.Popen(
-        command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
     )
     output, error = process.communicate()
     if output is not None and decode_output:
