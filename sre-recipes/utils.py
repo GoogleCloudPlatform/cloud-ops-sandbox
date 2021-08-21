@@ -21,15 +21,18 @@ import logging
 def run_shell_command(command, decode_output=True):
     """
     Runs the given command and returns any output and error
-    If `decode_output` is True, try to decode output with UTF-8 encoding,
-    as well as removing any single quote.
+    If `decode_output` is True, try to decode output and error message with 
+    UTF-8 encoding, as well as removing any single quote.
     """
     process = subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
     )
     output, error = process.communicate()
-    if output is not None and decode_output:
-        output = output.decode("utf-8").replace("'", '').strip()
+    if decode_output:
+        if output is not None:
+            output = output.decode("utf-8").replace("'", '').strip()
+        if error is not None:
+            error = error.decode("utf-8").replace("'", '').strip()
     return output, error
 
 
