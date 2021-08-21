@@ -46,7 +46,7 @@ def get_project_id():
     project_id, err = run_shell_command(
         "gcloud config list --format 'value(core.project)'")
     if not project_id:
-        logging.warning(f"Could not retrieve project id.")
+        logging.warn(f"Could not retrieve project id.")
     return project_id, err
 
 
@@ -55,7 +55,7 @@ def get_external_ip():
     ip_addr, err = run_shell_command(
         "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{{.status.loadBalancer.ingress[0].ip}}'")
     if not ip_addr:
-        logging.warning(f"No external IP found.")
+        logging.warn(f"No external IP found.")
     return ip_addr, err
 
 
@@ -65,7 +65,7 @@ def get_loadgen_ip():
     ip_addr, err = run_shell_command(
         "kubectl get service loadgenerator -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
     if not ip_addr:
-        logging.warning(f"No loadgeen IP found.")
+        logging.warn(f"No loadgeen IP found.")
     auth_cluster('cloud-ops-sandbox')
     return ip_addr, err
 
@@ -75,7 +75,7 @@ def get_cluster_zone(project_id, cluster_name):
     zone, err = run_shell_command(
         f"gcloud container clusters list --filter name:{cluster_name} --project {project_id} --format 'value(zone)'")
     if not zone:
-        logging.warninig(
+        logging.warn(
             f"No zone found for {cluster_name} in project {project_id}"
         )
     return zone, err
