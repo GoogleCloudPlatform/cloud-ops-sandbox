@@ -1,0 +1,41 @@
+name: Ratings Freshness Recipe
+description: |
+  This implements recipe 3, which adds a crashing bug to the recommendation 
+  service by causing an exception in request processing.
+config:
+  break:
+    # Dev Note: the MAX_RESPONSES is 5.0, a float, which will cause crash
+    # during integer conversion stage in the service.
+    - run: kubectl set env deployment/recommendationservice MAX_RESPONSES=5.0
+    - run: kubectl delete pod $(kubectl get pod -l app=recommendationservice -o jsonpath='{.items[0].metadata.name}')
+    - run: kubectl wait --for=condition=available --timeout=600s deployment/recommendationservice
+  restore:
+    - run: kubectl set env deployment/recommendationservice MAX_RESPONSES-
+    - run: kubectl delete pod $(kubectl get pod -l app=recommendationservice -o jsonpath='{.items[0].metadata.name}')
+    - run: kubectl wait --for=condition=available --timeout=600s deployment/recommendationservice
+  hint: |
+    Browse your website until you encounter an issue, and use Cloud Logging to 
+    view logs exported by each service. You can also use `sandboxctl describe` 
+    to get information (such as project ID, logs, core URLs) for your sandbox.
+  verify:
+    broken_service:
+      choices:
+        - 0. Ad
+        - 1. Cart
+        - 2. Checkout
+        - 3. Currency
+        - 4. Email
+        - 5. Frontend
+        - 6. Payment
+        - 7. Product Catalog
+        - 8. Rating
+        - 9. Recommendation
+        - 10. Shipping
+      answer: 9
+    broken_cause:
+      choices:
+        - 0. High Latency
+        - 1. Internal Service Error
+        - 2. Failed Connection to Other Services
+        - 3. Memory Quota Issues
+      answer: 1

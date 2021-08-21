@@ -5,26 +5,20 @@ description: |
   confirmation emails.
 config:
   break:
-    - type: set_env_variable
-      service: deployment/emailservice
-      pod_selector: app=emailservice
-      feature_flag: ENCODE_EMAIL
-      feature_value: true
-      restart_wait_seconds: 600
+    - run: kubectl set env deployment/emailservice ENCODE_EMAIL=true
+    - run: kubectl delete pod $(kubectl get pod -l app=emailservice -o jsonpath='{.items[0].metadata.name}')
+    - run: kubectl wait --for=condition=available --timeout=600s deployment/emailservice
   restore:
-    - type: set_env_variable
-      service: deployment/emailservice
-      pod_selector: app=emailservice
-      feature_flag: ENCODE_EMAIL
-      feature_value: false
-      restart_wait_seconds: 600
+    - run: kubectl set env deployment/emailservice ENCODE_EMAIL=false
+    - run: kubectl delete pod $(kubectl get pod -l app=emailservice -o jsonpath='{.items[0].metadata.name}')
+    - run: kubectl wait --for=condition=available --timeout=600s deployment/emailservice
   hint: |
     Visit the external IP of the demo application and try buying some products. 
     You can also use monitoring dashboards to see metrics associated with each 
     service, and use Cloud Logging to view logs exported by each service. 
     Note: It may take up to 5 minutes for monitoring metrics to be updated.
-    You can also use `sandboxctl describe` to get information (such as core
-    URLs) for your sandbox.
+    You can also use `sandboxctl describe` to get information (such as project 
+    ID, logs, core URLs) for your sandbox.
   verify:
     broken_service:
       choices:

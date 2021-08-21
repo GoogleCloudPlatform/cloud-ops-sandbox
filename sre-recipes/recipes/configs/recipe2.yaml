@@ -4,20 +4,17 @@ description: |
   API calls to rating service, so the ratings will become stale.
 config:
   break:
-    - type: update_gcloud_scheduler
-      job_name: ratingservice-recollect-job
-      action: pause
+    - run: gcloud scheduler jobs pause ratingservice-recollect-job --project $(gcloud config list --format "value(core.project)")
   restore:
-    - type: update_gcloud_scheduler
-      job_name: ratingservice-recollect-job
-      action: resume
+    - run: gcloud scheduler jobs resume ratingservice-recollect-job --project $(gcloud config list --format "value(core.project)")
   hint: |
     Product ratings are managed by the "rating service", hosted on Google AppEngine.
     The service provides APIs that allow other services to get and update products' ratings.
     The rating data is kept up-to-date by periodically calling an API endpoint that collects,
     all recently sent new rating scores for each product and calculates the new rating,
     based on the old value and the new scores. Try to check if the rating service operates normally.
-    You can also use `sandboxctl describe` to get information (such as core URLs) for your sandbox.
+    You can also use `sandboxctl describe` to get information (such as project 
+    ID, logs, core URLs) for your sandbox.
   verify:
     broken_service:
       choices:
@@ -32,7 +29,7 @@ config:
         - 8. Rating
         - 9. Recommendation
         - 10. Shipping
-      answer: 5
+      answer: 8
     broken_cause:
       choices:
         - 0. Rating service does not run

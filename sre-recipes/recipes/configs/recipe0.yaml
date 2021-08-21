@@ -4,25 +4,19 @@ description: |
   frontend service by doing a lot of unnecessary currency conversions.
 config:
   break:
-    - type: set_env_variable
-      service: deployment/frontend
-      pod_selector: app=frontend
-      feature_flag: CONVERT_CURRENCIES
-      feature_value: true
-      restart_wait_seconds: 600
+    - run: kubectl set env deployment/frontend CONVERT_CURRENCIES=true
+    - run: kubectl delete pod $(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}')
+    - run: kubectl wait --for=condition=available --timeout=600s deployment/frontend
   restore:
-    - type: set_env_variable
-      service: deployment/frontend
-      pod_selector: app=frontend
-      feature_flag: CONVERT_CURRENCIES
-      feature_value: false
-      restart_wait_seconds: 600
+    - run: kubectl set env deployment/frontend CONVERT_CURRENCIES=false
+    - run: kubectl delete pod $(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}')
+    - run: kubectl wait --for=condition=available --timeout=600s deployment/frontend
   hint: |
     Visit the external IP of the demo application to see if there are any 
     visible changes. You can also use monitoring dashboards to see metrics 
     associated with each service. Note: It may take up to 5 minutes for 
     monitoring metrics to be updated. You can also use `sandboxctl describe`
-    to get information (such as core URLs) for your sandbox.
+    to get information (such as project ID, logs, core URLs) for your sandbox.
   verify:
     broken_service:
       choices:
