@@ -53,8 +53,11 @@ class RecipeRunner:
         print('Done. Restored broken service to working state.')
 
     def run_hint(self):
-        hint = self.config.get("hint", "This recipe has no hints.")
-        print(f'Here is your hint!\n\n{hint}')
+        hint = self.config.get("hint", None)
+        if hint:
+          print(f'Here is your hint!\n\n{hint}')
+        else:
+          print("This recipe has no hints.")
 
     def run_verify(self):
         verify_config = self.config.get("verify", {})
