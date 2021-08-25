@@ -14,12 +14,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: cartservice
+  name: frontend-external
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
-    app: cartservice
+    app: frontend
   ports:
-  - name: grpc
-    port: 7070
-    targetPort: 7070
+  - name: http
+    port: 80
+    targetPort: 8080

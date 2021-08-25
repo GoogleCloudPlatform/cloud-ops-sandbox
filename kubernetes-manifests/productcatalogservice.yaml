@@ -12,39 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: productcatalogservice
-spec:
-  selector:
-    matchLabels:
-      app: productcatalogservice
-  template:
-    metadata:
-      labels:
-        app: productcatalogservice
-    spec:
-      terminationGracePeriodSeconds: 5
-      containers:
-      - name: productcatalogservice
-        image: gcr.io/stackdriver-sandbox-230822/sandbox/productcatalogservice:latest
-        ports:
-        - containerPort: 3550
-        readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:3550"]
-        livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:3550"]
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
----
 apiVersion: v1
 kind: Service
 metadata:

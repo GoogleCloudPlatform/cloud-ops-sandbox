@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -64,40 +63,3 @@ spec:
       # Create a volume to store the expanded template (with correct cloud project ID)
       - name: collector-gateway-config
         emptyDir: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: opentelemetrycollector
-spec:
-  ports:
-  - name: grpc-otlp
-    port: 4317
-    protocol: TCP
-    targetPort: 4317
-  selector:
-    app: opentelemetrycollector
-  type: ClusterIP
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: collector-gateway-config-template
-# Open Telemetry Collector config
-# https://opentelemetry.io/docs/collector/configuration/
-data:
-  collector-gateway-config-template.yaml: |
-    receivers:
-      otlp:
-        protocols: 
-          grpc:
-    processors:
-    exporters:
-      googlecloud:
-        project: {{PROJECT_ID}}
-    service:
-      pipelines:
-        traces:
-          receivers: [otlp] # Receive otlp-formatted data from other collector instances
-          processors: []
-          exporters: [googlecloud] # Export directly to Google Cloud

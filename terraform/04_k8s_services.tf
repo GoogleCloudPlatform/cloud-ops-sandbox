@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,15 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-apiVersion: v1
-kind: Service
-metadata:
-  name: cartservice
-spec:
-  type: ClusterIP
-  selector:
-    app: cartservice
-  ports:
-  - name: grpc
-    port: 7070
-    targetPort: 7070
+
+module "k8s_services" {
+  source                 = "./microservices"
+  host                   = "https://${google_container_cluster.gke.endpoint}"
+  access_token                  = data.google_client_config.default.access_token
+  cluster_ca_certificate = base64decode(google_container_cluster.gke.master_auth[0].cluster_ca_certificate)
+  //depends_on = [null_resource.install_istio]
+}

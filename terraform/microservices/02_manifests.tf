@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,15 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-apiVersion: v1
-kind: Service
-metadata:
-  name: cartservice
-spec:
-  type: ClusterIP
-  selector:
-    app: cartservice
-  ports:
-  - name: grpc
-    port: 7070
-    targetPort: 7070
+
+resource "kubernetes_manifest" "service_manifests" {
+  for_each = fileset(path.module, "../kubernetes-manifests/*.yaml")
+  manifest = yamldecode(file("${each.key}"))
+}

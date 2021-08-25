@@ -12,41 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: emailservice
-spec:
-  selector:
-    matchLabels:
-      app: emailservice
-  template:
-    metadata:
-      labels:
-        app: emailservice
-    spec:
-      terminationGracePeriodSeconds: 5
-      containers:
-      - name: emailservice
-        image: gcr.io/stackdriver-sandbox-230822/sandbox/emailservice:latest
-        ports:
-        - containerPort: 8080
-        readinessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
-        livenessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
----
 apiVersion: v1
 kind: Service
 metadata:
