@@ -14,7 +14,7 @@
 
 # -*- coding: utf-8 -*-
 
-name: Ratings Freshness Recipe
+name: Recommendation Crash Recipe
 description: |
   This implements recipe 3, which adds a crashing bug to the recommendation 
   service by causing an exception in request processing.
