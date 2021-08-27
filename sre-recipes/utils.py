@@ -106,11 +106,8 @@ def auth_cluster(cluster_name="cloud-ops-sandbox"):
         logging.error(f"Can't authenticate cluster. Failed to get zone: {err}")
         exit(1)
     # Run authentication command
-    _, err = run_shell_command(
+    _ = run_shell_command(
         f"gcloud container clusters get-credentials {cluster_name} --project {project_id} --zone {zone}")
-    if err:
-        logging.error(f"Failed to run authentication command: {err}")
-        exit(1)
     logging.info("Cluster has been authenticated")
 
 
