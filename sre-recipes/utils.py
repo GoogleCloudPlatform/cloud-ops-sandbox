@@ -56,7 +56,7 @@ def get_project_id():
 def get_external_ip():
     """Get the IP Address for the external LoadBalancer"""
     ip_addr, err = run_shell_command(
-        "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{{.status.loadBalancer.ingress[0].ip}}'")
+        "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
     if not ip_addr:
         logging.warn(f"No external IP found.")
     return ip_addr, err
@@ -105,17 +105,11 @@ def auth_cluster(cluster_name="cloud-ops-sandbox"):
     if err or not zone:
         logging.error(f"Can't authenticate cluster. Failed to get zone: {err}")
         exit(1)
-    # Get authentication command
-    auth_command, err = run_shell_command(
+    # Run authentication command
+    _, err = run_shell_command(
         f"gcloud container clusters get-credentials {cluster_name} --project {project_id} --zone {zone}")
-    if err or not auth_command:
-        logging.error(f"Failed to get authentication command: {err}")
-        exit(1)
-    # Authenticate!
-    _, err = run_shell_command(auth_command, decode_output=False)
     if err:
-        logging.error(
-            f"Failed to run authentication command `{auth_command}`: {err}")
+        logging.error(f"Failed to run authentication command: {err}")
         exit(1)
     logging.info("Cluster has been authenticated")
 
