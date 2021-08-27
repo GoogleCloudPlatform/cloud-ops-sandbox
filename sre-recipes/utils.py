@@ -55,6 +55,7 @@ def get_project_id():
 
 def get_external_ip():
     """Get the IP Address for the external LoadBalancer"""
+    auth_cluster('cloud-ops-sandbox')
     ip_addr, err = run_shell_command(
         "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
     if not ip_addr:
