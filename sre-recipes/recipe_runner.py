@@ -27,6 +27,13 @@ import utils
 from recipes.impl_based.base import BaseRecipeImpl
 
 
+# Default Load Generation Config
+DEFAULT_LOADGEN_USER_TYPE = "BasicHomePageViewingUser"
+DEFAULT_LOADGEN_USER_COUNT = 20
+DEFAULT_LOADGEN_SPAWN_RATE = 1
+DEFAULT_LOADGEN_TIMEOUT_SECONDS = 600
+
+
 class ImplBasedRecipeRunner:
     """A SRE Recipe runner for running recipes implemented as class objects.
 
@@ -175,13 +182,13 @@ class ConfigBasedRecipeRunner:
                             f"Failed to stop existing load generation: {resp.status_code} {resp.reason}")
                 elif action["loadgen"] == "spawn":
                     user_type = action.get(
-                        "user_type", "BasicHomePageViewingUser")
+                        "user_type", DEFAULT_LOADGEN_USER_TYPE)
                     resp = requests.post(
                         f"http://{loadgen_ip}:81/api/spawn/{user_type}",
                         {
-                            "user_count": int(action.get("user_count", 20)),
-                            "spawn_rate": int(action.get("spawn_rate", 5)),
-                            "stop_after": int(action.get("stop_after", 600))
+                            "user_count": int(action.get("user_count", DEFAULT_LOADGEN_USER_COUNT)),
+                            "spawn_rate": int(action.get("spawn_rate", DEFAULT_LOADGEN_SPAWN_RATE)),
+                            "stop_after": int(action.get("stop_after", DEFAULT_LOADGEN_TIMEOUT_SECONDS))
                         })
                     print(f"Load Generator API Response: {resp.text}")
                     if not resp.ok:
