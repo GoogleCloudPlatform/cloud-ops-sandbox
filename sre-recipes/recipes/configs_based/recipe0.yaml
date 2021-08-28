@@ -25,7 +25,7 @@ config:
     - run: kubectl delete pod $(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}')
     - run: kubectl wait --for=condition=available --timeout=600s deployment/frontend
     - loadgen: spawn
-      sre_recipe_user_identifier: BasicHomePageViewingUser
+      user_type: BasicHomePageViewingUser
       user_count: 20
       spawn_rate: 5
       stop_after: 600

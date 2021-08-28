@@ -175,11 +175,11 @@ class ConfigBasedRecipeRunner:
                             f"Failed to stop existing load generation: {resp.status_code} {resp.reason}")
                 elif action["loadgen"] == "spawn":
                     user_type = action.get(
-                        "sre_recipe_user_identifier", "BasicHomePageViewingUser")
+                        "user_type", "BasicHomePageViewingUser")
                     resp = requests.post(
                         f"http://{loadgen_ip}:81/api/spawn/{user_type}",
                         {
-                            "user_count": int(action.get("spawn_rate", 20)),
+                            "user_count": int(action.get("user_count", 20)),
                             "spawn_rate": int(action.get("spawn_rate", 5)),
                             "stop_after": int(action.get("stop_after", 600))
                         })
