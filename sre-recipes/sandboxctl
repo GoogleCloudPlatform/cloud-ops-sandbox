@@ -106,19 +106,36 @@ def sre_recipes(action, recipe_name):
 @cli.command()
 @click.argument('traffic_pattern', type=click.Choice(['basic', 'step']))
 def loadgen(traffic_pattern):
-    """Change traffic patterns for the loadgenerator service"""
+    """Change traffic patterns for the loadgenerator service
+
+    We will always switch back to cloud-ops-sandbox cluster after successful
+    completion of this command, assuming it is the most common cluster to be in.
+    """
     set_env_command = "kubectl set env deployment/loadgenerator "\
         f"LOCUST_TASK={traffic_pattern}"
     delete_pods_command = "kubectl delete pods -l app=loadgenerator"
 
-    utils.auth_cluster('loadgenerator')
+    if not utils.auth_cluster('loadgenerator'):
+        print("Failed to authenticate into load generator cluster")
+        return
     print('Redeploying Loadgenerator...')
-    utils.run_shell_command(set_env_command)
-    utils.run_shell_command(delete_pods_command)
+    _, err = utils.run_shell_command(set_env_command)
+    if err:
+        print("Failed to set traffic pattern for load generator: ", err)
+    _, err = utils.run_shell_command(delete_pods_command)
+    if err:
+        print("Failed to redeploy updated load generator: ", err)
     print(f'Loadgenerator deployed using {traffic_pattern} pattern')
-    ip_addr, _ = utils.get_loadgen_ip()
-    if ip_addr:
+    ip_addr, err = utils.get_loadgen_ip()
+    if err:
+        print("Failed to get load generator IP: ", err)
+    elif not ip_addr:
+        print("Found empty load generator IP")
+    else:
         print(f"Loadgenerator web UI: http://{ip_addr}")
+
+    # Try switching back to cloud-ops-sandbox cluster.
+    # Do not error even if we fail
     utils.auth_cluster('cloud-ops-sandbox')
 
 

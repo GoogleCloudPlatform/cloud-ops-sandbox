@@ -21,7 +21,7 @@ import logging
 def run_shell_command(command, decode_output=True):
     """
     Runs the given command and returns any output and error
-    If `decode_output` is True, try to decode output and error message with 
+    If `decode_output` is True, try to decode output and error message with
     UTF-8 encoding, as well as removing any single quote.
     """
     process = subprocess.Popen(
@@ -55,7 +55,8 @@ def get_project_id():
 
 def get_external_ip():
     """Get the IP Address for the external LoadBalancer"""
-    auth_cluster('cloud-ops-sandbox')
+    if not auth_cluster('cloud-ops-sandbox'):
+        return None, "Failed to authenticate into cloud-ops-sandbox cluster"
     ip_addr, err = run_shell_command(
         "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
     if not ip_addr:
@@ -65,11 +66,14 @@ def get_external_ip():
 
 def get_loadgen_ip():
     """Get the IP Address for the load generator"""
-    auth_cluster('loadgenerator')
+    if not auth_cluster('loadgenerator'):
+        return None, "Failed to authenticate into loadgenerator cluster"
     ip_addr, err = run_shell_command(
         "kubectl get service loadgenerator -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
     if not ip_addr:
         logging.warn(f"No loadgeen IP found.")
+    # Try switching back to cloud-ops-sandbox cluster.
+    # Do not error even if we fail
     auth_cluster('cloud-ops-sandbox')
     return ip_addr, err
 
@@ -93,6 +97,8 @@ def auth_cluster(cluster_name="cloud-ops-sandbox"):
             Options:
               - cloud-ops-sandbox
               - loadgenerator
+
+    Return true if authentication was successful, or false otherwise.
     """
     logging.info("Trying to authenticate cluster...")
     # Locate project ID
@@ -100,16 +106,17 @@ def auth_cluster(cluster_name="cloud-ops-sandbox"):
     if err or not project_id:
         logging.error(
             f"Can't authenticate cluster. Failed too get project ID: {err}")
-        exit(1)
+        return False
     # Get cluster zone
     zone, err = get_cluster_zone(project_id, cluster_name)
     if err or not zone:
         logging.error(f"Can't authenticate cluster. Failed to get zone: {err}")
-        exit(1)
+        return False
     # Run authentication command
-    _ = run_shell_command(
+    run_shell_command(
         f"gcloud container clusters get-credentials {cluster_name} --project {project_id} --zone {zone}")
     logging.info("Cluster has been authenticated")
+    return True
 
 
 def run_interactive_multiple_choice(prompt, choices, correct_answer):
@@ -132,7 +139,7 @@ def run_interactive_multiple_choice(prompt, choices, correct_answer):
           8: Rating
           9: Recommendation
           10: Shipping
-        Enter your answer: 
+        Enter your answer:
 
     Paramters
     ---------
