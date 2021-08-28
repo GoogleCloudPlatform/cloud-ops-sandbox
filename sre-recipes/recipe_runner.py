@@ -16,6 +16,7 @@
 
 import abc
 import importlib
+import requests
 import subprocess
 import yaml
 
@@ -154,10 +155,37 @@ class ConfigBasedRecipeRunner:
         actions: a list of dictionary of paramters.
             Example: [{'run': 'echo "Hello World!"'}]
         """
+        loadgen_ip = None
+
         for action in actions:
             if "run" in action:
                 output, err = utils.run_shell_command(action["run"])
                 if err:
                     raise RuntimeError(f"Failed to run action {action}: {err}")
+            elif "loadgen" in action:
+                if not loadgen_ip:
+                    loadgen_ip, err = utils.get_loadgen_ip()
+                    if err:
+                        raise RuntimeError(f"Failed to get loadgen IP: {err}")
+                if action["loadgen"] == "stop":
+                    resp = requests.post(f"http://{loadgen_ip}:81/api/stop")
+                    print(f"Load Generator API Response: {resp.text}")
+                    if not resp.ok:
+                        raise RuntimeError(
+                            f"Failed to stop existing load generation: {resp.status_code} {resp.reason}")
+                elif action["loadgen"] == "spawn":
+                    user_type = action.get(
+                        "sre_recipe_user_identifier", "BasicHomePageViewingUser")
+                    resp = requests.post(
+                        f"http://{loadgen_ip}:81/api/spawn/{user_type}",
+                        {
+                            "user_count": int(action.get("spawn_rate", 20)),
+                            "spawn_rate": int(action.get("spawn_rate", 5)),
+                            "stop_after": int(action.get("stop_after", 600))
+                        })
+                    print(f"Load Generator API Response: {resp.text}")
+                    if not resp.ok:
+                        raise RuntimeError(
+                            f"Failed to start load generation: {resp.status_code} {resp.reason}")
             else:
                 raise NotImplementedError(f"action not supported: {action}")
