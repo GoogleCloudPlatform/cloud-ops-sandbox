@@ -176,7 +176,6 @@ class ConfigBasedRecipeRunner:
                         raise RuntimeError(f"Failed to get loadgen IP: {err}")
                 if action["loadgen"] == "stop":
                     resp = requests.post(f"http://{loadgen_ip}:81/api/stop")
-                    print(f"Load Generator API Response: {resp.text}")
                     if not resp.ok:
                         raise RuntimeError(
                             f"Failed to stop existing load generation: {resp.status_code} {resp.reason}")
@@ -190,7 +189,6 @@ class ConfigBasedRecipeRunner:
                             "spawn_rate": int(action.get("spawn_rate", DEFAULT_LOADGEN_SPAWN_RATE)),
                             "stop_after": int(action.get("stop_after", DEFAULT_LOADGEN_TIMEOUT_SECONDS))
                         })
-                    print(f"Load Generator API Response: {resp.text}")
                     if not resp.ok:
                         raise RuntimeError(
                             f"Failed to start load generation: {resp.status_code} {resp.reason}")
