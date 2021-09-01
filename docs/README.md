@@ -110,7 +110,7 @@ Cloud Ops Sandbox comes with [Locust load generator](https://locust.io/), to sim
 
 This will produce traffic on the store from a loadgenerator pod:
 
-![Locust example](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/raw/master/docs/images/user-guide/3-locust.png "Example of Locust configuration")
+![Locust example](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/raw/main/docs/images/user-guide/3-locust.png "Example of Locust configuration")
 
 From here, you can explore how the application was deployed, and you can use the navigation menu to bring up other GCP tools.
 
@@ -453,7 +453,7 @@ Cloud operations suite provides **service oriented monitoring**, that means that
 
 The first step in order to create SLO is to **ingest the data**. For GKE services telemetry and dashboards comes out of the box, but you can also ingest additional data and [create custom metrics.](#Monitoring-and-logs-based-metrics)
 
-Then you need to **define your service**, Cloud Operations Sandbox' services are already detected since Istio's services are automatically detected and created. But to demonstrate that you can create your own services, it also deploys custom services using [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring).
+Then you need to **define your service**, Cloud Operations Sandbox' services are already detected since Istio's services are automatically detected and created. But to demonstrate that you can create your own services, it also deploys custom services using [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/main/terraform/monitoring).
 
 You can find all the services under [monitoring → services → Services Overview](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/svc-overview), and you can create your own [custom service.](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/ui/define-svc)
 
@@ -461,7 +461,7 @@ You can find all the services under [monitoring → services → Services Overvi
 
 #### Services SLOs  
 
-The *predefined SLOs* are also deployed as part of [Terraform code](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/master/terraform/monitoring/04_slos.tf) and currently are for the mentioned custom services, the Istio service and Rating service.  
+The *predefined SLOs* are also deployed as part of [Terraform code](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/main/terraform/monitoring/04_slos.tf) and currently are for the mentioned custom services, the Istio service and Rating service.  
 
 **Custom services SLOs**
 ``` 
@@ -517,7 +517,7 @@ You can [configure your own SLIs and SLOs](https://cloud.google.com/stackdriver/
 
 After you create the SLO, you can create[Burn Rate Alerts](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate)for those.
 
-Several *predefined policies* are deployed as part of [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/master/terraform/monitoring/05_alerting_policies.tf). You can view them in the service screen, edit them, or [create your own](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate).
+Several *predefined policies* are deployed as part of [Terraform](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/main/terraform/monitoring/05_alerting_policies.tf). You can view them in the service screen, edit them, or [create your own](https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate).
 
 Let's continue with the Istio checkoutservice SLO you created [in the previous section:](#Let's-demonstrate-that-using-the-checkout-auto-defined-Istio-service:)
 

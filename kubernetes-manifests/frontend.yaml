@@ -26,7 +26,7 @@ spec:
         app: frontend
     spec:
       containers:
-        - name: server
+        - name: frontend
           image: gcr.io/stackdriver-sandbox-230822/sandbox/frontend:latest
           ports:
           - containerPort: 8080
@@ -65,11 +65,11 @@ spec:
             value: "http://some.host"
           resources:
             requests:
-              cpu: 100m
-              memory: 64Mi
-            limits:
               cpu: 200m
               memory: 128Mi
+            limits:
+              cpu: 320m
+              memory: 256Mi
 ---
 apiVersion: v1
 kind: Service

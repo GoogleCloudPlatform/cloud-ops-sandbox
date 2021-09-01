@@ -15,16 +15,16 @@
 name: "End to End - Latest"
 on:
   push:
-    # run on pushes to master or release/*
+    # run on pushes to main, develop, or prefixed with e2e
     branches:
-      - master
-      - release/*
+      - main
+      - develop
       - e2e*
-      - step-pattern
-      - upstream/cart_grpc
   pull_request:
     branches:
-      - master
+    # run on PRs to main or develop
+      - main
+      - develop
   workflow_dispatch:
   # trigger through UI or API
 env:
@@ -62,6 +62,7 @@ jobs:
         # use newly built containers instead of latest pushed
         find "./kubernetes-manifests" "./loadgenerator-manifests" -name '*.yaml' -exec sed -i -e "s#$OLD_PATH#$NEW_PATH#g" {} \;
         find "./kubernetes-manifests" "./loadgenerator-manifests" -name '*.yaml' -exec sed -i -e "s#:latest#:$GITHUB_SHA#g" {} \;
+        find "./kubernetes-manifests" "./loadgenerator-manifests" -name '*.yaml' -exec sed -i -e "s#:v\([0-9\.]\+\)#:$GITHUB_SHA#g" {} \;
     - name: Run Install Script
       timeout-minutes: 30
       run: |
@@ -72,6 +73,7 @@ jobs:
         docker run --rm \
           -e project_id=${{ env.PROJECT_ID }} \
           -e service_wait=1 \
+          -e PYTHONDONTWRITEBYTECODE=1 \
           -v ~/.config:/root/.config \
           -v `pwd`:/sandbox-shared \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
@@ -89,9 +91,22 @@ jobs:
         docker run --rm \
           -e GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }} \
           -e ZONE=$CLUSTER_ZONE \
+          -e PYTHONDONTWRITEBYTECODE=1 \
           -e LOADGEN_ZONE=$LOADGEN_ZONE \
           -v ~/.config:/root/.config \
           test-provisioning:$GITHUB_SHA
+    - name: Run SRE Recipes Tests
+      timeout-minutes: 30
+      run: |
+        # build cloud shell image
+        docker build -t test-cloud-shell:$GITHUB_SHA ./cloud-shell
+        # run test script
+        docker run --rm \
+          -v ~/.config:/root/.config \
+          -v `pwd`:/sandbox-shared \
+          -e PYTHONDONTWRITEBYTECODE=1 \
+          --entrypoint /sandbox-shared/tests/recipes/test_recommendation_crash_recipe.sh \
+          test-cloud-shell:$GITHUB_SHA
     - name: Run Monitoring Integration Tests
       timeout-minutes: 30
       run: |
