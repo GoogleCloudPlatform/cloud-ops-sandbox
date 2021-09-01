@@ -16,6 +16,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: paymentservice
+  namespace: default
 spec:
   type: ClusterIP
   selector:

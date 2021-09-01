@@ -15,6 +15,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: recommendationservice
+  namespace: default
 spec:
   type: ClusterIP
   selector:

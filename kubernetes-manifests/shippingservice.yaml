@@ -12,43 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: shippingservice
-spec:
-  selector:
-    matchLabels:
-      app: shippingservice
-  template:
-    metadata:
-      labels:
-        app: shippingservice
-    spec:
-      containers:
-      - name: shippingservice
-        image: gcr.io/stackdriver-sandbox-230822/sandbox/shippingservice:latest
-        ports:
-        - containerPort: 50051
-        readinessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
-        livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
----
 apiVersion: v1
 kind: Service
 metadata:
   name: shippingservice
+  namespace: default
 spec:
   type: ClusterIP
   selector:
