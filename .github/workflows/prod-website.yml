@@ -12,30 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Stage Website"
+name: "Prod Website"
 on:
   push:
-    # run on pushes to develop
+    # run on pushes to main (after merging release branches)
     branches:
-    - develop
-  workflow_dispatch:
-    inputs:
-      name:
-        description: 'App Engine Service Name'
-        required: true
-        default: 'staging'
-    # trigger through UI or API
+      - main
 env:
   PROJECT_ID: stackdriver-sandbox-230822
 jobs:
-  stage-website:
+  update-website:
     runs-on: [self-hosted, push-privilege]
     steps:
     - uses: actions/checkout@v2
-    - name: Deploy Staged Website to App Engine
+    - name: Deploy Website to App Engine
       timeout-minutes: 20
       run: |
         set -x
-        cp website/app.yaml website/staging.app.yaml
-        echo "service: ${{ github.event.inputs.name  }}" >> website/staging.app.yaml
-        gcloud app deploy website/staging.app.yaml
+        gcloud app deploy website/app.yaml

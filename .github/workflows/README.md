@@ -68,14 +68,6 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 - builds and pushes images to official GCR repo tagged with git commit
 - builds and pushes images to official GCR repo tagged as latest
 
-### Update-Website.yaml
-
-#### Triggers
-- release merged and commits pushed to main
-
-#### Actions
-- push new prod version of the website to App Engine
-
 ### Push-Tags.yaml
 
 #### Triggers
@@ -164,11 +156,26 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 - Checks kubernetes manifests to ensure develop is pinned to `latest`, and main is pinned to a version
 - Checks telemetry id to ensure develop is on `test` and main is on `prod`
 
-### Staging-Website.yml
+### Prod-Website.yaml
+
+#### Triggers
+- release merged and commits pushed to main
+
+#### Actions
+- push new prod version of the website to App Engine
+
+### Manual-Website.yml
+
+#### Triggers
+- on manual trigger
+
+#### Actions
+- sets up a pre-prod GAE website deployment in `stackdriver-sandbox-230822`
+
+### Develop-Website.yml
 
 #### Triggers
 - on each new push to develop
-- on manual trigger
 
 #### Actions
 - sets up a pre-prod GAE website deployment in `stackdriver-sandbox-230822`
