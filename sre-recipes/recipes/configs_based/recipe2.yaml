@@ -36,24 +36,26 @@ config:
     You can also use `sandboxctl describe` to get information (such as project 
     ID, logs, core URLs) for your sandbox.
   verify:
-    affected_service:
+    - action: run-interactive-multiple-choice
+      prompt: Which service has an issue?
       choices:
-        - Ad # 0
-        - Cart # 1
-        - Checkout # 2
-        - Currency # 3
-        - Email # 4
-        - Frontend # 5
-        - Payment # 6
-        - Product Catalog # 7
-        - Rating # 8
-        - Recommendation # 9
-        - Shipping # 10
-      answer: 8
-    incident_cause:
+        - option: Ad
+        - option: Cart
+        - option: Checkout
+        - option: Currency
+        - option: Email
+        - option: Frontend
+        - option: Payment
+        - option: Product Catalog
+        - option: Rating
+          accept: true
+        - option: Recommendation
+        - option: Shipping #
+    - action: run-interactive-multiple-choice
+      prompt: What was the cause of the issue?
       choices:
-        - Rating service does not run # 0
-        - Rating votes data is missing in the database # 1
-        - Scheduler job that sends recollect request to rating service does not work # 2
-        - New ratings are calculated incorrectly # 3
-      answer: 2
+        - option: Rating service does not run
+        - option: Rating votes data is missing in the database
+        - option: Scheduler job that sends recollect request to rating service does not work
+          accept: true
+        - option: New ratings are calculated incorrectly

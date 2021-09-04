@@ -119,7 +119,7 @@ def auth_cluster(cluster_name="cloud-ops-sandbox"):
     return True
 
 
-def run_interactive_multiple_choice(prompt, choices, correct_answer):
+def run_interactive_multiple_choice(prompt, choices):
     """Runs an interactive multiple choice Quiz.
 
     Example Layout:
@@ -141,22 +141,35 @@ def run_interactive_multiple_choice(prompt, choices, correct_answer):
           10: Shipping
         Enter your answer:
 
+    The user can respond with their answer by typing the number shown before 
+    the answer choice (e.g. 1 for Cart).
+
     Paramters
     ---------
     prompt: string
         The question prompt to display.
-    choices: string[]
+    choices: dict[]
         A list of potential answers to choose from.
-    correct_answer: int
-        The (0-based) index for the correct answer in the `choices` params.
+        Each entry is a dictionary of the following fields:
+          - option: Required. The answer display text to show user
+          - accept: Optional. When true, this entry will be accepted as correct.
+
+        If multiple entries have `accept` field set to True, it means there are
+        multiple correct answers. If no entries have `accept` set to True, the
+        function will throw ValueError.
     """
     if not choices:
         logging.info("Skipped. Empty multiple choice.")
         return
 
-    if correct_answer < 0 or correct_answer >= len(choices):
+    if not all(["option" in x for x in choices]):
         logging.error(
-            "Correct answer is not in the pool of potential answers.")
+            "The 'option' field is required for all answer choice entries.")
+        exit(1)
+
+    if not any([x.get("accept", False) for x in choices]):
+        logging.error(
+            "No accepted answer found in in the pool of potential answers.")
         exit(1)
 
     # Show the question
@@ -165,8 +178,12 @@ def run_interactive_multiple_choice(prompt, choices, correct_answer):
     print("===============================================================")
     print(f"Question: {prompt}")
     print("Choices")
+    correct_answers = set()
     for i, choice in enumerate(choices):
-        print(f"  {i}: {choice}")
+        display_text = choice["option"].strip()
+        print(f"  {i}: {display_text}")
+        if choice.get("accept", False):
+            correct_answers.add(i)
 
     # Asks for answer
     while True:
@@ -175,7 +192,7 @@ def run_interactive_multiple_choice(prompt, choices, correct_answer):
             user_answer = int(user_answer)
             if user_answer < 0 or user_answer >= len(choices):
                 print("Not a valid choice")
-            elif user_answer == correct_answer:
+            elif user_answer in correct_answers:
                 print("Congratulations! You are correct.")
                 return
             else:

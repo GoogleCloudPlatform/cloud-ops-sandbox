@@ -38,24 +38,26 @@ config:
     view logs exported by each service. You can also use `sandboxctl describe` 
     to get information (such as project ID, logs, core URLs) for your sandbox.
   verify:
-    affected_service:
+    - action: run-interactive-multiple-choice
+      prompt: Which service has an issue?
       choices:
-        - Ad # 0
-        - Cart # 1
-        - Checkout # 2
-        - Currency # 3
-        - Email # 4
-        - Frontend # 5
-        - Payment # 6
-        - Product Catalog # 7
-        - Rating # 8
-        - Recommendation # 9
-        - Shipping # 10
-      answer: 9
-    incident_cause:
+        - option: Ad
+        - option: Cart
+        - option: Checkout
+        - option: Currency
+        - option: Email
+        - option: Frontend
+        - option: Payment
+        - option: Product Catalog
+        - option: Rating
+        - option: Recommendation
+          accept: true
+        - option: Shipping
+    - action: run-interactive-multiple-choice
+      prompt: What was the cause of the issue?
       choices:
-        - High Latency # 0
-        - Internal Service Error # 1
-        - Failed Connection to Other Services # 2
-        - Memory Quota Issues # 3
-      answer: 1
+        - option: High Latency
+        - option: Internal Service Error
+          accept: true
+        - option: Failed Connection to Other Services
+        - option: Memory Quota Issues

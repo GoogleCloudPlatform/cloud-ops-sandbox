@@ -136,32 +136,7 @@ class ConfigBasedRecipeRunner:
         verify_config = self.config.get("verify", {})
         if not verify_config:
             raise NotImplementedError("Verify is not configured")
-
-        affected_service_config = verify_config.get("affected_service", {})
-        if affected_service_config:
-            if "answer" not in affected_service_config:
-                raise ValueError(
-                    "Correct answer is not specified for affected service quiz.")
-            elif "choices" not in affected_service_config:
-                raise ValueError(
-                    "No answer choices configured in affected service quiz.")
-            utils.run_interactive_multiple_choice(
-                "Which service has an issue?",
-                affected_service_config["choices"],
-                affected_service_config["answer"])
-
-        incident_cause_config = verify_config.get("incident_cause", {})
-        if incident_cause_config:
-            if "answer" not in incident_cause_config:
-                raise ValueError(
-                    "Correct answer is not specified for incident cause quiz.")
-            elif "choices" not in incident_cause_config:
-                raise ValueError(
-                    "No answer choices configured in incident cause quiz.")
-            utils.run_interactive_multiple_choice(
-                "What was the cause of the issue?",
-                incident_cause_config["choices"],
-                incident_cause_config["answer"])
+        self.__handle_actions(verify_config)
 
     ########################## Recipe Action Handlers ##########################
 
@@ -183,6 +158,10 @@ class ConfigBasedRecipeRunner:
                     if err:
                         raise RuntimeError(
                             f"Failed to run command `{cmd}`: {err}")
+            elif action["action"] == "run-interactive-multiple-choice":
+                utils.run_interactive_multiple_choice(
+                    action["prompt"],
+                    action["choices"])
             elif action["action"] == "loadgen-spawn":
                 if not loadgen_ip:
                     loadgen_ip, err = utils.get_loadgen_ip()

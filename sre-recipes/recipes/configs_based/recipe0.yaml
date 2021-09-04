@@ -45,26 +45,28 @@ config:
     monitoring metrics to be updated. You can also use `sandboxctl describe`
     to get information (such as project ID, logs, core URLs) for your sandbox.
   verify:
-    affected_service:
+    - action: run-interactive-multiple-choice
+      prompt: Which service has an issue?
       choices:
-        - Ad # 0
-        - Cart # 1
-        - Checkout # 2
-        - Currency # 3
-        - Email # 4
-        - Frontend # 5
-        - Payment # 6
-        - Product Catalog # 7
-        - Rating # 8
-        - Recommendation # 9
-        - Shipping # 10
-      answer: 5
-    incident_cause:
+        - option: Ad
+        - option: Cart
+        - option: Checkout
+        - option: Currency
+        - option: Email
+        - option: Frontend
+          accept: true
+        - option: Payment
+        - option: Product
+        - option: Rating
+        - option: Recommendation
+        - option: Shipping
+    - action: run-interactive-multiple-choice
+      prompt: What was the cause of the issue?
       choices:
-        - Dropped Requests # 0
-        - Failed connections to other services # 1
-        - High latency # 2
-        - High memory usage # 3
-        - Memory Quota Exceeded # 4
-        - Internal Server Error # 5
-      answer: 2
+        - option: Dropped Requests
+        - option: Failed connections to other services
+        - option: High latency
+          accept: true
+        - option: High memory usage
+        - option: Memory Quota Exceeded
+        - option: Internal Server Error
