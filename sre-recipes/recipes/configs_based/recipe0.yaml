@@ -32,7 +32,7 @@ config:
       spawn_rate: 5
       stop_after: 600
   restore:
-    - loadgen: stop
+    - action: loadgen-stop
     - action: run-shell-commands
       commands:
         - kubectl set env deployment/frontend CONVERT_CURRENCIES=false
