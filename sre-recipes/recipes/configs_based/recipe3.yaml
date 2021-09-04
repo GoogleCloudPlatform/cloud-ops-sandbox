@@ -38,7 +38,7 @@ config:
     view logs exported by each service. You can also use `sandboxctl describe` 
     to get information (such as project ID, logs, core URLs) for your sandbox.
   verify:
-    - action: run-interactive-multiple-choice
+    - action: multiple-choice-quiz
       prompt: Which service has an issue?
       choices:
         - option: Ad
@@ -53,7 +53,7 @@ config:
         - option: Recommendation
           accept: true
         - option: Shipping
-    - action: run-interactive-multiple-choice
+    - action: multiple-choice-quiz
       prompt: What was the cause of the issue?
       choices:
         - option: High Latency

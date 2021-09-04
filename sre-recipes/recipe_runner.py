@@ -159,7 +159,7 @@ class ActionHandler:
         # Action types to action handlers
         self.action_map = {
             "run-shell-commands": self.run_shell_commands,
-            "run-interactive-multiple-choice": self.run_interactive_multiple_choice,
+            "multiple-choice-quiz": self.run_multiple_choice_quiz,
             "loadgen-spawn": self.loadgen_spawn,
             "loadgen-stop": self.loadgen_stop,
         }
@@ -185,13 +185,32 @@ class ActionHandler:
     ############################ Action Handlers ###############################
 
     def run_shell_commands(self, config):
+        """Runs the commands one at a time in shell.
+
+        Config Paramters
+        ----------------
+        commands: string[]
+            Required. A list of shell command strings.
+        """
         for cmd in config["commands"]:
             output, err = utils.run_shell_command(cmd)
             if err:
                 raise RuntimeError(
                     f"Failed to run command `{cmd}`: {err}")
 
-    def run_interactive_multiple_choice(self, config):
+    def run_multiple_choice_quiz(self, config):
+        """Runs an interactive multiple choice quiz.
+
+        Config Paramters
+        ----------------
+        prompt: string
+            Required. The question prompt to display to the user.
+        choices: dict[]
+            option: string
+                Required. The answer display text to show to the user.
+            accept: bool
+                Optional. If true, the choice is considered correct.
+        """
         if "prompt" not in config:
             raise ValueError("No prompt specified for the multiple choice.")
         elif "choices" not in config:
@@ -201,6 +220,24 @@ class ActionHandler:
             config["prompt"], config["choices"])
 
     def loadgen_spawn(self, config):
+        """
+        Starts spawning a load shape at specified spawn rate until a total
+        user count is reached. Then, stop the load after a specified timesout.
+
+        Config Paramters
+        ----------------
+        user_type: string
+            Optional. Same as the `sre_recipe_user_identifier` for locust tasks
+            defined in `sre/loadgenerator/locust_tasks`.
+            Default: BasicHomePageViewingUser.
+        user_count: int
+            Optional. The number of total users to spawn. Default: 20.
+        spawn_rate: int
+            Optional. The number of users per second to spawn. Default: 1.
+        stop_after: int
+            Optional. The number of seconds to spawn before stopping.
+            Default: 600 seconds.
+        """
         self.init_loadgen_ip()
         user_type = config.get(
             "user_type", DEFAULT_LOADGEN_USER_TYPE)
@@ -216,6 +253,10 @@ class ActionHandler:
                 f"Failed to start load generation: {resp.status_code} {resp.reason}")
 
     def loadgen_stop(self, config):
+        """Stops any active load generation produced by SRE Recipes.
+
+        Config Paramters is not required.
+        """
         self.init_loadgen_ip()
         resp = requests.post(f"http://{self.loadgen_ip}:81/api/stop")
         if not resp.ok:

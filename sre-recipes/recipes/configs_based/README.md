@@ -58,7 +58,7 @@ config:
     - action: loadgen-stop
   hint: Put the hint string for your recipe here
   verify:
-    - action: run-interactive-multiple-choice
+    - action: multiple-choice-quiz
       prompt: Put the question prompt here
       choices:
         # Put as many answers to choose from as you need
@@ -119,12 +119,12 @@ Example:
   stop_after: 600
 ```
 
-4. `run-interactive-multiple-choice`: run an interactive multiple choice quiz.
+4. `multiple-choice-quiz`: run an interactive multiple choice quiz.
 
 Example
 
 ```yaml
-- action: run-interactive-multiple-choice
+- action: multiple-choice-quiz
   prompt: Put the question prompt here
   choices:
     # Put as many answers to choose from as you need

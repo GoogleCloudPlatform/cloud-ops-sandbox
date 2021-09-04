@@ -45,7 +45,7 @@ config:
     monitoring metrics to be updated. You can also use `sandboxctl describe`
     to get information (such as project ID, logs, core URLs) for your sandbox.
   verify:
-    - action: run-interactive-multiple-choice
+    - action: multiple-choice-quiz
       prompt: Which service has an issue?
       choices:
         - option: Ad
@@ -60,7 +60,7 @@ config:
         - option: Rating
         - option: Recommendation
         - option: Shipping
-    - action: run-interactive-multiple-choice
+    - action: multiple-choice-quiz
       prompt: What was the cause of the issue?
       choices:
         - option: Dropped Requests
