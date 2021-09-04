@@ -126,4 +126,4 @@ Example:
 **Contributions**
 
 If you want to add more pre-defined action templates, add your implementation to
-the `handle_actions` method in the `RecipeRunner` class of `recipe_runner.py`.
+the `ActionHandlers` in `recipe_runner.py`.

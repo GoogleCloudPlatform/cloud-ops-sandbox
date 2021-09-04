@@ -102,6 +102,7 @@ class ConfigBasedRecipeRunner:
             self.recipe = yaml.safe_load(file.read())
         if not self.recipe:
             raise ValueError("Cannot parse config as YAML.")
+        self.action_handler = ActionHandler()
 
     def get_name(self):
         return self.recipe.get("name", "No name found")
@@ -109,20 +110,20 @@ class ConfigBasedRecipeRunner:
     def get_description(self):
         return self.recipe.get("description", "No description found")
 
-    ############################ Run Recipe ###################################
-
-    @ property
+    @property
     def config(self):
         return self.recipe.get("config", {})
 
     def run_break(self):
         print('Deploying broken service...')
-        self.__handle_actions(self.config.get("break", {}))
+        for action in self.config.get("break", []):
+            self.action_handler.handle_action(action)
         print('Done. Deployed broken service')
 
     def run_restore(self):
         print('Restoring broken service...')
-        self.__handle_actions(self.config.get("restore", {}))
+        for action in self.config.get("restore", []):
+            self.action_handler.handle_action(action)
         print('Done. Restored broken service to working state.')
 
     def run_hint(self):
@@ -133,60 +134,90 @@ class ConfigBasedRecipeRunner:
             print("This recipe has no hints.")
 
     def run_verify(self):
-        verify_config = self.config.get("verify", {})
+        verify_config = self.config.get("verify", [])
         if not verify_config:
             raise NotImplementedError("Verify is not configured")
-        self.__handle_actions(verify_config)
+        for action in verify_config:
+            self.action_handler.handle_action(action)
 
-    ########################## Recipe Action Handlers ##########################
 
-    def __handle_actions(self, actions):
-        """
-        Dispatch and handle a list of actions synchronously.
+class ActionHandler:
+    """A utility helper for executing actions supported by SRE Recipe configs.
 
-        Paramters
-        ---------
-        actions: a list of dictionary of paramters.
-            Example: [{'run': 'echo "Hello World!"'}]
-        """
-        loadgen_ip = None
+    Implementation Guide
+    --------------------
+    1. Map the action name to the action handler in the `__init__` method.
+    2. All action handlers should take exactly one argument, which is the full 
+       config specified for the action itself, as it is defined in YAML.
+       For example: {action: "run-shell-commands", commands: ['echo Hi']}
 
-        for action in actions:
-            if action["action"] == "run-shell-commands":
-                for cmd in action["commands"]:
-                    output, err = utils.run_shell_command(cmd)
-                    if err:
-                        raise RuntimeError(
-                            f"Failed to run command `{cmd}`: {err}")
-            elif action["action"] == "run-interactive-multiple-choice":
-                utils.run_interactive_multiple_choice(
-                    action["prompt"],
-                    action["choices"])
-            elif action["action"] == "loadgen-spawn":
-                if not loadgen_ip:
-                    loadgen_ip, err = utils.get_loadgen_ip()
-                    if err:
-                        raise RuntimeError(f"Failed to get loadgen IP: {err}")
-                user_type = action.get(
-                    "user_type", DEFAULT_LOADGEN_USER_TYPE)
-                resp = requests.post(
-                    f"http://{loadgen_ip}:81/api/spawn/{user_type}",
-                    {
-                        "user_count": int(action.get("user_count", DEFAULT_LOADGEN_USER_COUNT)),
-                        "spawn_rate": int(action.get("spawn_rate", DEFAULT_LOADGEN_SPAWN_RATE)),
-                        "stop_after": int(action.get("stop_after", DEFAULT_LOADGEN_TIMEOUT_SECONDS))
-                    })
-                if not resp.ok:
-                    raise RuntimeError(
-                        f"Failed to start load generation: {resp.status_code} {resp.reason}")
-            elif action["action"] == "loadgen-stop":
-                if not loadgen_ip:
-                    loadgen_ip, err = utils.get_loadgen_ip()
-                    if err:
-                        raise RuntimeError(f"Failed to get loadgen IP: {err}")
-                resp = requests.post(f"http://{loadgen_ip}:81/api/stop")
-                if not resp.ok:
-                    raise RuntimeError(
-                        f"Failed to stop existing load generation: {resp.status_code} {resp.reason}")
-            else:
-                raise NotImplementedError(f"action not supported: {action}")
+    This runner will propgate all exceptions to the caller, and it is caller's
+    responsibility to handle any exception and to perform any error logging.
+    """
+
+    def __init__(self):
+        # Action types to action handlers
+        self.action_map = {
+            "run-shell-commands": self.run_shell_commands,
+            "run-interactive-multiple-choice": self.run_interactive_multiple_choice,
+            "loadgen-spawn": self.loadgen_spawn,
+            "loadgen-stop": self.loadgen_stop,
+        }
+
+        # Reusable parameters shared between action handlers
+        self.loadgen_ip = None
+
+    def handle_action(self, config):
+        if "action" not in config:
+            raise ValueError("Action config missing `action` type")
+        action_type = config["action"]
+        if action_type not in self.action_map:
+            raise NotImplementedError(
+                f"Action type not implemented: {action_type}")
+        return self.action_map[action_type](config)
+
+    def init_loadgen_ip(self):
+        if not self.loadgen_ip:
+            self.loadgen_ip, err = utils.get_loadgen_ip()
+            if err:
+                raise RuntimeError(f"Failed to get loadgen IP: {err}")
+
+    ############################ Action Handlers ###############################
+
+    def run_shell_commands(self, config):
+        for cmd in config["commands"]:
+            output, err = utils.run_shell_command(cmd)
+            if err:
+                raise RuntimeError(
+                    f"Failed to run command `{cmd}`: {err}")
+
+    def run_interactive_multiple_choice(self, config):
+        if "prompt" not in config:
+            raise ValueError("No prompt specified for the multiple choice.")
+        elif "choices" not in config:
+            raise ValueError(
+                "No answer choices available for the multiple choice.")
+        utils.run_interactive_multiple_choice(
+            config["prompt"], config["choices"])
+
+    def loadgen_spawn(self, config):
+        self.init_loadgen_ip()
+        user_type = config.get(
+            "user_type", DEFAULT_LOADGEN_USER_TYPE)
+        resp = requests.post(
+            f"http://{self.loadgen_ip}:81/api/spawn/{user_type}",
+            {
+                "user_count": int(config.get("user_count", DEFAULT_LOADGEN_USER_COUNT)),
+                "spawn_rate": int(config.get("spawn_rate", DEFAULT_LOADGEN_SPAWN_RATE)),
+                "stop_after": int(config.get("stop_after", DEFAULT_LOADGEN_TIMEOUT_SECONDS))
+            })
+        if not resp.ok:
+            raise RuntimeError(
+                f"Failed to start load generation: {resp.status_code} {resp.reason}")
+
+    def loadgen_stop(self, config):
+        self.init_loadgen_ip()
+        resp = requests.post(f"http://{self.loadgen_ip}:81/api/stop")
+        if not resp.ok:
+            raise RuntimeError(
+                f"Failed to stop existing load generation: {resp.status_code} {resp.reason}")
