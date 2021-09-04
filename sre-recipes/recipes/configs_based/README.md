@@ -19,24 +19,28 @@ config:
   # You can use, or contribute, more action templates by referring to the
   # "Supported SRE Recipe Actions" below.
   break:
-    # The `run` action template simply runs the given shell commands as it is.
-    - run: <shell command>
+    # The `run-shell-commands` action template simply runs the given shell
+    # commands one at a time as it is.
+    - action: run-shell-commands
+      commands:
+        - echo 'first command'
+        - echo 'another command'
 
-    # The `loadgen` action template with `spawn` will spawn the given load shape
+    # The `loadgen-spawn` action template will spawn the given load shape
     # producible by `user_type` (see `sre/loadgenerator/locust_tasks`) at a
     # `spawn_rate` of users per second until it reaches a total of `user_count`
     # users. The users will keep generating load until at least `stop_after`
     # seconds have passed.
-    - loadgen: spawn
+    - action: loadgen-spawn
       user_type: BasicHomePageViewingUser
       user_count: 20
       spawn_rate: 5
       stop_after: 600
 
-    # The `loadgen` action template with `stop` value will stop any active
-    # load generation produced by SRE Recipes. It is ok to call this even if
-    # there is no load generation ongoing.
-    - loadgen: stop
+    # The `loadgen-stop` action template will stop any active load generation
+    # produced by SRE Recipes. It is ok to call this even if there is no load
+    # generation ongoing.
+    - action: loadgen-stop
   # This section defines the actions to run when `sandboxctl sre-receipes restore`
   # is called". In practice, this is where you try to restore sandbox services.
   #
@@ -47,8 +51,11 @@ config:
   # "Supported SRE Recipe Actions" below.
   restore:
     # The same set of action templates as `break` are supported in `restore`
-    - run: <shell command>
-    - loadgen: stop
+    - action: run-shell-commands
+      commands:
+        - echo 'first command'
+        - echo 'another command'
+    - action: loadgen-stop
   hint: "Put the hint string for your recipe here"
   verify:
     # This configures the multiple choice for asking user what service is
@@ -72,22 +79,29 @@ config:
 
 The `break` and `restore` sections support the following action templates:
 
-1. `run`: simply run the command in shell
+1. `run-shell-commands`: simply run the commands one at a time in shell
 
 Example:
 
 ```
-- run: kubectl delete pod $(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}')
+- action: run-shell-commands
+  commands:
+    - kubectl delete pod $(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}')
 ```
 
-2. `loadgen`: start or stop load generation
+2. `loadgen-stop`: stop any active load generation produced by SRE Recipes.
 
-**Start/Spawn Load**
+It is ok to call this even if there is no load generation ongoing.
 
-The `loadgen` action template with `spawn` will spawn the given load shape
-producible by `user_type` at a `spawn_rate` of users per second until it reaches
-a total of `user_count` users. The users will keep generating load until at
-least `stop_after` seconds have passed.
+Example:
+
+```
+- action: loadgen-stop
+```
+
+3. `loadgen-spawn`: start spawning the given load shape producible by
+   `user_type` at a `spawn_rate` of users per second until it reaches a total of `user_count` users. The users will keep generating load until at least
+   `stop_after` seconds have passed.
 
 _Optional Parameters:_
 
@@ -102,23 +116,11 @@ _Optional Parameters:_
 Example:
 
 ```
-- loadgen: spawn
+- action: loadgen-spawn
   user_type: BasicHomePageViewingUser
   user_count: 20
   spawn_rate: 5
   stop_after: 600
-```
-
-**Stop Load**
-
-The `loadgen` action template with `stop` value will stop any active load
-generation produced by SRE Recipes. It is ok to call this even if there is no
-load generation ongoing.
-
-Example:
-
-```
-- loadgen: stop
 ```
 
 **Contributions**

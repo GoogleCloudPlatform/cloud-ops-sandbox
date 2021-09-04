@@ -177,32 +177,37 @@ class ConfigBasedRecipeRunner:
         loadgen_ip = None
 
         for action in actions:
-            if "run" in action:
-                output, err = utils.run_shell_command(action["run"])
-                if err:
-                    raise RuntimeError(f"Failed to run action {action}: {err}")
-            elif "loadgen" in action:
+            if action["action"] == "run-shell-commands":
+                for cmd in action["commands"]:
+                    output, err = utils.run_shell_command(cmd)
+                    if err:
+                        raise RuntimeError(
+                            f"Failed to run command `{cmd}`: {err}")
+            elif action["action"] == "loadgen-spawn":
                 if not loadgen_ip:
                     loadgen_ip, err = utils.get_loadgen_ip()
                     if err:
                         raise RuntimeError(f"Failed to get loadgen IP: {err}")
-                if action["loadgen"] == "stop":
-                    resp = requests.post(f"http://{loadgen_ip}:81/api/stop")
-                    if not resp.ok:
-                        raise RuntimeError(
-                            f"Failed to stop existing load generation: {resp.status_code} {resp.reason}")
-                elif action["loadgen"] == "spawn":
-                    user_type = action.get(
-                        "user_type", DEFAULT_LOADGEN_USER_TYPE)
-                    resp = requests.post(
-                        f"http://{loadgen_ip}:81/api/spawn/{user_type}",
-                        {
-                            "user_count": int(action.get("user_count", DEFAULT_LOADGEN_USER_COUNT)),
-                            "spawn_rate": int(action.get("spawn_rate", DEFAULT_LOADGEN_SPAWN_RATE)),
-                            "stop_after": int(action.get("stop_after", DEFAULT_LOADGEN_TIMEOUT_SECONDS))
-                        })
-                    if not resp.ok:
-                        raise RuntimeError(
-                            f"Failed to start load generation: {resp.status_code} {resp.reason}")
+                user_type = action.get(
+                    "user_type", DEFAULT_LOADGEN_USER_TYPE)
+                resp = requests.post(
+                    f"http://{loadgen_ip}:81/api/spawn/{user_type}",
+                    {
+                        "user_count": int(action.get("user_count", DEFAULT_LOADGEN_USER_COUNT)),
+                        "spawn_rate": int(action.get("spawn_rate", DEFAULT_LOADGEN_SPAWN_RATE)),
+                        "stop_after": int(action.get("stop_after", DEFAULT_LOADGEN_TIMEOUT_SECONDS))
+                    })
+                if not resp.ok:
+                    raise RuntimeError(
+                        f"Failed to start load generation: {resp.status_code} {resp.reason}")
+            elif action["action"] == "loadgen-stop":
+                if not loadgen_ip:
+                    loadgen_ip, err = utils.get_loadgen_ip()
+                    if err:
+                        raise RuntimeError(f"Failed to get loadgen IP: {err}")
+                resp = requests.post(f"http://{loadgen_ip}:81/api/stop")
+                if not resp.ok:
+                    raise RuntimeError(
+                        f"Failed to stop existing load generation: {resp.status_code} {resp.reason}")
             else:
                 raise NotImplementedError(f"action not supported: {action}")
