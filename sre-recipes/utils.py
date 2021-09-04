@@ -24,10 +24,10 @@ def run_shell_command(command, decode_output=True):
     If `decode_output` is True, try to decode output and error message with
     UTF-8 encoding, as well as removing any single quote.
     """
-    process = subprocess.Popen(
-        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+    process = subprocess.run(
+        command, shell=True, capture_output=True
     )
-    output, error = process.communicate()
+    output, error = process.stdout, process.stderr
     if decode_output:
         if output is not None:
             output = output.decode("utf-8").replace("'", '').strip()
