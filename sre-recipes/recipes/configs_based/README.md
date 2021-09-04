@@ -56,23 +56,19 @@ config:
         - echo 'first command'
         - echo 'another command'
     - action: loadgen-stop
-  hint: "Put the hint string for your recipe here"
+  hint: Put the hint string for your recipe here
   verify:
-    # This configures the multiple choice for asking user what service is
-    # affected by this SRE Recipe.
-    affected_service:
+    - action: run-interactive-multiple-choice
+      prompt: Put the question prompt here
       choices:
         # Put as many answers to choose from as you need
-        - <choice string 1>
-        - <choice string 2>
-      answer: <The 0-based index to the correct answer in the `choices` above>
-    # This configures the multiple choice for asking what caused the incident.
-    incident_cause:
-      choices:
-        # Put as many answers to choose from as you need
-        - <choice string 1>
-        - <choice string 2>
-      answer: <The 0-based index to the correct answer in the `choices` above>
+        # Mark the correct option with `accept: true`
+        # You must at least mark one option as accepted, otherwise a runtime
+        # error will be thrown. You can mark multiple options as accepted.
+        - option: Answer 1
+          accept: true
+        - option: Answer 2
+        - option: Answer 3
 ```
 
 ## Supported SRE Recipe Actions
@@ -83,7 +79,7 @@ The `break` and `restore` sections support the following action templates:
 
 Example:
 
-```
+```yaml
 - action: run-shell-commands
   commands:
     - kubectl delete pod $(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}')
@@ -95,7 +91,7 @@ It is ok to call this even if there is no load generation ongoing.
 
 Example:
 
-```
+```yaml
 - action: loadgen-stop
 ```
 
@@ -115,12 +111,30 @@ _Optional Parameters:_
 
 Example:
 
-```
+```yaml
 - action: loadgen-spawn
   user_type: BasicHomePageViewingUser
   user_count: 20
   spawn_rate: 5
   stop_after: 600
+```
+
+4. `run-interactive-multiple-choice`: run an interactive multiple choice quiz.
+
+Example
+
+```yaml
+- action: run-interactive-multiple-choice
+  prompt: Put the question prompt here
+  choices:
+    # Put as many answers to choose from as you need
+    # Mark the correct option with `accept: true`
+    # You must at least mark one option as accepted, otherwise a runtime
+    # error will be thrown. You can mark multiple options as accepted.
+    - option: Answer 1
+      accept: true
+    - option: Answer 2
+    - option: Answer 3
 ```
 
 **Contributions**
