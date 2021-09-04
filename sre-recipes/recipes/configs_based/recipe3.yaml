@@ -22,13 +22,17 @@ config:
   break:
     # Dev Note: the MAX_RESPONSES is 5.0, a float, which will cause crash
     # during integer conversion stage in the service.
-    - run: kubectl set env deployment/recommendationservice MAX_RESPONSES=5.0
-    - run: kubectl delete pod $(kubectl get pod -l app=recommendationservice -o jsonpath='{.items[0].metadata.name}')
-    - run: kubectl wait --for=condition=available --timeout=600s deployment/recommendationservice
+    - action: run-shell-commands
+      commands:
+        - kubectl set env deployment/recommendationservice MAX_RESPONSES=5.0
+        - kubectl delete pod $(kubectl get pod -l app=recommendationservice -o jsonpath='{.items[0].metadata.name}')
+        - kubectl wait --for=condition=available --timeout=600s deployment/recommendationservice
   restore:
-    - run: kubectl set env deployment/recommendationservice MAX_RESPONSES-
-    - run: kubectl delete pod $(kubectl get pod -l app=recommendationservice -o jsonpath='{.items[0].metadata.name}')
-    - run: kubectl wait --for=condition=available --timeout=600s deployment/recommendationservice
+    - action: run-shell-commands
+      commands:
+        - kubectl set env deployment/recommendationservice MAX_RESPONSES-
+        - kubectl delete pod $(kubectl get pod -l app=recommendationservice -o jsonpath='{.items[0].metadata.name}')
+        - kubectl wait --for=condition=available --timeout=600s deployment/recommendationservice
   hint: |
     Browse your website until you encounter an issue, and use Cloud Logging to 
     view logs exported by each service. You can also use `sandboxctl describe` 
@@ -36,17 +40,17 @@ config:
   verify:
     affected_service:
       choices:
-        - Ad  # 0
-        - Cart  # 1
-        - Checkout  # 2
-        - Currency  # 3
+        - Ad # 0
+        - Cart # 1
+        - Checkout # 2
+        - Currency # 3
         - Email # 4
-        - Frontend  # 5
+        - Frontend # 5
         - Payment # 6
         - Product Catalog # 7
-        - Rating  # 8
-        - Recommendation  # 9
-        - Shipping  # 10
+        - Rating # 8
+        - Recommendation # 9
+        - Shipping # 10
       answer: 9
     incident_cause:
       choices:

@@ -20,9 +20,13 @@ description: |
   API calls to rating service, so the ratings will become stale.
 config:
   break:
-    - run: gcloud scheduler jobs pause ratingservice-recollect-job --project $(gcloud config list --format "value(core.project)")
+    - action: run-shell-commands
+      commands:
+        - gcloud scheduler jobs pause ratingservice-recollect-job --project $(gcloud config list --format "value(core.project)")
   restore:
-    - run: gcloud scheduler jobs resume ratingservice-recollect-job --project $(gcloud config list --format "value(core.project)")
+    - action: run-shell-commands
+      commands:
+        - gcloud scheduler jobs resume ratingservice-recollect-job --project $(gcloud config list --format "value(core.project)")
   hint: |
     Product ratings are managed by the "rating service", hosted on Google AppEngine.
     The service provides APIs that allow other services to get and update products' ratings.
@@ -34,17 +38,17 @@ config:
   verify:
     affected_service:
       choices:
-        - Ad  # 0
-        - Cart  # 1
-        - Checkout  # 2
-        - Currency  # 3
+        - Ad # 0
+        - Cart # 1
+        - Checkout # 2
+        - Currency # 3
         - Email # 4
-        - Frontend  # 5
+        - Frontend # 5
         - Payment # 6
         - Product Catalog # 7
-        - Rating  # 8
-        - Recommendation  # 9
-        - Shipping  # 10
+        - Rating # 8
+        - Recommendation # 9
+        - Shipping # 10
       answer: 8
     incident_cause:
       choices:

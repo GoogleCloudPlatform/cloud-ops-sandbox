@@ -14,6 +14,18 @@
 
 # -*- coding: utf-8 -*-
 
+"""
+This file contains utility runtime classes implementing core SRE Recipes
+features, such as breaking and restoring microservices, printing hints, and
+running interactive multiple choice questions.
+
+Currently, it implements two SRE Recipe Runner:
+- ImplBasedRecipeRunner: runs SRE Recipe implemented via python classes.
+- ConfigBasedRecipeRunner: runs SRE Recipes defined as YAML configs.
+
+Refer to the class docstring for further explanations.
+"""
+
 import abc
 import importlib
 import requests

@@ -20,20 +20,24 @@ description: |
   frontend service by doing a lot of unnecessary currency conversions.
 config:
   break:
-    - loadgen: stop
-    - run: kubectl set env deployment/frontend CONVERT_CURRENCIES=true
-    - run: kubectl delete pod $(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}')
-    - run: kubectl wait --for=condition=available --timeout=600s deployment/frontend
-    - loadgen: spawn
+    - action: loadgen-stop
+    - action: run-shell-commands
+      commands:
+        - kubectl set env deployment/frontend CONVERT_CURRENCIES=true
+        - kubectl delete pod $(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}')
+        - kubectl wait --for=condition=available --timeout=600s deployment/frontend
+    - action: loadgen-spawn
       user_type: BasicHomePageViewingUser
       user_count: 20
       spawn_rate: 5
       stop_after: 600
   restore:
     - loadgen: stop
-    - run: kubectl set env deployment/frontend CONVERT_CURRENCIES=false
-    - run: kubectl delete pod $(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}')
-    - run: kubectl wait --for=condition=available --timeout=600s deployment/frontend
+    - action: run-shell-commands
+      commands:
+        - kubectl set env deployment/frontend CONVERT_CURRENCIES=false
+        - kubectl delete pod $(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}')
+        - kubectl wait --for=condition=available --timeout=600s deployment/frontend
   hint: |
     Visit the external IP of the demo application to see if there are any 
     visible changes. You can also use monitoring dashboards to see metrics 

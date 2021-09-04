@@ -6,12 +6,12 @@ This directory contains configs for supported config-based SRE Recipes.
 
 Each SRE Recipe config is a YAML file with the following overall structure.
 
-```
+```yaml
 name: <Put the name of your recipe here. This is not user visible.>
 description: <Put the description of your recipe here. This is not user visible.>
 config:
-  # This section lists the configs for all the actions to perform for this SRE
-  # Recipe. In practice, this is where you try to break sandbox services.
+  # This section defines the actions to run when `sandboxctl sre-receipes break`
+  # is called" . In practice, this is where you try to break sandbox services.
   #
   # If your SRE Recipe has complex logic, prefer running a shell command to
   # run a shell script instead.
@@ -37,9 +37,8 @@ config:
     # load generation produced by SRE Recipes. It is ok to call this even if
     # there is no load generation ongoing.
     - loadgen: stop
-  # This section lists the configs for all the actions to perform for this SRE
-  # Recipe. In practice, this is where you try to restore sandbox services
-  # back to its original working condition.
+  # This section defines the actions to run when `sandboxctl sre-receipes restore`
+  # is called". In practice, this is where you try to restore sandbox services.
   #
   # If your SRE Recipe has complex logic, prefer running a shell command to
   # run a shell script instead.
@@ -50,7 +49,7 @@ config:
     # The same set of action templates as `break` are supported in `restore`
     - run: <shell command>
     - loadgen: stop
-  hint: <Put the hint for your recipe here.>
+  hint: "Put the hint string for your recipe here"
   verify:
     # This configures the multiple choice for asking user what service is
     # affected by this SRE Recipe.
