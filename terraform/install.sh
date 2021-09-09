@@ -213,7 +213,7 @@ applyTerraform() {
   #If cluster already exist leave original version
   gke_location="$(gcloud container clusters list --format="value(location)" --filter name=cloud-ops-sandbox)"
   if [[ -n "$gke_location" ]]; then 
-    gke_version="$(gcloud container clusters describe cloud-ops-sandbox --region "${gke_location}"  --format="value(resourceLabels.version)")"
+    gke_version="$(gcloud container clusters describe cloud-ops-sandbox --zone "${gke_location}"  --format="value(resourceLabels.version)")"
     #If cluster exist and it's older version use backward comp params
     if [[ -n "$gke_version" ]]; then 
        app_ver=$gke_version
