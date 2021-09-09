@@ -15,5 +15,12 @@
 resource "kubernetes_manifest" "service_manifests" {
   for_each = fileset("${path.module}/..", "../kubernetes-manifests/*.yaml")
   manifest = yamldecode(file("${each.key}"))
-
+/*   wait_for = {
+    fields = {
+      # Check the phase of a pod
+      "status.phase" = "Running"
+      # Check a container's status
+      "status.containerStatuses[0].ready" = "true",
+    }
+  } */
 }
