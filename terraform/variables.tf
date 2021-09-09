@@ -43,8 +43,3 @@ variable "gke_location"{
   description = "GKE Cloud Operastions Sandbox's Cluster location."
   
 }
-variable "app_version" {
-  type        = string
-  description = "Cloud Operastions Sandbox's Version."
-}
-   
