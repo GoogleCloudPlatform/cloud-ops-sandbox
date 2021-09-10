@@ -36,3 +36,10 @@ variable "skip_loadgen" {
   default     = false
   description = "If true, the load generator will not be deployed."
 }
+
+variable "gke_location"{
+  default     = ""
+  type        = string
+  description = "GKE Cloud Operastions Sandbox's Cluster location."
+  
+}
