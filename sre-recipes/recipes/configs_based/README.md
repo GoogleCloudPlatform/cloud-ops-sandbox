@@ -113,6 +113,7 @@ Example:
 
 ```yaml
 - action: loadgen-spawn
+  # Defined in /src/loadgenerator/locust_tasks/sre_recipe_load_tasks.py
   user_type: BasicHomePageViewingUser
   user_count: 20
   spawn_rate: 5

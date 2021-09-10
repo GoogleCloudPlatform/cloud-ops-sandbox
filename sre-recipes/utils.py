@@ -144,7 +144,7 @@ def run_interactive_multiple_choice(prompt, choices):
     The user can respond with their answer by typing the number shown before 
     the answer choice (e.g. 1 for Cart).
 
-    Paramters
+    Parameters
     ---------
     prompt: string
         The question prompt to display.

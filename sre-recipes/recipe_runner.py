@@ -91,7 +91,7 @@ class ConfigBasedRecipeRunner:
 
     Given a `recipe_name`, it tries to load `recipes/configs_based/recipe_name.yaml`.
 
-    This runner will propgate all exceptions to the caller, and it is caller's
+    This runner will propagate all exceptions to the caller, and it is caller's
     responsibility to handle any exception and to perform any error logging.
     """
 
@@ -121,7 +121,7 @@ class ConfigBasedRecipeRunner:
         print('Done. Deployed broken service')
 
     def run_restore(self):
-        print('Restoring broken service...')
+        print('Restoring service back to normal...')
         for action in self.config.get("restore", []):
             self.action_handler.handle_action(action)
         print('Done. Restored broken service to working state.')
