@@ -41,3 +41,10 @@ variable "app_version" {
   type        = string
   description = "Cloud Operastions Sandbox's Version."
 }
+
+variable "gke_location"{
+  default     = ""
+  type        = string
+  description = "GKE Cloud Operastions Sandbox's Cluster location."
+  
+}
