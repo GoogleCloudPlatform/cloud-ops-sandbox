@@ -57,12 +57,13 @@ resource "google_sql_user" "default" {
   name     = "postgres"
   password = random_password.db_password.result
   instance = google_sql_database_instance.rating_service.name
+  project  = data.google_project.project.project_id
 }
 
 resource "google_sql_database" "rating_service" {
   name     = "rating-db"
   instance = google_sql_database_instance.rating_service.name
-
+  project  = data.google_project.project.project_id
   provisioner "local-exec" {
     command = "${path.module}/configure_rating_db.sh ${var.gcp_project_id}"
     environment = {
@@ -148,7 +149,7 @@ resource "google_app_engine_standard_app_version" "ratingservice" {
   service    = local.service_name
   version_id = local.service_version
   runtime    = "python38"
-
+  project    = data.google_project.project.project_id
   entrypoint {
     shell = "uwsgi --http-socket :${local.service_port} --wsgi-file main.py --callable app --master --processes 1 --threads ${local.max_connections}"
   }
@@ -194,6 +195,7 @@ resource "google_cloud_scheduler_job" "recollect_job" {
   description      = "recollect recently posted new votes"
   time_zone        = "Europe/London"
   region           = var.gcp_region_name
+  project          = data.google_project.project.project_id
   attempt_deadline = "340s"
 
   retry_config {
