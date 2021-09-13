@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
+data "google_project" "project" {
+  project_id = var.gcp_project_id
+}
+
 resource "google_project_service" "gae" {
   service                    = "appengine.googleapis.com"
   disable_dependent_services = true
-  project                    = var.gcp_project_id
+  project                    = data.google_project.project.project_id
 }
 
 resource "google_project_service" "cloudscheduler" {
   service                    = "cloudscheduler.googleapis.com"
   disable_dependent_services = true
-  project                    = var.gcp_project_id
+  project                    = data.google_project.project.project_id
 }
 
 resource "random_string" "suffix_len_4" {
@@ -42,6 +46,7 @@ resource "google_sql_database_instance" "rating_service" {
   name                = "ratingservice-sql-instance-${random_string.suffix_len_4.result}"
   database_version    = "POSTGRES_12"
   deletion_protection = false
+  project             = data.google_project.project.project_id
   region              = var.gcp_region_name
   settings {
     tier = "db-f1-micro"
@@ -110,8 +115,8 @@ data "external" "app_engine_state" {
 resource "google_app_engine_application" "app" {
   count       = data.external.app_engine_state.result.application_exist == "false" ? 1 : 0
   location_id = var.gcp_region_name
-
-  depends_on = [google_project_service.gae]
+  project     = data.google_project.project.project_id
+  depends_on  = [google_project_service.gae]
 }
 
 resource "google_app_engine_standard_app_version" "default" {
@@ -119,7 +124,7 @@ resource "google_app_engine_standard_app_version" "default" {
   service    = "default"
   version_id = "v1"
   runtime    = "python38"
-
+  project    = data.google_project.project.project_id
   entrypoint {
     shell = "uwsgi --http-socket :8080 --wsgi-file main.py --callable app --master --processes 1 --threads 1"
   }
