@@ -1,0 +1,67 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# -*- coding: utf-8 -*-
+
+name: Encoding Recipe
+description: |
+  This implements recipe 1, which purposefully breaks encoding logic in the 
+  email service, which is a part of the checkout flow for sending order 
+  confirmation emails.
+config:
+  break:
+    - action: run-shell-commands
+      commands:
+        - kubectl set env deployment/emailservice ENCODE_EMAIL=true
+        - kubectl delete pod $(kubectl get pod -l app=emailservice -o jsonpath='{.items[0].metadata.name}')
+        - kubectl wait --for=condition=available --timeout=600s deployment/emailservice
+  restore:
+    - action: run-shell-commands
+      commands:
+        - kubectl set env deployment/emailservice ENCODE_EMAIL=false
+        - kubectl delete pod $(kubectl get pod -l app=emailservice -o jsonpath='{.items[0].metadata.name}')
+        - kubectl wait --for=condition=available --timeout=600s deployment/emailservice
+  hint: |
+    Visit the external IP of the demo application and try buying some products. 
+    You can also use monitoring dashboards to see metrics associated with each 
+    service, and use Cloud Logging to view logs exported by each service. 
+    Note: It may take up to 5 minutes for monitoring metrics to be updated.
+    You can also use `sandboxctl describe` to get information (such as project 
+    ID, logs, core URLs) for your sandbox.
+  verify:
+    - action: multiple-choice-quiz
+      prompt: Which service has an issue?
+      choices:
+        - option: Ad
+        - option: Cart
+        - option: Checkout
+        - option: Currency
+        - option: Email
+          accept: true
+        - option: Frontend
+        - option: Payment
+        - option: Product Catalog
+        - option: Rating
+        - option: Recommendation
+        - option: Shipping
+    - action: multiple-choice-quiz
+      prompt: What was the cause of the issue?
+      choices:
+        - option: Dropped Requests
+        - option: Failed connections to other services
+        - option: High latency
+        - option: High memory usage
+        - option: Memory Quota Exceeded
+        - option: Internal Server Error
+          accept: true
