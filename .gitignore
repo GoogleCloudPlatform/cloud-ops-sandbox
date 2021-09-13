@@ -18,3 +18,4 @@ terraform/istio/istio-*/**
 .token
 skaffold
 website/resources*
+srerecipes.log
