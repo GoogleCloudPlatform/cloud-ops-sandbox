@@ -21,7 +21,6 @@
 #
 # TODO:  we can consider configuring it via env vars
 # that were populated appropriately at runtime.
-
 terraform {
   required_providers {
     google = {
