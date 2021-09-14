@@ -215,7 +215,18 @@ applyTerraform() {
   if [[ -n "$gke_location" ]]; then 
     #use existing gke_location instead of using random one
     terraform_command+=" -var=\"gke_location=${gke_location}\""
-  fi
+    gke_version="$(gcloud container clusters describe cloud-ops-sandbox --zone "${gke_location}"  --format="value(resourceLabels.version)")"
+    #If cluster exist and it's older version use backward comp params
+    if [[ -n "$gke_version" ]]; then 
+       app_ver=$gke_version
+    fi
+  elif [[ -n "$VERSION" ]]; then
+    app_ver="$(echo $VERSION | tr "." "_")"
+  else
+    app_ver="0" 
+  fi     
+  terraform_command+=" -var=\"app_version=${app_ver}\"" 
+  
   log "Apply Terraform automation"
   eval $terraform_command
 }
