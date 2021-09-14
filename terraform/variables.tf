@@ -38,13 +38,14 @@ variable "skip_loadgen" {
 }
 
 variable "app_version" {
+  default     = 0
   type        = string
-  description = "Cloud Operastions Sandbox's Version."
+  description = "Cloud Operations Sandbox's Version. If wasn't set will be 0."
 }
 
-variable "gke_location"{
+variable "gke_location" {
   default     = ""
   type        = string
-  description = "GKE Cloud Operastions Sandbox's Cluster location."
-  
+  description = "GKE Cloud Operations Sandbox's Cluster location."
+
 }
