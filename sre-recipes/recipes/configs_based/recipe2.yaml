@@ -1,0 +1,61 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# -*- coding: utf-8 -*-
+
+name: Ratings Freshness Recipe
+description: |
+  This implements recipe 2, which purposefully stops ratings service recollect 
+  API calls to rating service, so the ratings will become stale.
+config:
+  break:
+    - action: run-shell-commands
+      commands:
+        - gcloud scheduler jobs pause ratingservice-recollect-job --project $(gcloud config list --format "value(core.project)")
+  restore:
+    - action: run-shell-commands
+      commands:
+        - gcloud scheduler jobs resume ratingservice-recollect-job --project $(gcloud config list --format "value(core.project)")
+  hint: |
+    Product ratings are managed by the "rating service", hosted on Google AppEngine.
+    The service provides APIs that allow other services to get and update products' ratings.
+    The rating data is kept up-to-date by periodically calling an API endpoint that collects,
+    all recently sent new rating scores for each product and calculates the new rating,
+    based on the old value and the new scores. Try to check if the rating service operates normally.
+    You can also use `sandboxctl describe` to get information (such as project 
+    ID, logs, core URLs) for your sandbox.
+  verify:
+    - action: multiple-choice-quiz
+      prompt: Which service has an issue?
+      choices:
+        - option: Ad
+        - option: Cart
+        - option: Checkout
+        - option: Currency
+        - option: Email
+        - option: Frontend
+        - option: Payment
+        - option: Product Catalog
+        - option: Rating
+          accept: true
+        - option: Recommendation
+        - option: Shipping #
+    - action: multiple-choice-quiz
+      prompt: What was the cause of the issue?
+      choices:
+        - option: Rating service does not run
+        - option: Rating votes data is missing in the database
+        - option: Scheduler job that sends recollect request to rating service does not work
+          accept: true
+        - option: New ratings are calculated incorrectly
