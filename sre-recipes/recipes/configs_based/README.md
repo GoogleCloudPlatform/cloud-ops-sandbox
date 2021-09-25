@@ -71,6 +71,14 @@ config:
         - option: Answer 3
 ```
 
+## Contributions
+
+If you want to add more pre-defined action templates,
+
+1. add your implementation to the `ActionHandlers` in `recipe_runner.py`.
+2. add a short guide for how to use your new action in this README file
+3. add schema validation for your new action config in `./schema` folder
+
 ## Supported SRE Recipe Actions
 
 The `break` and `restore` sections support the following action templates:
@@ -137,8 +145,3 @@ Example
     - option: Answer 2
     - option: Answer 3
 ```
-
-**Contributions**
-
-If you want to add more pre-defined action templates, add your implementation to
-the `ActionHandlers` in `recipe_runner.py`.

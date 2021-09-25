@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "description": "The config schema for running a list of shell commands one at a time",
+  "required": ["action", "commands"],
+  "properties": {
+    "action": {
+      "type": "string",
+      "const": "run-shell-commands",
+      "description": "Required identifier for run-shell-commands action."
+    },
+    "commands": {
+      "type": "array",
+      "description": "Required. A list of shell command strings",
+      "items": {
+        "type": "string",
+        "description": "Valid command string passed to Python `subprocess.run`",
+        "minLength": 1
+      }
+    }
+  },
+  "additionalProperties": false
+}

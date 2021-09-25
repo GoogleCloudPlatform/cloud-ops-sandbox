@@ -95,6 +95,14 @@ jobs:
           -e LOADGEN_ZONE=$LOADGEN_ZONE \
           -v ~/.config:/root/.config \
           test-provisioning:$GITHUB_SHA
+    - name: Run SRE Recipes Config Validations
+      timeout-minutes: 30
+      run: |
+        set -x
+        # install dependencies
+        python3 -m pip install -r tests/requirements.txt
+        # run validations
+        python3 tests/recipes/validate_recipe_configs.py
     - name: Run SRE Recipes Tests
       timeout-minutes: 30
       run: |

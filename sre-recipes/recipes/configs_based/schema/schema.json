@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "schema.json",
+  "title": "SRE Recipe Config - Schema Definitions",
   "type": "object",
   "description": "The base schema for an SRE Recipe",
   "required": ["name", "description", "config"],
@@ -22,11 +23,11 @@
       "properties": {
         "break": {
           "description": "A list of actions to run for the `sandboxctl sre-receipes break` command",
-          "$ref": "#/$defs/actions-list"
+          "$ref": "#/$defs/action-config-list"
         },
         "restore": {
           "description": "A list of actions to run for the `sandboxctl sre-receipes restore` command",
-          "$ref": "#/$defs/actions-list"
+          "$ref": "#/$defs/action-config-list"
         },
         "hint": {
           "type": "string",
@@ -35,187 +36,11 @@
         },
         "verify": {
           "description": "A list of actions to run for the `sandboxctl sre-receipes verify` command",
-          "$ref": "#/$defs/actions-list"
+          "$ref": "#/$defs/action-config-list"
         }
       },
       "additionalProperties": false
     }
   },
-  "additionalProperties": false,
-  "$defs": {
-    "actions-list": {
-      "type": "array",
-      "description": "The main schema for defining a list of action configs",
-      "items": {
-        "allOf": [
-          {
-            "properties": {
-              "action": {
-                "type": "string",
-                "description": "Only support following action configs",
-                "enum": [
-                  "run-shell-commands",
-                  "loadgen-spawn",
-                  "loadgen-stop",
-                  "multiple-choice-quiz"
-                ]
-              }
-            }
-          },
-          {
-            "if": {
-              "properties": { "action": { "const": "run-shell-commands" } }
-            },
-            "then": {
-              "$ref": "#/$defs/run-shell-commands"
-            }
-          },
-          {
-            "if": {
-              "properties": { "action": { "const": "loadgen-spawn" } }
-            },
-            "then": {
-              "$ref": "#/$defs/loadgen-spawn"
-            }
-          },
-          {
-            "if": {
-              "properties": { "action": { "const": "loadgen-stop" } }
-            },
-            "then": {
-              "$ref": "#/$defs/loadgen-stop"
-            }
-          },
-          {
-            "if": {
-              "properties": { "action": { "const": "multiple-choice-quiz" } }
-            },
-            "then": {
-              "$ref": "#/$defs/multiple-choice-quiz"
-            }
-          }
-        ]
-      },
-      "minItems": 1
-    },
-    "run-shell-commands": {
-      "type": "object",
-      "description": "The config schema for running a list of shell commands one at a time",
-      "required": ["action", "commands"],
-      "properties": {
-        "action": {
-          "type": "string",
-          "const": "run-shell-commands",
-          "description": "Required. Identifier for this specific action."
-        },
-        "commands": {
-          "type": "array",
-          "description": "Required. A list of shell command strings",
-          "items": {
-            "type": "string",
-            "description": "Valid command string passed to Python `subprocess.run`",
-            "minLength": 1
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    "loadgen-spawn": {
-      "type": "object",
-      "description": "The config schema for generating a specific load pattern to the sandbox frontend.",
-      "required": ["action"],
-      "properties": {
-        "action": {
-          "type": "string",
-          "const": "loadgen-spawn",
-          "description": "Required. Identifier for this specific action."
-        },
-        "user_type": {
-          "type": "string",
-          "description": "Optional. The `sre_recipe_user_identifier` for locust tasks defined in `sre/loadgenerator/locust_tasks`. Default: BasicHomePageViewingUser.",
-          "minLength": 1
-        },
-        "user_count": {
-          "type": "integer",
-          "description": "Optional. The number of total users to spawn. Default: 20.",
-          "minimum": 1
-        },
-        "spawn_rate": {
-          "type": "integer",
-          "description": "Optional. The number of users per second to spawn. Default: 1.",
-          "minimum": 1
-        },
-        "stop_after": {
-          "type": "integer",
-          "description": "Optional. The number of seconds to spawn before stopping. Default: 600.",
-          "minimum": 1
-        }
-      },
-      "additionalProperties": false
-    },
-    "loadgen-stop": {
-      "type": "object",
-      "description": "The config schema for stopping any active load generation produced by SRE Recipe Load Generator.",
-      "required": ["action"],
-      "properties": {
-        "action": {
-          "type": "string",
-          "const": "loadgen-stop",
-          "description": "Required. Identifier for this specific action."
-        }
-      },
-      "additionalProperties": false
-    },
-    "multiple-choice-quiz": {
-      "type": "object",
-      "description": "The config schema for running an interactive multiple choice quiz.",
-      "required": ["action", "prompt", "choices"],
-      "properties": {
-        "action": {
-          "type": "string",
-          "const": "multiple-choice-quiz",
-          "description": "Required. Identifier for this specific action."
-        },
-        "prompt": {
-          "type": "string",
-          "description": "Required. The question prompt to display.",
-          "minLength": 1
-        },
-        "choices": {
-          "type": "array",
-          "description": "Required. The list of potential answers to choose from.",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "description": "The config schema for a specific answer choice",
-            "required": ["option"],
-            "properties": {
-              "option": {
-                "type": "string",
-                "description": "Required. The answer display text to show user."
-              },
-              "accept": {
-                "type": "boolean",
-                "description": "Optional. When true, this entry will be accepted as correct."
-              }
-            },
-            "additionalProperties": false
-          },
-          "contains": {
-            "type": "object",
-            "description": "At least one answer config has `accept` defined as True.",
-            "required": ["accept"],
-            "properties": {
-              "accept": {
-                "type": "boolean",
-                "enum": [true]
-              }
-            }
-          },
-          "uniqueItems": true
-        }
-      },
-      "additionalProperties": false
-    }
-  }
+  "additionalProperties": false
 }
