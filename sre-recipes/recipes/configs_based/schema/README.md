@@ -8,8 +8,7 @@ JSON from the YAML format.
 ### Usage
 
 If you need to write reusable schema definitions that can be referenced via
-`$ref` field, define them in the `./defs` subdirectory. See the README there for
-more details.
+`$ref` field, define them in the `./defs` subdirectory.
 
 ### Adding validation for a new SRE Recipe action
 
@@ -21,14 +20,15 @@ more details.
 2. Add your new action to the `./defs/action-config-list.schema.json` schema
 
    a. Add your action config name to the list of `enums` under `Supported action configs names`.
-   b. Attach your schema definition reference to the config name by adding a new tuple under `allOf`.
+
+   b. Attach your schema definition reference to the config name by adding a new `if-then` tuple under `allOf`.
 
 For example, if you added a new action handler for `action: my-action`, then:
 
 1. create a `./defs/my-action.schema.json` schema definition
 2. add to the `action-config-list.schema.json`:
 
-```json
+```
 {
   // other stuff ....
   "items": {
