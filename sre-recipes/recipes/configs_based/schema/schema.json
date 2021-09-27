@@ -31,7 +31,7 @@
         },
         "hint": {
           "type": "string",
-          "description": "A list of actions to run for the `sandboxctl sre-receipes hint` command",
+          "description": "A hint string to display for the `sandboxctl sre-receipes hint` command",
           "minLength": 1
         },
         "verify": {
