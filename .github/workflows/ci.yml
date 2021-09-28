@@ -47,7 +47,7 @@ jobs:
         python3 get-pip.py
         python3 -m pip install -r tests/requirements.txt
         # run validations
-        python tests/recipes/validate_recipe_configs.py
+        python3 tests/recipes/validate_recipe_configs.py
     - name: Test Custom Cloud Shell Image Build
       run: |
         set -x
