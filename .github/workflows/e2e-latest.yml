@@ -54,14 +54,6 @@ jobs:
         IMAGE_PATH=gcr.io/${{ env.PROJECT_ID }}/tests/gcr.io/stackdriver-sandbox-230822/sandbox/loadgenerator/gke:$GITHUB_SHA
         docker build -t $IMAGE_PATH ./src/loadgenerator
         docker push $IMAGE_PATH
-    - name: Validate SRE Recipes Configs
-      timeout-minutes: 30
-      run: |
-        set -x
-        # install dependencies
-        python3 -m pip install -r tests/requirements.txt
-        # run validations
-        python3 tests/recipes/validate_recipe_configs.py
     - name: Rewrite Manifests
       run: |
         set -x

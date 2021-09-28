@@ -39,6 +39,14 @@ jobs:
         if [[ -n $(git status -s) ]]; then
           exit 1
         fi
+    - name: Validate Schema of SRE Recipes Configs
+      run: |
+        set -x
+        # install dependencies
+        python3 -m ensurepip --upgrade
+        python3 -m pip install -r tests/requirements.txt
+        # run validations
+        python tests/recipes/validate_recipe_configs.py
     - name: Test Custom Cloud Shell Image Build
       run: |
         set -x
