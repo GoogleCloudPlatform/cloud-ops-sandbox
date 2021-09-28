@@ -43,7 +43,8 @@ jobs:
       run: |
         set -x
         # install dependencies
-        python3 -m ensurepip --upgrade
+        curl https://bootstrap.pypa.io/pip/3.5/get-pip.py -o get-pip.py
+        python3 get-pip.py
         python3 -m pip install -r tests/requirements.txt
         # run validations
         python tests/recipes/validate_recipe_configs.py
