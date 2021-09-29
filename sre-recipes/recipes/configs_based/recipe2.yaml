@@ -50,7 +50,7 @@ config:
         - option: Rating
           accept: true
         - option: Recommendation
-        - option: Shipping #
+        - option: Shipping
     - action: multiple-choice-quiz
       prompt: What was the cause of the issue?
       choices:
