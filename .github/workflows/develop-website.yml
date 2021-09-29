@@ -11,3 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+name: "Stage Website - Develop"
+on:
+  push:
+    # run on pushes to develop
+    branches:
+    - develop
+env:
+  PROJECT_ID: stackdriver-sandbox-230822
+jobs:
+  stage-website:
+    runs-on: [self-hosted, push-privilege]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Deploy Staged Website to App Engine
+      timeout-minutes: 20
+      run: |
+        set -x
+        cp website/app.yaml website/staging.app.yaml
+        echo "service: develop" >> website/staging.app.yaml
+        gcloud app deploy website/staging.app.yaml
