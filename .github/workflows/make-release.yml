@@ -28,7 +28,7 @@ jobs:
         run: |
           set -x
           # clone repo
-          git clone https://github.com/daniel-sanche/cloud-ops-sandbox.git
+          git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git
           cd cloud-ops-sandbox
           git checkout develop
           git config --global user.email "ci@cloud-ops-sandbox.dev"
