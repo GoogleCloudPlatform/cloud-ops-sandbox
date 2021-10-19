@@ -26,8 +26,8 @@ spec:
         app: checkoutservice
     spec:
       containers:
-        - name: checkoutservice
-          image: gcr.io/stackdriver-sandbox-230822/sandbox/checkoutservice:latest
+        - name: server
+          image: gcr.io/stackdriver-sandbox-230822/sandbox/checkoutservice:v0.7.0
           ports:
           - containerPort: 5050
           readinessProbe:
