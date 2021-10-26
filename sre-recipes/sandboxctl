@@ -63,7 +63,8 @@ IMPL_RECIPES = get_impl_based_recipes()
     ['break', 'restore', 'verify', 'hint']))
 @click.argument('recipe_name', type=click.Choice(
     sorted(CONFIG_RECIPES + IMPL_RECIPES)))
-def sre_recipes(action, recipe_name):
+@click.option('--skip-loadgen', is_flag=True, help="Ignore loadgen actions in config based recipes.")
+def sre_recipes(action, recipe_name, skip_loadgen):
     """Performs an action on a recipe."""
     logging.basicConfig(filename='srerecipes.log', level=logging.INFO,
                         format='%(asctime)s %(message)s')
@@ -77,7 +78,7 @@ def sre_recipes(action, recipe_name):
             print(f"Find conflicting config & impl for {recipe_name}")
             return
         elif has_config:
-            recipe = ConfigBasedRecipeRunner(recipe_name)
+            recipe = ConfigBasedRecipeRunner(recipe_name, skip_loadgen=skip_loadgen)
         elif has_impl:
             recipe = ImplBasedRecipeRunner(recipe_name)
         else:

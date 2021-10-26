@@ -95,14 +95,14 @@ class ConfigBasedRecipeRunner:
     responsibility to handle any exception and to perform any error logging.
     """
 
-    def __init__(self, recipe_name):
+    def __init__(self, recipe_name, skip_loadgen=False):
         filepath = path.join(path.dirname(
             path.abspath(__file__)), f"recipes/configs_based/{recipe_name}.yaml")
         with open(filepath, "r") as file:
             self.recipe = yaml.safe_load(file.read())
         if not self.recipe:
             raise ValueError("Cannot parse config as YAML.")
-        self.action_handler = ActionHandler()
+        self.action_handler = ActionHandler(skip_loadgen)
 
     def get_name(self):
         return self.recipe.get("name", "No name found")
@@ -155,7 +155,7 @@ class ActionHandler:
     responsibility to handle any exception and to perform any error logging.
     """
 
-    def __init__(self):
+    def __init__(self, skip_loadgen=False):
         # Action types to action handlers
         self.action_map = {
             "run-shell-commands": self.run_shell_commands,
@@ -163,7 +163,10 @@ class ActionHandler:
             "loadgen-spawn": self.loadgen_spawn,
             "loadgen-stop": self.loadgen_stop,
         }
-
+        if skip_loadgen:
+            # ignore loadgen actions when requested
+            self.action_map["loadgen-spawn"] = lambda *args: None
+            self.action_map['loadgen-stop'] = lambda *args: None
         # Reusable parameters shared between action handlers
         self.loadgen_ip = None
 
