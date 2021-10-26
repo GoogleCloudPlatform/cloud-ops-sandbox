@@ -22,11 +22,11 @@ config:
   break:
     - action: run-shell-commands
       commands:
-        - gcloud scheduler jobs pause ratingservice-recollect-job --project $(gcloud config list --format "value(core.project)") 2>&1
+        - gcloud scheduler jobs pause ratingservice-recollect-job --project $(gcloud config list --format "value(core.project)")
   restore:
     - action: run-shell-commands
       commands:
-        - gcloud scheduler jobs resume ratingservice-recollect-job --project $(gcloud config list --format "value(core.project)") 2>&1
+        - gcloud scheduler jobs resume ratingservice-recollect-job --project $(gcloud config list --format "value(core.project)")
   hint: |
     Product ratings are managed by the "rating service", hosted on Google AppEngine.
     The service provides APIs that allow other services to get and update products' ratings.
