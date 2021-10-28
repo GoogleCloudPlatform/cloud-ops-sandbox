@@ -28,4 +28,12 @@ $ ./sandboxctl sre-recipes hint <recipe_name>
 
 ## Contributing
 
-To contribute a new recipe, create a new folder in the [recipes directory](./recipes). The directory must include a class that extends the abstract base class found in [recipe.py](recipe.py).
+To contribute a new recipe, you can either:
+
+1. Create a simple config based SRE Recipe (Recommended)
+    
+   See `recipes/configs_based/README.md` for contribution instruction and usage.
+
+2. Create a implementation based SRE Recipe class
+    
+   See `recipes/impl_based/README.md` for contribution instruction and usage.
