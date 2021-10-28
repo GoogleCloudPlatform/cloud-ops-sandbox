@@ -203,7 +203,7 @@ applyTerraform() {
   fi
 
   #build Terraform apply command 
-  terraform_command="terraform apply -auto-approve -var=\"project_id=${project_id}\" -var=\"bucket_name=${bucket_name}\" -var=\"skip_loadgen=${skip_loadgen:-false}\""
+  terraform_command="terraform apply -auto-approve -var=\"project_id=${project_id}\" -var=\"skip_loadgen=${skip_loadgen:-false}\""
 
   #If billing account provided specify it 
   if [[ -n "$billing_id" ]]; then

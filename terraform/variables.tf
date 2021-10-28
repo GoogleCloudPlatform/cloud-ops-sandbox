@@ -27,11 +27,6 @@ variable "project_id" {
   description = "The id of your project. Case-sensitive."
 }
 
-variable "bucket_name" {
-  type        = string
-  description = "The name of your bucket to store the state file. Case-sensitive."
-}
-
 variable "skip_loadgen" {
   default     = false
   description = "If true, the load generator will not be deployed."
