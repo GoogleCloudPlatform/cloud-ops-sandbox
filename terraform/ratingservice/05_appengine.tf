@@ -14,61 +14,6 @@
  * limitations under the License.
  */
 
-resource "google_project_service" "gae" {
-  service                    = "appengine.googleapis.com"
-  disable_dependent_services = true
-  project                    = var.gcp_project_id
-}
-
-resource "google_project_service" "cloudscheduler" {
-  service                    = "cloudscheduler.googleapis.com"
-  disable_dependent_services = true
-  project                    = var.gcp_project_id
-}
-
-resource "random_string" "suffix_len_4" {
-  upper   = false
-  special = false
-  length  = 4
-}
-
-# provision CloudSQL
-resource "random_password" "db_password" {
-  length  = 16
-  special = false
-}
-
-resource "google_sql_database_instance" "rating_service" {
-  name                = "ratingservice-sql-instance-${random_string.suffix_len_4.result}"
-  database_version    = "POSTGRES_12"
-  deletion_protection = false
-  region              = var.gcp_region_name
-  settings {
-    tier = "db-f1-micro"
-  }
-}
-
-resource "google_sql_user" "default" {
-  name     = "postgres"
-  password = random_password.db_password.result
-  instance = google_sql_database_instance.rating_service.name
-}
-
-resource "google_sql_database" "rating_service" {
-  name     = "rating-db"
-  instance = google_sql_database_instance.rating_service.name
-
-  provisioner "local-exec" {
-    command = "${path.module}/configure_rating_db.sh ${var.gcp_project_id}"
-    environment = {
-      DB_HOST     = google_sql_database_instance.rating_service.connection_name
-      DB_NAME     = google_sql_database.rating_service.name
-      DB_USERNAME = google_sql_user.default.name
-      DB_PASSWORD = google_sql_user.default.password
-    }
-  }
-}
-
 # provision App Engine service
 locals {
   max_connections = 10
@@ -76,31 +21,6 @@ locals {
   service_name    = "ratingservice"
   service_version = "prod"
   source_path     = "${path.root}/../src/ratingservice"
-}
-
-resource "google_storage_bucket" "it" {
-  # max name length is 63 char = 30 chars for project id + '-ratingservice-' + 4 char suffix
-  name                        = "${var.gcp_project_id}-ratingservice-${random_string.suffix_len_4.result}"
-  uniform_bucket_level_access = true
-  project                     = var.gcp_project_id
-}
-
-resource "google_storage_bucket_object" "requirements" {
-  name   = "requirements.txt"
-  bucket = google_storage_bucket.it.name
-  source = "${local.source_path}/requirements.txt"
-}
-
-resource "google_storage_bucket_object" "main" {
-  name   = "ratingservice/main.py"
-  bucket = google_storage_bucket.it.name
-  source = "${local.source_path}/main.py"
-}
-
-resource "google_storage_bucket_object" "default_main" {
-  name   = "default/main.py"
-  bucket = google_storage_bucket.it.name
-  source = "${local.source_path}/pong.py"
 }
 
 data "external" "app_engine_state" {
@@ -181,33 +101,4 @@ resource "google_app_engine_standard_app_version" "ratingservice" {
 
   delete_service_on_destroy = true
   depends_on                = [google_app_engine_standard_app_version.default]
-}
-
-resource "google_cloud_scheduler_job" "recollect_job" {
-  name             = "ratingservice-recollect-job"
-  schedule         = "* * * * *" # each minute
-  description      = "recollect recently posted new votes"
-  time_zone        = "Europe/London"
-  region           = var.gcp_region_name
-  attempt_deadline = "340s"
-
-  retry_config {
-    min_backoff_duration = "1s"
-    max_retry_duration   = "10s"
-    max_doublings        = 2
-    retry_count          = 3
-  }
-
-  app_engine_http_target {
-    http_method = "POST"
-
-    app_engine_routing {
-      service = local.service_name
-      version = local.service_version
-    }
-
-    relative_uri = "/ratings:recollect"
-  }
-
-  depends_on = [google_project_service.cloudscheduler, google_app_engine_standard_app_version.ratingservice]
 }
