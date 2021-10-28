@@ -10,7 +10,7 @@ weight: 10
 
 ## Deploy the Sandbox
 
-In a new browser tab, navigate to the Cloud Operations Sandbox [website](https://stackdriver-sandbox.dev/) and follow the instructions there:
+In a new browser tab, navigate to the Cloud Operations Sandbox [website](/) and follow the instructions there:
 
 Click the **Open in Google Cloud Shell** button. You might have to click Proceed on a second dialog if you haven't run Cloud Shell before.
 
@@ -53,8 +53,4 @@ The URLs in this message tell you where to find the results of the installation:
 
 ### Recovering from session timeout
 Should your Cloud Shell session timeout due to user inactivity, you will need to launch the custom Cloud Shell image to access the `sandboxctl` command.
-Click the
-
-![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)
-
-button from the [Cloud Operations Sandbox homepage](https://cloud-ops-sandbox.dev/) to restart the custom Cloud Shell
+Click the [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](/) button on the [Cloud Operations Sandbox homepage](/) to restart the custom Cloud Shell
