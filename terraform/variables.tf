@@ -47,7 +47,7 @@ variable "app_version" {
 #GKE Services Cluster
 variable "gke_cluster_name" {
   default     = "cloud-ops-sandbox"
-  description = "GKE Hipstershop default cluster name."
+  description = "GKE GKE Hipster shop cluster name."
 }
 
 variable "gke_location" {
