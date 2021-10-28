@@ -18,7 +18,7 @@
 resource "google_monitoring_uptime_check_config" "http" {
   display_name = "HTTP Uptime Check"
   timeout      = "10s"
-  period       = "60s"  
+  period       = "60s"
 
   http_check {
     path = "/"
@@ -50,10 +50,10 @@ resource "google_monitoring_alert_policy" "alert_policy" {
       comparison = "COMPARISON_GT"
       aggregations {
         # the alignment sets the window over which the metric is viewed
-        alignment_period   = "1200s"
-        per_series_aligner = "ALIGN_NEXT_OLDER"
+        alignment_period     = "1200s"
+        per_series_aligner   = "ALIGN_NEXT_OLDER"
         cross_series_reducer = "REDUCE_COUNT_FALSE"
-        group_by_fields = ["resource.label.*"]
+        group_by_fields      = ["resource.label.*"]
       }
       threshold_value = "2"
       trigger {
