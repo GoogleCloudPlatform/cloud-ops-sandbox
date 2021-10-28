@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+locals {
+  source_path = "${path.root}/../src/ratingservice"
+}
+
 resource "google_storage_bucket" "it" {
   # max name length is 63 char = 30 chars for project id + '-ratingservice-' + 4 char suffix
   name                        = "${var.gcp_project_id}-ratingservice-${random_string.suffix_len_4.result}"

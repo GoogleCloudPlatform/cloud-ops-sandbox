@@ -18,9 +18,6 @@
 locals {
   max_connections = 10
   service_port    = 8080
-  service_name    = "ratingservice"
-  service_version = "prod"
-  source_path     = "${path.root}/../src/ratingservice"
 }
 
 data "external" "app_engine_state" {
@@ -60,8 +57,8 @@ resource "google_app_engine_standard_app_version" "default" {
 }
 
 resource "google_app_engine_standard_app_version" "ratingservice" {
-  service    = local.service_name
-  version_id = local.service_version
+  service    = var.service_name
+  version_id = var.service_version
   runtime    = "python38"
 
   entrypoint {

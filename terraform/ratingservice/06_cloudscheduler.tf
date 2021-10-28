@@ -33,8 +33,8 @@ resource "google_cloud_scheduler_job" "recollect_job" {
     http_method = "POST"
 
     app_engine_routing {
-      service = local.service_name
-      version = local.service_version
+      service = var.service_name
+      version = var.service_version
     }
 
     relative_uri = "/ratings:recollect"
