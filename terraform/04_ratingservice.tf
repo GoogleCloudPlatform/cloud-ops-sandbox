@@ -15,5 +15,5 @@
 module "ratingservice" {
   source          = "./ratingservice"
   gcp_project_id  = data.google_project.project.project_id
-  gcp_region_name = "us-east1"
+  gcp_region_name = var.appengine_region
 }
