@@ -43,7 +43,7 @@ Make sure you have a billing account enabled.
 
 ```bash
 $ gcloud auth application-default login
-$ git clone https://source.developers.google.com/p/stackdriver-sandbox-230822/r/sandbox
+$ git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git
 $ cd sandbox/terraform
 $ terraform init
 $ terraform apply -var 'billing_account=<your billing account name>'
