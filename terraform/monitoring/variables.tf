@@ -28,8 +28,8 @@ variable "project_id" {
 }
 
 variable "project_owner_email" {
-	type	      = string
-	description = "The email to receive alerts caused by violations of alerting policies."
+  type        = string
+  description = "The email to receive alerts caused by violations of alerting policies."
 }
 
 variable "zone" {
