@@ -12,8 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module "ratingservice" {
-  source          = "./ratingservice"
-  gcp_project_id  = data.google_project.project.project_id
-  gcp_region_name = "us-east1"
-}
+name: "Stage Website - Develop"
+on:
+  push:
+    # run on pushes to develop
+    branches:
+    - develop
+env:
+  PROJECT_ID: stackdriver-sandbox-230822
+jobs:
+  stage-website:
+    runs-on: [self-hosted, push-privilege]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Deploy Staged Website to App Engine
+      timeout-minutes: 20
+      run: |
+        set -x
+        cp website/app.yaml website/staging.app.yaml
+        echo "service: develop" >> website/staging.app.yaml
+        gcloud app deploy website/staging.app.yaml

@@ -20,12 +20,12 @@
 # in the data section.
 
 terraform {
-   backend "gcs" {}
+  backend "gcs" {}
 }
 
 data "terraform_remote_state" "state" {
-    backend = "gcs"
-    config = {
-        bucket = var.bucket_name
-    }
+  backend = "gcs"
+  config = {
+    bucket = var.bucket_name
+  }
 }

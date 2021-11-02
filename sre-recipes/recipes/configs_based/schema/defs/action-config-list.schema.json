@@ -1,0 +1,57 @@
+{
+  "type": "array",
+  "description": "The main schema for defining a list of action configs",
+  "items": {
+    "properties": {
+      "action": {
+        "type": "string",
+        "description": "Supported action configs names",
+        "enum": [
+          "run-shell-commands",
+          "loadgen-spawn",
+          "loadgen-stop",
+          "multiple-choice-quiz"
+        ]
+      }
+    },
+    "allOf": [
+      {
+        "description": "The schema definition for `action: run-shell-commands`",
+        "if": {
+          "properties": { "action": { "const": "run-shell-commands" } }
+        },
+        "then": {
+          "$ref": "#/$defs/run-shell-commands"
+        }
+      },
+      {
+        "description": "The schema definition for `action: loadgen-spawn`",
+        "if": {
+          "properties": { "action": { "const": "loadgen-spawn" } }
+        },
+        "then": {
+          "$ref": "#/$defs/loadgen-spawn"
+        }
+      },
+      {
+        "description": "The schema definition for `action: loadgen-stop`",
+        "if": {
+          "properties": { "action": { "const": "loadgen-stop" } }
+        },
+        "then": {
+          "$ref": "#/$defs/loadgen-stop"
+        }
+      },
+      {
+        "description": "The schema definition for `action: multiple-choice-quiz`",
+        "if": {
+          "properties": { "action": { "const": "multiple-choice-quiz" } }
+        },
+        "then": {
+          "$ref": "#/$defs/multiple-choice-quiz"
+        }
+      }
+    ]
+  },
+  "minItems": 1
+}

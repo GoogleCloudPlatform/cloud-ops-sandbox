@@ -32,6 +32,31 @@ variable "bucket_name" {
   description = "The name of your bucket to store the state file. Case-sensitive."
 }
 
+#AppEngine 
+variable "appengine_region" {
+  default     = "us-east1"
+  description = "App Engine defult GCP region."
+}
+
+variable "app_version" {
+  default     = 0
+  type        = string
+  description = "Cloud Operations Sandbox's Version. If wasn't set will be 0."
+}
+
+#GKE Services Cluster
+variable "gke_cluster_name" {
+  default     = "cloud-ops-sandbox"
+  description = "GKE GKE Hipster shop cluster name."
+}
+
+variable "gke_location" {
+  default     = ""
+  type        = string
+  description = "GKE Cloud Operations Sandbox's Cluster location."
+
+}
+#Loadgen
 variable "skip_loadgen" {
   default     = false
   description = "If true, the load generator will not be deployed."

@@ -45,16 +45,20 @@ resource "google_container_cluster" "gke" {
   project  = data.google_project.project.project_id
 
   # Here's how you specify the name
-  name = "cloud-ops-sandbox"
+  name = var.gke_cluster_name
 
-  # Set the zone by grabbing the result of the random_shuffle above. It
-  # returns a list so we have to pull the first element off. If you're looking
+  # If GKE_cluster was specify during insalltion use it otherwise set the zone by grabbing the result of the random_shuffle above. 
+  # It returns a list so we have to pull the first element off. If you're looking
   # at this and thinking "huh terraform syntax looks a clunky" you are NOT WRONG
-  location = element(random_shuffle.zone.result, 0)
+  location = var.gke_location != "" ? var.gke_location : element(random_shuffle.zone.result, 0)
 
   # Enable Workload Identity for cluster
   workload_identity_config {
     identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+
+  resource_labels = {
+    "version" = var.app_version
   }
 
   # Using an embedded resource to define the node pool. Another
@@ -94,7 +98,7 @@ resource "google_container_cluster" "gke" {
     initial_node_count = 4
 
     autoscaling {
-      min_node_count = 3
+      min_node_count = 2
       max_node_count = 10
     }
 
@@ -111,7 +115,7 @@ resource "google_container_cluster" "gke" {
 
   # Stores the zone of created gke cluster
   provisioner "local-exec" {
-    command = "gcloud config set compute/zone ${element(random_shuffle.zone.result, 0)}"
+    command = "gcloud config set compute/zone ${google_container_cluster.gke.location}"
   }
 
   # add a hint that the service resource must be created (i.e., the service must
@@ -141,7 +145,7 @@ data "google_compute_default_service_account" "default" {
 # Create GSA/KSA binding: let IAM auth KSAs as a svc.id.goog member name
 resource "google_service_account_iam_binding" "set_gsa_binding" {
   service_account_id = data.google_compute_default_service_account.default.name // google_service_account.set_gsa.name
-  role = "roles/iam.workloadIdentityUser"
+  role               = "roles/iam.workloadIdentityUser"
 
   members = [
     "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[default/default]"
@@ -158,7 +162,7 @@ resource "null_resource" "annotate_ksa" {
 
   provisioner "local-exec" {
     command = <<EOT
-      gcloud container clusters get-credentials cloud-ops-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${data.google_project.project.project_id}
+      gcloud container clusters get-credentials cloud-ops-sandbox --zone ${google_container_cluster.gke.location} --project ${data.google_project.project.project_id}
       kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-service-account=${data.google_compute_default_service_account.default.email}
     EOT
   }

@@ -24,34 +24,32 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop'
     steps:
-      - name: Validation
+      - name: Git Setup
         run: |
           set -x
-          export NEW_VERSION=${{ github.event.inputs.version }}
+          # clone repo
+          git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git
+          cd cloud-ops-sandbox
+          git checkout develop
+          git config --global user.email "ci@cloud-ops-sandbox.dev"
+          git config --global user.name "CI"
           # validate version number (format: v0.0.0)
+          export NEW_VERSION=${{ github.event.inputs.version }}
           if [[ ! "${NEW_VERSION}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
               echo "${NEW_VERSION} argument must conform to regex string:  ^v[0-9]+\.[0-9]+\.[0-9]+$ "
               echo "ex. v1.0.1"
               exit 1
           fi
           # ensure not duplicate
-          if [[ "$NEW_VERSION" == $(git tag | grep $NEW_VERSION | cat) ]]; then
+          if [[ ! -z $(git tag | grep $NEW_VERSION | cat) ]]; then
             echo "$NEW_VERSION" tag already exists in project
             exit 1
           fi
-          if [[ "$NEW_VERSION" == $(git branch | grep "release/$NEW_VERSION" | cat) ]]; then
-            echo "$NEW_VERSION" branch already exists in project
+          if [[ ! -z $(git branch -a | grep "release/$NEW_VERSION" | cat) ]]; then
+            echo "release/$NEW_VERSION" branch already exists in project
             exit 1
           fi
-      - name: Git Setup
-        run: |
-          set -x
-          git clone https://github.com/daniel-sanche/cloud-ops-sandbox.git
-          cd cloud-ops-sandbox
-          git checkout develop
-          git config --global user.email "ci@cloud-ops-sandbox.dev"
-          git config --global user.name "CI"
-
+          # create new release branch
           git fetch
           git checkout -b "release/${{ github.event.inputs.version }}"
           git merge --strategy-option theirs main
@@ -76,6 +74,7 @@ jobs:
           sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/website/deploy/index.html;
           sed -i -e "s/productVersion': 'v\([0-9\.]\+\)/productVersion': '${NEW_VERSION}/g" ${REPO_ROOT}/website/deploy/index.html;
           sed -i -e "s/uncertified:v\([0-9\.]\+\)/uncertified:${NEW_VERSION}/g" ${REPO_ROOT}/website/deploy/index.html;
+          sed -i -e "s/version = \"v\([0-9\.]\+\)\"/version = \"${NEW_VERSION}\"/g" ${REPO_ROOT}/website/config.toml;
           # update custom Cloud Shell image variable
           sed -i -e "s/VERSION=v\([0-9\.]\+\)/VERSION=${NEW_VERSION}/g" ${REPO_ROOT}/cloud-shell/Dockerfile;
 
@@ -83,21 +82,12 @@ jobs:
            PROD_TOPIC="telemetry_prod"
            TEST_TOPIC="telemetry_test"
            sed -i -e "s/topic_id = \"${TEST_TOPIC}\"/topic_id = \"${PROD_TOPIC}\"/g" ${REPO_ROOT}/terraform/telemetry.py;
-      - name: Push changes
-        uses: ad-m/github-push-action@65392840bda2e774394d5cd38ca33e5918aec2d3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch:  "release/${{ github.event.inputs.version  }}"
-          directory: cloud-ops-sandbox
-          tags: true
       - name: Build PR Body
         run: |
           cd cloud-ops-sandbox
           # find the changes commited to develop since last release
           PREV_HASH=$(git merge-base develop main)
           RECENT_HASH=$(git rev-parse develop)
-          DIFF=$(git log ${PREV_HASH}...${RECENT_HASH} --oneline)
-          echo -e $DIFF
 
           # print version number as title
           export NEW_VERSION=${{ github.event.inputs.version  }}
@@ -111,11 +101,11 @@ jobs:
             regexes=$(echo $i | tr "/" "\n" | tail -n 1)
             # create grep statements for each regex
             grep_formatted_regex=$(echo "--grep ^$regexes" | awk -F'|' -v OFS=" --grep ^" '$1=$1')
-            if [[ ! -z $(git log ${LAST_HASH}...${FIRST_HASH} $grep_formatted_regex)  ]]; then
+            if [[ ! -z $(git log ${PREV_HASH}...${RECENT_HASH} $grep_formatted_regex)  ]]; then
               # print the category title
               echo "### $title" >> PR.txt
               # print the commits in the category
-              git log ${LAST_HASH}...${FIRST_HASH} $grep_formatted_regex --oneline | cut -d " " -f2- | awk '{print "- " $0}' >> PR.txt
+              git log ${PREV_HASH}...${RECENT_HASH} $grep_formatted_regex --oneline | cut -d " " -f2- | awk '{print "- " $0}' >> PR.txt
               echo "" >> PR.txt
             fi
           done
@@ -125,6 +115,7 @@ jobs:
           echo 'PULL_REQUEST_BODY<<EOF' >> $GITHUB_ENV
           cat PR.txt >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
+          rm PR.txt
       - name: Commit Changes
         run: |
           set -x
@@ -134,6 +125,13 @@ jobs:
           git add .
           git commit -m "chore: update tags for release ${NEW_VERSION}"
           git tag "${NEW_VERSION}"
+      - name: Push changes
+        uses: ad-m/github-push-action@65392840bda2e774394d5cd38ca33e5918aec2d3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch:  "release/${{ github.event.inputs.version  }}"
+          directory: cloud-ops-sandbox
+          tags: true
       - name: Create Pull Request
         uses: vsoch/pull-request-action@29dbfc0acd2ac96b0ec14b9fd53fa12136130058
         env:

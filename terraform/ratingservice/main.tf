@@ -14,31 +14,16 @@
  * limitations under the License.
  */
 
-
-terraform {
-  # The module has 0.12 syntax and is not compatible with any versions below 0.12.
-  required_version = ">= 0.12"
-}
-
-provider "google" {
-  version = "~> 3.0"
-
-  project = var.gcp_project_id
-  region  = var.gcp_region_name
-}
-
-provider "random" {
-  version = "~> 2.0"
-}
-
 resource "google_project_service" "gae" {
   service                    = "appengine.googleapis.com"
   disable_dependent_services = true
+  project                    = var.gcp_project_id
 }
 
 resource "google_project_service" "cloudscheduler" {
   service                    = "cloudscheduler.googleapis.com"
   disable_dependent_services = true
+  project                    = var.gcp_project_id
 }
 
 resource "random_string" "suffix_len_4" {
@@ -57,7 +42,7 @@ resource "google_sql_database_instance" "rating_service" {
   name                = "ratingservice-sql-instance-${random_string.suffix_len_4.result}"
   database_version    = "POSTGRES_12"
   deletion_protection = false
-
+  region              = var.gcp_region_name
   settings {
     tier = "db-f1-micro"
   }
@@ -97,6 +82,7 @@ resource "google_storage_bucket" "it" {
   # max name length is 63 char = 30 chars for project id + '-ratingservice-' + 4 char suffix
   name                        = "${var.gcp_project_id}-ratingservice-${random_string.suffix_len_4.result}"
   uniform_bucket_level_access = true
+  project                     = var.gcp_project_id
 }
 
 resource "google_storage_bucket_object" "requirements" {
@@ -189,8 +175,8 @@ resource "google_app_engine_standard_app_version" "ratingservice" {
       min_instances = 1
     }
     max_concurrent_requests = 9
-    min_idle_instances = 1
-    max_idle_instances = 1
+    min_idle_instances      = 1
+    max_idle_instances      = 1
   }
 
   delete_service_on_destroy = true
@@ -202,6 +188,7 @@ resource "google_cloud_scheduler_job" "recollect_job" {
   schedule         = "* * * * *" # each minute
   description      = "recollect recently posted new votes"
   time_zone        = "Europe/London"
+  region           = var.gcp_region_name
   attempt_deadline = "340s"
 
   retry_config {

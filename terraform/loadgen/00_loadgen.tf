@@ -71,12 +71,12 @@ resource "google_container_cluster" "gke_loadgen" {
       machine_type = "n1-standard-2"
 
       oauth_scopes = [
-        "https://www.googleapis.com/auth/cloud-platform"  
+        "https://www.googleapis.com/auth/cloud-platform"
       ]
 
       labels = {
         environment = "dev",
-        cluster = "loadgenerator-main"
+        cluster     = "loadgenerator-main"
       }
     }
 
@@ -114,7 +114,7 @@ resource "null_resource" "set_gke_context" {
   }
 
   depends_on = [
-    google_container_cluster.gke_loadgen, 
+    google_container_cluster.gke_loadgen,
     null_resource.current_project
   ]
 }
