@@ -24,3 +24,13 @@ variable "gcp_region_name" {
   default     = "us-east1"
   description = "GCP region name where CloudSQL instance and App Engine application should be deployed."
 }
+variable "service_name" {
+  type        = string
+  default     = "ratingservice"
+  description = "App Engine service name"
+}
+variable "service_version" {
+  type        = string
+  default     = "prod"
+  description = "App Engine service version"
+}
