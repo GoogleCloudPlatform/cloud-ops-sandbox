@@ -27,7 +27,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       containers:
-      - name: server
+      - name: emailservice
         image: gcr.io/stackdriver-sandbox-230822/sandbox/emailservice:v0.7.2
         ports:
         - containerPort: 8080
