@@ -19,3 +19,4 @@ module "loadgen" {
   project_id  = data.google_project.project.project_id
   depends_on  = [module.k8s_services]
 }
+

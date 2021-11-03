@@ -106,7 +106,10 @@ url_latest_version = "https://cloud-ops-sandbox.dev/"
 github_repo = "https://github.com/GoogleCloudPlatform/cloud-ops-sandbox"
 
 # Specify a value here if your content directory is not in your repo's root directory
-github_subdir = "website/docsy"
+github_subdir = "website"
+
+# Specify development branch
+github_branch = "develop"
 
 # Google Custom Search Engine ID. Remove or comment out to disable search.
 #gcs_engine_id = "011737558837375720776:fsdu1nryfng"
