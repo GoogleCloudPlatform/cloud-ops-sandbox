@@ -4,13 +4,13 @@
 
 The Cloud Operations Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the [Cloud Operations](http://cloud.google.com/products/operations) (formerly Stackdriver) product suite. Cloud Operations is a suite of tools that helps you gain full observability into your code and applications.
 
-The Hipster Shop application used in the sandbox is intended to be sufficiently complex such that you can meaningfully experiment with it, and the Sandbox automatically provisions a new demo cluster, configures and deploys Hipster Shop, and simulates real users.
+The Online Boutique application used in the sandbox is intended to be sufficiently complex such that you can meaningfully experiment with it, and the Sandbox automatically provisions a new demo cluster, configures and deploys Online Boutique, and simulates real users.
 
 With the Sandbox running, you can experiment with various Cloud Operations tools to solve problems and accomplish standard SRE tasks in a sandboxed environment without impacting your production monitoring setup.
 
-### Architecture of the Hipster Shop application
+### Architecture of the Online Boutique application
 
-The Hipster Shop application consists of a number of microservices, written in a variety of languages, that talk to each other over gRPC. [To learn more.](https://cloud-ops-sandbox.dev/docs/service_overview/#service-architecture)
+The Online Boutique application consists of a number of microservices, written in a variety of languages, that talk to each other over gRPC. [To learn more.](https://cloud-ops-sandbox.dev/docs/service_overview/#service-architecture)
 
 ### Prerequisites
 
@@ -31,7 +31,7 @@ The installation process takes up to 20 minutes. When it completes, you will see
 Cloud Operations Sandbox deployed successfully!
     Google Cloud Console GKE Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project_ID>
     Google Cloud Console Monitoring Workspace: https://console.cloud.google.com/monitoring?project=<project_ID>
-    Hipstershop web app address: http://XX.XX.XX.XX
+    OnlineBoutique web app address: http://XX.XX.XX.XX
     Load generator web interface: http://XX.XX.XX.XX
 ```
 
@@ -58,9 +58,9 @@ Let's get started!
 
 In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you to the [Kubernetes Engine **Workloads** page](https://console.cloud.google.com/kubernetes/workload) for the project created by the installer ([documentation](https://cloud.google.com/kubernetes-engine/docs/)).
 
-### Shop like a hipster!
+### Shop using Online Boutique!
 
-In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase" everything you need for your hipster lifestyle using a mock credit card number.
+In a new browser tab, navigate to the Online Boutique URL, where you can "purchase" everything you need for your lifestyle using a mock credit card number.
 
 ### Run the load generator
 
@@ -68,7 +68,7 @@ Cloud Ops Sandbox comes with [Locust load generator](https://locust.io/), to sim
 
 - In another browser tab, navigate to the load-generator URL(from the installation stage if it isn't populated).  
 - Enter the number of **users** and **spawn rate**. For this application, we recommend to test 100 total users with a spawn rate of 2 users per second.  
-- Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't populated.  
+- Fill in the **Host** field with the "Online Boutique web address" from the installation stage if it isn't populated.  
 - Click the **Start swarming** button to begin generating traffic to the site.
 
 From here, you can explore how the application was deployed, and you can use the navigation menu to bring up other GCP tools.
@@ -130,7 +130,7 @@ Creating a logs-based metric involves two general steps:
 1. Identifying the set of log entries you want to use as the source of data for your entry by using the Logs Viewer. Using the Logs Viewer is briefly described in the **Cloud Logging** section of this document.
 2. Describing the metric data to extract from these log entries by using the Metric Editor.
 
-This example creates a logs-based metric that counts the number of times a user (user ID, actually) adds an item to the HipsterShop cart.  (This is an admittedly trivial example, though it could be extended. For example, from this same set of records, you can extract the user ID, item, and quantity added.)
+This example creates a logs-based metric that counts the number of times a user (user ID, actually) adds an item to the OnlineBoutique cart.  (This is an admittedly trivial example, though it could be extended. For example, from this same set of records, you can extract the user ID, item, and quantity added.)
 
 First, create a logs query that finds the relevant set of log entries:
 

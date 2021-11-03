@@ -103,7 +103,7 @@ jobs:
             sleep 5
         done
         # ping homepage
-        # should contain "Hipster Shop"
-        curl --show-error --fail localhost:3000 | grep "Hipster Shop"
+        # should contain "Online Boutique"
+        curl --show-error --fail localhost:3000 | grep "Online Boutique"
         # ping cart page
         curl --silent --output /dev/null --show-error --fail localhost:3000/cart

@@ -188,7 +188,7 @@ def describe():
     gcp_monitoring_path = gcp_path + '/monitoring?project=' + project_id
     print(f"""Cloud Operations Sandbox info for project: {project_id}
     - Load generator web interface: http://{loadgen_ip}
-    - Hipstershop web app address: http://{external_ip}
+    - OnlineBoutique web app address: http://{external_ip}
     - Google Cloud Console KBE Dashboard: {gcp_kubernetes_path}
     - Google Cloud Console Monitoring Workspace {gcp_monitoring_path}""")
 

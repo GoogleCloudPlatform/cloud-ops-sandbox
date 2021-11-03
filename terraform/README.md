@@ -1,14 +1,14 @@
-Hipster Shop Terraform
+Online Boutique Terraform
 ================================================================================
 
 This directory contains a heavily documented, [Terraform]
-config for deploying [Hipster Shop]. It's part of the [Google Cloud Operations Sandbox]
+config for deploying [Online Boutique]. It's part of the [Google Cloud Operations Sandbox]
 project. The goal of the project is to provide a one-click installer that builds
-a fullly functional environment including Hipster Shop and a preconfigured
+a fullly functional environment including Online Boutique and a preconfigured
 Google Cloud Operations environment suitable for learning and experimentation.
 
 [Terraform]: https://www.terraform.io/
-[Hipster Shop]: https://github.com/GoogleCloudPlatform/microservices-demo
+[Online Boutique]: https://github.com/GoogleCloudPlatform/microservices-demo
 [Google Cloud Operations Sandbox]: https://cloud-ops-sandbox.dev/
 
 tl;dr
@@ -64,9 +64,9 @@ comments are available in each file, but here's the short version:
 * `00_state.tf`         -- configure state storage
 * `01_provider.tf`      -- configure the terraform provider
 * `02_project.tf`       -- create a GCP project, set up billing, and enable services
-* `03_gke_cluster.tf`   -- provision a GKE cluster per to the Hipster Shop README
+* `03_gke_cluster.tf`   -- provision a GKE cluster per to the Online Boutique README
 * `04_ratingservice.tf` -- provision and populates Postgres DB over CloudSQL and deploy ranking service to AppEngine. Creates scheduled task to aggregate new placed ratings.
-* `05_loadgen.tf`       -- provision a loadgen cluster per to the Hipster Shop README
+* `05_loadgen.tf`       -- provision a loadgen cluster per to the Online Boutique README
 
 The assumption is that a system under user control would run terraform and create resources on the user's behalf.
 The user would not be aware of the underlying tool.

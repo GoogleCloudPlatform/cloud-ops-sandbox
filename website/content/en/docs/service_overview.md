@@ -11,18 +11,18 @@ weight: 3
 {{% /pageinfo %}}
 
 This project contains a multi-tier microservices application.
-It is a web-based e-commerce app called **“Hipster Shop”**, where users can browse items, add them to the cart, and purchase them.
+It is a web-based e-commerce app called **“Online Boutique”**, where users can browse items, add them to the cart, and purchase them.
 
 ### Screenshots
 
 | Home Page | Checkout Screen |
 |-----------|-----------------|
-| [![Screenshot of store homepage](/docs/img/hipster-shop-frontend-1.png)](/docs/img/hipster-shop-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/hipster-shop-frontend-2.png)](/docs/img/hipster-shop-frontend-2.png) |
+| [![Screenshot of store homepage](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
 
 ### Service Architecture
 
-**Hipster Shop** is composed of many microservices, written in different languages, that talk to each other over gRPC and REST API.
->**We are not endorsing the architecture of Hipster Shop as the best way to build such a shop!**
+**Online Boutique** is composed of many microservices, written in different languages, that talk to each other over gRPC and REST API.
+>**We are not endorsing the architecture of Online Boutique as the best way to build such a shop!**
 > The architecture is optimized for learning purposes and includes modern stack: Kubernetes, GKE, Istio,
 > Cloud Operations, App Engine, gRPC, OpenTelemetry, and similar cloud-native technologies.
 
@@ -57,7 +57,7 @@ Find the **gRPC protocol buffer descriptions** in the [`./pb` directory](https:/
 * **[Cloud Operations APM and SRE](https://cloud.google.com/products/operations):** Many services
   are instrumented with **Profiling**, **Tracing**, **Debugging**, **Monitoring**, **Logging** and **Error Reporting**.
 * **[Skaffold](https://github.com/GoogleContainerTools/skaffold):** A tool used for doing repeatable deployments. You can deploy to Kubernetes with a single command using Skaffold.
-* **Synthetic Load Generation:** The application demo comes with dedicated load generation service that creates realistic usage patterns on Hipster Shop website using
+* **Synthetic Load Generation:** The application demo comes with dedicated load generation service that creates realistic usage patterns on Online Boutique website using
   [Locust](https://locust.io/) load generator.
 * **[Google App Engine](https://cloud.google.com/appengine):** PaaS for running Web applications and services.
 * **[Google Cloud SQL](https://cloud.google.com/sql):** Fully managed relational database service for MySQL, PostgreSQL and SQL Server.

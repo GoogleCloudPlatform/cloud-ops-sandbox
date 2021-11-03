@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This script provisions Hipster Shop Cluster for Cloud Operations Sandbox using Terraform
+# This script provisions Online Boutique Cluster for Cloud Operations Sandbox using Terraform
 #set -euo pipefail
 set -o errexit  # Exit on error
 #set -o nounset  # Trigger error when expanding unset variables
@@ -267,12 +267,12 @@ installMonitoring() {
 getExternalIp() {
   external_ip="";
   while [ -z $external_ip ]; do
-     log "Waiting for Hipster Shop endpoint...";
+     log "Waiting for Online Boutique endpoint...";
      external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
      [ -z "$external_ip" ] && sleep 10;
   done;
   if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
-      log "Hipster Shop app is available at http://$external_ip"
+      log "Online Boutique app is available at http://$external_ip"
       sendTelemetry $project_id hipstershop-available
   else
       log "error: Hipsterhop app at http://$external_ip is unreachable"
@@ -335,7 +335,7 @@ displaySuccessMessage() {
     log ""
     log "     Google Cloud Console GKE Dashboard: $gcp_kubernetes_path"
     log "     Google Cloud Console Monitoring Workspace: $gcp_monitoring_path"
-    log "     Hipstershop web app address: http://$external_ip"
+    log "     OnlineBoutique web app address: http://$external_ip"
     if [[ -z "${skip_loadgen}" ]]; then
       log "     Load generator web interface: $loadgen_addr"
     fi

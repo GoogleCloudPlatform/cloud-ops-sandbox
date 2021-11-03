@@ -18,13 +18,13 @@ menu:
 
 The Cloud Operations Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the [Cloud Operations](http://cloud.google.com/products/operations) (formerly Stackdriver) product suite. Cloud Operations is a suite of tools that helps you gain full observability into your code and applications.
 
-The Hipster Shop application used in the sandbox is intended to be sufficiently complex such that you can meaningfully experiment with it, and the Sandbox automatically provisions a new demo cluster, configures and deploys Hipster Shop, and simulates real users.
+The Online Boutique application used in the sandbox is intended to be sufficiently complex such that you can meaningfully experiment with it, and the Sandbox automatically provisions a new demo cluster, configures and deploys Online Boutique, and simulates real users.
 
 With the Sandbox running, you can experiment with various Cloud Operations tools to solve problems and accomplish standard SRE tasks in a sandboxed environment without impacting your production monitoring setup.
 
-## Architecture of the Hipster Shop application
+## Architecture of the Online Boutique application
 
-The Hipster Shop application consists of a number of microservices, written in a variety of languages, that talk to each other over gRPC.
+The Online Boutique application consists of a number of microservices, written in a variety of languages, that talk to each other over gRPC.
 
 ![image](/docs/images/user-guide/1-architecture.png)
 

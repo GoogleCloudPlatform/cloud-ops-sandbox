@@ -1,4 +1,4 @@
-Hipster Shop Monitoring Terraform
+Online Boutique Monitoring Terraform
 ================================================================================
 
 ## What's included

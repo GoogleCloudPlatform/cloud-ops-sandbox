@@ -4,13 +4,13 @@
 
 The Cloud Operations Sandbox is intended to make it easy for you to deploy and run a non-trivial application that lets you explore the Google Cloud Platform services, particularly the [Cloud Operations](http://cloud.google.com/products/operations) (formerly Stackdriver) product suite. Cloud Operations is a suite of tools that helps you gain full observability into your code and applications.
 
-The Hipster Shop application used in the sandbox is intended to be sufficiently complex such that you can meaningfully experiment with it, and the Sandbox automatically provisions a new demo cluster, configures and deploys Hipster Shop, and simulates real users.
+The Online Boutique application used in the sandbox is intended to be sufficiently complex such that you can meaningfully experiment with it, and the Sandbox automatically provisions a new demo cluster, configures and deploys Online Boutique, and simulates real users.
 
 With the Sandbox running, you can experiment with various Cloud Operations tools to solve problems and accomplish standard SRE tasks in a sandboxed environment without impacting your production monitoring setup.
 
-## Architecture of the Hipster Shop application
+## Architecture of the Online Boutique application
 
-The Hipster Shop application consists of a number of microservices, written in a variety of languages, that talk to each other over gRPC.
+The Online Boutique application consists of a number of microservices, written in a variety of languages, that talk to each other over gRPC.
 
 ![image](./images/user-guide/1-architecture.png)
 
@@ -47,7 +47,7 @@ The installer script performs the following tasks:
 
 -  Enables the necessary GCP features
 -  Creates a GCP project named "Cloud Operations Sandbox Demo"
--  Creates and configures a GKE cluster and deploys the microservices that make up the Hipster Shop application
+-  Creates and configures a GKE cluster and deploys the microservices that make up the Online Boutique application
 -  Starts a Compute Engine instance and runs [Locust](https://locust.io/), a load-generator application
 
 The installation process takes a few minutes. When it completes, you see a message like the following:
@@ -58,7 +58,7 @@ Cloud Operations Sandbox deployed successfully!
 
      Google Cloud Console GKE Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project ID>
      Google Cloud Console Monitoring Workspace: https://console.cloud.google.com/monitoring?project=<project ID>
-     Hipstershop web app address: http://XX.XX.XX.XX
+     OnlineBoutique web app address: http://XX.XX.XX.XX
      Load generator web interface: http://XX.XX.XX.XX
 ```
 
@@ -70,9 +70,9 @@ The URLs in this message tell you where to find the results of the installation:
 
 - The **Google Cloud Console Monitoring Workspace** URL takes you to the Cloud Monitoring console for your deployment.
 
--  The **Hipster Shop** URL takes you to the storefront.
+-  The **Online Boutique** URL takes you to the storefront.
 
--  The **load generator** URL takes you to an interface for generating synthetic traffic to Hipster Shop.
+-  The **load generator** URL takes you to an interface for generating synthetic traffic to Online Boutique.
 
 ### Recovering from session timeout
 Should your Cloud Shell session timeout due to user inactivity, you will need to launch the custom Cloud Shell image to access the `sandboxctl` command.
@@ -94,18 +94,18 @@ In a new browser tab, navigate to the GCP Monitoring Workspace URL, which takes 
 
 ![image](./images/user-guide/19-gcp-monitoring-overview.png)
 
-## Shop like a hipster!
+## Shop using Online Boutique!
 
-In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase" everything you need for your hipster lifestyle using a mock credit card number:
+In a new browser tab, navigate to the Online Boutique URL, where you can "purchase" everything you need for your lifestyle using a mock credit card number:
 
-![image](./images/user-guide/2-hipstershop.png)
+![image](./images/user-guide/2-online-boutique-frontend.png)
 
 ## Run the load generator
 Cloud Ops Sandbox comes with [Locust load generator](https://locust.io/), to simulate users traffic.  
 
 - In another browser tab, navigate to the load-generator URL (from the installation stage if it isn't populated).  
 - Enter the number of **users** and **spawn rate**. For this application, we recommend to test 100 total users with a spawn rate of 2 users per second.  
-- Fill in the **Host** field with the "Hipster shop web address" from the installation stage if it isn't populated.  
+- Fill in the **Host** field with the "Online Boutique web address" from the installation stage if it isn't populated.  
 - Click the **Start swarming** button to begin generating traffic to the site.
 
 This will produce traffic on the store from a loadgenerator pod:
@@ -148,7 +148,7 @@ You can find the Cloud Operations products in the navigation panel on the GCP Co
 
 For instrumenting your applications, currently recommended solution is **OpenCensus.** [OpenCensus](https://opencensus.io/) is an open-source project that supports trace instrumentation in a variety of languages and that can export this data to Cloud Operations. Then you can use the Cloud Trace UI to analyze the data. Note that OpenCensus is merging with another similar project, OpenTracing, to form OpenTelemetry. See [OpenCensus to become OpenTelemetry](#opencensus-to-become-opentelemetry) in this doc.
 
-HipsterShop microservices are instrumented to collect trace data. In addition to distributed tracing, **OpenCensus (Stats)** provides the sink to send quantifiable data, such as database latency, open file descriptors, and so on, that helps to set up monitoring of [SLIs and SLOs](#SLIs-SLOs-and-Burn-rate-Alerts) for the service. This data is available in Cloud Monitoring.
+OnlineBoutique microservices are instrumented to collect trace data. In addition to distributed tracing, **OpenCensus (Stats)** provides the sink to send quantifiable data, such as database latency, open file descriptors, and so on, that helps to set up monitoring of [SLIs and SLOs](#SLIs-SLOs-and-Burn-rate-Alerts) for the service. This data is available in Cloud Monitoring.
 
 #### Using Trace
 
@@ -184,7 +184,7 @@ Cloud Profiler ([documentation](https://cloud.google.com/profiler/docs/)) perfor
 
 You do not have to write any profiling code in your application; you simply need to make the Profiler library available (the mechanism varies by language). This library will sample performance traits and create reports, which you can then analyze with the Profiler UI.
 
-The following Hipster Shop microservices are configured to capture profiling data:
+The following Online Boutique microservices are configured to capture profiling data:
 
 -  Checkout service
 -  Currency service
@@ -221,7 +221,7 @@ Cloud Debugger ([documentation](https://cloud.google.com/debugger/docs/)) lets d
 
 You do not have to  add any instrumentation code to your application to use Cloud Debugger. You start the debugger agent in the container running the application, and  you can then use the Debugger UI to step through snapshots of the running code.
 
-The following Hipster Shop microservices are configured to capture debugger data:
+The following Online Boutique microservices are configured to capture debugger data:
 
 -  Currency service
 -  Email service
@@ -341,7 +341,7 @@ Creating a logs-based metric involves two general steps:
 1. Identifying the set of log entries you want to use as the source of data for your entry by using the Logs Viewer. Using the Logs Viewer is briefly described in the **Cloud Logging** section of this document.
 2. Describing the metric data to extract from these log entries by using the Metric Editor.
 
-This example creates a logs-based metric that counts the number of times a user (user ID, actually) adds an item to the HipsterShop cart.  (This is an admittedly trivial example, though it could be extended. For example, from this same set of records, you can extract the user ID, item, and quantity added.)
+This example creates a logs-based metric that counts the number of times a user (user ID, actually) adds an item to the OnlineBoutique cart.  (This is an admittedly trivial example, though it could be extended. For example, from this same set of records, you can extract the user ID, item, and quantity added.)
 
 First, create a logs query that finds the relevant set of log entries:
 

@@ -16,7 +16,7 @@
 
 # This is another example of the random provider. Here we're using it to pick a
 # zone at random - all different regions from where we provisioned
-# the Hipster Shop.
+# the Online Boutique.
 resource "random_shuffle" "zone" {
   input = ["us-west1-a", "us-west1-b", "us-west1-c", "asia-east1-a", "europe-west2-a"]
 
@@ -38,7 +38,7 @@ resource "random_shuffle" "zone" {
 # itself.
 #
 # Finally, there are many, many other options available. The resource below
-# replicates what the Hipster Shop README creates. If you want to see what else
+# replicates what the Online Boutique README creates. If you want to see what else
 # is possible, check out the docs: https://www.terraform.io/docs/providers/google/r/container_cluster.html
 resource "google_container_cluster" "gke_loadgen" {
   # Here's how you specify the name of the cluster

@@ -1,7 +1,7 @@
 # Rating Service terraform Module
 
 This folder includes files for provisioning a rating microservice on App Engine Standard Edition and CloudSQL Postgres database.
-The provisioning is invoked from the `/terraform/03_ratingservice.tf` as part of the Hipster Shop application setup.
+The provisioning is invoked from the `/terraform/03_ratingservice.tf` as part of the Online Boutique application setup.
 Rating service provisions Cloud SQL Instance with a "rating-db" database to be used with the rating microservice that is deployed to App Engine.
 The App Engine application in the provided GCP project is created only if there is none.
 The App Engine application requires having a service with the name "default" in order to be able to deploy any other service.

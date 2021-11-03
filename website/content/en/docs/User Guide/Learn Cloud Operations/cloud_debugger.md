@@ -22,7 +22,7 @@ Cloud Debugger ([documentation](https://cloud.google.com/debugger/docs/)) lets d
 
 You do not have to  add any instrumentation code to your application to use Cloud Debugger. You start the debugger agent in the container running the application, and  you can then use the Debugger UI to step through snapshots of the running code.
 
-The following Hipster Shop microservices are configured to capture debugger data:
+The following Online Boutique microservices are configured to capture debugger data:
 
 -  Currency service
 -  Email service

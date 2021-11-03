@@ -14,7 +14,7 @@
 
 #!/bin/bash
 #
-# Create a new deployment of Hipster Shop
+# Create a new deployment of Online Boutique
 
 # Install Prerequisites
 #sudo apt-get install jshon

@@ -38,7 +38,7 @@ resource "random_shuffle" "zone" {
 # itself.
 #
 # Finally, there are many, many other options available. The resource below
-# replicates what the Hipster Shop README creates. If you want to see what else
+# replicates what the Online Boutique README creates. If you want to see what else
 # is possible, check out the docs: https://www.terraform.io/docs/providers/google/r/container_cluster.html
 resource "google_container_cluster" "gke" {
   provider = google-beta

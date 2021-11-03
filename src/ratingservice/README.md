@@ -1,7 +1,7 @@
 # Rating Service
 
 Rating Service is a microservice in Python developed to run on App Engine Standard Environment.
-It manages ratings of the Hipster shop products graded in scale from 1 to 5.
+It manages ratings of the Online Boutique products graded in scale from 1 to 5.
 The collection of pairs {entity id, rating} are stored in Postgres database managed by Cloud SQL.
 The service exposes GET APIs to get a collection of all managed ratings or to get a rating of the specific product.
 It is possible to submit a new vote for the product's rating. New vote get recollected on demand and the new product rating is calculated as an average of the current rating and all submitted votes.

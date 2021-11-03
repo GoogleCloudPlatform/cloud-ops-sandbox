@@ -24,7 +24,7 @@ The installer script performs the following tasks:
 
 -  Enables the necessary GCP features
 -  Creates a GCP project named "Cloud Operations Sandbox Demo"
--  Creates and configures a GKE cluster and deploys the microservices that make up the Hipster Shop application
+-  Creates and configures a GKE cluster and deploys the microservices that make up the Online Boutique application
 -  Starts a Compute Engine instance and runs [Locust](https://locust.io/), a load-generator application
 
 The installation process takes a few minutes. When it completes, you see a message like the following:
@@ -35,7 +35,7 @@ Cloud Operations Sandbox deployed successfully!
 
      Google Cloud Console GKE Dashboard: https://console.cloud.google.com/kubernetes/workload?project=<project ID>
      Google Cloud Console Monitoring Workspace: https://console.cloud.google.com/monitoring?project=<project ID>
-     Hipstershop web app address: http://XX.XX.XX.XX
+     OnlineBoutique web app address: http://XX.XX.XX.XX
      Load generator web interface: http://XX.XX.XX.XX
 ```
 
@@ -47,9 +47,9 @@ The URLs in this message tell you where to find the results of the installation:
 
 - The **Google Cloud Console Monitoring Workspace** URL takes you to the Cloud Monitoring console for your deployment.
 
--  The **Hipster Shop** URL takes you to the storefront.
+-  The **Online Boutique** URL takes you to the storefront.
 
--  The **load generator** URL takes you to an interface for generating synthetic traffic to Hipster Shop.
+-  The **load generator** URL takes you to an interface for generating synthetic traffic to Online Boutique.
 
 ### Recovering from session timeout
 Should your Cloud Shell session timeout due to user inactivity, you will need to launch the custom Cloud Shell image to access the `sandboxctl` command.

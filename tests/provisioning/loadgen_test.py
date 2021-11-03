@@ -72,7 +72,7 @@ class TestLoadGenerator(unittest.TestCase):
         self.assertTrue(r.ok)
 
     def testDifferentZone(self):
-        """Test if load generator cluster is in a different zone from the Hipster Shop cluster"""
+        """Test if load generator cluster is in a different zone from the Online Boutique cluster"""
         self.assertTrue(get_cluster_zone() != os.environ['ZONE'])
 
     @parameterized.expand([(None,), ('basic',), ('step',)])

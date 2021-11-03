@@ -21,8 +21,8 @@ export PATH=$PATH:$SRE_RECIPES_DIR
 set -e
 echo "Testing Recommendation Crash SRE Recipe"
 
-HTTP_ADDR=$(sandboxctl describe | grep "Hipstershop web app address" | awk '{ print $NF  }')
-echo "Hipstershop endpoint: $HTTP_ADDR"
+HTTP_ADDR=$(sandboxctl describe | grep "OnlineBoutique web app address" | awk '{ print $NF  }')
+echo "OnlineBoutique endpoint: $HTTP_ADDR"
 
 echo "- testing request before changes..."
 curl --show-error --fail $HTTP_ADDR/product/OLJCESPC7Z | grep Typewriter

@@ -15,7 +15,7 @@ Cloud Profiler ([documentation](https://cloud.google.com/profiler/docs/)) perfor
 
 You do not have to write any profiling code in your application; you simply need to make the Profiler library available (the mechanism varies by language). This library will sample performance traits and create reports, which you can then analyze with the Profiler UI.
 
-The following Hipster Shop microservices are configured to capture profiling data:
+The following Online Boutique microservices are configured to capture profiling data:
 
 -  Checkout service
 -  Currency service

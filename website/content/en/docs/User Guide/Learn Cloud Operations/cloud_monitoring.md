@@ -65,7 +65,7 @@ Creating a logs-based metric involves two general steps:
 1. Identifying the set of log entries you want to use as the source of data for your entry by using the Logs Viewer. Using the Logs Viewer is briefly described in the **Cloud Logging** section of this document.
 2. Describing the metric data to extract from these log entries by using the Metric Editor.
 
-This example creates a logs-based metric that counts the number of times a user (user ID, actually) adds an item to the HipsterShop cart. (This is an admittedly trivial example, though it could be extended. For example, from this same set of records, you can extract the user ID, item, and quantity added.)
+This example creates a logs-based metric that counts the number of times a user (user ID, actually) adds an item to the OnlineBoutique cart. (This is an admittedly trivial example, though it could be extended. For example, from this same set of records, you can extract the user ID, item, and quantity added.)
 
 First, create a logs query that finds the relevant set of log entries:
 

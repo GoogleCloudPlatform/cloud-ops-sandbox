@@ -64,7 +64,7 @@ class TestGKECluster(unittest.TestCase):
             self.assertTrue(int(service['status']['readyReplicas']) >= 1)
 
     def testReachOfHipsterShop(self):
-        """ Test if querying hipster shop returns 200 """
+        """ Test if querying online boutique returns 200 """
         command = ("kubectl -n istio-system get service istio-ingressgateway --context=%s -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" % TestGKECluster.context)
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
         external_ip = result.stdout.replace('\n', '')

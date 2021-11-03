@@ -1,7 +1,7 @@
 # Development Principles
 
 > **Note:** This document outlines guidances behind some development decisions
-> behind the Hipster Shop demo application.
+> behind the Online Boutique demo application.
 
 ## Minimal configuration
 
@@ -20,7 +20,7 @@ be close.
 For example:
 
 - OpenCensus prints the traces to stdout when it cannot connect to GCP.
-- Stackdriver Debugging tries connecting to GCP multiple times, eventually gives
+- GCP's Cloud Operations Debugging tries connecting to GCP multiple times, eventually gives
   up.
 
 ## Running on GCP must not reduce functionality
