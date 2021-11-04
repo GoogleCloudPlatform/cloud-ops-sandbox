@@ -13,7 +13,7 @@
 # limitations under the License.
 
 resource "kubernetes_manifest" "service_manifests" {
-  for_each = fileset("${path.module}/..", "../../kubernetes-manifests/*.yaml")
+  for_each = fileset("${path.module}/..", "../kubernetes-manifests/*.yaml")
   manifest = yamldecode(file("${each.key}"))
 
 }
