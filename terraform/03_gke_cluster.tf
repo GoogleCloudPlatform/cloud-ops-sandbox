@@ -54,7 +54,7 @@ resource "google_container_cluster" "gke" {
 
   # Enable Workload Identity for cluster
   workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
 
   resource_labels = {
@@ -91,7 +91,7 @@ resource "google_container_cluster" "gke" {
 
       # Enable Workload Identity for node pool
       workload_metadata_config {
-        node_metadata = "GKE_METADATA_SERVER"
+        mode = "GKE_METADATA"
       }
     }
 
