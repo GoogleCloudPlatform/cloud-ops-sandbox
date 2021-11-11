@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schema.json",
+  "title": "SRE Recipe Config - Schema Definitions",
+  "type": "object",
+  "description": "The base schema for an SRE Recipe",
+  "required": ["name", "description", "config"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the SRE Recipe",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "The description of the SRE Recipe",
+      "minLength": 1
+    },
+    "config": {
+      "type": "object",
+      "description": "The config section for the SRE Recipe",
+      "required": ["break", "restore", "hint", "verify"],
+      "properties": {
+        "break": {
+          "description": "A list of actions to run for the `sandboxctl sre-receipes break` command",
+          "$ref": "#/$defs/action-config-list"
+        },
+        "restore": {
+          "description": "A list of actions to run for the `sandboxctl sre-receipes restore` command",
+          "$ref": "#/$defs/action-config-list"
+        },
+        "hint": {
+          "type": "string",
+          "description": "A hint string to display for the `sandboxctl sre-receipes hint` command",
+          "minLength": 1
+        },
+        "verify": {
+          "description": "A list of actions to run for the `sandboxctl sre-receipes verify` command",
+          "$ref": "#/$defs/action-config-list"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

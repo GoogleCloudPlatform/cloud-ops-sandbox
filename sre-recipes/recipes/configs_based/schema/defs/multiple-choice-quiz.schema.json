@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "description": "The config schema for running an interactive multiple choice quiz.",
+  "required": ["action", "prompt", "choices"],
+  "properties": {
+    "action": {
+      "type": "string",
+      "const": "multiple-choice-quiz",
+      "description": "Required identifier for multiple-choice-quiz action."
+    },
+    "prompt": {
+      "type": "string",
+      "description": "Required. The question prompt to display.",
+      "minLength": 1
+    },
+    "choices": {
+      "type": "array",
+      "description": "Required. The list of potential answers to choose from.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "description": "The config schema for a specific answer choice",
+        "required": ["option"],
+        "properties": {
+          "option": {
+            "type": "string",
+            "description": "Required. The answer display text to show user."
+          },
+          "accept": {
+            "type": "boolean",
+            "description": "Optional. When true, this entry will be accepted as correct."
+          }
+        },
+        "additionalProperties": false
+      },
+      "contains": {
+        "type": "object",
+        "description": "At least one answer config has `accept` defined as True.",
+        "required": ["accept"],
+        "properties": {
+          "accept": {
+            "type": "boolean",
+            "enum": [true]
+          }
+        }
+      },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}

@@ -283,53 +283,53 @@ class TestServiceSlo(unittest.TestCase):
     def testFrontendServiceSloExists(self):
         """ Test that for Frontend Service that two SLOs (availability, latency) get created. """
         found_availability_slo = self.checkForSlo(
-            'frontend-srv', 'availability-slo')
+            'frontend-srv', 'frontend-srv-availability-slo')
         self.assertTrue(found_availability_slo)
-        found_latency_slo = self.checkForSlo('frontend-srv', 'latency-slo')
+        found_latency_slo = self.checkForSlo('frontend-srv', 'frontend-srv-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testCheckoutServiceSloExists(self):
         """ Test that for Checkout Service that two SLOs (availability, latency) get created. """
         found_availability_slo = self.checkForSlo(
-            'checkoutservice-srv', 'availability-slo')
+            'checkoutservice-srv', 'checkoutservice-srv-availability-slo')
         self.assertTrue(found_availability_slo)
         found_latency_slo = self.checkForSlo(
-            'checkoutservice-srv', 'latency-slo')
+            'checkoutservice-srv', 'checkoutservice-srv-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testPaymentServiceSloExists(self):
         """ Test that for Payment Service that two SLOs (availability, latency) get created. """
         found_availability_slo = self.checkForSlo(
-            'paymentservice-srv', 'availability-slo')
+            'paymentservice-srv', 'paymentservice-srv-availability-slo')
         self.assertTrue(found_availability_slo)
         found_latency_slo = self.checkForSlo(
-            'paymentservice-srv', 'latency-slo')
+            'paymentservice-srv', 'paymentservice-srv-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testEmailServiceSloExists(self):
         """ Test that for Email Service that two SLOs (availability, latency) get created. """
         found_availability_slo = self.checkForSlo(
-            'emailservice-srv', 'availability-slo')
+            'emailservice-srv', 'emailservice-srv-availability-slo')
         self.assertTrue(found_availability_slo)
-        found_latency_slo = self.checkForSlo('emailservice-srv', 'latency-slo')
+        found_latency_slo = self.checkForSlo('emailservice-srv', 'emailservice-srv-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testShippingServiceSloExists(self):
         """ Test that for Shipping Service that two SLOs (availability, latency) get created. """
         found_availability_slo = self.checkForSlo(
-            'shippingservice-srv', 'availability-slo')
+            'shippingservice-srv', 'shippingservice-srv-availability-slo')
         self.assertTrue(found_availability_slo)
         found_latency_slo = self.checkForSlo(
-            'shippingservice-srv', 'latency-slo')
+            'shippingservice-srv', 'shippingservice-srv-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testCartServiceSloExists(self):
         """ Test that for each service that two SLOs (availability, latency) get created. """
         cartservice_id = self.getIstioService('cartservice')
         found_availability_slo = self.checkForSlo(
-            cartservice_id, 'availability-slo')
+            cartservice_id, 'cartservice-availability-slo')
         self.assertTrue(found_availability_slo)
-        found_latency_slo = self.checkForSlo(cartservice_id, 'latency-slo')
+        found_latency_slo = self.checkForSlo(cartservice_id, 'cartservice-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testProductCatalogServiceSloExists(self):
@@ -337,19 +337,19 @@ class TestServiceSlo(unittest.TestCase):
         productcatalogservice_id = self.getIstioService(
             'productcatalogservice')
         found_availability_slo = self.checkForSlo(
-            productcatalogservice_id, 'availability-slo')
+            productcatalogservice_id, 'productcatalogservice-availability-slo')
         self.assertTrue(found_availability_slo)
         found_latency_slo = self.checkForSlo(
-            productcatalogservice_id, 'latency-slo')
+            productcatalogservice_id, 'productcatalogservice-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testCurrencyServiceSloExists(self):
         """ Test that for each service that two SLOs (availability, latency) get created. """
         currencyservice_id = self.getIstioService('currencyservice')
         found_availability_slo = self.checkForSlo(
-            currencyservice_id, 'availability-slo')
+            currencyservice_id, 'currencyservice-availability-slo')
         self.assertTrue(found_availability_slo)
-        found_latency_slo = self.checkForSlo(currencyservice_id, 'latency-slo')
+        found_latency_slo = self.checkForSlo(currencyservice_id, 'currencyservice-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testRecommendationServiceSloExists(self):
@@ -357,28 +357,28 @@ class TestServiceSlo(unittest.TestCase):
         recommendationservice_id = self.getIstioService(
             'recommendationservice')
         found_availability_slo = self.checkForSlo(
-            recommendationservice_id, 'availability-slo')
+            recommendationservice_id, 'recommendationservice-availability-slo')
         self.assertTrue(found_availability_slo)
         found_latency_slo = self.checkForSlo(
-            recommendationservice_id, 'latency-slo')
+            recommendationservice_id, 'recommendationservice-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testAdServiceSloExists(self):
         """ Test that for each service that two SLOs (availability, latency) get created. """
         adservice_id = self.getIstioService('adservice')
         found_availability_slo = self.checkForSlo(
-            adservice_id, 'availability-slo')
+            adservice_id, 'adservice-availability-slo')
         self.assertTrue(found_availability_slo)
-        found_latency_slo = self.checkForSlo(adservice_id, 'latency-slo')
+        found_latency_slo = self.checkForSlo(adservice_id, 'adservice-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testRatingServiceSloExists(self):
         """ Test the rating service for having two SLOs (availability, latency) get created. """
         service_id = 'gae:' + project_id + '_ratingservice'
         found_availability_slo = self.checkForSlo(
-            service_id, 'availability-slo')
+            service_id, 'ratingservice-availability-slo')
         self.assertTrue(found_availability_slo)
-        found_latency_slo = self.checkForSlo(service_id, 'latency-slo')
+        found_latency_slo = self.checkForSlo(service_id, 'ratingservice-latency-slo')
         self.assertTrue(found_latency_slo)
 
 

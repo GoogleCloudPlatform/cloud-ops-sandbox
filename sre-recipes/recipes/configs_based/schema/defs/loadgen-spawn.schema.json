@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "description": "The config schema for generating a specific load pattern to the sandbox frontend.",
+  "required": ["action"],
+  "properties": {
+    "action": {
+      "type": "string",
+      "const": "loadgen-spawn",
+      "description": "Required identifier for loadgen-spawn action."
+    },
+    "user_type": {
+      "type": "string",
+      "description": "Optional. The `sre_recipe_user_identifier` for locust tasks defined in `sre/loadgenerator/locust_tasks`. Default: BasicHomePageViewingUser.",
+      "minLength": 1
+    },
+    "user_count": {
+      "type": "integer",
+      "description": "Optional. The number of total users to spawn. Default: 20.",
+      "minimum": 1
+    },
+    "spawn_rate": {
+      "type": "integer",
+      "description": "Optional. The number of users per second to spawn. Default: 1.",
+      "minimum": 1
+    },
+    "stop_after": {
+      "type": "integer",
+      "description": "Optional. The number of seconds to spawn before stopping. Default: 600.",
+      "minimum": 1
+    }
+  },
+  "additionalProperties": false
+}
