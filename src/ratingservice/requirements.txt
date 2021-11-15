@@ -1,4 +1,6 @@
 uwsgi==2.0.19.1
 flask==1.1.4
 psycopg2-binary==2.8.5
-google-python-cloud-debugger
+google-python-cloud-debugger==2.18
+# pyparsing pin solves related issue: https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/issues/877
+pyparsing==2.4.7
