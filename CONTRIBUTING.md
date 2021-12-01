@@ -86,10 +86,10 @@ brew install coreutils
    * [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
      (ensure version ≥v0.20)
 
-1. Launch “Docker for Desktop”. Go to **Preferences**:
-   * Choose **Enable Kubernetes**
-   * Set **CPUs** to at least 3
-   * Set **Memory** to at least 6.0 GiB
+1. Launch “Docker for Desktop”. Go to **Settings**.:
+   * Under **Kubernetes**, Choose **Enable Kubernetes**
+   * Under **Resources>Advanced**, Set **CPUs** to at least 3
+   * Under **Resources>Advanced**, Set **Memory** to at least 6.0 GiB
 
 1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
@@ -137,7 +137,8 @@ gcloud services enable container.googleapis.com
 gcloud container clusters create demo --zone=us-central1-a \
     --machine-type=n1-standard-2 \
     --num-nodes=2 \
-    --enable-stackdriver-kubernetes \
+    --logging \
+    --monitoring \
     --scopes https://www.googleapis.com/auth/cloud-platform
 
 kubectl get nodes
