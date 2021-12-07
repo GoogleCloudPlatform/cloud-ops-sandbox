@@ -17,5 +17,5 @@ module "k8s_services" {
   host                   = "https://${google_container_cluster.gke.endpoint}"
   access_token           = data.google_client_config.default.access_token
   cluster_ca_certificate = base64decode(google_container_cluster.gke.master_auth[0].cluster_ca_certificate)
-  //depends_on = [null_resource.install_istio]
+  depends_on = [null_resource.install_istio]
 }

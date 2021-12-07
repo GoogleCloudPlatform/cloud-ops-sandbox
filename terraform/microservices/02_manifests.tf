@@ -12,6 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+resource "kubernetes_manifest" "istio_manifests" {
+  for_each = fileset("${path.root}", "/istio-manifests/*.yaml")
+  manifest = yamldecode(file("${path.root}/${each.key}"))
+  depands_on = [null_resource.install_istio]
+
+}
+
 resource "kubernetes_manifest" "service_manifests" {
   for_each = fileset("${path.root}", "/kubernetes-manifests/*.yaml")
   manifest = yamldecode(file("${path.root}/${each.key}"))

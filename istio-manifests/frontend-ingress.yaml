@@ -13,16 +13,17 @@
 # limitations under the License.
 
 apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
+kind: VirtualService
 metadata:
-  name: frontend-gateway
+  name: frontend-ingress
 spec:
-  selector:
-    istio: ingressgateway # use Istio default gateway implementation
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "*"
+  hosts:
+  - "*"
+  gateways:
+  - frontend-gateway
+  http:
+  - route:
+    - destination:
+        host: frontend
+        port:
+          number: 80
