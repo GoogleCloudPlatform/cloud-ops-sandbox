@@ -29,7 +29,7 @@ RUN python3 -m pip install click==8.0.1
 RUN python3 -m pip install google-cloud-monitoring==2.4.0
 
 # set env var
-RUN echo "VERSION=v0.7.2" >> /etc/environment
+RUN echo "VERSION=v0.7.4" >> /etc/environment
 
 # Change "Open in Cloudshell" script to run `sandboxctl create` using local file and changing it
 COPY cloudshell_open_cp.sh /google/devshell/bashrc.google.d/cloudshell_open.sh

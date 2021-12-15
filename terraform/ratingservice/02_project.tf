@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
-output "service_url" {
-  value = "https://ratingservice-dot-${length(google_app_engine_application.app) > 0 ? google_app_engine_application.app[0].default_hostname : data.external.app_engine_state.result.application_domain}"
+resource "google_project_service" "gae" {
+  service                    = "appengine.googleapis.com"
+  disable_dependent_services = true
+  project                    = var.gcp_project_id
+}
+
+resource "google_project_service" "cloudscheduler" {
+  service                    = "cloudscheduler.googleapis.com"
+  disable_dependent_services = true
+  project                    = var.gcp_project_id
 }
