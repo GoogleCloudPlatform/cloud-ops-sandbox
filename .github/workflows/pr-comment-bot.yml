@@ -25,7 +25,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           msg: |
-            [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/${{ github.repository  }}.git&cloudshell_git_branch=${{ github.head_ref }}&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:latest)
+            [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/${{ github.repository  }}.git&cloudshell_git_branch=${{ github.head_ref }}&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:latest)
             You can also use the [Stage Website Action](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/actions/workflows/manual-website-stage.yml) if there were updates to the website.
             ---
             > Note: Open in Cloud Shell may not work properly if this PR contains changes to the custom Cloud Shell image
