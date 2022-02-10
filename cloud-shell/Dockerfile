@@ -20,6 +20,9 @@ RUN sudo apt-get install unzip && \
   unzip -o terraform.zip && \
   sudo install terraform /usr/local/bin
 
+# to fix kubectl authentication
+RUN apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
+
 # install Postgres client and Json query
 RUN sudo apt-get -y install postgresql-client jq
 
