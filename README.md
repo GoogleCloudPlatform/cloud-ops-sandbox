@@ -40,7 +40,7 @@ With Sandbox, we provide a tool that automatically provisions a new demo cluster
 
 Click the Cloud Shell button for automated one-click installation of a new Sandbox cluster in a new Google Cloud Project.
 
-[![Open in Cloud Shell](http://www.gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=develop&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:latest&cloudshell_tutorial=docs/tutorial.md)
+[![Open in Cloud Shell](http://www.gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=v0.7.5&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:v0.7.5&cloudshell_tutorial=docs/tutorial.md)
 
 __Note__: If installation stops due to billing account errors, set up the billing account and type: `sandboxctl create`.
 
