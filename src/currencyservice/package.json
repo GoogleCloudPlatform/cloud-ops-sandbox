@@ -18,7 +18,7 @@
     "@opentelemetry/node": "^0.23.0",
     "@opentelemetry/tracing": "^0.22.0",
     "ajv": "^5.0.0",
-    "async": "3.2.0",
+    "async": "3.2.2",
     "google-protobuf": "3.13.0",
     "grpc": "1.24.10",
     "left-pad": "1.3.0",
