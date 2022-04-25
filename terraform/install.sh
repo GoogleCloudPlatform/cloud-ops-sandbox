@@ -203,7 +203,7 @@ applyTerraform() {
   fi
 
   #build Terraform apply command 
-  terraform_command="terraform apply -auto-approve -var=\"project_id=${project_id}\" -var=\"bucket_name=${bucket_name}\" -var=\"skip_loadgen=${skip_loadgen:-false}\""
+  terraform_command="terraform apply -auto-approve -var=\"project_id=${project_id}\" -var=\"bucket_name=${bucket_name}\" -var=\"skip_ratingservice=${skip_ratingservice:-false}\" -var=\"skip_loadgen=${skip_loadgen:-false}\""
 
   #If billing account provided specify it 
   if [[ -n "$billing_id" ]]; then
@@ -381,6 +381,10 @@ parseArguments() {
       skip_loadgen=1
       shift
       ;;
+    --skip-ratingservice)
+      skip_ratingservice=1
+      shift
+      ;;
     --service-wait)
       service_wait=1
       shift
@@ -396,6 +400,7 @@ parseArguments() {
       log "-p|--project|--project-id     GCP project to deploy Cloud Operations Sandbox to"
       log "-v|--verbose                  print commands as they run (set -x)"
       log "--skip-loadgenerator          Don't deploy a loadgenerator instance"
+      log "--skip-ratingservice          Don't deploy the ratingservice"
       log "--service-wait                Wait indefinitely for services to be detected by Cloud Monitoring"
       log ""
       exit 0
