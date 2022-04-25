@@ -21,6 +21,7 @@ resource "google_cloud_scheduler_job" "recollect_job" {
   time_zone        = "Europe/London"
   region           = var.gcp_region_name
   attempt_deadline = "340s"
+  count = "${var.skip_ratingservice ? 0 : 1}"
 
   retry_config {
     min_backoff_duration = "1s"

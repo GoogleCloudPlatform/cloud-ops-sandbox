@@ -23,12 +23,14 @@ resource "google_storage_bucket" "it" {
   name                        = "${var.gcp_project_id}-ratingservice-${random_string.suffix_len_4.result}"
   uniform_bucket_level_access = true
   project                     = var.gcp_project_id
+  count = "${var.skip_ratingservice ? 0 : 1}"
 }
 
 resource "google_storage_bucket_object" "requirements" {
   name   = "requirements.txt"
   bucket = google_storage_bucket.it.name
   source = "${local.source_path}/requirements.txt"
+  count = "${var.skip_ratingservice ? 0 : 1}"
 }
 
 resource "google_storage_bucket_object" "main" {
