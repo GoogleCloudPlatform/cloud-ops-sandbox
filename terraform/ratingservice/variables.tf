@@ -34,3 +34,8 @@ variable "service_version" {
   default     = "prod"
   description = "App Engine service version"
 }
+
+variable "skip_ratingservice" {
+  default     = false
+  description = "If true, the ratingservice and associated resources will not be deployed."
+}
