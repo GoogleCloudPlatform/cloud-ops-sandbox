@@ -207,7 +207,7 @@ resource "null_resource" "ratingservice-envvar" {
 
   provisioner "local-exec" {
     command = <<-EOT
-    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${module.ratingservice.service_url[0]}
+    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${one(module.ratingservice[*].service_url)}
   EOT
   }
 
