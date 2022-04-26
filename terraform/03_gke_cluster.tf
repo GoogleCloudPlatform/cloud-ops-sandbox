@@ -195,11 +195,23 @@ resource "null_resource" "deploy_services" {
     kubectl apply -f ../kubernetes-manifests/productcatalogservice.yaml
     kubectl apply -f ../kubernetes-manifests/recommendationservice.yaml
     kubectl apply -f ../kubernetes-manifests/shippingservice.yaml
-    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${module.ratingservice.service_url}
   EOT
   }
 
   depends_on = [null_resource.install_istio]
+}
+
+# Configure frontend to talk to Ratingservice
+resource "null_resource" "ratingservice-envvar" {
+  count = var.skip_ratingservice ? 0 : 1
+
+  provisioner "local-exec" {
+    command = <<-EOT
+    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${module.ratingservice.service_url[0]}
+  EOT
+  }
+
+  depends_on = [null_resource.deploy_services]
 }
 
 # We wait for all of our microservices to become available on kubernetes
