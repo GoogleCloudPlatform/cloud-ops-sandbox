@@ -60,6 +60,8 @@ resource "google_monitoring_dashboard" "productcatalogservice_dashboard" {
 
 # Creates a dashboard for the ratingservice.
 resource "google_monitoring_dashboard" "ratingservice_dashboard" {
+  count = var.skip_ratingservice ? 0 : 1
+
   dashboard_json = file("./dashboards/ratingservice_dashboard.json")
 }
 

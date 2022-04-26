@@ -176,6 +176,7 @@ resource "google_monitoring_slo" "istio_service_latency_slo" {
 resource "google_monitoring_slo" "rating_service_availability_slo" {
   # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine
   # Identify of the service is built after the following template: gae:${project_id}_servicename
+  count = var.skip_ratingservice ? 0 : 1
   service      = "gae:${var.project_id}_ratingservice"
   slo_id       = "ratingservice-availability-slo"
   display_name = "Rating Service Availability SLO with request base SLI (good total ratio)"
@@ -223,6 +224,7 @@ resource "google_monitoring_slo" "rating_service_availability_slo" {
 resource "google_monitoring_slo" "rating_service_latency_slo" {
   # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine
   # Identify of the service is built after the following template: gae:${project_id}_servicename
+  count = var.skip_ratingservice ? 0 : 1
   service      = "gae:${var.project_id}_ratingservice"
   slo_id       = "ratingservice-latency-slo"
   display_name = "Rating Service Latency SLO with request base SLI (distribution cut)"
@@ -257,6 +259,7 @@ resource "google_monitoring_slo" "rating_service_latency_slo" {
 resource "google_monitoring_slo" "rating_service_freshness_slo" {
   # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine
   # Identify of the service is built after the following template: gae:${project_id}_servicename
+  count = var.skip_ratingservice ? 0 : 1
   service      = "gae:${var.project_id}_ratingservice"
   slo_id       = "ratingservice-freshness-slo"
   display_name = "Rating freshness SLO with window based SLI"
