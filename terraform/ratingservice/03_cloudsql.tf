@@ -28,7 +28,6 @@ resource "random_password" "db_password" {
 
 resource "google_sql_database_instance" "rating_service" {
   name                = "ratingservice-sql-instance-${random_string.suffix_len_4.result}"
-  count = "${var.skip_ratingservice ? 0 : 1}"
   database_version    = "POSTGRES_12"
   deletion_protection = false
   region              = var.gcp_region_name
@@ -39,14 +38,12 @@ resource "google_sql_database_instance" "rating_service" {
 
 resource "google_sql_user" "default" {
   name     = "postgres"
-  count = "${var.skip_ratingservice ? 0 : 1}"
   password = random_password.db_password.result
   instance = google_sql_database_instance.rating_service.name
 }
 
 resource "google_sql_database" "rating_service" {
   name     = "rating-db"
-  count = "${var.skip_ratingservice ? 0 : 1}"
   instance = google_sql_database_instance.rating_service.name
 
   provisioner "local-exec" {
