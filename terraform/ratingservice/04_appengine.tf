@@ -25,6 +25,7 @@ data "external" "app_engine_state" {
 }
 
 resource "google_app_engine_application" "app" {
+  project = data.google_project.project.project_id
   count       = data.external.app_engine_state.result.application_exist == "false" ? 1 : 0
   location_id = var.gcp_region_name
 
@@ -33,6 +34,7 @@ resource "google_app_engine_application" "app" {
 
 resource "google_app_engine_standard_app_version" "default" {
   count      = data.external.app_engine_state.result.default_svc_exist == "false" ? 1 : 0
+  project = data.google_project.project.project_id
   service    = "default"
   version_id = "v1"
   runtime    = "python38"
@@ -57,6 +59,7 @@ resource "google_app_engine_standard_app_version" "default" {
 }
 
 resource "google_app_engine_standard_app_version" "ratingservice" {
+  project = data.google_project.project.project_id
   service    = var.service_name
   version_id = var.service_version
   runtime    = "python38"
