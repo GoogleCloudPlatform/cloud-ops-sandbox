@@ -27,7 +27,7 @@ resource "random_password" "db_password" {
 }
 
 resource "google_sql_database_instance" "rating_service" {
-  project = data.google_project.project.project_id
+  project             = var.gcp_project_id
   name                = "ratingservice-sql-instance-${random_string.suffix_len_4.result}"
   database_version    = "POSTGRES_12"
   deletion_protection = false
@@ -38,14 +38,14 @@ resource "google_sql_database_instance" "rating_service" {
 }
 
 resource "google_sql_user" "default" {
-  project = data.google_project.project.project_id
+  project  = var.gcp_project_id
   name     = "postgres"
   password = random_password.db_password.result
   instance = google_sql_database_instance.rating_service.name
 }
 
 resource "google_sql_database" "rating_service" {
-  project = data.google_project.project.project_id
+  project  = var.gcp_project_id
   name     = "rating-db"
   instance = google_sql_database_instance.rating_service.name
 

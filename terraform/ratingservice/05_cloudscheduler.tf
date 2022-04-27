@@ -15,7 +15,7 @@
  */
 
 resource "google_cloud_scheduler_job" "recollect_job" {
-  project = data.google_project.project.project_id
+  project          =  var.gcp_project_id
   name             = "ratingservice-recollect-job"
   schedule         = "* * * * *" # each minute
   description      = "recollect recently posted new votes"
