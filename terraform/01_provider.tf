@@ -41,3 +41,8 @@ terraform {
 
   }
 }
+
+provider "google" {
+  project = data.google_project.project.project_id
+  region  = var.appengine_region
+}
