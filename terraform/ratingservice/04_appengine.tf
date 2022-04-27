@@ -29,7 +29,7 @@ resource "google_app_engine_application" "app" {
   count       = data.external.app_engine_state.result.application_exist == "false" ? 1 : 0
   location_id = var.gcp_region_name
 
-  depends_on = [google_project_service.gae]
+  depends_on = [google_project_service.gae, google_project_service.cloudbuild]
 }
 
 resource "google_app_engine_standard_app_version" "default" {
@@ -55,7 +55,7 @@ resource "google_app_engine_standard_app_version" "default" {
   }
 
   noop_on_destroy = true
-  depends_on      = [google_project_service.gae]
+  depends_on      = [google_project_service.gae, google_project_service.cloudbuild]
 }
 
 resource "google_app_engine_standard_app_version" "ratingservice" {
