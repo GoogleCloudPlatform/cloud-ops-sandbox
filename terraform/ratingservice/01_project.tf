@@ -25,3 +25,7 @@ resource "google_project_service" "cloudscheduler" {
   disable_dependent_services = true
   project                    = var.gcp_project_id
 }
+
+data "google_project" "project" {
+  project_id = var.gcp_project_id
+}

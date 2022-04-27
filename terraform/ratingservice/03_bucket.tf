@@ -42,3 +42,17 @@ resource "google_storage_bucket_object" "default_main" {
   bucket = google_storage_bucket.it.name
   source = "${local.source_path}/pong.py"
 }
+
+data "google_iam_policy" "cloudbuild" {
+  binding {
+    role = "roles/storage.objectViewer"
+    members = [
+      "serviceaccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com",
+    ]
+  }
+}
+
+resource "google_storage_bucket_iam_policy" "policy" {
+  bucket = google_storage_bucket.it.name
+  policy_data = data.google_iam_policy.cloudbuild.policy_data
+}
