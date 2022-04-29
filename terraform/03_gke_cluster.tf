@@ -225,7 +225,7 @@ resource "null_resource" "delay" {
 }
 
 # Rewrite ratingservice address
-resource "null_resource" "ratingservice-address-rewrite" {
+resource "null_resource" "ratingservice_address_rewrite" {
   count = var.skip_ratingservice ? 0 : 1
 
   provisioner "local-exec" {
