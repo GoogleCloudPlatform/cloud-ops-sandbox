@@ -14,9 +14,7 @@
 
 module "ratingservice" {
   source          = "./ratingservice"
-
-  count = var.skip_ratingservice ? 0 : 1
-
+  count           = var.skip_ratingservice ? 0 : 1
   gcp_project_id  = var.project_id
   gcp_region_name = var.appengine_region
 }

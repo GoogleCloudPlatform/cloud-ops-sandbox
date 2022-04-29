@@ -55,7 +55,13 @@ resource "google_app_engine_standard_app_version" "default" {
   }
 
   noop_on_destroy = true
-  depends_on      = [google_project_service.gae, google_project_service.cloudbuild, google_storage_bucket_object.requirements, google_storage_bucket_object.default_main, google_storage_bucket_object.main]
+  depends_on      = [
+    google_project_service.gae,
+    google_project_service.cloudbuild,
+    google_storage_bucket_object.requirements,
+    google_storage_bucket_object.default_main,
+    google_storage_bucket_object.main
+  ]
 }
 
 resource "google_app_engine_standard_app_version" "ratingservice" {

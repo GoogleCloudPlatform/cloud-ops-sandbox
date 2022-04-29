@@ -97,10 +97,9 @@ resource "google_monitoring_slo" "custom_service_latency_slo" {
 # Example SLO is defined as following:
 #   90% of HTTP requests are successful within the past 30 day windowed period
 resource "google_monitoring_slo" "istio_service_availability_slo" {
-  count = length(var.istio_services)
-
   # Uses the Istio service that is automatically detected and created by installing Istio
   # Identify the service using the string: ist:${project_id}-zone-${zone}-cloud-ops-sandbox-default-${service_id}
+  count        = length(var.istio_services)
   service      = "ist:${var.project_id}-zone-${var.zone}-cloud-ops-sandbox-default-${var.istio_services[count.index].service_id}"
   slo_id       = "${var.istio_services[count.index].service_id}-availability-slo"
   display_name = "Availability SLO with request base SLI (good total ratio) for ${var.istio_services[count.index].service_id}"
@@ -176,7 +175,7 @@ resource "google_monitoring_slo" "istio_service_latency_slo" {
 resource "google_monitoring_slo" "rating_service_availability_slo" {
   # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine
   # Identify of the service is built after the following template: gae:${project_id}_servicename
-  count = var.skip_ratingservice ? 0 : 1
+  count        = var.skip_ratingservice ? 0 : 1
   service      = "gae:${var.project_id}_ratingservice"
   slo_id       = "ratingservice-availability-slo"
   display_name = "Rating Service Availability SLO with request base SLI (good total ratio)"
@@ -224,7 +223,7 @@ resource "google_monitoring_slo" "rating_service_availability_slo" {
 resource "google_monitoring_slo" "rating_service_latency_slo" {
   # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine
   # Identify of the service is built after the following template: gae:${project_id}_servicename
-  count = var.skip_ratingservice ? 0 : 1
+  count        = var.skip_ratingservice ? 0 : 1
   service      = "gae:${var.project_id}_ratingservice"
   slo_id       = "ratingservice-latency-slo"
   display_name = "Rating Service Latency SLO with request base SLI (distribution cut)"
@@ -259,7 +258,7 @@ resource "google_monitoring_slo" "rating_service_latency_slo" {
 resource "google_monitoring_slo" "rating_service_freshness_slo" {
   # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine
   # Identify of the service is built after the following template: gae:${project_id}_servicename
-  count = var.skip_ratingservice ? 0 : 1
+  count        = var.skip_ratingservice ? 0 : 1
   service      = "gae:${var.project_id}_ratingservice"
   slo_id       = "ratingservice-freshness-slo"
   display_name = "Rating freshness SLO with window based SLI"
