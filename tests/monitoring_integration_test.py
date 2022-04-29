@@ -92,14 +92,14 @@ class TestUptimeCheck(unittest.TestCase):
             cls.external_ip = fout.read().replace('\'', '')
 
     def testNumberOfUptimeChecks(self):
-        """" Test that ensures there is only one uptime check created """
+        """" Test that ensures there is an uptime check created """
         client = monitoring_v3.UptimeCheckServiceClient()
         configs = client.list_uptime_check_configs(project_name)
         config_list = []
         for config in configs:
             config_list.append(config)
 
-        self.assertEqual(len(config_list), 1)
+        self.assertTrue(len(config_list) >= 1)
 
     def testUptimeCheckName(self):
         """ Verifies the configured IP address of the uptime check matches the external IP
@@ -126,14 +126,14 @@ class TestUptimeCheck(unittest.TestCase):
         self.assertTrue(found_uptime_alert)
 
     def testUptimeCheckAlertingPolicyNotificationChannel(self):
-        """ Test that our single notification channel was created. """
+        """ Test that a notification channel was created. """
         client = monitoring_v3.NotificationChannelServiceClient()
         channels = client.list_notification_channels(project_name)
         channel_list = []
         for channel in channels:
             channel_list.append(channel)
 
-        self.assertEqual(len(channel_list), 1)
+        self.assertTrue(len(channel_list) >= 1)
 
 
 class TestMonitoringDashboard(unittest.TestCase):

@@ -13,9 +13,9 @@
 # limitations under the License.
 #!/bin/bash
 
-project_id=$(gcloud config get-value project)
+project_id=$(gcloud config get-value project 2> /dev/null)
 zone=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $project_id --format="value(zone)")
-gcloud container clusters get-credentials cloud-ops-sandbox --project $project_id --zone $zone
+gcloud container clusters get-credentials cloud-ops-sandbox --project $project_id --zone $zone > /dev/null 2> /dev/null
 
 # Retrieve the cluster's external IP
 TRIES=0
