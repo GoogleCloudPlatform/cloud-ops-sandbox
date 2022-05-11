@@ -32,7 +32,6 @@ jobs:
     - name: License Check
       run: |
         set -x
-        export "PATH=$PATH:$HOME/go/bin"
         addlicense --check ./
     - name: Validate Schema of SRE Recipes Configs
       run: |
