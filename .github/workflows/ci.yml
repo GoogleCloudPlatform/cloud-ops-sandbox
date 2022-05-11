@@ -32,13 +32,7 @@ jobs:
     - name: License Check
       run: |
         set -x
-        git init
-        git add --all
-        git -c user.name="CI Bot" -c user.email="<>" commit -m "initial state"
-        addlicense ./
-        if [[ -n $(git status -s) ]]; then
-          exit 1
-        fi
+        addlicense --check ./
     - name: Validate Schema of SRE Recipes Configs
       run: |
         set -x
