@@ -112,13 +112,9 @@ resource "google_app_engine_standard_app_version" "ratingservice" {
 
 # give the default appengine service account permissions to use clouddebugger
 
-data "google_app_engine_default_service_account" "default" {
-  depends_on = [google_project_service.gae]
-}
-
-
 resource "google_project_iam_member" "gae_editor_binding" {
-  project = var.gcp_project_id
-  role    = "roles/editor"
-  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
+  project    = var.gcp_project_id
+  role       = "roles/editor"
+  member     = "serviceAccount:${var.gcp_project_id}@appspot.gserviceaccount.com"
+  depends_on = [google_app_engine_standard_app_version.default]
 }
