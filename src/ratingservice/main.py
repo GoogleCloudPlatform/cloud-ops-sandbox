@@ -15,16 +15,15 @@
 import os
 from flask import Flask, jsonify, request
 from psycopg2 import pool, DatabaseError, IntegrityError
-from googleapiclient.errors import HttpError
 # enable GCP debugger when not running locally
-# if __name__ != "__main__":
-    # try:
-    #     import googleclouddebugger
-    #     googleclouddebugger.enable(
-    #         breakpoint_enable_canary=False
-    #     )
-    # except (ImportError, HttpError) as e:
-    #     pass
+if __name__ != "__main__":
+    try:
+        import googleclouddebugger
+        googleclouddebugger.enable(
+            breakpoint_enable_canary=False
+        )
+    except ImportError:
+        pass
 
 
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
