@@ -64,6 +64,7 @@ jobs:
         skaffold config set --global local-cluster true
         skaffold run -p local --status-check=false
         # setup dummy RATING_SERVICE_ADDR; without it frontend microservice will not run
+        kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/frontend
         kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=http://some.host
     - name: Wait For Pods
       timeout-minutes: 10
