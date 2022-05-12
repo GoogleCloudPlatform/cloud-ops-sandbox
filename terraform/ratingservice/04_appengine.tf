@@ -120,5 +120,5 @@ data "google_app_engine_default_service_account" "default" {
 resource "google_project_iam_member" "gae_editor_binding" {
   project = var.gcp_project_id
   role    = "roles/editor"
-  member  = "serviceAccount:${google_app_engine_default_service_account.default.email}"
+  member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
 }
