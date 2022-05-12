@@ -15,6 +15,7 @@
 import os
 from flask import Flask, jsonify, request
 from psycopg2 import pool, DatabaseError, IntegrityError
+from googleapiclient.errors import HttpError
 # enable GCP debugger when not running locally
 if __name__ != "__main__":
     try:
@@ -22,7 +23,7 @@ if __name__ != "__main__":
         googleclouddebugger.enable(
             breakpoint_enable_canary=False
         )
-    except ImportError:
+    except (ImportError, HttpError) as e:
         pass
 
 
