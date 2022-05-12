@@ -60,7 +60,8 @@ resource "google_app_engine_standard_app_version" "default" {
     google_project_service.cloudbuild,
     google_storage_bucket_object.requirements,
     google_storage_bucket_object.default_main,
-    google_storage_bucket_object.main
+    google_storage_bucket_object.main,
+    google_app_engine_application.app,
   ]
 }
 
