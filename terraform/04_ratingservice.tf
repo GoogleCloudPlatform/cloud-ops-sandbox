@@ -19,9 +19,6 @@ module "ratingservice" {
   gcp_region_name = var.appengine_region
 
   providers = {
-    google = {
-      region  = var.appengine_region
-      project = var.project_id
-    }
+    google = google.ratingservice
   }
 }
