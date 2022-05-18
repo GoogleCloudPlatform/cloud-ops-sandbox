@@ -170,10 +170,10 @@ resource "null_resource" "annotate_ksa" {
   depends_on = [google_service_account_iam_binding.set_gsa_binding]
 }
 
-# Install Istio into the GKE cluster
-resource "null_resource" "install_istio" {
+# Install ASM into the GKE cluster
+resource "null_resource" "install_asm" {
   provisioner "local-exec" {
-    command = "./istio/install_istio.sh"
+    command = "./istio/install_asm.sh"
   }
 
   depends_on = [null_resource.annotate_ksa]
@@ -198,7 +198,7 @@ resource "null_resource" "deploy_services" {
   EOT
   }
 
-  depends_on = [null_resource.install_istio]
+  depends_on = [null_resource.install_asm]
 }
 
 # We wait for all of our microservices to become available on kubernetes
