@@ -85,6 +85,22 @@ resource "google_project_service" "sourcerepo" {
   disable_dependent_services = true
 }
 
+resource "google_project_service" "gkehub" {
+  project = data.google_project.project.project_id
+
+  service = "gkehub.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "meshconfig" {
+  project = data.google_project.project.project_id
+
+  service = "meshconfig.googleapis.com"
+
+  disable_dependent_services = true
+}
+
 # Enable GKE in the project we created. If you look at the docs you might see
 # the `google_project_services` resource which allows you to specify a list of
 # resources to enable. This seems like a good idea but there's a gotcha: to use
