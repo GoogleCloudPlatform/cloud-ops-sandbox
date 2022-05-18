@@ -24,7 +24,7 @@ echo "### "
 
 ASM_VERSION=1.12
 PROJECT_ID=$(gcloud config get-value project)
-CLUSTER_ZONE=$(gcloud container clusters list --filter name=cloud-ops-sandbox --format="json" | jq '.[0].zone')
+CLUSTER_ZONE=$(gcloud container clusters list --filter name=cloud-ops-sandbox --format="json" | jq -r '.[0].zone')
 
 # Set the working directory to our current directory (/sandbox/terraform/istio)
 export SCRIPTPATH=$(dirname $(realpath $0))
