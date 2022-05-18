@@ -144,7 +144,9 @@ def loadgen(traffic_pattern):
 @click.option('--verbose', '-v', default=False, is_flag=True,
               help='print commands as they run (set -x)')
 @click.option('--skip-loadgenerator', default=False,  is_flag=True,
-              help="Don't deploy a loadgenerator instance")
+              help="Don't deploy the loadgenerator instance")
+@click.option('--skip-ratingservice', default=False,  is_flag=True,
+              help="Don't deploy the ratingservice")
 @click.option('--service-wait', default=False,  is_flag=True,
               help='Wait indefinitely for services to be detected by Cloud Monitoring')
 def create(project, *args, **kwargs):

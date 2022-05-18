@@ -36,3 +36,8 @@ variable "zone" {
   type        = string
   description = "The Zone of the Cloud Operations Sandbox cluster."
 }
+
+variable "skip_ratingservice" {
+  default     = false
+  description = "If true, the ratingservice and associated resources will not be deployed."
+}

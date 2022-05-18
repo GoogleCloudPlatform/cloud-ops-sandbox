@@ -25,14 +25,16 @@ data "external" "app_engine_state" {
 }
 
 resource "google_app_engine_application" "app" {
+  project     =  var.gcp_project_id
   count       = data.external.app_engine_state.result.application_exist == "false" ? 1 : 0
   location_id = var.gcp_region_name
 
-  depends_on = [google_project_service.gae]
+  depends_on = [google_project_service.gae, google_project_service.cloudbuild]
 }
 
 resource "google_app_engine_standard_app_version" "default" {
   count      = data.external.app_engine_state.result.default_svc_exist == "false" ? 1 : 0
+  project    =  var.gcp_project_id
   service    = "default"
   version_id = "v1"
   runtime    = "python38"
@@ -53,10 +55,18 @@ resource "google_app_engine_standard_app_version" "default" {
   }
 
   noop_on_destroy = true
-  depends_on      = [google_project_service.gae]
+  depends_on      = [
+    google_project_service.gae,
+    google_project_service.cloudbuild,
+    google_storage_bucket_object.requirements,
+    google_storage_bucket_object.default_main,
+    google_storage_bucket_object.main,
+    google_app_engine_application.app,
+  ]
 }
 
 resource "google_app_engine_standard_app_version" "ratingservice" {
+  project    = var.gcp_project_id
   service    = var.service_name
   version_id = var.service_version
   runtime    = "python38"
@@ -98,4 +108,13 @@ resource "google_app_engine_standard_app_version" "ratingservice" {
 
   delete_service_on_destroy = true
   depends_on                = [google_app_engine_standard_app_version.default]
+}
+
+# give the default appengine service account permissions to use clouddebugger
+
+resource "google_project_iam_member" "gae_editor_binding" {
+  project    = var.gcp_project_id
+  role       = "roles/editor"
+  member     = "serviceAccount:${var.gcp_project_id}@appspot.gserviceaccount.com"
+  depends_on = [google_app_engine_standard_app_version.default]
 }

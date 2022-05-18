@@ -195,7 +195,6 @@ resource "null_resource" "deploy_services" {
     kubectl apply -f ../kubernetes-manifests/productcatalogservice.yaml
     kubectl apply -f ../kubernetes-manifests/recommendationservice.yaml
     kubectl apply -f ../kubernetes-manifests/shippingservice.yaml
-    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${module.ratingservice.service_url}
   EOT
   }
 
@@ -223,6 +222,22 @@ resource "null_resource" "delay" {
   triggers = {
     "before" = null_resource.deploy_services.id
   }
+}
+
+# Rewrite ratingservice address
+resource "null_resource" "ratingservice_address_rewrite" {
+  count = var.skip_ratingservice ? 0 : 1
+
+  provisioner "local-exec" {
+    command = <<-EOT
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/frontend
+    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${one(module.ratingservice[*].service_url)}
+    kubectl delete pod -l app=frontend
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/frontend
+  EOT
+  }
+
+  depends_on = [null_resource.delay]
 }
 
 data "external" "terraform_vars" {
