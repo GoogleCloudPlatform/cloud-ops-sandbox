@@ -19,8 +19,8 @@ set -euo pipefail
 sudo apt-get -y install git kubectl
 
 # install go
-curl -O https://storage.googleapis.com/golang/go1.12.9.linux-amd64.tar.gz
-tar -xvf go1.12.9.linux-amd64.tar.gz
+curl -O https://go.dev/dl/go1.18.2.linux-amd64.tar.gz
+tar -xvf go1.18.2.linux-amd64.tar.gz
 sudo chown -R root:root ./go
 sudo mv go /usr/local
 echo 'export GOPATH=$HOME/go' >> ~/.profile
@@ -28,11 +28,11 @@ echo 'export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin' >> ~/.profile
 source ~/.profile
 
 # install addlicense
-go get -u github.com/google/addlicense
+go install github.com/google/addlicense@latest
 sudo ln -s $HOME/go/bin/addlicense /bin
 
 # install kind
-curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64" && \
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.13.0/kind-linux-amd64
 chmod +x ./kind && \
 sudo mv ./kind /usr/local/bin
 
@@ -52,9 +52,8 @@ sudo usermod -aG docker ${USER}
 # docker auth with service account used for CI
 gcloud auth configure-docker --quiet
 
+# install pip3
+sudo apt-get install python3-pip
+
 # reboot to complete docker setup
 sudo reboot
-
-# install pip3
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-python3 get-pip.py
