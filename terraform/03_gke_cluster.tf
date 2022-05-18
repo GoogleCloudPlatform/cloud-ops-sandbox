@@ -61,6 +61,12 @@ resource "google_container_cluster" "gke" {
     "version" = var.app_version
   }
 
+  release_channel = "regular"
+
+  labels = {
+    mesh_id     = "proj-${data.google_project.project.number}"
+  }
+
   # Using an embedded resource to define the node pool. Another
   # option would be to create the node pool as a separate resource and link it
   # to this cluster. There are tradeoffs to each approach.
@@ -78,7 +84,7 @@ resource "google_container_cluster" "gke" {
   # interesting things.
   node_pool {
     node_config {
-      machine_type = "n1-standard-2"
+      machine_type = "n1-standard-4"
 
       oauth_scopes = [
         "https://www.googleapis.com/auth/cloud-platform"
@@ -87,6 +93,7 @@ resource "google_container_cluster" "gke" {
       labels = {
         environment = "dev",
         cluster     = "cloud-ops-sandbox-main"
+        mesh_id     = "proj-${data.google_project.project.number}"
       }
 
       # Enable Workload Identity for node pool
