@@ -60,3 +60,6 @@ echo "Enabling Sidecar Injection..."
 cd $WORK_DIR
 REVISION=$(kubectl get deploy -n istio-system -l app=istiod -o json | jq -r '.["items"][0]["metadata"]["labels"]["istio.io/rev"]')
 kubectl label namespace default istio-injection- istio.io/rev=$REVISION --overwrite
+
+echo "Deploying Virtual Services..."
+kubectl apply -f ../../istio-manifests
