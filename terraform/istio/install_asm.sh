@@ -48,14 +48,6 @@ echo "Installing ASM..."
   --ca mesh_ca \
   --enable_gcp_components
 
-#echo "Installing Gateway..."
-#GATEWAY_NS=istio-gateway
-#kubectl create namespace $GATEWAY_NS
-#REVISION=$(kubectl get deploy -n istio-system -l app=istiod -o jsonpath={.items[*].metadata.labels.'istio\.io\/rev'}'{"\n"}')
-#kubectl label namespace $GATEWAY_NS istio.io/rev=$REVISION --overwrite
-#cd $WORK_DIR/asm_output
-#kubectl apply -n $GATEWAY_NS -f samples/gateways/istio-ingressgateway
-
 echo "Enabling Sidecar Injection..."
 cd $WORK_DIR
 REVISION=$(kubectl get deploy -n istio-system -l app=istiod -o json | jq -r '.["items"][0]["metadata"]["labels"]["istio.io/rev"]')
