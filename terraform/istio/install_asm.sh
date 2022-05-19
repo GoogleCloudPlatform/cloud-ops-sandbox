@@ -43,6 +43,7 @@ echo "Installing ASM..."
   --fleet_id $PROJECT_ID \
   --output_dir $WORK_DIR/asm_output \
   --enable_all \
+  --option prometheus-and-stackdriver \
   --option legacy-default-ingressgateway \
   --ca mesh_ca \
   --enable_gcp_components
