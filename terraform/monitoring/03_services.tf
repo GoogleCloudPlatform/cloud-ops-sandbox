@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Define specifics for each of the services that will receive SLOs through a custom service
-# The data members needed are to specify the custom service, goals for each SLO (availability and latency),
-# and maximum error budget burn rates.
-variable "custom_services" {
+# Specify services that will use the Istio service that is automatically detected
+# and created by installing Istio on the Kubernetes cluster.
+# The data members required are to successfully set up SLOs (goals and latency thresholds)
+# and burn rate limits for alerting policies
+variable "istio_services" {
   type = list(object({
     service_name           = string,
     service_id             = string,
@@ -70,38 +71,7 @@ variable "custom_services" {
       latency_goal           = 0.99
       latency_threshold      = 500
       latency_burn_rate      = 2
-    }
-  ]
-}
-
-# Create a custom service that we attach our SLOs to
-# Using a custom service here allows us to add on additional SLOs and 
-# alerting policies on things such as custom metrics.
-#
-# There is the option to use an Istio service since Istio automatically detects and creates 
-# services for us. This example uses a custom service to demonstrate Terraform support for 
-# creating custom services with attached SLOs and alerting policies.
-resource "google_monitoring_custom_service" "custom_service" {
-  count        = length(var.custom_services)
-  service_id   = "${var.custom_services[count.index].service_id}-srv"
-  display_name = var.custom_services[count.index].service_name
-}
-
-# Specify services that will use the Istio service that is automatically detected
-# and created by installing Istio on the Kubernetes cluster.
-# The data members required are to successfully set up SLOs (goals and latency thresholds)
-# and burn rate limits for alerting policies
-variable "istio_services" {
-  type = list(object({
-    service_name           = string,
-    service_id             = string,
-    availability_goal      = number,
-    availability_burn_rate = number,
-    latency_goal           = number,
-    latency_threshold      = number,
-    latency_burn_rate      = number
-  }))
-  default = [
+    },
     {
       service_name           = "Cart Service"
       service_id             = "cartservice"
