@@ -146,14 +146,14 @@ data "google_compute_default_service_account" "default" {
 
 # Give service account Observability permissions
 resource "google_project_iam_member" "trace_role" {
-  project = var.gcp_project_id
+  project = data.google_project.project.project_id
   role    = "roles/cloudtrace.admin"
   member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
   depends_on = [data.google_compute_default_service_account.default]
 }
 
 resource "google_project_iam_member" "monitoring_role" {
-  project = var.gcp_project_id
+  project = data.google_project.project.project_id
   role    = "roles/monitoring.editor"
   member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
   depends_on = [data.google_compute_default_service_account.default]
@@ -161,7 +161,7 @@ resource "google_project_iam_member" "monitoring_role" {
 
 
 resource "google_project_iam_member" "profiler_role" {
-  project = var.gcp_project_id
+  project = data.google_project.project.project_id
   role    = "roles/cloudprofiler.agent"
   member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
   depends_on = [data.google_compute_default_service_account.default]
