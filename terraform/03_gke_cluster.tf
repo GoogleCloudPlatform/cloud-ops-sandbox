@@ -59,6 +59,7 @@ resource "google_container_cluster" "gke" {
 
   resource_labels = {
     "version" = var.app_version
+    "mesh_id"     = "proj-${data.google_project.project.number}"
   }
 
   # Using an embedded resource to define the node pool. Another
