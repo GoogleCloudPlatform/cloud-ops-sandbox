@@ -20,23 +20,22 @@ import concurrent.futures
 from google.cloud import monitoring_v3
 
 
-def getIstioServiceName(service_name, project_name):
+def getIstioServiceName(service_name, project_number):
     """ Returns the Istio service name of a certain service. """
-    return "canonical-ist:proj-{}-default-{}".format(project_name, service_name)
+    return "canonical-ist:proj-{}-default-{}".format(project_number, service_name)
 
 
-def findService(client, service_name, project_id, zone, should_timeout):
+def findService(client, service_name, project_number, should_timeout):
         """ Checks to see if a service exists in Cloud Monitoring 
         Arguments:
         client - the API client
         service_name - the Istio service name, returned from getIstioServiceName
-        project_id - the Sandbox project id
-        zone - the zone of the Sandbox cluster
+        project_number - the Sandbox project number
         should_timeout - whether to timeout after 5 minutes or wait indefinitely for the service
         """
         found_service = False
-        full_service_name = getIstioServiceName(service_name, project_id, zone)
-        service = client.service_path(project_id, full_service_name)
+        full_service_name = getIstioServiceName(service_name, project_number)
+        service = client.service_path(project_number, full_service_name)
         num_tries = 0
         while not found_service and num_tries <= 50:
             try:
