@@ -260,6 +260,8 @@ installMonitoring() {
   python3 monitoring/istio_service_setup.py $project_number $service_wait
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
+  # todo: remove. Adding a manual sleep to see if that helps SLOs on start
+  sleep 60
   terraform init -lockfile=false
   terraform apply --auto-approve -var="project_id=${project_id}" -var="project_number=${project_number}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}" -var="zone=${CLUSTER_ZONE}" -var="skip_ratingservice=${skip_ratingservice:-false}"
   popd
