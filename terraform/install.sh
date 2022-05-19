@@ -254,13 +254,14 @@ installMonitoring() {
   fi
 
   acct=$(gcloud info --format="value(config.account)")
+  project_number=$(gcloud projects describe $project_id --format="value(projectNumber)")
 
   log "Checking to make sure necessary Istio services are ready for monitoring"
-  python3 monitoring/istio_service_setup.py $project_id $CLUSTER_ZONE $service_wait
+  python3 monitoring/istio_service_setup.py $project_number $service_wait
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
   terraform init -lockfile=false
-  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}" -var="zone=${CLUSTER_ZONE}" -var="skip_ratingservice=${skip_ratingservice:-false}"
+  terraform apply --auto-approve -var="project_id=${project_id}" -var="project_number=${project_number}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}" -var="zone=${CLUSTER_ZONE}" -var="skip_ratingservice=${skip_ratingservice:-false}"
   popd
 }
 

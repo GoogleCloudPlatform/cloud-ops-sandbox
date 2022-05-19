@@ -20,9 +20,9 @@ import concurrent.futures
 from google.cloud import monitoring_v3
 
 
-def getIstioServiceName(service_name, project_id, zone):
+def getIstioServiceName(service_name, project_name):
     """ Returns the Istio service name of a certain service. """
-    return "ist:{}-zone-{}-cloud-ops-sandbox-default-{}".format(project_id, zone, service_name)
+    return "canonical-ist:proj-{}-default-{}".format(project_name, service_name)
 
 
 def findService(client, service_name, project_id, zone, should_timeout):
@@ -48,11 +48,10 @@ def findService(client, service_name, project_id, zone, should_timeout):
                 found_service = False
 
 
-def waitForIstioServicesDetection(project_id, zone, should_timeout):
+def waitForIstioServicesDetection(project_number, should_timeout):
     """ Waits for Istio services to be detected in Cloud Monitoring as a prerequisite for Terraform monitoring provisioning
     Arguments:
-    project_id - the Sandbox project id (cloud-ops-sandbox-###)
-    zone - the zone of the Sandbox cluster
+    project_number - the Sandbox project number
     should_timeout - whether to timeout after 1 minute or wait indefinitely for the service
     """
     client = monitoring_v3.ServiceMonitoringServiceClient()
@@ -62,22 +61,20 @@ def waitForIstioServicesDetection(project_id, zone, should_timeout):
                 "adservice", "frontend", "checkoutservice", "paymentservice", "emailservice", "shippingservice"]
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(services)) as executor:
         for service in services:
-            executor.submit(findService, client, service,
-                            project_id, zone, should_timeout)
+            executor.submit(findService, client, service, project_number, should_timeout)
 
 
 if __name__ == '__main__':
-    project_id = ''
+    project_number = ''
     zone = ''
     try:
-        project_id = sys.argv[1]
-        zone = sys.argv[2]
+        project_number = sys.argv[1]
     except IndexError:
-        exit('Missing Project Name or Zone. Usage: python3 istio_service_setup.py $project_id $zone')
+        exit('Missing Project Number. Usage: python3 istio_service_setup.py $project_number')
 
     # optional parameter to determine whether we should timeout, default = True
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 3:
         should_timeout = False
     else:
         should_timeout = True
-    waitForIstioServicesDetection(project_id, zone, should_timeout)
+    waitForIstioServicesDetection(project_number, should_timeout)

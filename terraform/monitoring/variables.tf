@@ -27,6 +27,11 @@ variable "project_id" {
   description = "The project id that was created by Cloud Operations Sandbox. Can be revealed by running \"gcloud config get-value project\" in the Google Cloud CLI."
 }
 
+variable "project_number" {
+  type        = string
+  description = "The project Number associated with the project id."
+}
+
 variable "project_owner_email" {
   type        = string
   description = "The email to receive alerts caused by violations of alerting policies."

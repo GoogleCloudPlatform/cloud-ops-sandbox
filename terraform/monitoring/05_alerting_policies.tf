@@ -74,7 +74,7 @@ resource "google_monitoring_alert_policy" "istio_service_availability_slo_alert"
 
       # This filter alerts on burn rate over the past 60 minutes
       # The service is defined by the unique Istio string that is automatically created
-      filter          = "select_slo_burn_rate(\"projects/${var.project_id}/services/ist:${var.project_id}-zone-${var.zone}-cloud-ops-sandbox-default-${var.istio_services[count.index].service_id}/serviceLevelObjectives/${google_monitoring_slo.istio_service_availability_slo[count.index].slo_id}\", 60m)"
+      filter          = "select_slo_burn_rate(\"projects/${var.project_id}/services/canonical-ist:proj-${var.project_number}-default-${var.istio_services[count.index].service_id}/serviceLevelObjectives/${google_monitoring_slo.istio_service_availability_slo[count.index].slo_id}\", 60m)"
       threshold_value = var.istio_services[count.index].availability_burn_rate
       comparison      = "COMPARISON_GT"
       duration        = "60s"
@@ -95,7 +95,7 @@ resource "google_monitoring_alert_policy" "istio_service_latency_slo_alert" {
   conditions {
     display_name = "SLO burn rate alert for latency SLO with a threshold of ${var.istio_services[count.index].latency_burn_rate}"
     condition_threshold {
-      filter          = "select_slo_burn_rate(\"projects/${var.project_id}/services/ist:${var.project_id}-zone-${var.zone}-cloud-ops-sandbox-default-${var.istio_services[count.index].service_id}/serviceLevelObjectives/${google_monitoring_slo.istio_service_latency_slo[count.index].slo_id}\", 60m)"
+      filter          = "select_slo_burn_rate(\"projects/${var.project_id}/services/canonical-ist:proj-${var.project_number}-default-${var.istio_services[count.index].service_id}/serviceLevelObjectives/${google_monitoring_slo.istio_service_latency_slo[count.index].slo_id}\", 60m)"
       threshold_value = var.istio_services[count.index].availability_burn_rate
       comparison      = "COMPARISON_GT"
       duration        = "60s"
