@@ -89,7 +89,7 @@ resource "google_monitoring_slo" "istio_service_latency_slo" {
 }
 
 # Rating service availability SLO:
-#   99% of HTTP requests are successful within the past 30 day windowed period
+#   90% of HTTP requests are successful within the past 30 day windowed period
 
 resource "google_monitoring_slo" "rating_service_availability_slo" {
   # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine
@@ -100,7 +100,7 @@ resource "google_monitoring_slo" "rating_service_availability_slo" {
   display_name = "Rating Service Availability SLO with request base SLI (good total ratio)"
 
   # The goal sets our objective for successful requests over the 30 day rolling window period
-  goal                = 0.99
+  goal                = 0.9
   rolling_period_days = 30
 
   request_based_sli {
@@ -137,7 +137,7 @@ resource "google_monitoring_slo" "rating_service_availability_slo" {
 }
 
 # Rating service latency SLO:
-#   99% of requests that return in under 175 ms in the previous 30 days
+#   90% of requests that return in under 175 ms in the previous 30 days
 
 resource "google_monitoring_slo" "rating_service_latency_slo" {
   # Uses ratingservice service that is automatically detected and created when the service is deployed to App Engine
@@ -147,7 +147,7 @@ resource "google_monitoring_slo" "rating_service_latency_slo" {
   slo_id       = "ratingservice-latency-slo"
   display_name = "Rating Service Latency SLO with request base SLI (distribution cut)"
 
-  goal                = 0.99
+  goal                = 0.9
   rolling_period_days = 30
 
   request_based_sli {
@@ -166,7 +166,7 @@ resource "google_monitoring_slo" "rating_service_latency_slo" {
       range {
         # By not setting a min value, it is automatically set to -infinity
         # The upper bound for latency is in ms
-        max = 500
+        max = 1000
       }
     }
   }
@@ -182,7 +182,7 @@ resource "google_monitoring_slo" "rating_service_freshness_slo" {
   slo_id       = "ratingservice-freshness-slo"
   display_name = "Rating freshness SLO with window based SLI"
 
-  goal                = 0.99
+  goal                = 0.9
   rolling_period_days = 1
 
   windows_based_sli {
