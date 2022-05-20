@@ -55,6 +55,27 @@ resource "google_monitoring_slo" "istio_service_availability_slo" {
   }
 }
 
+resource "google_monitoring_slo" "istio_service_availability_slo2" {
+  # Uses the Istio service that is automatically detected and created by installing Istio
+  # Identify the service using the string: canonical-ist:proj-${project_number}-default-${istio_services[count.index].service_id}
+  count        = length(var.istio_services)
+  service      = "canonical-ist:proj-${var.project_number}-default-${var.istio_services[count.index].service_id}"
+  slo_id       = "${var.istio_services[count.index].service_id}-availability-slo"
+  display_name = "${var.istio_services[count.index].availability_goal}% - Availability - 30 Days - ${var.istio_services[count.index].service_id}"
+
+  # The goal sets our objective for successful requests over the 30 day rolling window period
+  goal                = var.istio_services[count.index].availability_goal
+  rolling_period_days = 30
+
+  basic_sli {
+    availability {
+      enabled = "true"
+    }
+  }
+}
+
+
+
 # Create an SLO with respect to latency using the Istio service.
 # Example SLO is defined as:
 #   99% of requests return in under 500 ms in the previous 30 days
