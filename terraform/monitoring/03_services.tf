@@ -33,7 +33,7 @@ variable "istio_services" {
       availability_goal      = 0.9 # configurable goal for the availability SLO (0.9 = 90% of requests are successsful)
       availability_burn_rate = 2   # limit on error budget burn rate (2 indicates we alert if error budget is consumed 2x faster than it should)
       latency_goal           = 0.9 # configurable goal for the latency SLO (0.9 = 90% of requests finish in under the latency threshold)
-      latency_threshold      = 1500 # indicates 1000ms as the maximum latency of a 'good' request
+      latency_threshold      = 2000 # indicates 2000ms as the maximum latency of a 'good' request
       latency_burn_rate      = 2
     },
     {
@@ -102,7 +102,7 @@ variable "istio_services" {
     {
       service_name           = "Recommendation Service"
       service_id             = "recommendationservice"
-      availability_goal      = 0.9
+      availability_goal      = 0.8
       availability_burn_rate = 2
       latency_goal           = 0.9
       latency_threshold      = 1000
