@@ -21,47 +21,7 @@ resource "google_monitoring_slo" "istio_service_availability_slo" {
   count        = length(var.istio_services)
   service      = "canonical-ist:proj-${var.project_number}-default-${var.istio_services[count.index].service_id}"
   slo_id       = "${var.istio_services[count.index].service_id}-availability-slo"
-  display_name = "Availability SLO with request base SLI (good total ratio) for ${var.istio_services[count.index].service_id}"
-
-  # The goal sets our objective for successful requests over the 30 day rolling window period
-  goal                = var.istio_services[count.index].availability_goal
-  rolling_period_days = 30
-
-  request_based_sli {
-    good_total_ratio {
-
-      # The "good" service is the number of 200 OK responses
-      good_service_filter = join(" AND ", [
-        "metric.type=\"istio.io/service/server/request_count\"",
-        "resource.type=\"k8s_container\"",
-        "resource.label.\"cluster_name\"=\"cloud-ops-sandbox\"",
-        "metadata.user_labels.\"app\"=\"${var.istio_services[count.index].service_id}\"",
-        "metric.label.\"response_code\"=\"200\""
-      ])
-
-      # The total is the number of non-4XX responses
-      # We eliminate 4XX responses since they do not accurately represent server-side 
-      # failures and have the possibility of skewing our SLO measurements
-      total_service_filter = join(" AND ", [
-        "metric.type=\"istio.io/service/server/request_count\"",
-        "resource.type=\"k8s_container\"",
-        "resource.label.\"cluster_name\"=\"cloud-ops-sandbox\"",
-        "metadata.user_labels.\"app\"=\"${var.istio_services[count.index].service_id}\"",
-        join(" OR ", ["metric.label.\"response_code\"<\"400\"",
-        "metric.label.\"response_code\">=\"500\""])
-      ])
-
-    }
-  }
-}
-
-resource "google_monitoring_slo" "istio_service_availability_slo2" {
-  # Uses the Istio service that is automatically detected and created by installing Istio
-  # Identify the service using the string: canonical-ist:proj-${project_number}-default-${istio_services[count.index].service_id}
-  count        = length(var.istio_services)
-  service      = "canonical-ist:proj-${var.project_number}-default-${var.istio_services[count.index].service_id}"
-  slo_id       = "${var.istio_services[count.index].service_id}-availability-slo"
-  display_name = "${var.istio_services[count.index].availability_goal}% - Availability - 30 Days - ${var.istio_services[count.index].service_id}"
+  display_name = "${var.istio_services[count.index].availability_goal * 100}% - Availability - Rolling 30 Days - ${var.istio_services[count.index].service_id}"
 
   # The goal sets our objective for successful requests over the 30 day rolling window period
   goal                = var.istio_services[count.index].availability_goal
@@ -84,6 +44,7 @@ resource "google_monitoring_slo" "istio_service_latency_slo" {
   service             = "canonical-ist:proj-${var.project_number}-default-${var.istio_services[count.index].service_id}"
   slo_id              = "${var.istio_services[count.index].service_id}-latency-slo"
   display_name        = "Latency SLO with request base SLI (distribution cut) for ${var.istio_services[count.index].service_id}"
+  display_name        = "${var.istio_services[count.index].availability_goal * 100}% - Latency - Rolling 30 days - ${var.istio_services[count.index].service_id}"
   goal                = var.istio_services[count.index].latency_goal
   rolling_period_days = 30
 
