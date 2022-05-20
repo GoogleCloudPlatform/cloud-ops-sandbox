@@ -167,6 +167,13 @@ resource "google_project_iam_member" "profiler_role" {
   depends_on = [data.google_compute_default_service_account.default]
 }
 
+resource "google_project_iam_member" "debugger_role" {
+  project = data.google_project.project.project_id
+  role    = "roles/clouddebugger.agent"
+  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  depends_on = [data.google_compute_default_service_account.default]
+}
+
 # Create GSA/KSA binding: let IAM auth KSAs as a svc.id.goog member name
 resource "google_service_account_iam_binding" "set_gsa_binding" {
   service_account_id = data.google_compute_default_service_account.default.name // google_service_account.set_gsa.name
