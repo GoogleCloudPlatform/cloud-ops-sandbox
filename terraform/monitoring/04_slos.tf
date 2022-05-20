@@ -43,7 +43,6 @@ resource "google_monitoring_slo" "istio_service_latency_slo" {
   count               = length(var.istio_services)
   service             = "canonical-ist:proj-${var.project_number}-default-${var.istio_services[count.index].service_id}"
   slo_id              = "${var.istio_services[count.index].service_id}-latency-slo"
-  display_name        = "Latency SLO with request base SLI (distribution cut) for ${var.istio_services[count.index].service_id}"
   display_name        = "${var.istio_services[count.index].availability_goal * 100}% - Latency - Rolling 30 days - ${var.istio_services[count.index].service_id}"
   goal                = var.istio_services[count.index].latency_goal
   rolling_period_days = 30
