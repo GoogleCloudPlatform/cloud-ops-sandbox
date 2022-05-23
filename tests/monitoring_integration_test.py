@@ -61,6 +61,33 @@ def getProjectNumber():
 
     return project_num
 
+
+_services_short = [
+    'adservice',
+    'cartservice',
+    'checkoutservice',
+    'currencyservice',
+    'emailservice',
+    'frontend',
+    'paymentservice',
+    'productcatalogservice',
+    'recommendationservice',
+    'shippingservice',
+]
+
+_services_long = [
+    'Ad Service',
+    'Cart Service',
+    'Checkout Service',
+    'Currency Service',
+    'Email Service',
+    'Frontend Service',
+    'Payment Service',
+    'Product Catalog Service',
+    'Recommendation Service',
+    'Shipping Service',
+]
+
 class TestUptimeCheck(unittest.TestCase):
 
     external_ip = ''
@@ -124,32 +151,14 @@ class TestMonitoringDashboard(unittest.TestCase):
     Ensure Dashboards are set up for all Hipstershop Services,
     Plust a User Experience Dashboard and a Log Based Metric Dashboard
     """
-    def checkForDashboard(self, dashboard_display_name):
-        client = v1.DashboardsServiceClient()
-        dashboards = client.list_dashboards(project_name)
-        for dashboard in dashboards:
-            if dashboard.display_name == dashboard_display_name:
-                return True
-        return False
 
     def testDashboardsExist(self):
         """
         Test to ensure dashboards were set up
         """
-        expected_dashboards = [
-            'User Experience Dashboard',
-            'Log Based Metric Dashboard',
-            'Ad Service Dashboard',
-            'Cart Service Dashboard',
-            'Checkout Service Dashboard',
-            'Currency Service Dashboard',
-            'Email Service Dashboard',
-            'Frontend Service Dashboard',
-            'Payment Service Dashboard',
-            'Product Catalog Service Dashboard',
-            'Recommendation Service Dashboard',
-            'Shipping Service Dashboard',
-        ]
+        expected_dashboards = [f"{service} Dashboard" for service in _services_long]
+        expected_dashboards += ['User Experience Dashboard', 'Log Based Metric Dashboard']
+
         client = v1.DashboardsServiceClient()
         found_dashboards = client.list_dashboards(project_name)
         found_dashboiard_names = [dash.display_name for dash in found_dashboards]
@@ -173,11 +182,6 @@ class TestServiceSlo(unittest.TestCase):
         self.client = monitoring_v3.ServiceMonitoringServiceClient()
         self.project_id = getProjectId()
 
-    def checkForSlo(self, service, slo):
-        name = self.client.service_level_objective_path(
-            self.project_id, service, slo)
-        return self.client.get_service_level_objective(name)
-
     def getIstioService(self, service_name):
         project_num = getProjectNumber()
         return 'canonical-ist:proj-' + project_num + '-default-' + service_name
@@ -186,19 +190,7 @@ class TestServiceSlo(unittest.TestCase):
         """
         Ensure that hipstersop Istio services have been picked up by Cloud Monitoring
         """
-        services = [
-            'adservice',
-            'cartservice',
-            'checkoutservice',
-            'currencyservice',
-            'emailservice',
-            'frontend',
-            'paymentservice',
-            'productcatalogservice',
-            'recommendationservice',
-            'shippingservice',
-        ]
-        for service_name in services:
+        for service_name in _services_short:
             istio_service_name = self.getIstioService(service_name)
             full_name = self.client.service_path(self.project_id, istio_service_name)
             result = self.client.get_service(full_name)
@@ -208,19 +200,7 @@ class TestServiceSlo(unittest.TestCase):
         """
         Ensure that SLOs have been added to Istio services
         """
-        services = [
-            'adservice',
-            'cartservice',
-            'checkoutservice',
-            'currencyservice',
-            'emailservice',
-            'frontend',
-            'paymentservice',
-            'productcatalogservice',
-            'recommendationservice',
-            'shippingservice',
-        ]
-        for service_name in services:
+        for service_name in _services_short:
             istio_service_name = self.getIstioService(service_name)
             for slo_type in ['latency', 'availability']:
                 slo_id = f"{service_name}-{slo_type}-slo"
@@ -237,30 +217,10 @@ class TestSloAlertPolicy(unittest.TestCase):
     def setUp(self):
         self.client = monitoring_v3.AlertPolicyServiceClient()
 
-    def checkForAlertingPolicy(self, policy_display_name):
-        policies = self.client.list_alert_policies(project_name)
-        for policy in policies:
-            if policy.display_name == policy_display_name:
-                return True
-        return False
-
     def testAlertsExist(self):
-        services = [
-            'Ad Service',
-            'Cart Service',
-            'Checkout Service',
-            'Currency Service',
-            'Email Service',
-            'Frontend Service',
-            'Payment Service',
-            'Product Catalog Service',
-            'Recommendation Service',
-            'Shipping Service',
-        ]
-
         found_policies = self.client.list_alert_policies(project_name)
         found_policy_names = [policy.display_name for policy in found_policies]
-        for service_name in services:
+        for service_name in _services_long:
             latency_alert_name = f"{service_name} Latency Alert Policy"
             self.assertIn(latency_alert_name, found_policy_names)
             availability_alert_name = f"{service_name} Availability Alert Policy"
