@@ -52,11 +52,6 @@ resource "google_container_cluster" "gke" {
   # at this and thinking "huh terraform syntax looks a clunky" you are NOT WRONG
   location = var.gke_location != "" ? var.gke_location : element(random_shuffle.zone.result, 0)
 
-  # Enable Workload Identity for cluster
-  workload_identity_config {
-    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
-  }
-
   resource_labels = {
     "version" = var.app_version
     "mesh_id"     = "proj-${data.google_project.project.number}"
@@ -89,11 +84,6 @@ resource "google_container_cluster" "gke" {
         environment = "dev",
         cluster     = "cloud-ops-sandbox-main"
         mesh_id     = "proj-${data.google_project.project.number}"
-      }
-
-      # Enable Workload Identity for node pool
-      workload_metadata_config {
-        mode = "GKE_METADATA"
       }
     }
 
@@ -179,34 +169,6 @@ resource "google_project_iam_member" "logging_role" {
   role    = "roles/logging.logWriter"
   member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
   depends_on = [data.google_compute_default_service_account.default]
-}
-
-# Create GSA/KSA binding: let IAM auth KSAs as a svc.id.goog member name
-resource "google_service_account_iam_binding" "set_gsa_binding" {
-  service_account_id = data.google_compute_default_service_account.default.name // google_service_account.set_gsa.name
-  role               = "roles/iam.workloadIdentityUser"
-
-  members = [
-    "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[default/default]"
-  ]
-
-  depends_on = [data.google_compute_default_service_account.default]
-}
-
-# Annotate KSA
-resource "null_resource" "annotate_ksa" {
-  triggers = {
-    cluster_ep = google_container_cluster.gke.endpoint #kubernetes cluster endpoint
-  }
-
-  provisioner "local-exec" {
-    command = <<EOT
-      gcloud container clusters get-credentials cloud-ops-sandbox --zone ${google_container_cluster.gke.location} --project ${data.google_project.project.project_id}
-      kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-service-account=${data.google_compute_default_service_account.default.email}
-    EOT
-  }
-
-  depends_on = [google_service_account_iam_binding.set_gsa_binding]
 }
 
 # Install ASM into the GKE cluster
