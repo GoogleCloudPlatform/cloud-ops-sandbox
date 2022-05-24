@@ -22,6 +22,7 @@ import tabulate
 import subprocess
 import sys
 import json
+import time
 
 from google.cloud import monitoring_v3
 from google.cloud import logging_v2
@@ -174,7 +175,6 @@ class TestLogBasedMetric(unittest.TestCase):
         metric = client.metric("checkoutservice_log_metric")
         self.assertTrue(metric.exists())
 
-
 class TestServiceSlo(unittest.TestCase):
     """
     Check to make sure Istio services and SLOs are created properly
@@ -186,6 +186,35 @@ class TestServiceSlo(unittest.TestCase):
     def getIstioService(self, service_name):
         project_num = getProjectNumber()
         return 'canonical-ist:proj-' + project_num + '-default-' + service_name
+
+    def get_response_count(self, service_name, period_seconds=1200, is_fail=False):
+        client = monitoring_v3.MetricServiceClient()
+        now = time.time()
+        now_seconds = int(now)
+        now_nanos = int((now - seconds) * 10 ** 9)
+        interval = {
+                "end_time": {"seconds": now_seconds, "nanos": now_nanos},
+                "start_time": {"seconds": (now_seconds - period_seconds), "nanos": now_nanos},
+        }
+        aggregation = {
+                "alignment_period": {"seconds": period_seconds},
+                "per_series_aligner": monitoring_v3.types.Aggregation.Aligner.ALIGN_MEAN,
+        }
+        # 200s are successes, 500s are errors. 300-400s are excluded, as they are caused by client-side errors
+        response_code_operation = "< 300" if is_fail else ">= 500"
+        results = client.list_time_series(
+            name=project_name,
+            filter_=f'metric.type = "istio.io/service/server/request_count" AND resource.labels.canonical_service_name = "{service_name}" AND metric.labels.response_code {response_code_operation}',
+            interval=interval,
+            view=monitoring_v3.types.ListTimeSeriesRequest.TimeSeriesView.FULL,
+            aggregation=aggregation,
+        )
+        results = list(results)
+        print(results[0])
+        # print(len(results))
+        # breakpoint()
+        return len(list(results))
+
 
     def test_services_created(self):
         """
@@ -212,6 +241,21 @@ class TestServiceSlo(unittest.TestCase):
                 self.assertIsNotNone(result)
                 print(f"✅  {service_name} {slo_type} SLO created")
 
+    def test_availability_slos_passing(self):
+        """
+        Ensure that availability is at expected levels to pass the SLO
+        """
+        for service_name in _services_short:
+            # get SLO
+            istio_service_name = self.getIstioService(service_name)
+            slo_id = f"{service_name}-availability-slo"
+            slo_name_full = self.client.service_level_objective_path(
+                self.project_id, istio_service_name, slo_id)
+            slo = self.client.get_service_level_objective(slo_name_full)
+            # get metric data
+            successes = self.get_response_count(service_name, True)
+            fails = self.get_response_count(service_name, False)
+            print(f"{service_name}: {successes} sucess, {fails} fail. {int((successes/(successes+fails)) * 100)}% availibility")
 
 class TestSloAlertPolicy(unittest.TestCase):
     """
