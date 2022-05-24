@@ -187,11 +187,18 @@ class TestServiceSlo(unittest.TestCase):
         project_num = getProjectNumber()
         return 'canonical-ist:proj-' + project_num + '-default-' + service_name
 
-    def get_response_count(self, service_name, period_seconds=1200, is_fail=False):
+    def get_service_availability(self, service_name, period_seconds=1200):
+        """
+        Calculates the availability ratio for a service
+
+        Args:
+            service_name (str): the name of the service to query
+            period_seconds: the number of seconds back to read metrics for
+        """
         client = monitoring_v3.MetricServiceClient()
         now = time.time()
         now_seconds = int(now)
-        now_nanos = int((now - seconds) * 10 ** 9)
+        now_nanos = int((now - now_seconds) * 10 ** 9)
         interval = {
                 "end_time": {"seconds": now_seconds, "nanos": now_nanos},
                 "start_time": {"seconds": (now_seconds - period_seconds), "nanos": now_nanos},
@@ -199,21 +206,27 @@ class TestServiceSlo(unittest.TestCase):
         aggregation = {
                 "alignment_period": {"seconds": period_seconds},
                 "per_series_aligner": monitoring_v3.types.Aggregation.Aligner.ALIGN_MEAN,
+                "cross_series_reducer": monitoring_v3.types.Aggregation.Reducer.REDUCE_MEAN,
+                "group_by_fields": ["metric.labels.response_code"],
         }
-        # 200s are successes, 500s are errors. 300-400s are excluded, as they are caused by client-side errors
-        response_code_operation = "< 300" if is_fail else ">= 500"
         results = client.list_time_series(
             name=project_name,
-            filter_=f'metric.type = "istio.io/service/server/request_count" AND resource.labels.canonical_service_name = "{service_name}" AND metric.labels.response_code {response_code_operation}',
+            filter_=f'metric.type = "istio.io/service/server/request_count" AND resource.labels.canonical_service_name = "{service_name}"',
             interval=interval,
             view=monitoring_v3.types.ListTimeSeriesRequest.TimeSeriesView.FULL,
             aggregation=aggregation,
         )
-        results = list(results)
-        print(results[0])
-        # print(len(results))
-        # breakpoint()
-        return len(list(results))
+        # count up the percentage of successful calls
+        # 200s are successes, 500s are errors. 300-400s are excluded, as they are caused by client-side errors
+        success_total, fail_total = 0, 0
+        for response in results:
+            status_code = int(response.metric.labels['response_code'])
+            request_count = response.points[0].value.double_value
+            if status_code < 300:
+                success_total += request_count
+            elif status_code >= 500:
+                fail_total += request_count
+        return success_total/(fail_total+success_total+1e-9)
 
 
     def test_services_created(self):
@@ -253,9 +266,11 @@ class TestServiceSlo(unittest.TestCase):
                 self.project_id, istio_service_name, slo_id)
             slo = self.client.get_service_level_objective(slo_name_full)
             # get metric data
-            successes = self.get_response_count(service_name, True)
-            fails = self.get_response_count(service_name, False)
-            print(f"{service_name}: {successes} sucess, {fails} fail. {int((successes/(successes+fails)) * 100)}% availibility")
+            availability = self.get_service_availability(service_name)
+            SLO_status_text = f"({int(availability * 100)}% availibility, SLO={int(slo.goal * 100)}%)"
+            self.assertGreater(availability, slo.goal, f"{service_name} failed availability SLO {SLO_status_text}")
+            print(f"✅  {service_name} Availability SLO passed: {SLO_status_text}")
+
 
 class TestSloAlertPolicy(unittest.TestCase):
     """
