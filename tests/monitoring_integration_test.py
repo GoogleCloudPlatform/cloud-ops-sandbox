@@ -164,6 +164,7 @@ class TestMonitoringDashboard(unittest.TestCase):
         found_dashboiard_names = [dash.display_name for dash in found_dashboards]
         for expected_dash in expected_dashboards:
             self.assertIn(expected_dash, found_dashboiard_names)
+            print(f"✅  {expected_dash} created")
 
 class TestLogBasedMetric(unittest.TestCase):
 
@@ -195,6 +196,7 @@ class TestServiceSlo(unittest.TestCase):
             full_name = self.client.service_path(self.project_id, istio_service_name)
             result = self.client.get_service(full_name)
             self.assertEqual(result.display_name, service_name)
+            print(f"✅  {service_name} canonical service created")
 
     def test_slos_created(self):
         """
@@ -208,6 +210,7 @@ class TestServiceSlo(unittest.TestCase):
                     self.project_id, istio_service_name, slo_id)
                 result = self.client.get_service_level_objective(slo_name_full)
                 self.assertIsNotNone(result)
+                print(f"✅  {service_name} {slo_type} SLO created")
 
 
 class TestSloAlertPolicy(unittest.TestCase):
@@ -225,6 +228,7 @@ class TestSloAlertPolicy(unittest.TestCase):
             self.assertIn(latency_alert_name, found_policy_names)
             availability_alert_name = f"{service_name} Availability Alert Policy"
             self.assertIn(availability_alert_name, found_policy_names)
+            print(f"✅  {service_name} Alerts created")
 
 if __name__ == '__main__':
     project_id = getProjectId()
