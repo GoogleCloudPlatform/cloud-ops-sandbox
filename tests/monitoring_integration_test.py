@@ -162,9 +162,9 @@ class TestMonitoringDashboard(unittest.TestCase):
 
         client = v1.DashboardsServiceClient()
         found_dashboards = client.list_dashboards(project_name)
-        found_dashboiard_names = [dash.display_name for dash in found_dashboards]
+        found_dashboard_names = [dash.display_name for dash in found_dashboards]
         for expected_dash in expected_dashboards:
-            self.assertIn(expected_dash, found_dashboiard_names)
+            self.assertIn(expected_dash, found_dashboard_names, f"{expected_dash} not found")
             print(f"✅  {expected_dash} created")
 
 class TestLogBasedMetric(unittest.TestCase):
@@ -237,7 +237,7 @@ class TestServiceSlo(unittest.TestCase):
             istio_service_name = self.getIstioService(service_name)
             full_name = self.client.service_path(self.project_id, istio_service_name)
             result = self.client.get_service(full_name)
-            self.assertEqual(result.display_name, service_name)
+            self.assertEqual(result.display_name, service_name, f"{service_name} not found")
             print(f"✅  {service_name} canonical service created")
 
     def test_slos_created(self):
@@ -251,7 +251,7 @@ class TestServiceSlo(unittest.TestCase):
                 slo_name_full = self.client.service_level_objective_path(
                     self.project_id, istio_service_name, slo_id)
                 result = self.client.get_service_level_objective(slo_name_full)
-                self.assertIsNotNone(result)
+                self.assertIsNotNone(result, f"{service_name} {slo_type} SLO not found")
                 print(f"✅  {service_name} {slo_type} SLO created")
 
     def test_availability_slos_passing(self):
@@ -284,9 +284,9 @@ class TestSloAlertPolicy(unittest.TestCase):
         found_policy_names = [policy.display_name for policy in found_policies]
         for service_name in _services_long:
             latency_alert_name = f"{service_name} Latency Alert Policy"
-            self.assertIn(latency_alert_name, found_policy_names)
+            self.assertIn(latency_alert_name, found_policy_names, f"{latency_alert_name} not found")
             availability_alert_name = f"{service_name} Availability Alert Policy"
-            self.assertIn(availability_alert_name, found_policy_names)
+            self.assertIn(availability_alert_name, found_policy_names, f"{availability_alert_name} not found")
             print(f"✅  {service_name} Alerts created")
 
 if __name__ == '__main__':
