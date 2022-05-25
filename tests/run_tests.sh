@@ -1,4 +1,4 @@
-#!/bin/bashi
+#!/bin/bash
 # Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,13 +29,16 @@ export CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sa
 export LOADGEN_ZONE=$(gcloud container clusters list --filter="name:loadgenerator" --project ${PROJECT_ID} --format="value(zone)")
 
 # run provisioning test
+echo "running provisioning tests.."
 python3 -m venv provision-venv
 source provision-venv/bin/activate
+python3 -m pip install -r $SCRIPT_DIR/requirements.txt
 python3 -m pip install -r $SCRIPT_DIR/provisioning/requirements.txt
 python3 $SCRIPT_DIR/provisioning/test_runner.py
 deactivate
 
 # run monitoring integration tests
+echo "running monitoring integration tests.."
 python3 -m venv monitor-venv
 source monitor-venv/bin/activate
 python3 -m pip install -r $SCRIPT_DIR/requirements.txt
@@ -44,6 +47,7 @@ deactivate
 
 # run rating service tests
 if [[ -z "$SKIP_RATINGS_TEST" ]]; then
+  echo "running ratingservice tests.."
   RATING_SERVICE_URL="https://ratingservice-dot-$(gcloud app describe --format='value(defaultHostname)' --project=${PROJECT_ID})"
   python3 -m venv ratings-venv
   source ratings-venv/bin/activate
@@ -55,6 +59,7 @@ else
 fi
 
 # run sre recipes tests
+echo "running SRE recipes tests.."
 $SCRIPT_DIR/recipes/test_recommendation_crash_recipe.sh
 
 echo "✅ All tests pass"

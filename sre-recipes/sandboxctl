@@ -205,15 +205,22 @@ def destroy():
 @cli.command()
 @click.option('--skip-ratingservice', default=False,  is_flag=True,
               help="Don't test the ratingservice")
-def test(skip-ratingservice):
+def test(skip_ratingservice):
     """Run tests to ensure environment is working as expected"""
     command = "../tests/run_tests.sh"
     if skip_ratingservice:
         command = f'SKIP_RATINGS_TEST=TRUE {command}'
-    output, error = utils.run_shell_command(command)
-    print(output)
-    if error:
-        print("Tests failed:". err)
+    os.setpgrp()
+    complete = False
+    try:
+        # run install.sh in a background shell
+        process = subprocess.Popen(command, bufsize=0, shell=True)
+        process.communicate()
+        complete = True
+    finally:
+        # kill background process if script is terminated
+        if not complete:
+            os.killpg(0, signal.SIGTERM)
 
 if __name__ == "__main__":
     cli()
