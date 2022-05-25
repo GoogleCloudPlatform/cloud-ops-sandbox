@@ -52,6 +52,11 @@ resource "google_container_cluster" "gke" {
   # at this and thinking "huh terraform syntax looks a clunky" you are NOT WRONG
   location = var.gke_location != "" ? var.gke_location : element(random_shuffle.zone.result, 0)
 
+  # Enable Workload Identity for cluster
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+
   resource_labels = {
     "version" = var.app_version
     "mesh_id"     = "proj-${data.google_project.project.number}"
@@ -84,6 +89,11 @@ resource "google_container_cluster" "gke" {
         environment = "dev",
         cluster     = "cloud-ops-sandbox-main"
         mesh_id     = "proj-${data.google_project.project.number}"
+      }
+
+      # Enable Workload Identity for node pool
+      workload_metadata_config {
+        mode = "GKE_METADATA"
       }
     }
 
