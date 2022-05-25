@@ -207,6 +207,7 @@ def destroy():
               help="Don't test the ratingservice")
 def test(skip_ratingservice):
     """Run tests to ensure environment is working as expected"""
+    os.chdir(os.path.abspath(sys.path[0]))
     command = "../tests/run_tests.sh"
     if skip_ratingservice:
         command = f'SKIP_RATINGS_TEST=TRUE {command}'
