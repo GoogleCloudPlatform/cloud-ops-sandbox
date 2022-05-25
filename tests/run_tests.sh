@@ -25,8 +25,17 @@ cd $SCRIPT_DIR
 
 # set environment variables
 export PROJECT_ID=$(gcloud config get-value project)
+export PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
 export ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${PROJECT_ID} --format="value(zone)")
 export LOADGEN_ZONE=$(gcloud container clusters list --filter="name:loadgenerator" --project ${PROJECT_ID} --format="value(zone)")
+
+# run monitoring integration tests
+echo "running monitoring integration tests.."
+python3 -m venv --system-site-packages monitor-venv
+source monitor-venv/bin/activate
+python3 -m pip install -r $SCRIPT_DIR/requirements.txt
+python3 $SCRIPT_DIR/monitoring_integration_test.py ${PROJECT_ID} ${PROJECT_NUMBER}
+deactivate
 
 # run provisioning test
 echo "running provisioning tests.."
@@ -36,14 +45,6 @@ python3 -m pip install -r $SCRIPT_DIR/provisioning/requirements.txt
 pushd $SCRIPT_DIR/provisioning
   python3 ./test_runner.py
 popd
-deactivate
-
-# run monitoring integration tests
-echo "running monitoring integration tests.."
-python3 -m venv --system-site-packages monitor-venv
-source monitor-venv/bin/activate
-python3 -m pip install -r $SCRIPT_DIR/requirements.txt
-python3 $SCRIPT_DIR/monitoring_integration_test.py ${PROJECT_ID}
 deactivate
 
 # run rating service tests

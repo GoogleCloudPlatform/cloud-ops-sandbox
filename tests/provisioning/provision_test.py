@@ -46,14 +46,14 @@ class TestGKECluster(unittest.TestCase):
         client = cluster_manager.ClusterManagerClient()
         cluster_info = client.get_cluster(name=TestGKECluster.name)
         machine_type = cluster_info.node_config.machine_type
-        self.assertEqual(machine_type, 'n1-standard-2')
+        self.assertEqual(machine_type, 'n1-standard-4')
 
     def testNumberOfNode(self):
         """ Test if the number of nodes in the node pool is as specified """
         client = cluster_manager.ClusterManagerClient()
         cluster_info = client.get_cluster(name=TestGKECluster.name)
         node_count = cluster_info.current_node_count
-        self.assertEqual(node_count, 4)
+        self.assertEqual(node_count, 2)
 
     def testStatusOfServices(self):
         """ Test if all the service deployments are ready """
