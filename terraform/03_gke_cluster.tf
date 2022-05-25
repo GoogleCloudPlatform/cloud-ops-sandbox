@@ -177,7 +177,7 @@ resource "null_resource" "install_asm" {
     command = "./istio/install_asm.sh"
   }
 
-  depends_on = [null_resource.annotate_ksa]
+  depends_on = [google_container_cluster.gke]
 }
 
 # Deploy microservices into GKE cluster
