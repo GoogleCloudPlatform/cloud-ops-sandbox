@@ -89,6 +89,7 @@ EOF
 }
 
 resource "google_logging_metric" "ratingservice_logging_metric" {
+  count  = var.skip_ratingservice ? 0 : 1
   name   = "ratingservice_recollect_requests_count"
   filter = "resource.type=gae_app AND resource.labels.module_id=ratingservice AND resource.labels.version_id=prod protoPayload.method=POST AND protoPayload.resource=\"/ratings:recollect\""
   metric_descriptor {

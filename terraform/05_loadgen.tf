@@ -20,5 +20,5 @@ module "loadgen" {
   external_ip = data.external.terraform_vars.result.external_ip
   project_id  = data.google_project.project.project_id
 
-  depends_on = [null_resource.delay]
+  depends_on = [null_resource.delay, null_resource.ratingservice_address_rewrite]
 }
