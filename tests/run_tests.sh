@@ -32,7 +32,6 @@ export LOADGEN_ZONE=$(gcloud container clusters list --filter="name:loadgenerato
 echo "running provisioning tests.."
 python3 -m venv --system-site-packages provision-venv
 source provision-venv/bin/activate
-python3 -m pip install -r $SCRIPT_DIR/requirements.txt
 python3 -m pip install -r $SCRIPT_DIR/provisioning/requirements.txt
 pushd $SCRIPT_DIR/provisioning
   python3 ./test_runner.py
