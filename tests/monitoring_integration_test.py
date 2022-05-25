@@ -187,13 +187,15 @@ class TestServiceSlo(unittest.TestCase):
         project_num = getProjectNumber()
         return 'canonical-ist:proj-' + project_num + '-default-' + service_name
 
-    def get_service_availability(self, service_name, period_seconds=1200):
+    def _get_metric_data(self, filter_, aggregation, period_seconds=1200):
         """
-        Calculates the availability ratio for a service
+        Helper function to query metric data for a service
 
         Args:
             service_name (str): the name of the service to query
             period_seconds: the number of seconds back to read metrics for
+        Returns:
+            a list of results from the API
         """
         client = monitoring_v3.MetricServiceClient()
         now = time.time()
@@ -203,31 +205,76 @@ class TestServiceSlo(unittest.TestCase):
                 "end_time": {"seconds": now_seconds, "nanos": now_nanos},
                 "start_time": {"seconds": (now_seconds - period_seconds), "nanos": now_nanos},
         }
-        aggregation = {
-                "alignment_period": {"seconds": period_seconds},
-                "per_series_aligner": monitoring_v3.types.Aggregation.Aligner.ALIGN_MEAN,
-                "cross_series_reducer": monitoring_v3.types.Aggregation.Reducer.REDUCE_MEAN,
-                "group_by_fields": ["metric.labels.response_code"],
-        }
         results = client.list_time_series(
             name=project_name,
-            filter_=f'metric.type = "istio.io/service/server/request_count" AND resource.labels.canonical_service_name = "{service_name}"',
+            filter_=filter_,
             interval=interval,
             view=monitoring_v3.types.ListTimeSeriesRequest.TimeSeriesView.FULL,
             aggregation=aggregation,
         )
+        return results
+
+    def get_service_availability(self, service_name, period_seconds=1200):
+        """
+        Calculates the availability ratio for a service
+
+        Args:
+            service_name (str): the name of the service to query
+            period_seconds: the number of seconds back to read metrics for
+        Returns:
+            the availability % as a float
+        """
+        filter_ = f'metric.type = "istio.io/service/server/request_count" AND resource.labels.canonical_service_name = "{service_name}"'
+        aggregation = {
+            "alignment_period": {"seconds": period_seconds},
+            "per_series_aligner": monitoring_v3.types.Aggregation.Aligner.ALIGN_MEAN,
+            "cross_series_reducer": monitoring_v3.types.Aggregation.Reducer.REDUCE_MEAN,
+            "group_by_fields": ["metric.labels.response_code"],
+        }
+        results = self._get_metric_data(filter_, aggregation, period_seconds)
         # count up the percentage of successful calls
         # 200s are successes, 500s are errors. 300-400s are excluded, as they are caused by client-side errors
-        success_total, fail_total = 0, 0
-        for response in results:
-            status_code = int(response.metric.labels['response_code'])
-            request_count = response.points[0].value.double_value
-            if status_code < 300:
-                success_total += request_count
-            elif status_code >= 500:
-                fail_total += request_count
-        return success_total/(fail_total+success_total+1e-9)
+        ratio = None
+        try:
+            success_total, fail_total = 0, 0
+            for response in results:
+                status_code = int(response.metric.labels['response_code'])
+                request_count = response.points[0].value.double_value
+                if status_code < 300:
+                    success_total += request_count
+                elif status_code >= 500:
+                    fail_total += request_count
+            ratio = success_total/(fail_total+success_total)
+        except (IndexError, ZeroDivisionError) as e:
+            # data not found. Return None
+            pass
+        return ratio
 
+    def get_service_latency(self, service_name, period_seconds=1200):
+        """
+        Calculates the latency data for a service
+
+        Args:
+            service_name (str): the name of the service to query
+            period_seconds (int): the number of seconds back to read metrics for
+        Returns:
+            the calculated average latency of the service in miliseconds as a float
+        """
+        filter_ = f'metric.type = "istio.io/service/server/response_latencies" AND resource.labels.canonical_service_name = "{service_name}"'
+        aggregation = {
+            "alignment_period": {"seconds": period_seconds},
+            "per_series_aligner": monitoring_v3.types.Aggregation.Aligner.ALIGN_DELTA,
+            "cross_series_reducer": monitoring_v3.types.Aggregation.Reducer.REDUCE_MEAN,
+        }
+        results = self._get_metric_data(filter_, aggregation, period_seconds)
+        results = list(results)
+        latency = None
+        try:
+            latency = results[0].points[0].value.double_value
+        except IndexError:
+            # data not found. Return None
+            pass
+        return latency
 
     def test_services_created(self):
         """
@@ -267,10 +314,29 @@ class TestServiceSlo(unittest.TestCase):
             slo = self.client.get_service_level_objective(slo_name_full)
             # get metric data
             availability = self.get_service_availability(service_name)
+            self.assertIsNotNone(availability, f"{service_name} availability data not found")
             SLO_status_text = f"({int(availability * 100)}% availibility, SLO={int(slo.goal * 100)}%)"
             self.assertGreater(availability, slo.goal, f"{service_name} failed availability SLO {SLO_status_text}")
             print(f"✅  {service_name} Availability SLO passed: {SLO_status_text}")
 
+    def test_latency_slos_passing(self):
+        """
+        Ensure that service latency is at expected levels to pass the SLO
+        """
+        for service_name in _services_short:
+            # get SLO
+            istio_service_name = self.getIstioService(service_name)
+            slo_id = f"{service_name}-latency-slo"
+            slo_name_full = self.client.service_level_objective_path(
+                self.project_id, istio_service_name, slo_id)
+            slo = self.client.get_service_level_objective(slo_name_full)
+            max_latency = slo.service_level_indicator.request_based.distribution_cut.range.max
+            # get metric data
+            latency = self.get_service_latency(service_name)
+            self.assertIsNotNone(latency, f"{service_name} latency data not found")
+            SLO_status_text = f"({latency:.2f}ms latency, SLO={max_latency:.2f}ms)"
+            self.assertLess(latency, max_latency, f"{service_name} failed latency SLO {SLO_status_text}")
+            print(f"✅  {service_name} Latency SLO passed: {SLO_status_text}")
 
 class TestSloAlertPolicy(unittest.TestCase):
     """
