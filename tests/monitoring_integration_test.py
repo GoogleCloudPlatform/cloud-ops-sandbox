@@ -44,24 +44,39 @@ def getProjectId():
     try:
         project_id = sys.argv[1]
     except:
-        exit('Missing Project ID. Usage: python3 monitoring_integration_test.py $PROJECT_ID $PROJECT_NUMBER')
+        exit('Missing Project ID. Usage: python3 monitoring_integration_test.py $PROJECT_ID')
 
     return project_id
 
 
-def getProjectNumber():
-    """Retrieves the project number from the script arguments.
+def getZone():
+    """Retrieves the zone of the Kubernetes cluster hosted on GKE.
+    Raises:
+    MissingZoneError -- When no cluster is found.
     Returns:
-        str -- the project number
-    Exits when project number is not set
+        str -- the zone
     """
-    try:
-        project_num = sys.argv[2]
-    except:
-        exit('Missing Project Number. Usage: python3 monitoring_integration_test.py $PROJECT_ID $PROJECT_NUMBER')
+    credentials = GoogleCredentials.get_application_default()
 
-    return project_num
+    service = discovery.build('container', 'v1', credentials=credentials)
 
+    zone = '-'  # query for all zones
+
+    request = service.projects().zones().clusters().list(
+        projectId=project_id, zone=zone)
+    response = request.execute()
+
+    # Retrieve the cluster for cloud-ops-sandbox and its zone
+    clusters = response['clusters']
+    for cluster in clusters:
+        if cluster['name'] == 'cloud-ops-sandbox':
+            zone = cluster['zone']
+
+    if zone == '-':
+        raise MissingZoneError(
+            'No zone for the cloud-ops-sandbox cluster was detected')
+
+    return zone
 
 _services_short = [
     'adservice',
@@ -184,7 +199,6 @@ class TestServiceSlo(unittest.TestCase):
         self.project_id = getProjectId()
 
     def getIstioService(self, service_name):
-        project_num = getProjectNumber()
         return 'ist:' + project_id + '-zone-' + zone + '-cloud-ops-sandbox-default-' + service_name
 
     def _get_metric_data(self, filter_, aggregation, period_seconds=1200):
@@ -373,4 +387,5 @@ class TestServiceLogs(unittest.TestCase):
 if __name__ == '__main__':
     project_id = getProjectId()
     project_name = project_name + project_id
+    zone = getZone()
     unittest.main(argv=['first-arg-is-ignored'])
