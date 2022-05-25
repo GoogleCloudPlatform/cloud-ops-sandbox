@@ -1,5 +1,9 @@
-google-cloud-container>=1.0.0
-google-cloud-error-reporting>=0.34.0
-google-api-core>=1.0.0
-requests>=2.24.0
-parameterized>=0.7.4
+google-cloud-container==1.0.2
+google-cloud-monitoring==1.0.0
+google-cloud-error-reporting==0.34.0
+google-cloud-monitoring-dashboards==1.0.0
+google-api-core==1.31.5
+requests==2.24.0
+parameterized==0.7.4
+tabulate==0.8.7
+google-cloud-logging==3.0.0
