@@ -355,6 +355,21 @@ class TestSloAlertPolicy(unittest.TestCase):
             self.assertIn(availability_alert_name, found_policy_names, f"{availability_alert_name} not found")
             print(f"✅  {service_name} Alerts created")
 
+class TestServiceLogs(unittest.TestCase):
+    """
+    Make sure logs are sent to Cloud Logging and readable for each service
+    """
+    def setUp(self):
+        self.client = logging_v2.Client()
+
+    def testLogsExist(self):
+        for service_name in _services_short:
+            log_filter = f'labels."k8s-pod/service_istio_io/canonical-name"="{service_name}"'
+            results = self.client.list_entries(filter_=log_filter)
+            first_result = next(results, None)
+            self.assertIsNotNone(first_result, f"{service_name} logs not found")
+            print(f"✅  {service_name} logs found")
+
 if __name__ == '__main__':
     project_id = getProjectId()
     project_name = project_name + project_id
