@@ -281,6 +281,22 @@ class TestServiceSlo(unittest.TestCase):
             pass
         return latency
 
+    def _get_slo(self, slo_id, service_name):
+        """
+        Finds and returns a SLO object with the specified id, and service name
+
+        Args:
+            slo_id (str): the name of the SLO to query
+            service_name (str): the name of the related service
+        Returns:
+            SLO object
+        """
+        istio_service_name = self.getIstioService(service_name)
+        slo_name_full = self.client.service_level_objective_path(
+            self.project_id, istio_service_name, slo_id)
+        slo = self.client.get_service_level_objective(slo_name_full)
+        return slo
+
     def test_services_created(self):
         """
         Ensure that hipstersop Istio services have been picked up by Cloud Monitoring
@@ -315,11 +331,8 @@ class TestServiceSlo(unittest.TestCase):
         services = [service.short for service in _services]
         for service_name in services:
             # get SLO
-            istio_service_name = self.getIstioService(service_name)
             slo_id = f"{service_name}-availability-slo"
-            slo_name_full = self.client.service_level_objective_path(
-                self.project_id, istio_service_name, slo_id)
-            slo = self.client.get_service_level_objective(slo_name_full)
+            slo = self._get_slo(slo_id, service_name)
             # get metric data
             availability = self.get_service_availability(service_name)
             self.assertIsNotNone(availability, f"{service_name} availability data not found")
@@ -334,11 +347,8 @@ class TestServiceSlo(unittest.TestCase):
         services = [service.short for service in _services]
         for service_name in services:
             # get SLO
-            istio_service_name = self.getIstioService(service_name)
             slo_id = f"{service_name}-latency-slo"
-            slo_name_full = self.client.service_level_objective_path(
-                self.project_id, istio_service_name, slo_id)
-            slo = self.client.get_service_level_objective(slo_name_full)
+            slo = self._get_slo(slo_id, service_name)
             max_latency = slo.service_level_indicator.request_based.distribution_cut.range.max
             # get metric data
             latency = self.get_service_latency(service_name)
