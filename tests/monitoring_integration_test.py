@@ -24,6 +24,8 @@ import sys
 import json
 import time
 
+from collections import namedtuple
+
 from google.cloud import monitoring_v3
 from google.cloud import logging_v2
 from google.cloud.monitoring_dashboard import v1
@@ -78,31 +80,20 @@ def getZone():
 
     return zone
 
-_services_short = [
-    'adservice',
-    'cartservice',
-    'checkoutservice',
-    'currencyservice',
-    'emailservice',
-    'frontend',
-    'paymentservice',
-    'productcatalogservice',
-    'recommendationservice',
-    'shippingservice',
+ServiceName = namedtuple("ServiceName", "short long")
+_services = [
+    ServiceName(short='adservice', long='Ad Service'),
+    ServiceName(short='cartservice', long='Cart Service'),
+    ServiceName(short='checkoutservice', long='Checkout Service'),
+    ServiceName(short='currencyservice', long='Currency Service'),
+    ServiceName(short='emailservice', long='Email Service'),
+    ServiceName(short='frontend', long='Frontend Service'),
+    ServiceName(short='paymentservice', long='Payment Service'),
+    ServiceName(short='productcatalogservice', long='Product Catalog Service')
+    ServiceName(short='recommendationservice', long='Recommendation Service'),
+    ServiceName(short='shippingservice', long='Shipping Service'),
 ]
 
-_services_long = [
-    'Ad Service',
-    'Cart Service',
-    'Checkout Service',
-    'Currency Service',
-    'Email Service',
-    'Frontend Service',
-    'Payment Service',
-    'Product Catalog Service',
-    'Recommendation Service',
-    'Shipping Service',
-]
 
 class TestUptimeCheck(unittest.TestCase):
 
@@ -172,7 +163,7 @@ class TestMonitoringDashboard(unittest.TestCase):
         """
         Test to ensure dashboards were set up
         """
-        expected_dashboards = [f"{service} Dashboard" for service in _services_long]
+        expected_dashboards = [f"{service.long} Dashboard" for service in _services]
         expected_dashboards += ['User Experience Dashboard', 'Log Based Metric Dashboard']
 
         client = v1.DashboardsServiceClient()
@@ -294,7 +285,8 @@ class TestServiceSlo(unittest.TestCase):
         """
         Ensure that hipstersop Istio services have been picked up by Cloud Monitoring
         """
-        for service_name in _services_short:
+        services = [service.short for service in _services]
+        for service_name in services:
             istio_service_name = self.getIstioService(service_name)
             full_name = self.client.service_path(self.project_id, istio_service_name)
             result = self.client.get_service(full_name)
@@ -305,7 +297,8 @@ class TestServiceSlo(unittest.TestCase):
         """
         Ensure that SLOs have been added to Istio services
         """
-        for service_name in _services_short:
+        services = [service.short for service in _services]
+        for service_name in services:
             istio_service_name = self.getIstioService(service_name)
             for slo_type in ['latency', 'availability']:
                 slo_id = f"{service_name}-{slo_type}-slo"
@@ -319,7 +312,8 @@ class TestServiceSlo(unittest.TestCase):
         """
         Ensure that availability is at expected levels to pass the SLO
         """
-        for service_name in _services_short:
+        services = [service.short for service in _services]
+        for service_name in services:
             # get SLO
             istio_service_name = self.getIstioService(service_name)
             slo_id = f"{service_name}-availability-slo"
@@ -337,7 +331,8 @@ class TestServiceSlo(unittest.TestCase):
         """
         Ensure that service latency is at expected levels to pass the SLO
         """
-        for service_name in _services_short:
+        services = [service.short for service in _services]
+        for service_name in services:
             # get SLO
             istio_service_name = self.getIstioService(service_name)
             slo_id = f"{service_name}-latency-slo"
@@ -362,7 +357,8 @@ class TestSloAlertPolicy(unittest.TestCase):
     def testAlertsExist(self):
         found_policies = self.client.list_alert_policies(project_name)
         found_policy_names = [policy.display_name for policy in found_policies]
-        for service_name in _services_long:
+        services = [service.long for service in _services]
+        for service_name in services:
             latency_alert_name = f"{service_name} Latency Alert Policy"
             self.assertIn(latency_alert_name, found_policy_names, f"{latency_alert_name} not found")
             availability_alert_name = f"{service_name} Availability Alert Policy"
@@ -377,7 +373,8 @@ class TestServiceLogs(unittest.TestCase):
         self.client = logging_v2.Client()
 
     def testLogsExist(self):
-        for service_name in _services_short:
+        services = [service.short for service in _services]
+        for service_name in services:
             log_filter = f'labels."k8s-pod/service_istio_io/canonical-name"="{service_name}"'
             results = self.client.list_entries(filter_=log_filter)
             first_result = next(results, None)
