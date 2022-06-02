@@ -112,7 +112,7 @@ jobs:
       run: |
         set -x
         # install dependencies
-        python3 -m pip install -r tests/requirements.txt
+        python3 -m pip install --user -r tests/requirements.txt
         # authenticate cluster
         CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${{ env.PROJECT_ID }} --format="value(zone)")
         gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
@@ -123,7 +123,7 @@ jobs:
       run: |
         set -x
         # install dependencies
-        python3 -m pip install -r tests/ratingservice/requirements.txt
+        python3 -m pip install --user -r tests/ratingservice/requirements.txt
         # get service URL
         RATING_SERVICE_URL="https://ratingservice-dot-$(gcloud app describe --format='value(defaultHostname)' --project=${{ env.PROJECT_ID }})"
         # run test
