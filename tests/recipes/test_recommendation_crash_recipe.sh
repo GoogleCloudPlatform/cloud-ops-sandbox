@@ -43,7 +43,7 @@ kubectl logs $broken_pod recommendationservice | grep "invalid literal for int()
 echo "- restoring sandbox"
 sandboxctl sre-recipes restore recipe3
 restored_pod=$(kubectl get pods --sort-by=.status.startTime -o jsonpath="{.items[-1].metadata.name}")
-kubectl wait --for=condition=ready pod $restored_pod
+kubectl wait --for=condition=ready --timeout=120s pod $restored_pod
 sleep 10
 
 echo "- testing restored website..."
