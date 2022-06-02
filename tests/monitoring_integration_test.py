@@ -89,7 +89,7 @@ _services = [
     ServiceName(short='emailservice', long='Email Service'),
     ServiceName(short='frontend', long='Frontend Service'),
     ServiceName(short='paymentservice', long='Payment Service'),
-    ServiceName(short='productcatalogservice', long='Product Catalog Service')
+    ServiceName(short='productcatalogservice', long='Product Catalog Service'),
     ServiceName(short='recommendationservice', long='Recommendation Service'),
     ServiceName(short='shippingservice', long='Shipping Service'),
 ]
