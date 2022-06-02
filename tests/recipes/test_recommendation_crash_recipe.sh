@@ -37,6 +37,7 @@ echo "- expecting to see 500 error..."
 curl -I --no-fail $HTTP_ADDR/product/OLJCESPC7Z | grep "500 Internal Server Error" 
 
 echo "- checking for expected recomendationservice log..."
+sleep 5
 kubectl logs $broken_pod recommendationservice | grep "invalid literal for int() with base 10: '5.0'"
 
 echo "- restoring sandbox"
