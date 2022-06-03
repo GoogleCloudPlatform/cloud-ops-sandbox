@@ -95,6 +95,17 @@ jobs:
           -e LOADGEN_ZONE=$LOADGEN_ZONE \
           -v ~/.config:/root/.config \
           test-provisioning:$GITHUB_SHA
+    - name: Run Monitoring Integration Tests
+      timeout-minutes: 30
+      run: |
+        set -x
+        # install dependencies
+        python3 -m pip install --user -r tests/requirements.txt
+        # authenticate cluster
+        CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${{ env.PROJECT_ID }} --format="value(zone)")
+        gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
+        # run tests
+        python3 tests/monitoring_integration_test.py ${{ env.PROJECT_ID }}
     - name: Run SRE Recipes Tests
       timeout-minutes: 30
       run: |
@@ -107,17 +118,6 @@ jobs:
           -e PYTHONDONTWRITEBYTECODE=1 \
           --entrypoint /sandbox-shared/tests/recipes/test_recommendation_crash_recipe.sh \
           test-cloud-shell:$GITHUB_SHA
-    - name: Run Monitoring Integration Tests
-      timeout-minutes: 30
-      run: |
-        set -x
-        # install dependencies
-        python3 -m pip install --user -r tests/requirements.txt
-        # authenticate cluster
-        CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${{ env.PROJECT_ID }} --format="value(zone)")
-        gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
-        # run tests
-        python3 tests/monitoring_integration_test.py ${{ env.PROJECT_ID }}
     - name: Run Rating Service Test
       timeout-minutes: 30
       run: |
