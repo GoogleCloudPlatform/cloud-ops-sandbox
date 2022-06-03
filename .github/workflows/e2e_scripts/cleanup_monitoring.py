@@ -32,15 +32,13 @@ def cleanupDashboards(project_name):
 
 def cleanupLogBasedMetrics(project_name):
     """ Deletes all log-based metrics. """
-    client = logging_v2.MetricsServiceV2Client()
-    metrics = True
+    client = logging_v2.Client()
     while metrics:
-        metrics = ["{}/metrics/{}".format(project_name, metric.name) for metric in client.list_log_metrics(project_name)]
-        for metric in metrics:
+        for metric in client.list_metrics():
             try:
-                client.delete_log_metric(metric)
+                metric_obj.delete(metric)
             except:
-                print('Could not delete metric: ' + metric)
+                print(f'Could not delete metric: {metric}')
 
 def cleanupPolicies(project_name):
     """ Delete all alerting policies for both uptime checks and SLOs. """
