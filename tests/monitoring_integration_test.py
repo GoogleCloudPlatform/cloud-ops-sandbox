@@ -25,6 +25,7 @@ import json
 import time
 
 from collections import namedtuple
+from test_utils.retry import RetryErrors
 
 from google.cloud import monitoring_v3
 from google.cloud import logging_v2
@@ -219,6 +220,7 @@ class TestServiceSlo(unittest.TestCase):
         )
         return results
 
+    @RetryErrors(exception=(IndexError, ZeroDivisionError), delay=10, backoff=2, max_tries=5)
     def get_service_availability(self, service_name, period_seconds=1200):
         """
         Calculates the availability ratio for a service
@@ -239,22 +241,20 @@ class TestServiceSlo(unittest.TestCase):
         results = self._get_metric_data(filter_, aggregation, period_seconds)
         # count up the percentage of successful calls
         # 200s are successes, 500s are errors. 300-400s are excluded, as they are caused by client-side errors
-        ratio = None
-        try:
-            success_total, fail_total = 0, 0
-            for response in results:
-                status_code = int(response.metric.labels['response_code'])
-                request_count = response.points[0].value.double_value
-                if status_code < 300:
-                    success_total += request_count
-                elif status_code >= 500:
-                    fail_total += request_count
-            ratio = success_total/(fail_total+success_total)
-        except (IndexError, ZeroDivisionError) as e:
-            # data not found. Return None
-            pass
+        success_total, fail_total = 0, 0
+        for response in results:
+            # throws IndexError if data not found
+            status_code = int(response.metric.labels['response_code'])
+            request_count = response.points[0].value.double_value
+            if status_code < 300:
+                success_total += request_count
+            elif status_code >= 500:
+                fail_total += request_count
+        # throws zero division error if request data is zero
+        ratio = success_total/(fail_total+success_total)
         return ratio
 
+    @RetryErrors(exception=IndexError, delay=10, backoff=2, max_tries=5)
     def get_service_latency(self, service_name, period_seconds=1200):
         """
         Calculates the latency data for a service
@@ -273,12 +273,8 @@ class TestServiceSlo(unittest.TestCase):
         }
         results = self._get_metric_data(filter_, aggregation, period_seconds)
         results = list(results)
-        latency = None
-        try:
-            latency = results[0].points[0].value.double_value
-        except IndexError:
-            # data not found. Return None
-            pass
+        # throws IndexError if data not found
+        latency = results[0].points[0].value.double_value
         return latency
 
     def _get_slo(self, slo_id, service_name):
