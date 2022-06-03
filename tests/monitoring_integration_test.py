@@ -164,7 +164,7 @@ class TestMonitoringDashboard(unittest.TestCase):
         Test to ensure dashboards were set up
         """
         expected_dashboards = [f"{service.long} Dashboard" for service in _services]
-        expected_dashboards += ['User Experience Dashboard', 'Log Based Metric Dashboard']
+        expected_dashboards += ['User Experience Dashboard']
 
         client = v1.DashboardsServiceClient()
         found_dashboards = client.list_dashboards(project_name)
