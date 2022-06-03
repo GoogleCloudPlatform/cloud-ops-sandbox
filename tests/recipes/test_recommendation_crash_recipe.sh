@@ -39,7 +39,7 @@ curl -I --no-fail $HTTP_ADDR/product/OLJCESPC7Z | grep "500 Internal Server Erro
 
 echo "- checking for expected recomendationservice log..."
 sleep 30
-kubectl logs -l app=recommendationservice | grep "invalid literal for int() with base 10: '5.0'"
+kubectl logs $broken_pod recommendationservice | grep "invalid literal for int() with base 10: '5.0'"
 
 echo "- restoring sandbox"
 sandboxctl sre-recipes restore recipe3
