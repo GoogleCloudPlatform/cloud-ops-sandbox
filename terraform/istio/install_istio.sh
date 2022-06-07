@@ -59,3 +59,8 @@ ${WORK_DIR}/istioctl manifest install -f ${WORK_DIR}/istio_operator.yaml --skip-
 
 # apply manifests
 kubectl apply -f ${WORK_DIR}/../../istio-manifests
+
+# temp fix to get around istio not deploying issue..
+ISTIO_VERSION=1.14.0
+curl -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
+./istio-$ISTIO_VERSION/bin/istioctl install --set profile=demo -y
