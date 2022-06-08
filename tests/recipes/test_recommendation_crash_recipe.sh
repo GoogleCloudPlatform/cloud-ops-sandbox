@@ -29,10 +29,9 @@ curl --show-error --fail $HTTP_ADDR/product/OLJCESPC7Z | grep Typewriter
 
 echo "- breaking sandbox..."
 sandboxctl sre-recipes break recipe3
-sleep 5
+sleep 10
 broken_pod=$(kubectl get pods --sort-by=.status.startTime -o jsonpath="{.items[-1].metadata.name}")
 kubectl wait --for=condition=ready --timeout=30s pod $broken_pod
-sleep 5
 
 echo "- expecting to see 500 error..."
 curl -I --no-fail $HTTP_ADDR/product/OLJCESPC7Z | grep "500 Internal Server Error" 
