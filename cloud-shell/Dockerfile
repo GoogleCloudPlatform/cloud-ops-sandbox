@@ -31,6 +31,9 @@ RUN python3 -m pip install google-cloud-pubsub==2.6.0
 RUN python3 -m pip install click==8.0.1
 RUN python3 -m pip install google-cloud-monitoring==2.4.0
 
+# used by asmcli
+RUN sudo apt-get -y install netcat
+
 # set env var
 RUN echo "VERSION=develop" >> /etc/environment
 
