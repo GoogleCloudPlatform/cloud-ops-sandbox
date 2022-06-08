@@ -48,9 +48,6 @@ echo "Installing ASM..."
   --ca mesh_ca \
   --enable_gcp_components
 
-ISTIOCTL=$(find "$(pwd -P)" -name istioctl)
-$ISTIOCTL install --set profile=demo -y
-
 echo "Enabling Sidecar Injection..."
 cd $WORK_DIR
 REVISION=$(kubectl get deploy -n istio-system -l app=istiod -o json | jq -r '.["items"][0]["metadata"]["labels"]["istio.io/rev"]')
