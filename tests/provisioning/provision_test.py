@@ -21,7 +21,7 @@ from shlex import split
 import json
 import urllib.request
 
-from google.cloud.container_v1 import cluster_manager
+from google.cloud.container_v1 import ClusterManagerClient
 from google.cloud import error_reporting
 from google.api_core import exceptions
 
@@ -43,14 +43,14 @@ class TestGKECluster(unittest.TestCase):
 
     def testNodeMachineType(self):
         """ Test if the machine type for the nodes is as specified """
-        client = cluster_manager.ClusterManagerClient()
+        client = ClusterManagerClient()
         cluster_info = client.get_cluster(name=TestGKECluster.name)
         machine_type = cluster_info.node_config.machine_type
         self.assertEqual(machine_type, 'n1-standard-4')
 
     def testNumberOfNode(self):
         """ Test if the number of nodes in the node pool is as specified """
-        client = cluster_manager.ClusterManagerClient()
+        client = ClusterManagerClient()
         cluster_info = client.get_cluster(name=TestGKECluster.name)
         node_count = cluster_info.current_node_count
         self.assertEqual(node_count, 2)
