@@ -21,7 +21,7 @@ from shlex import split
 import json
 import urllib.request
 
-from google.cloud.container_v1.services import cluster_manager
+from google.cloud.container_v1 import cluster_manager
 from google.cloud import error_reporting
 from google.api_core import exceptions
 
