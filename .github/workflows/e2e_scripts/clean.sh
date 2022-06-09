@@ -23,7 +23,7 @@ export PROJECT_ID=$(gcloud config get-value project)
 export WORKDIR=$(dirname $(realpath $0))
 
 # clear monitoring
-python3 -m pip install -r ${WORKDIR}/requirements.txt
+python3 -m pip install --user -r ${WORKDIR}/requirements.txt
 python3 ${WORKDIR}/cleanup_monitoring.py "projects/$PROJECT_ID"
 
 # delete cluster
