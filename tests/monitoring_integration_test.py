@@ -189,11 +189,6 @@ class TestMonitoringDashboard(unittest.TestCase):
             'Product Catalog Service Dashboard')
         self.assertTrue(found_dashboard)
 
-    def testLogBasedMetricDashboard(self):
-        """ Test that the Log Based Metric Dashboard gets created. """
-        found_dashboard = self.checkForDashboard('Log Based Metric Dashboard')
-        self.assertTrue(found_dashboard)
-
     def testRatingServiceDashboard(self):
         """ Test that the Rating Service Dashboard gets created. """
         found_dashboard = self.checkForDashboard('Rating Service Dashboard')
