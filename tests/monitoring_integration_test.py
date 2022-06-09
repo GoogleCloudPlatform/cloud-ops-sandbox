@@ -202,15 +202,14 @@ class TestMonitoringDashboard(unittest.TestCase):
 
 class TestLogBasedMetric(unittest.TestCase):
     def setUp(self):
-        self.client = logging_v2.MetricsServiceV2Client()
+        self.client = Client()
         self.project_id = getProjectId()
 
     def testCheckoutServiceLogMetric(self):
         """ Test that the log based metric for the Checkout Service gets created. """
-        metric_name = self.client.metric_path(
-            self.project_id, "checkoutservice_log_metric")
-        response = self.client.get_log_metric(metric_name)
-        self.assertTrue(response)
+        client = logging_v2.Client()
+        metric = client.metric("checkoutservice_log_metric")
+        self.assertTrue(metric.exists())
 
 
 class TestCustomService(unittest.TestCase):
