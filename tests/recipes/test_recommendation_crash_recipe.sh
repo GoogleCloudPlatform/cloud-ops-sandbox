@@ -30,7 +30,6 @@ curl --show-error --fail $HTTP_ADDR/product/OLJCESPC7Z | grep Typewriter
 echo "- breaking sandbox..."
 sandboxctl sre-recipes break recipe3
 sleep 10
-kubectl get pods
 broken_pod=$(kubectl get pods --sort-by=.status.startTime -l app=recommendationservice -o jsonpath="{.items[-1].metadata.name}")
 kubectl wait --for=condition=ready --timeout=30s pod $broken_pod
 
@@ -39,14 +38,13 @@ curl -I --no-fail $HTTP_ADDR/product/OLJCESPC7Z | grep "500 Internal Server Erro
 
 echo "- checking for expected recomendationservice log..."
 sleep 30
-kubectl get pods
 kubectl logs -l app=recommendationservice | grep "invalid literal for int() with base 10: '5.0'"
 
 echo "- restoring sandbox"
 sandboxctl sre-recipes restore recipe3
+sleep 10
 restored_pod=$(kubectl get pods --sort-by=.status.startTime -o jsonpath="{.items[-1].metadata.name}")
 kubectl wait --for=condition=ready --timeout=120s pod $restored_pod
-sleep 10
 
 echo "- testing restored website..."
 curl --show-error --fail $HTTP_ADDR/product/OLJCESPC7Z | grep Typewriter
