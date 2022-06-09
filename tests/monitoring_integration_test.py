@@ -197,7 +197,6 @@ class TestMonitoringDashboard(unittest.TestCase):
 
 class TestLogBasedMetric(unittest.TestCase):
     def setUp(self):
-        self.client = Client()
         self.project_id = getProjectId()
 
     def testCheckoutServiceLogMetric(self):
