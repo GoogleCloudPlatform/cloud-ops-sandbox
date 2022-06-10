@@ -52,9 +52,8 @@ echo "Installing ASM..."
   --use_managed_cni
 
 echo "Enabling Sidecar Injection..."
-cd $WORK_DIR
-REVISION=$(kubectl get deploy -n istio-system -l app=istiod -o json | jq -r '.["items"][0]["metadata"]["labels"]["istio.io/rev"]')
 kubectl label namespace default istio-injection=enabled --overwrite
 
 echo "Deploying Virtual Services..."
+cd $WORK_DIR
 kubectl apply -f ../../istio-manifests
