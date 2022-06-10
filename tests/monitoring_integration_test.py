@@ -206,42 +206,6 @@ class TestLogBasedMetric(unittest.TestCase):
         self.assertTrue(metric.exists())
 
 
-class TestCustomService(unittest.TestCase):
-    def setUp(self):
-        self.client = monitoring_v3.ServiceMonitoringServiceClient()
-        self.project_id = getProjectId()
-
-    def checkForService(self, service_name):
-        name = self.client.service_path(self.project_id, service_name)
-        return self.client.get_service(name)
-
-    def testFrontendServiceExists(self):
-        """ Test that the Frontend Custom Service gets created. """
-        response = self.checkForService('frontend-srv')
-        # check that we found an object
-        self.assertTrue(response)
-
-    def testCheckoutServiceExists(self):
-        """ Test that the Custom Checkout Service gets created. """
-        response = self.checkForService('checkoutservice-srv')
-        self.assertTrue(response)
-
-    def testPaymentServiceExists(self):
-        """ Test that the Custom Payment Service gets created. """
-        response = self.checkForService('paymentservice-srv')
-        self.assertTrue(response)
-
-    def testEmailServiceExists(self):
-        """ Test that the Custom Email Service gets created. """
-        response = self.checkForService('emailservice-srv')
-        self.assertTrue(response)
-
-    def testShippingServiceExists(self):
-        """ Test that the Custom Shipping Service gets created. """
-        response = self.checkForService('shippingservice-srv')
-        self.assertTrue(response)
-
-
 class TestServiceSlo(unittest.TestCase):
     def setUp(self):
         self.client = monitoring_v3.ServiceMonitoringServiceClient()
