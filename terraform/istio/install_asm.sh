@@ -40,6 +40,7 @@ echo "Installing ASM..."
   --project_id $PROJECT_ID \
   --cluster_name cloud-ops-sandbox \
   --cluster_location $CLUSTER_ZONE \
+  --fleet_id $PROJECT_ID \
   --output_dir $WORK_DIR/asm_output \
   --enable_all \
   --option prometheus-and-stackdriver \
