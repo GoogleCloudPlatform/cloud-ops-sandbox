@@ -2,7 +2,7 @@
 
 
 [[projects]]
-  digest = "1:467af0aad47996b25b838d6f14c8371123a8a76ec239020a6c5894e1f8f60272"
+  digest = "1:cd61c288406d5d80572967f908a23a1f0ffbf460e926269672e955f4a88b79bc"
   name = "cloud.google.com/go"
   packages = [
     "compute/metadata",
@@ -12,8 +12,8 @@
     "trace/apiv2",
   ]
   pruneopts = "UT"
-  revision = "c728a003b238b26cef9ab6753a5dc424b331c3ad"
-  version = "v0.27.0"
+  revision = "457ea5c15ccf3b87db582c450e80101989da35f7"
+  version = "v0.40.0"
 
 [[projects]]
   digest = "1:4b96dcd8534bc6450a922bd16a76360ba3381f0d1daf40abbaec91c053fbfeb5"
@@ -85,12 +85,9 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:cd9864c6366515827a759931746738ede6079faa08df9c584596370d6add135c"
+  digest = "1:856bd1e35f6da8ce5671a5df09d0e89bf01e9b74b3dabb6d097d39b3813801e1"
   name = "github.com/googleapis/gax-go"
-  packages = [
-    ".",
-    "v2",
-  ]
+  packages = ["v2"]
   pruneopts = "UT"
   revision = "c8a15bac9b9fe955bd9f900272f9a306465d28cf"
   version = "v2.0.3"
@@ -198,12 +195,6 @@
     "sdk/metric/controller/time",
     "sdk/metric/processor/basic",
     "sdk/metric/selector/simple",
-    "instrumentation/grpctrace",
-    "internal/trace/parent",
-    "sdk",
-    "sdk/export/trace",
-    "sdk/instrumentation",
-    "sdk/internal",
     "sdk/resource",
     "sdk/trace",
     "sdk/trace/internal",
@@ -413,6 +404,7 @@
     "go.opencensus.io/stats/view",
     "go.opencensus.io/trace",
     "go.opentelemetry.io/otel/api/global",
+    "go.opentelemetry.io/otel/api/kv",
     "go.opentelemetry.io/otel/api/metric",
     "go.opentelemetry.io/otel/api/standard",
     "go.opentelemetry.io/otel/api/trace",
