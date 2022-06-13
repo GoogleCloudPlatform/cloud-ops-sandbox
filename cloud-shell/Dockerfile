@@ -14,6 +14,11 @@
 
 FROM gcr.io/cloudshell-images/cloudshell:latest
 
+# update gcloud version to support asm installation
+# asm needs gcloud 389 for `gcloud container fleet mesh enable`
+RUN sudo apt-get update
+RUN sudo apt-get -y --only-upgrade install google-cloud-sdk-anthos-auth google-cloud-sdk
+
 # install Terraform 1.0.0
 RUN sudo apt-get install unzip && \
   wget -q https://releases.hashicorp.com/terraform/1.0.0/terraform_1.0.0_linux_amd64.zip -O ./terraform.zip && \
@@ -30,9 +35,6 @@ RUN sudo apt-get -y install postgresql-client jq
 RUN python3 -m pip install google-cloud-pubsub==2.6.0
 RUN python3 -m pip install click==8.0.1
 RUN python3 -m pip install google-cloud-monitoring==2.4.0
-
-# update gcloud version
-RUN sudo apt-get -y --only-upgrade install google-cloud-sdk-anthos-auth google-cloud-sdk
 
 # set env var
 RUN echo "VERSION=develop" >> /etc/environment
