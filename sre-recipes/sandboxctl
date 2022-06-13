@@ -202,6 +202,5 @@ def destroy():
     destroy_command = "../terraform/destroy.sh"
     utils.run_interactive_shell_command(destroy_command)
 
-
 if __name__ == "__main__":
     cli()

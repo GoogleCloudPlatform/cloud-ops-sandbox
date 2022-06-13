@@ -46,9 +46,3 @@ provider "google" {
   project = var.project_id
 }
 
-# The provider used for the GAE ratingservice
-provider "google" {
-  alias   = "ratingservice"
-  project = var.project_id
-  region  = var.appengine_region
-}

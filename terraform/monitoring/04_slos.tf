@@ -17,9 +17,9 @@
 #   90% of HTTP requests are successful within the past 30 day windowed period
 resource "google_monitoring_slo" "istio_service_availability_slo" {
   # Uses the Istio service that is automatically detected and created by installing Istio
-  # Identify the service using the string: ist:${project_id}-zone-${zone}-cloud-ops-sandbox-default-${service_id}
+  # Identify the service using the string: canonical-ist:proj-${project_number}-default-${istio_services[count.index].service_id}
   count        = length(var.istio_services)
-  service      = "ist:${var.project_id}-zone-${var.zone}-cloud-ops-sandbox-default-${var.istio_services[count.index].service_id}"
+  service      = "canonical-ist:proj-${var.project_number}-default-${var.istio_services[count.index].service_id}"
   slo_id       = "${var.istio_services[count.index].service_id}-availability-slo"
   display_name = "${var.istio_services[count.index].availability_goal * 100}% - Availability - Rolling 30 Days - ${var.istio_services[count.index].service_id}"
 
@@ -41,7 +41,7 @@ resource "google_monitoring_slo" "istio_service_availability_slo" {
 #   99% of requests return in under 500 ms in the previous 30 days
 resource "google_monitoring_slo" "istio_service_latency_slo" {
   count               = length(var.istio_services)
-  service             = "ist:${var.project_id}-zone-${var.zone}-cloud-ops-sandbox-default-${var.istio_services[count.index].service_id}"
+  service             = "canonical-ist:proj-${var.project_number}-default-${var.istio_services[count.index].service_id}"
   slo_id              = "${var.istio_services[count.index].service_id}-latency-slo"
   display_name        = "${var.istio_services[count.index].availability_goal * 100}% - Latency - Rolling 30 days - ${var.istio_services[count.index].service_id}"
   goal                = var.istio_services[count.index].latency_goal
