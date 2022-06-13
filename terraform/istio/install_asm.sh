@@ -46,11 +46,18 @@ echo "Installing ASM..."
   --option prometheus-and-stackdriver \
   --option legacy-default-ingressgateway \
   --ca mesh_ca \
-  --enable_gcp_components 
+  --enable_gcp_components \
+  --managed \
+  --channel regular \
+  --use_managed_cni
+
+echo "Setting up Ingress Gateway"
+kubectl create ns asm-ingress
+kubectl label namespace asm-ingress istio-injection=enabled --overwrite
+kubectl apply -n asm-ingress -f $WORK_DIR/asm_output/samples/gateways/istio-ingressgateway
 
 echo "Enabling Sidecar Injection..."
-REVISION=$(kubectl get deploy -n istio-system -l app=istiod -o json | jq -r '.["items"][0]["metadata"]["labels"]["istio.io/rev"]')
-kubectl label namespace default istio-injection- istio.io/rev=$REVISION --overwrite
+kubectl label namespace default istio-injection=enabled --overwrite
 
 echo "Deploying Virtual Services..."
 cd $WORK_DIR

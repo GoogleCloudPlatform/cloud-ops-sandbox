@@ -65,7 +65,7 @@ class TestGKECluster(unittest.TestCase):
 
     def testReachOfHipsterShop(self):
         """ Test if querying hipster shop returns 200 """
-        command = ("kubectl -n istio-system get service istio-ingressgateway --context=%s -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" % TestGKECluster.context)
+        command = ("kubectl -n asm-ingress get service istio-ingressgateway --context=%s -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" % TestGKECluster.context)
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
         external_ip = result.stdout.replace('\n', '')
         url = 'http://{0}'.format(external_ip)
