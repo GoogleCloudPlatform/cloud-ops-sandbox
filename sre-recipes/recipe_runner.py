@@ -197,7 +197,7 @@ class ActionHandler:
         """
         for cmd in config["commands"]:
             output, err = utils.run_shell_command(cmd)
-            if err:
+            if err and not "WARNING" in err.upper():
                 raise RuntimeError(
                     f"Failed to run command `{cmd}`: {err}")
 
