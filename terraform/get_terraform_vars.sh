@@ -21,7 +21,7 @@ gcloud container clusters get-credentials cloud-ops-sandbox --project $project_i
 TRIES=0
 external_ip="";
 while [[ -z $external_ip && "${TRIES}" -lt 20 ]]; do
-    external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'); 
+    external_ip=$(kubectl -n asm-ingress get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'); 
     [ -z "$external_ip" ] && sleep 5; 
     TRIES=$((TRIES + 1))
 done;
