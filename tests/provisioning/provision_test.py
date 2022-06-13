@@ -49,12 +49,11 @@ class TestGKECluster(unittest.TestCase):
         self.assertEqual(machine_type, 'n1-standard-2')
 
     def testNumberOfNode(self):
-        """ Test if the number of nodes in the node pool is between 2 and 10,
-        as specified by autoscaling rules """
+        """ Test if the number of nodes in the node pool is as specified """
         client = cluster_manager.ClusterManagerClient()
         cluster_info = client.get_cluster(name=TestGKECluster.name)
         node_count = cluster_info.current_node_count
-        self.assertIn(node_count, [2,3,4,5,6,7,8,9,10])
+        self.assertEqual(node_count, 4)
 
     def testStatusOfServices(self):
         """ Test if all the service deployments are ready """
