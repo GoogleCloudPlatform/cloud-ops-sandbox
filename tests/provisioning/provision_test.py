@@ -21,7 +21,7 @@ from shlex import split
 import json
 import urllib.request
 
-from google.cloud.container_v1.services import cluster_manager
+from google.cloud.container_v1 import ClusterManagerClient
 from google.cloud import error_reporting
 from google.api_core import exceptions
 
@@ -43,17 +43,18 @@ class TestGKECluster(unittest.TestCase):
 
     def testNodeMachineType(self):
         """ Test if the machine type for the nodes is as specified """
-        client = cluster_manager.ClusterManagerClient()
+        client = ClusterManagerClient()
         cluster_info = client.get_cluster(name=TestGKECluster.name)
         machine_type = cluster_info.node_config.machine_type
         self.assertEqual(machine_type, 'n1-standard-2')
 
     def testNumberOfNode(self):
-        """ Test if the number of nodes in the node pool is as specified """
-        client = cluster_manager.ClusterManagerClient()
+        """ Test if the number of nodes in the node pool is between 2 and 10,
+        as specified by autoscaling rules """
+        client = ClusterManagerClient()
         cluster_info = client.get_cluster(name=TestGKECluster.name)
         node_count = cluster_info.current_node_count
-        self.assertEqual(node_count, 4)
+        self.assertIn(node_count, [2,3,4,5,6,7,8,9,10])
 
     def testStatusOfServices(self):
         """ Test if all the service deployments are ready """
@@ -65,7 +66,7 @@ class TestGKECluster(unittest.TestCase):
 
     def testReachOfHipsterShop(self):
         """ Test if querying hipster shop returns 200 """
-        command = ("kubectl -n istio-system get service istio-ingressgateway --context=%s -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" % TestGKECluster.context)
+        command = ("kubectl -n asm-ingress get service istio-ingressgateway --context=%s -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" % TestGKECluster.context)
         result = subprocess.run(split(command), encoding='utf-8', capture_output=True)
         external_ip = result.stdout.replace('\n', '')
         url = 'http://{0}'.format(external_ip)

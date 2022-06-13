@@ -19,12 +19,17 @@
 # These will be gone when we merge the monitoring terraform with the provisioning terraform
 variable "external_ip" {
   type        = string
-  description = "The external IP of the kubernetes cluster. Can be revealed by running \"kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'\" in the Google Cloud CLI."
+  description = "The external IP of the kubernetes cluster. Can be revealed by running \"kubectl -n asm-ingress get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'\" in the Google Cloud CLI."
 }
 
 variable "project_id" {
   type        = string
   description = "The project id that was created by Cloud Operations Sandbox. Can be revealed by running \"gcloud config get-value project\" in the Google Cloud CLI."
+}
+
+variable "project_number" {
+  type        = string
+  description = "The project Number associated with the project id."
 }
 
 variable "project_owner_email" {

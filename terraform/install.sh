@@ -243,7 +243,7 @@ installMonitoring() {
   TRIES=0
   external_ip="";
   while [[ -z $external_ip && "${TRIES}" -lt 20 ]]; do
-     external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
+     external_ip=$(kubectl -n asm-ingress get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
      [ -z "$external_ip" ] && sleep 5;
      TRIES=$((TRIES + 1))
   done;
@@ -254,13 +254,14 @@ installMonitoring() {
   fi
 
   acct=$(gcloud info --format="value(config.account)")
+  project_number=$(gcloud projects describe $project_id --format="value(projectNumber)")
 
   log "Checking to make sure necessary Istio services are ready for monitoring"
-  python3 monitoring/istio_service_setup.py $project_id $CLUSTER_ZONE $service_wait
+  python3 monitoring/istio_service_setup.py $project_number $service_wait
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
   terraform init -lockfile=false
-  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}" -var="zone=${CLUSTER_ZONE}" -var="skip_ratingservice=${skip_ratingservice:-false}"
+  terraform apply --auto-approve -var="project_id=${project_id}" -var="project_number=${project_number}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}" -var="zone=${CLUSTER_ZONE}" -var="skip_ratingservice=${skip_ratingservice:-false}"
   popd
 }
 
@@ -268,7 +269,7 @@ getExternalIp() {
   external_ip="";
   while [ -z $external_ip ]; do
      log "Waiting for Hipster Shop endpoint...";
-     external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
+     external_ip=$(kubectl -n asm-ingress get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
      [ -z "$external_ip" ] && sleep 10;
   done;
   if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
