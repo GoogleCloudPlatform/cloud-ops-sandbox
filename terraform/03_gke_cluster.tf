@@ -124,7 +124,7 @@ resource "google_container_cluster" "gke" {
   # be enabled) before the cluster can be created. This will not address the
   # eventual consistency problems we have with the API but it will make sure
   # that we're at least trying to do things in the right order.
-  depends_on = [google_project_service.gke, google_project_service.gkehub, google_project_service.meshconfig]
+  depends_on = [google_project_service.gke, google_project_service.gkehub, google_project_service.mesh]
 }
 
 

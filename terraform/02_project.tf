@@ -93,10 +93,10 @@ resource "google_project_service" "gkehub" {
   disable_dependent_services = true
 }
 
-resource "google_project_service" "meshconfig" {
+resource "google_project_service" "mesh" {
   project = data.google_project.project.project_id
 
-  service = "meshconfig.googleapis.com"
+  service = "mesh.googleapis.com"
 
   disable_dependent_services = true
 }
