@@ -59,6 +59,7 @@ resource "google_container_cluster" "gke" {
 
   resource_labels = {
     "version" = var.app_version
+    "mesh_id"     = "proj-${data.google_project.project.number}"
   }
 
   # Using an embedded resource to define the node pool. Another
@@ -87,6 +88,7 @@ resource "google_container_cluster" "gke" {
       labels = {
         environment = "dev",
         cluster     = "cloud-ops-sandbox-main"
+        mesh_id     = "proj-${data.google_project.project.number}"
       }
 
       # Enable Workload Identity for node pool
@@ -98,7 +100,7 @@ resource "google_container_cluster" "gke" {
     initial_node_count = 4
 
     autoscaling {
-      min_node_count = 2
+      min_node_count = 4
       max_node_count = 10
     }
 
@@ -122,7 +124,7 @@ resource "google_container_cluster" "gke" {
   # be enabled) before the cluster can be created. This will not address the
   # eventual consistency problems we have with the API but it will make sure
   # that we're at least trying to do things in the right order.
-  depends_on = [google_project_service.gke]
+  depends_on = [google_project_service.gke, google_project_service.gkehub, google_project_service.mesh]
 }
 
 
@@ -207,10 +209,10 @@ resource "null_resource" "annotate_ksa" {
   depends_on = [google_service_account_iam_binding.set_gsa_binding]
 }
 
-# Install Istio into the GKE cluster
-resource "null_resource" "install_istio" {
+# Install ASM into the GKE cluster
+resource "null_resource" "install_asm" {
   provisioner "local-exec" {
-    command = "./istio/install_istio.sh"
+    command = "./istio/install_asm.sh"
   }
 
   depends_on = [null_resource.annotate_ksa]
@@ -235,7 +237,7 @@ resource "null_resource" "deploy_services" {
   EOT
   }
 
-  depends_on = [null_resource.install_istio]
+  depends_on = [null_resource.install_asm]
 }
 
 # We wait for all of our microservices to become available on kubernetes

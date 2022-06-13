@@ -43,40 +43,22 @@ def getProjectId():
     try:
         project_id = sys.argv[1]
     except:
-        exit('Missing Project ID. Usage: python3 monitoring_integration_test.py $PROJECT_ID')
+        exit('Missing Project ID. Usage: python3 monitoring_integration_test.py $PROJECT_ID $PROJECT_NUMBER')
 
     return project_id
 
-
-def getZone():
-    """Retrieves the zone of the Kubernetes cluster hosted on GKE.
-    Raises:
-    MissingZoneError -- When no cluster is found.
+def getProjectNumber():
+    """Retrieves the project number from the script arguments.
     Returns:
-    str -- the zone
+        str -- the project number
+    Exits when project number is not set
     """
-    credentials = GoogleCredentials.get_application_default()
+    try:
+        project_num = sys.argv[2]
+    except:
+        exit('Missing Project Number. Usage: python3 monitoring_integration_test.py $PROJECT_ID $PROJECT_NUMBER')
 
-    service = discovery.build('container', 'v1', credentials=credentials)
-
-    zone = '-'  # query for all zones
-
-    request = service.projects().zones().clusters().list(
-        projectId=project_id, zone=zone)
-    response = request.execute()
-
-    # Retrieve the cluster for cloud-ops-sandbox and its zone
-    clusters = response['clusters']
-    for cluster in clusters:
-        if cluster['name'] == 'cloud-ops-sandbox':
-            zone = cluster['zone']
-
-    if zone == '-':
-        raise MissingZoneError(
-            'No zone for the cloud-ops-sandbox cluster was detected')
-
-    return zone
-
+    return project_num
 
 class TestUptimeCheck(unittest.TestCase):
 
@@ -86,7 +68,7 @@ class TestUptimeCheck(unittest.TestCase):
     def setUpClass(cls):
         """ Retrieve the external IP of the cluster """
         with open('out.txt', 'w+') as fout:
-            out = subprocess.run(["kubectl", "-n", "istio-system", "get", "service", "istio-ingressgateway",
+            out = subprocess.run(["kubectl", "-n", "asm-ingress", "get", "service", "istio-ingressgateway",
                                   "-o", "jsonpath='{.status.loadBalancer.ingress[0].ip}'"], stdout=fout)
             fout.seek(0)
             cls.external_ip = fout.read().replace('\'', '')
@@ -207,11 +189,6 @@ class TestMonitoringDashboard(unittest.TestCase):
             'Product Catalog Service Dashboard')
         self.assertTrue(found_dashboard)
 
-    def testLogBasedMetricDashboard(self):
-        """ Test that the Log Based Metric Dashboard gets created. """
-        found_dashboard = self.checkForDashboard('Log Based Metric Dashboard')
-        self.assertTrue(found_dashboard)
-
     def testRatingServiceDashboard(self):
         """ Test that the Rating Service Dashboard gets created. """
         found_dashboard = self.checkForDashboard('Rating Service Dashboard')
@@ -220,51 +197,13 @@ class TestMonitoringDashboard(unittest.TestCase):
 
 class TestLogBasedMetric(unittest.TestCase):
     def setUp(self):
-        self.client = logging_v2.MetricsServiceV2Client()
         self.project_id = getProjectId()
 
     def testCheckoutServiceLogMetric(self):
         """ Test that the log based metric for the Checkout Service gets created. """
-        metric_name = self.client.metric_path(
-            self.project_id, "checkoutservice_log_metric")
-        response = self.client.get_log_metric(metric_name)
-        self.assertTrue(response)
-
-
-class TestCustomService(unittest.TestCase):
-    def setUp(self):
-        self.client = monitoring_v3.ServiceMonitoringServiceClient()
-        self.project_id = getProjectId()
-
-    def checkForService(self, service_name):
-        name = self.client.service_path(self.project_id, service_name)
-        return self.client.get_service(name)
-
-    def testFrontendServiceExists(self):
-        """ Test that the Frontend Custom Service gets created. """
-        response = self.checkForService('frontend-srv')
-        # check that we found an object
-        self.assertTrue(response)
-
-    def testCheckoutServiceExists(self):
-        """ Test that the Custom Checkout Service gets created. """
-        response = self.checkForService('checkoutservice-srv')
-        self.assertTrue(response)
-
-    def testPaymentServiceExists(self):
-        """ Test that the Custom Payment Service gets created. """
-        response = self.checkForService('paymentservice-srv')
-        self.assertTrue(response)
-
-    def testEmailServiceExists(self):
-        """ Test that the Custom Email Service gets created. """
-        response = self.checkForService('emailservice-srv')
-        self.assertTrue(response)
-
-    def testShippingServiceExists(self):
-        """ Test that the Custom Shipping Service gets created. """
-        response = self.checkForService('shippingservice-srv')
-        self.assertTrue(response)
+        client = logging_v2.Client()
+        metric = client.metric("checkoutservice_log_metric")
+        self.assertTrue(metric.exists())
 
 
 class TestServiceSlo(unittest.TestCase):
@@ -278,58 +217,73 @@ class TestServiceSlo(unittest.TestCase):
         return self.client.get_service_level_objective(name)
 
     def getIstioService(self, service_name):
-        return 'ist:' + project_id + '-zone-' + zone + '-cloud-ops-sandbox-default-' + service_name
+        project_num = getProjectNumber()
+        return 'canonical-ist:proj-' + project_num + '-default-' + service_name
 
     def testFrontendServiceSloExists(self):
         """ Test that for Frontend Service that two SLOs (availability, latency) get created. """
+        serice_name = 'frontend'
+        service_id = self.getIstioService(serice_name)
         found_availability_slo = self.checkForSlo(
-            'frontend-srv', 'frontend-srv-availability-slo')
+            service_id, f'{serice_name}-availability-slo')
         self.assertTrue(found_availability_slo)
-        found_latency_slo = self.checkForSlo('frontend-srv', 'frontend-srv-latency-slo')
+        found_latency_slo = self.checkForSlo(
+            service_id, f'{serice_name}-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testCheckoutServiceSloExists(self):
         """ Test that for Checkout Service that two SLOs (availability, latency) get created. """
+        serice_name = 'checkoutservice'
+        service_id = self.getIstioService(serice_name)
         found_availability_slo = self.checkForSlo(
-            'checkoutservice-srv', 'checkoutservice-srv-availability-slo')
+            service_id, f'{serice_name}-availability-slo')
         self.assertTrue(found_availability_slo)
         found_latency_slo = self.checkForSlo(
-            'checkoutservice-srv', 'checkoutservice-srv-latency-slo')
+            service_id, f'{serice_name}-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testPaymentServiceSloExists(self):
         """ Test that for Payment Service that two SLOs (availability, latency) get created. """
+        serice_name = 'paymentservice'
+        service_id = self.getIstioService(serice_name)
         found_availability_slo = self.checkForSlo(
-            'paymentservice-srv', 'paymentservice-srv-availability-slo')
+            service_id, f'{serice_name}-availability-slo')
         self.assertTrue(found_availability_slo)
         found_latency_slo = self.checkForSlo(
-            'paymentservice-srv', 'paymentservice-srv-latency-slo')
+            service_id, f'{serice_name}-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testEmailServiceSloExists(self):
         """ Test that for Email Service that two SLOs (availability, latency) get created. """
+        serice_name = 'emailservice'
+        service_id = self.getIstioService(serice_name)
         found_availability_slo = self.checkForSlo(
-            'emailservice-srv', 'emailservice-srv-availability-slo')
+            service_id, f'{serice_name}-availability-slo')
         self.assertTrue(found_availability_slo)
-        found_latency_slo = self.checkForSlo('emailservice-srv', 'emailservice-srv-latency-slo')
+        found_latency_slo = self.checkForSlo(
+            service_id, f'{serice_name}-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testShippingServiceSloExists(self):
         """ Test that for Shipping Service that two SLOs (availability, latency) get created. """
+        serice_name = 'shippingservice'
+        service_id = self.getIstioService(serice_name)
         found_availability_slo = self.checkForSlo(
-            'shippingservice-srv', 'shippingservice-srv-availability-slo')
+            service_id, f'{serice_name}-availability-slo')
         self.assertTrue(found_availability_slo)
         found_latency_slo = self.checkForSlo(
-            'shippingservice-srv', 'shippingservice-srv-latency-slo')
+            service_id, f'{serice_name}-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testCartServiceSloExists(self):
         """ Test that for each service that two SLOs (availability, latency) get created. """
-        cartservice_id = self.getIstioService('cartservice')
+        serice_name = 'cartservice'
+        service_id = self.getIstioService(serice_name)
         found_availability_slo = self.checkForSlo(
-            cartservice_id, 'cartservice-availability-slo')
+            service_id, f'{serice_name}-availability-slo')
         self.assertTrue(found_availability_slo)
-        found_latency_slo = self.checkForSlo(cartservice_id, 'cartservice-latency-slo')
+        found_latency_slo = self.checkForSlo(
+            service_id, f'{serice_name}-latency-slo')
         self.assertTrue(found_latency_slo)
 
     def testProductCatalogServiceSloExists(self):
@@ -487,5 +441,4 @@ class TestSloAlertPolicy(unittest.TestCase):
 if __name__ == '__main__':
     project_id = getProjectId()
     project_name = project_name + project_id
-    zone = getZone()
     unittest.main(argv=['first-arg-is-ignored'])
