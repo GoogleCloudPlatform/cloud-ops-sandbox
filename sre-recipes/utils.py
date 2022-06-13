@@ -58,7 +58,7 @@ def get_external_ip():
     if not auth_cluster('cloud-ops-sandbox'):
         return None, "Failed to authenticate into cloud-ops-sandbox cluster"
     ip_addr, err = run_shell_command(
-        "kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
+        "kubectl -n asm-ingress get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
     if not ip_addr:
         logging.warn(f"No external IP found.")
     return ip_addr, err
