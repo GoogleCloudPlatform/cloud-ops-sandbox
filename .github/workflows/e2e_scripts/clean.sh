@@ -23,7 +23,7 @@ export PROJECT_ID=$(gcloud config get-value project)
 export WORKDIR=$(dirname $(realpath $0))
 
 # clear monitoring
-python3 -m pip install -r ${WORKDIR}/requirements.txt
+python3 -m pip install --user -r ${WORKDIR}/requirements.txt
 python3 ${WORKDIR}/cleanup_monitoring.py "projects/$PROJECT_ID"
 
 # delete cluster
@@ -108,4 +108,10 @@ done
 for INSTANCE_NAME in $(gcloud sql instances list --project=$PROJECT_ID --format="value(NAME)"); do
   echo "deleting Cloud SQL instance $INSTANCE_NAME..."
   gcloud sql instances delete $INSTANCE_NAME --project=$PROJECT_ID --quiet
+done
+
+# delete GKE hub clusters
+for MEMBER_NAME in $(gcloud container fleet memberships list --format="value(NAME)"); do
+  echo "deleting GKE hub membership $MEMBER_NAME"
+  gcloud beta container hub memberships delete $MEMBER_NAME --quiet
 done
