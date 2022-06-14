@@ -78,6 +78,18 @@ jobs:
           -v `pwd`:/sandbox-shared \
           --entrypoint /sandbox-shared/.github/workflows/e2e_scripts/run_install.sh \
           test-cloud-shell:$GITHUB_SHA
+    - name: Run Monitoring Integration Tests
+      timeout-minutes: 30
+      run: |
+        set -x
+        # install dependencies
+        python3 -m pip install --user -r tests/requirements.txt
+        # authenticate cluster
+        CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${{ env.PROJECT_ID }} --format="value(zone)")
+        gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
+        # run tests
+        PROJECT_NUMBER=$(gcloud projects describe ${{ env.PROJECT_ID }} --format="value(projectNumber)")
+        python3 tests/monitoring_integration_test.py ${{ env.PROJECT_ID }} $PROJECT_NUMBER
     - name: Run Provisioning Test
       timeout-minutes: 30
       run: |
@@ -95,18 +107,6 @@ jobs:
           -e LOADGEN_ZONE=$LOADGEN_ZONE \
           -v ~/.config:/root/.config \
           test-provisioning:$GITHUB_SHA
-    - name: Run Monitoring Integration Tests
-      timeout-minutes: 30
-      run: |
-        set -x
-        # install dependencies
-        python3 -m pip install --user -r tests/requirements.txt
-        # authenticate cluster
-        CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${{ env.PROJECT_ID }} --format="value(zone)")
-        gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
-        # run tests
-        PROJECT_NUMBER=$(gcloud projects describe ${{ env.PROJECT_ID }} --format="value(projectNumber)")
-        python3 tests/monitoring_integration_test.py ${{ env.PROJECT_ID }} $PROJECT_NUMBER
     - name: Run SRE Recipes Tests
       timeout-minutes: 30
       run: |

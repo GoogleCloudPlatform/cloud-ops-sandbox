@@ -204,7 +204,7 @@ class TestServiceSlo(unittest.TestCase):
         return results
 
     @RetryErrors(exception=(IndexError, ZeroDivisionError), delay=10, backoff=2, max_tries=5)
-    def get_service_availability(self, service_name, period_seconds=60):
+    def get_service_availability(self, service_name, period_seconds=120):
         """
         Calculates the availability ratio for a service
 
@@ -238,7 +238,7 @@ class TestServiceSlo(unittest.TestCase):
         return ratio
 
     @RetryErrors(exception=IndexError, delay=10, backoff=2, max_tries=5)
-    def get_service_latency(self, service_name, period_seconds=1200):
+    def get_service_latency(self, service_name, period_seconds=120):
         """
         Calculates the latency data for a service
 
@@ -303,7 +303,6 @@ class TestServiceSlo(unittest.TestCase):
                 self.assertIsNotNone(result, f"{service_name} {slo_type} SLO not found")
                 print(f"✅  {service_name} {slo_type} SLO created")
 
-    @RetryErrors(exception=(AssertionError), delay=60, max_tries=5)
     def test_availability_slos_passing(self):
         """
         Ensure that availability is at expected levels to pass the SLO
@@ -320,7 +319,6 @@ class TestServiceSlo(unittest.TestCase):
             self.assertGreater(availability, slo.goal, f"{service_name} failed availability SLO {SLO_status_text}")
             print(f"✅  {service_name} Availability SLO passed: {SLO_status_text}")
 
-    @RetryErrors(exception=(AssertionError), delay=60, max_tries=5)
     def test_latency_slos_passing(self):
         """
         Ensure that service latency is at expected levels to pass the SLO
