@@ -25,6 +25,10 @@ on:
     # run after pushing new tags
     tags:
       - 'v*'
+  workflow_run:
+    workflows: ["Make Release"]
+    types:
+      - completed
   workflow_dispatch:
     # trigger through UI or API
 jobs:
