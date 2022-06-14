@@ -19,6 +19,8 @@ on:
       version:
         description: 'New Version Number'
         required: true
+env:
+  PROJECT_ID: stackdriver-sandbox-230822
 jobs:
   make-release:
     runs-on: ubuntu-latest
@@ -142,3 +144,29 @@ jobs:
           PULL_REQUEST_FROM_BRANCH: "release/${{ github.event.inputs.version }}"
           PULL_REQUEST_TITLE: "chore: release/${{ github.event.inputs.version  }}"
           PULL_REQUEST_BRANCH: "main"
+  push-release-containers:
+    runs-on: [self-hosted, push-privilege]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Trigger Cloud Shell Re-build
+      id: cloud_build
+      run: |
+        set -x
+        gcloud builds submit \
+            --config cloud-shell/cloudbuild.yaml --async
+    - name: Push Service Images to GCR
+      timeout-minutes: 20
+      run: |
+        set -x
+        skaffold config set --global local-cluster false
+        # tag with release version
+        skaffold build --default-repo=gcr.io/${{ env.PROJECT_ID }} \
+                       --tag=${{ github.event.inputs.version  }}
+    - name: Push Load Generator Image to GCR
+      timeout-minutes: 20
+      run: |
+        set -x
+        gcloud auth configure-docker --quiet
+        IMAGE=gcr.io/${{ env.PROJECT_ID }}/sandbox/loadgenerator/gke:${{ github.event.inputs.version }}
+        docker build -t $IMAGE ./src/loadgenerator
+        docker push $IMAGE
