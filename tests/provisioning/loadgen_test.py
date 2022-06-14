@@ -43,11 +43,6 @@ class TestLoadGenerator(unittest.TestCase):
         result = subprocess.run(
             split(command), encoding='utf-8', capture_output=True)
         cls.context = result.stdout
-        # restart the pods
-        command = ('kubectl delete pods --all')
-        subprocess.run(split(command), encoding='utf-8')
-        command = ('kubectl wait --for=condition=ready pod -l app=loadgenerator')
-        subprocess.run(split(command), encoding='utf-8')
         # obtain the public url
         command = (
             "kubectl get service loadgenerator --context=%s -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" % TestLoadGenerator.context)
