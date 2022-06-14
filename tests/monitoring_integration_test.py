@@ -37,49 +37,31 @@ project_name = 'projects/'
 project_id = ''
 zone = '-'
 
-
 def getProjectId():
     """Retrieves the project id from the script arguments.
     Returns:
-        str -- the project id
+        str -- the project name
     Exits when project id is not set
     """
     try:
         project_id = sys.argv[1]
     except:
-        exit('Missing Project ID. Usage: python3 monitoring_integration_test.py $PROJECT_ID')
+        exit('Missing Project ID. Usage: python3 monitoring_integration_test.py $PROJECT_ID $PROJECT_NUMBER')
 
     return project_id
 
-
-def getZone():
-    """Retrieves the zone of the Kubernetes cluster hosted on GKE.
-    Raises:
-    MissingZoneError -- When no cluster is found.
+def getProjectNumber():
+    """Retrieves the project number from the script arguments.
     Returns:
-        str -- the zone
+        str -- the project number
+    Exits when project number is not set
     """
-    credentials = GoogleCredentials.get_application_default()
+    try:
+        project_num = sys.argv[2]
+    except:
+        exit('Missing Project Number. Usage: python3 monitoring_integration_test.py $PROJECT_ID $PROJECT_NUMBER')
 
-    service = discovery.build('container', 'v1', credentials=credentials)
-
-    zone = '-'  # query for all zones
-
-    request = service.projects().zones().clusters().list(
-        projectId=project_id, zone=zone)
-    response = request.execute()
-
-    # Retrieve the cluster for cloud-ops-sandbox and its zone
-    clusters = response['clusters']
-    for cluster in clusters:
-        if cluster['name'] == 'cloud-ops-sandbox':
-            zone = cluster['zone']
-
-    if zone == '-':
-        raise MissingZoneError(
-            'No zone for the cloud-ops-sandbox cluster was detected')
-
-    return zone
+    return project_num
 
 ServiceName = namedtuple("ServiceName", "short long")
 _services = [
@@ -104,7 +86,7 @@ class TestUptimeCheck(unittest.TestCase):
     def setUpClass(cls):
         """ Retrieve the external IP of the cluster """
         with open('out.txt', 'w+') as fout:
-            out = subprocess.run(["kubectl", "-n", "istio-system", "get", "service", "istio-ingressgateway",
+            out = subprocess.run(["kubectl", "-n", "asm-ingress", "get", "service", "istio-ingressgateway",
                                   "-o", "jsonpath='{.status.loadBalancer.ingress[0].ip}'"], stdout=fout)
             fout.seek(0)
             cls.external_ip = fout.read().replace('\'', '')
@@ -191,7 +173,8 @@ class TestServiceSlo(unittest.TestCase):
         self.project_id = getProjectId()
 
     def getIstioService(self, service_name):
-        return 'ist:' + project_id + '-zone-' + zone + '-cloud-ops-sandbox-default-' + service_name
+        project_num = getProjectNumber()
+        return 'canonical-ist:proj-' + project_num + '-default-' + service_name
 
     def _get_metric_data(self, filter_, aggregation, period_seconds=1200):
         """
@@ -390,5 +373,4 @@ class TestServiceLogs(unittest.TestCase):
 if __name__ == '__main__':
     project_id = getProjectId()
     project_name = project_name + project_id
-    zone = getZone()
     unittest.main(argv=['first-arg-is-ignored'])

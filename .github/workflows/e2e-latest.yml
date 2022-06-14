@@ -105,7 +105,8 @@ jobs:
         CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${{ env.PROJECT_ID }} --format="value(zone)")
         gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
         # run tests
-        python3 tests/monitoring_integration_test.py ${{ env.PROJECT_ID }}
+        PROJECT_NUMBER=$(gcloud projects describe ${{ env.PROJECT_ID }} --format="value(projectNumber)")
+        python3 tests/monitoring_integration_test.py ${{ env.PROJECT_ID }} $PROJECT_NUMBER
     - name: Run SRE Recipes Tests
       timeout-minutes: 30
       run: |
