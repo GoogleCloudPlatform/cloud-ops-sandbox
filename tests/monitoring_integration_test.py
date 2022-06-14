@@ -25,7 +25,6 @@ import json
 import time
 
 from collections import namedtuple
-from test_utils.retry import RetryErrors
 
 from google.cloud import monitoring_v3
 from google.cloud import logging_v2
@@ -203,7 +202,6 @@ class TestServiceSlo(unittest.TestCase):
         )
         return results
 
-    @RetryErrors(exception=(IndexError, ZeroDivisionError), delay=10, backoff=2, max_tries=5)
     def get_service_availability(self, service_name, period_seconds=120):
         """
         Calculates the availability ratio for a service
@@ -237,7 +235,6 @@ class TestServiceSlo(unittest.TestCase):
         ratio = success_total/(fail_total+success_total)
         return ratio
 
-    @RetryErrors(exception=IndexError, delay=10, backoff=2, max_tries=5)
     def get_service_latency(self, service_name, period_seconds=120):
         """
         Calculates the latency data for a service
@@ -303,6 +300,8 @@ class TestServiceSlo(unittest.TestCase):
                 self.assertIsNotNone(result, f"{service_name} {slo_type} SLO not found")
                 print(f"✅  {service_name} {slo_type} SLO created")
 
+    # SLO tests aren't reliable enough to run on CI tests, but can be useful for manual testing
+    @unittest.skip("unreliable for CI")
     def test_availability_slos_passing(self):
         """
         Ensure that availability is at expected levels to pass the SLO
@@ -319,6 +318,8 @@ class TestServiceSlo(unittest.TestCase):
             self.assertGreater(availability, slo.goal, f"{service_name} failed availability SLO {SLO_status_text}")
             print(f"✅  {service_name} Availability SLO passed: {SLO_status_text}")
 
+    # SLO tests aren't reliable enough to run on CI tests, but can be useful for manual testing
+    @unittest.skip("unreliable for CI")
     def test_latency_slos_passing(self):
         """
         Ensure that service latency is at expected levels to pass the SLO
