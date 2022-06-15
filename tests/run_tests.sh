@@ -54,7 +54,7 @@ if [[ -z "$SKIP_RATINGS_TEST" ]]; then
   python3 -m venv --system-site-packages ratings-venv
   source ratings-venv/bin/activate
   python3 -m pip install -r $SCRIPT_DIR/ratingservice/requirements.txt
-  python3 $SCRIPT_DIR/ratingservice/main_test.py
+  python3 $SCRIPT_DIR/ratingservice/main_test.py $RATING_SERVICE_URL
   deactivate
 else
   echo "rating test skipped"
