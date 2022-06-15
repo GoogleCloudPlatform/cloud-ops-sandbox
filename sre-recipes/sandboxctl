@@ -202,5 +202,26 @@ def destroy():
     destroy_command = "../terraform/destroy.sh"
     utils.run_interactive_shell_command(destroy_command)
 
+@cli.command()
+@click.option('--skip-ratingservice', default=False,  is_flag=True,
+              help="Don't test the ratingservice")
+def test(skip_ratingservice):
+    """Run tests to ensure environment is working as expected"""
+    os.chdir(os.path.abspath(sys.path[0]))
+    command = "../tests/run_tests.sh"
+    if skip_ratingservice:
+        command = f'SKIP_RATINGS_TEST=TRUE {command}'
+    os.setpgrp()
+    complete = False
+    try:
+        # run install.sh in a background shell
+        process = subprocess.Popen(command, bufsize=0, shell=True)
+        process.communicate()
+        complete = True
+    finally:
+        # kill background process if script is terminated
+        if not complete:
+            os.killpg(0, signal.SIGTERM)
+
 if __name__ == "__main__":
     cli()
