@@ -145,6 +145,7 @@ jobs:
           PULL_REQUEST_TITLE: "chore: release/${{ github.event.inputs.version  }}"
           PULL_REQUEST_BRANCH: "main"
   push-release-containers:
+    needs: make-release
     runs-on: [self-hosted, push-privilege]
     steps:
     - uses: actions/checkout@v2
