@@ -42,7 +42,7 @@ variable "istio_services" {
       availability_goal      = 0.9
       availability_burn_rate = 2
       latency_goal           = 0.9
-      latency_threshold      = 1000
+      latency_threshold      = 2000
       latency_burn_rate      = 2
     },
     {

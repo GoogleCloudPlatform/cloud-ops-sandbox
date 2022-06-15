@@ -20,6 +20,7 @@ There are two artifacts that make up a Cloud Operations Sandbox release:
   - a new git tag should have been pushed for the new release version
   - updated container images (hipstershop services, loadgenerator, cloud shell container) should be pushed in the [`stackdriver-sandbox-230822` GCR repo](http://console.cloud.google.com/gcr/images/stackdriver-sandbox-230822)
 1. Review the new release pull request.
+  - Hint: use `sandboxctl test` to run tests on a live, newly-created sandbox environment
   - If any issues arise, delete the branch and tag, push new changes to develop, and start the release process again (see [Reverting Faulty Releases](#reverting-faulty-releases))
 1. When the PR has been reviewed and thoroughly tested, merge it into main
    - Don't squash; we want to keep the git history

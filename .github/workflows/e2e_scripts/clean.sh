@@ -111,7 +111,7 @@ for INSTANCE_NAME in $(gcloud sql instances list --project=$PROJECT_ID --format=
 done
 
 # delete GKE hub clusters
-for MEMBER_NAME in $(gcloud container fleet memberships list --format="value(NAME)"); do
+for MEMBER_NAME in $(gcloud beta container hub memberships list --format="value(NAME)"); do
   echo "deleting GKE hub membership $MEMBER_NAME"
   gcloud beta container hub memberships delete $MEMBER_NAME --quiet
 done

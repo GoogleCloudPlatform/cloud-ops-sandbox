@@ -98,7 +98,7 @@ jobs:
         # change to previous release code state
         cd ./release-code
         # install dependencies
-        python3 -m pip install -r tests/requirements.txt
+        python3 -m pip install --user -r tests/requirements.txt
         # authenticate cluster
         CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${{ env.PROJECT_ID }} --format="value(zone)")
         gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
