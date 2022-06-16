@@ -65,6 +65,20 @@ resource "google_app_engine_standard_app_version" "default" {
   ]
 }
 
+data "google_app_engine_default_service_account" "default" {
+  project    = var.gcp_project_id
+  depends_on = [google_app_engine_standard_app_version.default]
+}
+
+resource "google_project_iam_binding" "sqlclientrole" {
+  project    = var.gcp_project_id
+  role       = "roles/cloudsql.client"
+  members    = [
+    "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
+  ]
+  depends_on = [data.google_app_engine_default_service_account.default, google_project_service.sqladmin]
+}
+
 resource "google_app_engine_standard_app_version" "ratingservice" {
   project    = var.gcp_project_id
   service    = var.service_name
@@ -107,7 +121,7 @@ resource "google_app_engine_standard_app_version" "ratingservice" {
   }
 
   delete_service_on_destroy = true
-  depends_on                = [google_app_engine_standard_app_version.default]
+  depends_on                = [google_app_engine_standard_app_version.default, google_project_iam_binding.sqlclientrole]
 }
 
 # give the default appengine service account permissions to use clouddebugger
