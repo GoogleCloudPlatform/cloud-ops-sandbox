@@ -25,6 +25,7 @@ cd $SCRIPT_DIR
 
 # set environment variables
 export PROJECT_ID=$(gcloud config get-value project)
+export PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
 export ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${PROJECT_ID} --format="value(zone)")
 export LOADGEN_ZONE=$(gcloud container clusters list --filter="name:loadgenerator" --project ${PROJECT_ID} --format="value(zone)")
 
@@ -33,7 +34,7 @@ echo "running monitoring integration tests.."
 python3 -m venv --system-site-packages monitor-venv
 source monitor-venv/bin/activate
 python3 -m pip install -r $SCRIPT_DIR/requirements.txt
-python3 $SCRIPT_DIR/monitoring_integration_test.py ${PROJECT_ID}
+python3 $SCRIPT_DIR/monitoring_integration_test.py ${PROJECT_ID} ${PROJECT_NUMBER}
 deactivate
 
 # run provisioning test
@@ -49,12 +50,14 @@ deactivate
 # run rating service tests
 if [[ -z "$SKIP_RATINGS_TEST" ]]; then
   echo "running ratingservice tests.."
+  pushd $SCRIPT_DIR/..
   RATING_SERVICE_URL="https://ratingservice-dot-$(gcloud app describe --format='value(defaultHostname)' --project=${PROJECT_ID})"
   python3 -m venv --system-site-packages ratings-venv
   source ratings-venv/bin/activate
   python3 -m pip install -r $SCRIPT_DIR/ratingservice/requirements.txt
-  python3 $SCRIPT_DIR/ratingservice/main_test.py
+  python3 $SCRIPT_DIR/ratingservice/main_test.py $RATING_SERVICE_URL
   deactivate
+  popd
 else
   echo "rating test skipped"
 fi
