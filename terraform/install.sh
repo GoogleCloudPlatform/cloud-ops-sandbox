@@ -37,8 +37,8 @@ sendTelemetry() {
 
 promptForBillingAccount() {
   log "Checking for billing accounts..."
-  found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter open=true --sort-by=displayName)
-  if [ -z "$found_accounts" ] || [[ ${#found_accounts[@]} -eq 0 ]]; then
+  found_all_accounts=$(gcloud beta billing accounts list --format="value(displayName,name)" --filter open=true --sort-by=displayName)
+  if [ -z "$found_all_accounts" ] || [[ ${#found_all_accounts[@]} -eq 0 ]]; then
     log "error: no active billing accounts were detected. In order to create a sandboxed environment,"
     log "the script needs to create a new GCP project and associate it with an active billing account"
     log "Follow this link to setup a billing account:"
@@ -49,6 +49,30 @@ promptForBillingAccount() {
     sendTelemetry "none" no-active-billing
     exit 1;
   fi
+
+ #check for permission to link account
+  found_accounts=()
+  IFS=$'\n'
+  found_all_accounts=($found_all_accounts)
+  for acc in ${found_all_accounts[@]}
+  do
+    IFS=$'\t'
+    acc=($acc)
+    IFS=$'\n'
+    test_perm=$(gcloud beta billing accounts get-iam-policy "${acc[1]}" --flatten=bindings --filter="bindings.role:roles/billing.projectManager OR bindings.role:roles/billing.user OR bindings.role:roles/billing.admin" --format='value(bindings.members)')
+    if [ -n "$test_perm" ] || [[ ${#test_perm[@]} -ne 0 ]]; then
+      found_accounts+=("${acc[1]}")
+    fi
+  done
+
+  if [[ ${#found_accounts[@]} -eq 0 ]]; then
+    log "error: you don't have permissions to link projects to billing accounts,"
+    log "Follow this link to setup a new billing account that you can link:"
+    log "https://cloud.google.com/billing/docs/how-to/manage-billing-account"
+    sendTelemetry "none" no-active-billing
+    exit 1;
+  fi
+
 
   # store (name:id) info in a map
   IFS_bak=$IFS
