@@ -40,6 +40,7 @@ The URLs in this message tell you where to find the results of the installation.
 If a message does **not** appear, and the installation script is not able to run, then try running `sandboxctl create` in your Cloud Shell terminal once you have set-up your billing account.
 
 ### Recovering from session timeout
+
 Should your Cloud Shell session timeout due to user inactivity, you will need to launch the custom Cloud Shell image to access the `sandboxctl` command.
 Click the
 
@@ -47,7 +48,7 @@ Click the
 
 button from the [Cloud Operations Sandbox homepage](https://cloud-ops-sandbox.dev/) to restart the custom Cloud Shell.
 
-## Explore the Sandbox!
+## Explore the Sandbox
 
 Cloud Operations Sandbox comes with several capabilities out-of-the-box, in this tutorial, we walk through a guided tour of products in Cloud Operations and explore how they can be used to work with an application.
 For additional information please refer to the [User Guide](https://cloud-ops-sandbox.dev/docs/).
@@ -58,7 +59,7 @@ Let's get started!
 
 In another browser tab, navigate to the GCP GKE Dashboard URL, which takes you to the [Kubernetes Engine **Workloads** page](https://console.cloud.google.com/kubernetes/workload) for the project created by the installer ([documentation](https://cloud.google.com/kubernetes-engine/docs/)).
 
-### Shop like a hipster!
+### Shop like a hipster
 
 In a new browser tab, navigate to the Hipster Shop URL, where you can "purchase" everything you need for your hipster lifestyle using a mock credit card number.
 
@@ -77,7 +78,7 @@ From here, you can explore how the application was deployed, and you can use the
 
 Navigate to the GCP Monitoring Workspace URL, which takes you to the [Cloud Monitoring **Workspace** page](https://console.cloud.google.com/monitoring) for your new project. The console may take some time to create a new workspace. Afterward, you'll be able to see a few dashboards generated through Cloud Operations tools.
 
-## Learn Cloud Operations 
+## Learn Cloud Operations
 
 ### Cloud Operations Overview
 
@@ -85,19 +86,18 @@ Cloud Operations provides products for both developers and administrators, this 
 
 Application developers need to be able to investigate the cause of problems in applications running in distributed environments, and in this context, the importance of **Application Performance Management (APM)** has increased. Cloud Operations provides 3 products for APM:
 
--  [Cloud Trace](https://console.cloud.google.com/traces)
--  [Cloud Profiler](https://console.cloud.google.com/profiler)
--  [Cloud Debugger](https://console.cloud.google.com/debug)
+- [Cloud Trace](https://console.cloud.google.com/traces)
+- [Cloud Profiler](https://console.cloud.google.com/profiler)
+- [Cloud Debugger](https://console.cloud.google.com/debug)
 
 > Note: The recommended solution for application instrumentation is [**OpenCensus**](https://opencensus.io/), an open-source project that supports trace instrumentation in a variety of languages and that can export this data to Cloud.
 
-Similarly, cloud-native, microservice-based applications complicate traditional approaches used by administrators for monitoring system health: it's harder to observe your system health when the number of instances is flexible and the inter-dependencies among the many components are complicated. In the last few years, **Site Reliability Engineering (SRE)** has become recognized as a practical approach to managing large-scale, highly complex, distributed systems. 
+Similarly, cloud-native, microservice-based applications complicate traditional approaches used by administrators for monitoring system health: it's harder to observe your system health when the number of instances is flexible and the inter-dependencies among the many components are complicated. In the last few years, **Site Reliability Engineering (SRE)** has become recognized as a practical approach to managing large-scale, highly complex, distributed systems.
 In addition, Cloud Operations provides the several tools that are useful for [Site Reliability Engineering (SRE)](https://sre.google/):
 
--  [Cloud Monitoring](https://console.cloud.google.com/monitoring)
--  [Cloud Logging](https://console.cloud.google.com/logs)
--  [Cloud Error Reporting](https://console.cloud.google.com/errors)
-
+- [Cloud Monitoring](https://console.cloud.google.com/monitoring)
+- [Cloud Logging](https://console.cloud.google.com/logs)
+- [Cloud Error Reporting](https://console.cloud.google.com/errors)
 
 ## The Cloud Observability Products: Monitoring, Logging, and Error Reporting
 
@@ -105,7 +105,7 @@ Next, learn about Cloud Observability products!
 
 ### Cloud Monitoring
 
-[Cloud Monitoring](https://console.cloud.google.com/monitoring) is the go-to place to grasp real-time trends of the system based on SLI/SLO. SRE team and application development team (and even business organization team) can collaborate to set up charts on the monitoring dashboard using metrics sent from the resources and the applications. 
+[Cloud Monitoring](https://console.cloud.google.com/monitoring) is the go-to place to grasp real-time trends of the system based on SLI/SLO. SRE team and application development team (and even business organization team) can collaborate to set up charts on the monitoring dashboard using metrics sent from the resources and the applications.
 
 #### Using Monitoring
 
@@ -147,13 +147,13 @@ Search for the metric type using the name you gave it.
 
 ## Cloud Logging
 
-Operators can look at [logs](https://console.cloud.google.com/logs) in [Cloud Logging](https://cloud.google.com/logging/docs/) to find clues explaining any anomalies in the metrics charts. 
+Operators can look at [logs](https://console.cloud.google.com/logs) in [Cloud Logging](https://cloud.google.com/logging/docs/) to find clues explaining any anomalies in the metrics charts.
 
 ### Using Logging
 
 You can access Cloud Logging by selecting **Logging** from the GCP navigation menu. This brings up the Logs Viewer interface.
 
-The Logs Viewer allows you to view logs emitted by resources in the project using search filters provided.  The Logs Viewer lets you select standard filters from pulldown menus. 
+The Logs Viewer allows you to view logs emitted by resources in the project using search filters provided.  The Logs Viewer lets you select standard filters from pulldown menus.
 
 ### An example: server logs
 
@@ -169,7 +169,7 @@ For additional information and examples like log export see [User Guide.](https:
 ## Cloud Error Reporting
 
 [Cloud Error Reporting](https://console.cloud.google.com/errors) ([documentation](https://cloud.google.com/error-reporting/docs/)) automatically groups errors depending on stack trace message patterns and shows the frequency of each error group. The error groups are generated automatically, based on stack traces.
-On opening an error group report, operators can access to the exact line in the application code where the error occurred and reason about the cause by navigating to the line of the source code on Google Cloud Source Repository. 
+On opening an error group report, operators can access to the exact line in the application code where the error occurred and reason about the cause by navigating to the line of the source code on Google Cloud Source Repository.
 
 ### Using Error Reporting
 
@@ -228,8 +228,8 @@ For additional information refer to the [User Guide.](https://cloud-ops-sandbox.
 SRE Recipes is our [Chaos Engineering](https://en.wikipedia.org/wiki/Chaos_engineering) tool to test your sandbox environment. It helps users to familiarize themselves with finding the root cause of a breakage using Cloud Operations suite of tools.  
 Each 'recipe' simulates a different scenario of real life problems that can occur to the production system. There are several recipes that you can run and you can also [contribute your own.](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/main/sre-recipes#contributing)  
 
-```
-$ sandboxctl sre-recipes  
+```bash
+sandboxctl sre-recipes  
 ```
 
 ### Running an example SRE Recipe
@@ -239,27 +239,29 @@ $ sandboxctl sre-recipes
 1. Run the recipe to manufacture errors in the demo cluster
 
 > **Note:** It may take up to 5 minutes for breakages to take effect in production.
-```
-$ sandboxctl sre-recipes break recipe0
+
+```bash
+sandboxctl sre-recipes break recipe0
 ```
 
 2. Use Cloud Operations suite to diagnose the problem.
 
 > **Note:** If you are stuck, you can use a hint to direct you to the right direction.
-```
-$ sandboxctl sre-recipes hint recipe0
+
+```bash
+sandboxctl sre-recipes hint recipe0
 ```
 
 3. Verify your hypothesis on what could be wrong with the demo app by using command line tool
 
-```
-$ sandboxctl sre-recipes verify recipe0
+```bash
+sandboxctl sre-recipes verify recipe0
 ```
 
 4. After you discover the problem, you can restore the cluster to its original state.
 
-```
-$ sandboxctl sre-recipes restore recipe0
+```bash
+sandboxctl sre-recipes restore recipe0
 ```
 
 ## Destroying your cluster
@@ -267,10 +269,11 @@ $ sandboxctl sre-recipes restore recipe0
 Once you have finished exploring the Cloud Operations Sandbox project, don't forget to destroy it to avoid incurring additional billing.
 
 Destroy your Sandbox project by opening the Cloud Shell and running sandboxctl destroy:
-```
-$ sandboxctl destroy
+
+```bash
+sandboxctl destroy
 ```
 
 **Note:** This script destroys the current project. If `sandboxctl create` were run again, a Sandbox project with a new project id would be created.
 
-### Congratulations on finishing the Cloud Operations Sandbox tutorial!
+**Congratulations on finishing the Cloud Operations Sandbox tutorial!**
