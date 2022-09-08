@@ -29,10 +29,14 @@ jobs:
     runs-on: [self-hosted, kind-cluster]
     steps:
     - uses: actions/checkout@v2
+    - uses: hashicorp/setup-terraform@v2
     - name: License Check
       run: |
         set -x
         addlicense --check ./
+    - name: Terraform fmt
+      run: |
+        run: terraform fmt -check -recursive
     - name: Validate Schema of SRE Recipes Configs
       run: |
         set -x
