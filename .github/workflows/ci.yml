@@ -29,9 +29,6 @@ jobs:
     runs-on: [self-hosted, kind-cluster]
     steps:
     - uses: actions/checkout@v2
-    - uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 0.15.1
     - name: License Check
       run: |
         set -x
