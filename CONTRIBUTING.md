@@ -172,7 +172,7 @@ gcloud auth configure-docker -q
    application.
 
 ```bash
-INGRESS_HOST="$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+INGRESS_HOST="$(kubectl -n asm-ingress get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
 echo "$INGRESS_HOST"
 curl -v "http://$INGRESS_HOST"
 ```
@@ -248,7 +248,7 @@ curl -X POST 'https://ratingservice-dot-$AE_DOMAIN/ratings:recollect'
    application.
 
 ```bash
-INGRESS_HOST="$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+INGRESS_HOST="$(kubectl -n asm-ingress get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
 echo "$INGRESS_HOST"
 curl -v "http://$INGRESS_HOST"
 ```

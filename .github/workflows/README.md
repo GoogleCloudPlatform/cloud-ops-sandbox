@@ -68,14 +68,6 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 - builds and pushes images to official GCR repo tagged with git commit
 - builds and pushes images to official GCR repo tagged as latest
 
-### Push-Tags.yaml
-
-#### Triggers
-- tags pushed to repo
-
-#### Actions
-- builds and pushes images to official GCR repo tagged with git tag name
-
 ### E2E-Latest.yaml
 
 #### Triggers

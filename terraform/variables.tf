@@ -56,6 +56,12 @@ variable "gke_location" {
   description = "GKE Cloud Operations Sandbox's Cluster location."
 
 }
+
+variable "skip_ratingservice" {
+  default     = false
+  description = "If true, the ratingservice and associated resources will not be deployed."
+}
+
 #Loadgen
 variable "skip_loadgen" {
   default     = false

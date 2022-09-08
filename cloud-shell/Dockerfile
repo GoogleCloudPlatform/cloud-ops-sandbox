@@ -14,6 +14,11 @@
 
 FROM gcr.io/cloudshell-images/cloudshell:latest
 
+# update gcloud version to support asm installation
+# asm needs gcloud 389 for `gcloud container fleet mesh enable`
+RUN sudo apt-get update
+RUN sudo apt-get -y --only-upgrade install google-cloud-sdk-anthos-auth google-cloud-sdk
+
 # install Terraform 1.0.0
 RUN sudo apt-get install unzip && \
   wget -q https://releases.hashicorp.com/terraform/1.0.0/terraform_1.0.0_linux_amd64.zip -O ./terraform.zip && \
@@ -32,7 +37,7 @@ RUN python3 -m pip install click==8.0.1
 RUN python3 -m pip install google-cloud-monitoring==2.4.0
 
 # set env var
-RUN echo "VERSION=v0.7.6" >> /etc/environment
+RUN echo "VERSION=v0.8.0" >> /etc/environment
 
 # Change "Open in Cloudshell" script to run `sandboxctl create` using local file and changing it
 COPY cloudshell_open_cp.sh /google/devshell/bashrc.google.d/cloudshell_open.sh
