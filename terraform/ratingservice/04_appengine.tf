@@ -25,7 +25,7 @@ data "external" "app_engine_state" {
 }
 
 resource "google_app_engine_application" "app" {
-  project     =  var.gcp_project_id
+  project     = var.gcp_project_id
   count       = data.external.app_engine_state.result.application_exist == "false" ? 1 : 0
   location_id = var.gcp_region_name
 
@@ -34,7 +34,7 @@ resource "google_app_engine_application" "app" {
 
 resource "google_app_engine_standard_app_version" "default" {
   count      = data.external.app_engine_state.result.default_svc_exist == "false" ? 1 : 0
-  project    =  var.gcp_project_id
+  project    = var.gcp_project_id
   service    = "default"
   version_id = "v1"
   runtime    = "python38"
@@ -55,7 +55,7 @@ resource "google_app_engine_standard_app_version" "default" {
   }
 
   noop_on_destroy = true
-  depends_on      = [
+  depends_on = [
     google_project_service.gae,
     google_project_service.cloudbuild,
     google_storage_bucket_object.requirements,
@@ -71,9 +71,9 @@ data "google_app_engine_default_service_account" "default" {
 }
 
 resource "google_project_iam_binding" "sqlclientrole" {
-  project    = var.gcp_project_id
-  role       = "roles/cloudsql.client"
-  members    = [
+  project = var.gcp_project_id
+  role    = "roles/cloudsql.client"
+  members = [
     "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
   ]
   depends_on = [data.google_app_engine_default_service_account.default, google_project_service.sqladmin]

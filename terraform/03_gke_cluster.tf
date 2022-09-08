@@ -59,7 +59,7 @@ resource "google_container_cluster" "gke" {
 
   resource_labels = {
     "version" = var.app_version
-    "mesh_id"     = "proj-${data.google_project.project.number}"
+    "mesh_id" = "proj-${data.google_project.project.number}"
   }
 
   # Using an embedded resource to define the node pool. Another
@@ -146,38 +146,38 @@ data "google_compute_default_service_account" "default" {
 
 # Give service account Observability permissions
 resource "google_project_iam_member" "trace_role" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudtrace.agent"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  project    = data.google_project.project.project_id
+  role       = "roles/cloudtrace.agent"
+  member     = "serviceAccount:${data.google_compute_default_service_account.default.email}"
   depends_on = [data.google_compute_default_service_account.default]
 }
 
 resource "google_project_iam_member" "monitoring_role" {
-  project = data.google_project.project.project_id
-  role    = "roles/monitoring.metricWriter"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  project    = data.google_project.project.project_id
+  role       = "roles/monitoring.metricWriter"
+  member     = "serviceAccount:${data.google_compute_default_service_account.default.email}"
   depends_on = [data.google_compute_default_service_account.default]
 }
 
 
 resource "google_project_iam_member" "profiler_role" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudprofiler.agent"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  project    = data.google_project.project.project_id
+  role       = "roles/cloudprofiler.agent"
+  member     = "serviceAccount:${data.google_compute_default_service_account.default.email}"
   depends_on = [data.google_compute_default_service_account.default]
 }
 
 resource "google_project_iam_member" "debugger_role" {
-  project = data.google_project.project.project_id
-  role    = "roles/clouddebugger.agent"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  project    = data.google_project.project.project_id
+  role       = "roles/clouddebugger.agent"
+  member     = "serviceAccount:${data.google_compute_default_service_account.default.email}"
   depends_on = [data.google_compute_default_service_account.default]
 }
 
 resource "google_project_iam_member" "logging_role" {
-  project = data.google_project.project.project_id
-  role    = "roles/logging.logWriter"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  project    = data.google_project.project.project_id
+  role       = "roles/logging.logWriter"
+  member     = "serviceAccount:${data.google_compute_default_service_account.default.email}"
   depends_on = [data.google_compute_default_service_account.default]
 }
 
