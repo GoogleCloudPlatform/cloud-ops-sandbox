@@ -58,5 +58,8 @@ sudo apt-get install python3-pip
 # install unzip
 sudo apt-get install unzip
 
+# install node (for terraform)
+sudo apt-get install nodejs
+
 # reboot to complete docker setup
 sudo reboot
