@@ -38,7 +38,7 @@ jobs:
         addlicense --check ./
     - name: Terraform fmt
       run: |
-        run: terraform fmt -check -recursive
+        terraform fmt -check -recursive
     - name: Validate Schema of SRE Recipes Configs
       run: |
         set -x
