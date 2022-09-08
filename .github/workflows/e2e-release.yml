@@ -98,12 +98,13 @@ jobs:
         # change to previous release code state
         cd ./release-code
         # install dependencies
-        python3 -m pip install -r tests/requirements.txt
+        python3 -m pip install --user -r tests/requirements.txt
         # authenticate cluster
         CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project ${{ env.PROJECT_ID }} --format="value(zone)")
         gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
         # run tests
-        python3 tests/monitoring_integration_test.py ${{ env.PROJECT_ID }}
+        PROJECT_NUMBER=$(gcloud projects describe ${{ env.PROJECT_ID }} --format="value(projectNumber)")
+        python3 tests/monitoring_integration_test.py ${{ env.PROJECT_ID }} $PROJECT_NUMBER
     - name:  Test Using Existing Project
       timeout-minutes: 30
       run: |

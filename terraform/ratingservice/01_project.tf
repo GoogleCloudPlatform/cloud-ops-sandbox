@@ -25,3 +25,16 @@ resource "google_project_service" "cloudscheduler" {
   disable_dependent_services = true
   project                    = var.gcp_project_id
 }
+
+resource "google_project_service" "cloudbuild" {
+  service                    = "cloudbuild.googleapis.com"
+  disable_dependent_services = true
+  project                    = var.gcp_project_id
+}
+
+resource "google_project_service" "sqladmin" {
+  service                    = "sqladmin.googleapis.com"
+  disable_dependent_services = true
+  project                    = var.gcp_project_id
+}
+
