@@ -55,5 +55,8 @@ gcloud auth configure-docker --quiet
 # install pip3
 sudo apt-get install python3-pip
 
+# install unzip
+sudo apt-get install unzip
+
 # reboot to complete docker setup
 sudo reboot
