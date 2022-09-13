@@ -179,13 +179,13 @@ def describe():
     gcp_path = "https://console.cloud.google.com"
     project_id, err = utils.get_project_id()
     if err:
-        print("Failed to get project ID:". err)
+        print("Failed to get project ID: ", err)
     external_ip, err = utils.get_external_ip()
     if err:
-        print("Failed to get external ID:". err)
+        print("Failed to get external ID: ", err)
     loadgen_ip, err = utils.get_loadgen_ip()
     if err:
-        print("Failed to get loadgen ID:". err)
+        print("Failed to get loadgen ID: ", err)
     gcp_kubernetes_path = gcp_path + '/kubernetes/workload?project=' + project_id
     gcp_monitoring_path = gcp_path + '/monitoring?project=' + project_id
     print(f"""Cloud Operations Sandbox info for project: {project_id}
