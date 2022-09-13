@@ -59,6 +59,7 @@ resource "google_container_cluster" "gke" {
 
   resource_labels = {
     "version" = var.app_version
+    "mesh_id"     = "proj-${data.google_project.project.number}"
   }
 
   # Using an embedded resource to define the node pool. Another
@@ -87,6 +88,7 @@ resource "google_container_cluster" "gke" {
       labels = {
         environment = "dev",
         cluster     = "cloud-ops-sandbox-main"
+        mesh_id     = "proj-${data.google_project.project.number}"
       }
 
       # Enable Workload Identity for node pool
@@ -98,7 +100,7 @@ resource "google_container_cluster" "gke" {
     initial_node_count = 4
 
     autoscaling {
-      min_node_count = 2
+      min_node_count = 4
       max_node_count = 10
     }
 
@@ -122,7 +124,7 @@ resource "google_container_cluster" "gke" {
   # be enabled) before the cluster can be created. This will not address the
   # eventual consistency problems we have with the API but it will make sure
   # that we're at least trying to do things in the right order.
-  depends_on = [google_project_service.gke]
+  depends_on = [google_project_service.gke, google_project_service.gkehub, google_project_service.mesh]
 }
 
 
@@ -140,6 +142,43 @@ data "google_compute_default_service_account" "default" {
     google_container_cluster.gke,
     null_resource.current_project
   ]
+}
+
+# Give service account Observability permissions
+resource "google_project_iam_member" "trace_role" {
+  project = data.google_project.project.project_id
+  role    = "roles/cloudtrace.agent"
+  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  depends_on = [data.google_compute_default_service_account.default]
+}
+
+resource "google_project_iam_member" "monitoring_role" {
+  project = data.google_project.project.project_id
+  role    = "roles/monitoring.metricWriter"
+  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  depends_on = [data.google_compute_default_service_account.default]
+}
+
+
+resource "google_project_iam_member" "profiler_role" {
+  project = data.google_project.project.project_id
+  role    = "roles/cloudprofiler.agent"
+  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  depends_on = [data.google_compute_default_service_account.default]
+}
+
+resource "google_project_iam_member" "debugger_role" {
+  project = data.google_project.project.project_id
+  role    = "roles/clouddebugger.agent"
+  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  depends_on = [data.google_compute_default_service_account.default]
+}
+
+resource "google_project_iam_member" "logging_role" {
+  project = data.google_project.project.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  depends_on = [data.google_compute_default_service_account.default]
 }
 
 # Create GSA/KSA binding: let IAM auth KSAs as a svc.id.goog member name
@@ -170,10 +209,10 @@ resource "null_resource" "annotate_ksa" {
   depends_on = [google_service_account_iam_binding.set_gsa_binding]
 }
 
-# Install Istio into the GKE cluster
-resource "null_resource" "install_istio" {
+# Install ASM into the GKE cluster
+resource "null_resource" "install_asm" {
   provisioner "local-exec" {
-    command = "./istio/install_istio.sh"
+    command = "./istio/install_asm.sh"
   }
 
   depends_on = [null_resource.annotate_ksa]
@@ -195,11 +234,10 @@ resource "null_resource" "deploy_services" {
     kubectl apply -f ../kubernetes-manifests/productcatalogservice.yaml
     kubectl apply -f ../kubernetes-manifests/recommendationservice.yaml
     kubectl apply -f ../kubernetes-manifests/shippingservice.yaml
-    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${module.ratingservice.service_url}
   EOT
   }
 
-  depends_on = [null_resource.install_istio]
+  depends_on = [null_resource.install_asm]
 }
 
 # We wait for all of our microservices to become available on kubernetes
@@ -223,6 +261,22 @@ resource "null_resource" "delay" {
   triggers = {
     "before" = null_resource.deploy_services.id
   }
+}
+
+# Rewrite ratingservice address
+resource "null_resource" "ratingservice_address_rewrite" {
+  count = var.skip_ratingservice ? 0 : 1
+
+  provisioner "local-exec" {
+    command = <<-EOT
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/frontend
+    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${one(module.ratingservice[*].service_url)}
+    kubectl delete pod -l app=frontend
+    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/frontend
+  EOT
+  }
+
+  depends_on = [null_resource.delay]
 }
 
 data "external" "terraform_vars" {
