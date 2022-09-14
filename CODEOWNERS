@@ -1,8 +1,3 @@
-*                                                               @GoogleCloudPlatform/dee-observability
-/.gitattributes                                                 @GoogleCloudPlatform/observability-devx
-/.gitignore                                                     @GoogleCloudPlatform/observability-devx
-/src/                                                           @simonz130 @GoogleCloudPlatform/observability-devx
-/terraform/                                                     @bleything @GoogleCloudPlatform/observability-devx
-/cloud-shell/                                                   @GoogleCloudPlatform/observability-devx
-/tests/                                                         @simonz130 @GoogleCloudPlatform/observability-devx
-/.github/                                                       @Daniel-Sanche @GoogleCloudPlatform/observability-devx
+*                                                             @GoogleCloudPlatform/dee-observability
+/.github/                                                     @daniel-sanche @GoogleCloudPlatform/dee-observability
+/cloud-shell/                                                 @daniel-sanche @GoogleCloudPlatform/dee-observability
