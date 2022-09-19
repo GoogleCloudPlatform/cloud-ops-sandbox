@@ -95,7 +95,7 @@ jobs:
 
           # print version number as title
           export NEW_VERSION=${{ github.event.inputs.version  }}
-          echo "## [$NEW_VERSION](https://www.github.com/${{ github.repository }}/compare/$LAST_HASH...$FIRST_HASH)" > PR.txt
+          echo "## [$NEW_VERSION](https://www.github.com/${{ github.repository }}/compare/$PREV_HASH...$RECENT_HASH)" > PR.txt
 
           # build category buckets
           # format: title/prefix|prefix|prefix...
