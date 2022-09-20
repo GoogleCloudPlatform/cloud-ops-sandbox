@@ -30,9 +30,9 @@ variable "istio_services" {
     {
       service_name           = "Frontend Service"
       service_id             = "frontend"
-      availability_goal      = 0.9  # configurable goal for the availability SLO (0.9 = 90% of requests are successsful)
-      availability_burn_rate = 2    # limit on error budget burn rate (2 indicates we alert if error budget is consumed 2x faster than it should)
-      latency_goal           = 0.9  # configurable goal for the latency SLO (0.9 = 90% of requests finish in under the latency threshold)
+      availability_goal      = 0.9 # configurable goal for the availability SLO (0.9 = 90% of requests are successsful)
+      availability_burn_rate = 2   # limit on error budget burn rate (2 indicates we alert if error budget is consumed 2x faster than it should)
+      latency_goal           = 0.9 # configurable goal for the latency SLO (0.9 = 90% of requests finish in under the latency threshold)
       latency_threshold      = 2000 # indicates 2000ms as the maximum latency of a 'good' request
       latency_burn_rate      = 2
     },
