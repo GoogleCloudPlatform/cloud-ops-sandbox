@@ -37,7 +37,7 @@ resource "google_app_engine_standard_app_version" "default" {
   project    = var.gcp_project_id
   service    = "default"
   version_id = "v1"
-  runtime    = "python38"
+  runtime    = "python39"
 
   entrypoint {
     shell = "uwsgi --http-socket :8080 --wsgi-file main.py --callable app --master --processes 1 --threads 1"
