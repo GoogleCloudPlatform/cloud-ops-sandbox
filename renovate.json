@@ -17,7 +17,7 @@
       "groupName": "linters"
     }
   ],
-  "reviewers": ["GoogleCloudPlatform/observability-devx"],
+  "reviewers": ["GoogleCloudPlatform/dee-observability"],
   "labels": [
     "dependencies",
     "type: cleanup",
@@ -30,6 +30,8 @@
   "ignoreDeps": [
     "com.google.protobuf:protoc"
   ],
-  "semanticCommits" : "enabled",
-  "baseBranches": ["develop"]
+  "semanticCommits": "enabled",
+  "baseBranches": [
+    "develop"
+  ]
 }

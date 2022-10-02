@@ -16,6 +16,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
     - `wget -O - https://raw.githubusercontent.com/GoogleCloudPlatform/cloud-ops-sandbox/main/.github/workflows/install-dependencies.sh | bash`
 
 ## Tags
+
 - `kind-cluster`
   - default worker
   - needs no special privileges
@@ -41,6 +42,7 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
   - requires `E2E_PROJECT_ID` to be set properly as an environment variable
 
 ---
+
 ## Workflows
 
 ### CI.yaml
@@ -58,23 +60,26 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
   - ensures all pods reach ready state
   - ensures HTTP request to frontend returns HTTP status 200
 
-
 ### Push-Containers.yaml
 
 #### Triggers
+
 - commits pushed to develop or main branches
 
 #### Actions
+
 - builds and pushes images to official GCR repo tagged with git commit
 - builds and pushes images to official GCR repo tagged as latest
 
 ### E2E-Latest.yaml
 
 #### Triggers
+
 - on each commit to main or develop
 - on each PR to main or develop
 
 #### Actions
+
 - ensure end-to-end test project has deleted all test resources
 - build fresh containers for all services and the custom cloud shell image
 - rewrite the kubernetes manifests to test with local images
@@ -84,25 +89,29 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 ### E2E-Release.yaml
 
 #### Triggers
+
 - daily at 8pm
 - on demand (through UI)
 - on pushes to main branch
 
 #### Actions
+
 - ensure end-to-end test project has deleted all test resources
-- scrape latest release information from https://stackdriver-sandbox.dev/
+- scrape latest release information from <https://stackdriver-sandbox.dev/>
 - run install.sh script against end-to-end test project
 - clean up resources in test project
 
 ### E2E-Upgrade.yaml
 
 #### Triggers
+
 - daily at 10pm
 - on demand (through UI)
 
 #### Actions
+
 - ensure end-to-end test project has deleted all test resources
-- scrape latest release information from https://stackdriver-sandbox.dev/
+- scrape latest release information from <https://stackdriver-sandbox.dev/>
 - run install.sh script with previous release
 - build fresh containers for all services and the custom cloud shell image
 - run install.sh script with latest code in repo, to make sure it is backwards-compatible
@@ -113,62 +122,74 @@ workloads run using [GitHub self-hosted runners](https://help.github.com/en/acti
 ### Update-Custom-Image.yaml
 
 #### Triggers
+
 - on each commit to main or develop
 - on each new tag pushed to repo
 - every 24 hours
 
 #### Actions
+
 - runs Cloud Build trigger, which runs the logic in `../../cloudshell-image/Cloudbuild.yaml`. This logic:
-    - rebuilds tagged versions of the custom cloud shell image from the base cloud shell image (including the latest version)
+  - rebuilds tagged versions of the custom cloud shell image from the base cloud shell image (including the latest version)
 - prints logs from Cloud Build trigger run
 
 ### PR-Comment-Bot.yml
 
 #### Triggers
+
 - on each new PR
 
 #### Actions
-- leaves a comment containing an "Open in Cloud Shell" button
 
+- leaves a comment containing an "Open in Cloud Shell" button
 
 ### Gitflow-Enforcer.yml
 
 #### Triggers
+
 - on each new PR to main
 
 #### Actions
+
 - Only allow "release/" PRs against master
 
 ### Check-Tags.yml
 
 #### Triggers
+
 - on each new PR to main or develop
 
 #### Actions
+
 - Checks kubernetes manifests to ensure develop is pinned to `latest`, and main is pinned to a version
 - Checks telemetry id to ensure develop is on `test` and main is on `prod`
 
 ### Prod-Website.yaml
 
 #### Triggers
+
 - release merged and commits pushed to main
 
 #### Actions
+
 - push new prod version of the website to App Engine
 
 ### Manual-Website.yml
 
 #### Triggers
+
 - on manual trigger
 
 #### Actions
+
 - sets up a pre-prod GAE website deployment in `stackdriver-sandbox-230822`
 
 ### Develop-Website.yml
 
 #### Triggers
+
 - on each new push to develop
 
 #### Actions
-- sets up a pre-prod GAE website deployment in `stackdriver-sandbox-230822`
 
+- sets up a pre-prod GAE website deployment in `stackdriver-sandbox-230822`

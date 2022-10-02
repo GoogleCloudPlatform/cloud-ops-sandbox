@@ -12,44 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Config file for Label Bot
-# go/language-label-bot
-# Disable label by Drift product
+
+# do not add 'prod:' label
 product: false
-language:
-  # Enable pr labeling
-  pullrequest: true
-  labelprefix: 'lang: '
-  # To re-map extension to languages
-  extensions:
-    manifest: ['tf']
-    typescript: ['ts']
-  # To map languages based on project directory structure:
-  paths:
-    src:
-      frontend: 'go'
-      cartservice: 'dotnet'
-      productcatalogservice: 'go'
-      currencyservice: 'javascript'
-      paymentservice: 'javascript'
-      shippingservice: 'go'
-      emailservice: 'python'
-      checkoutservice: 'go'
-      recommendationservice: 'python'
-      adservice: 'java'
-      loadgenerator: 'python'
-    tests:
-      # To designate the default language for a subdirectory use '.'
-      .: 'python'
-      # More specific path designations will overwrite the default
-      cartservice: 'dotnet'
-      ratingservice: 'python'
-    website:
-      .: 'javascript'
-      images: 'svg'
+
+# add 'size:' label
 requestsize:
   enabled: true
-staleness:
+
+language:
   pullrequest: true
-  old: 30
-  extraold: 60
+  labelprefix: "lang:"
+  terraform: "tf"
+  paths:
+    apps:
+      .: 'configs'
+    tests:
+      .: 'tests'
