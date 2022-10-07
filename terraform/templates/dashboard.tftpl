@@ -1,0 +1,34 @@
+{"displayName": "${display_name}",
+ "gridLayout": {
+  "columns": "2",
+  "widgets": ${jsonencode([
+    for widget in widgets: {
+     "title": "${widget.title}",
+     "xyChart": {
+      "yAxis": {
+        "label": "${widget.y_axis_label}",
+        "scale": "LINEAR"
+      },
+      "chartOptions": {
+        "mode": "COLOR"
+      },
+      "dataSets": [
+       for ds in widget.datasets: {
+        "timeSeriesQuery": {
+         "timeSeriesFilter": {
+          "filter": "${ds.time_series.filter.query}",
+          "aggregation": {
+           "perSeriesAligner": "${ds.time_series.filter.aggregation.aligner}"
+          }
+         },
+         "unitOverride": "${ds.time_series.unit_override}"
+        },
+        "plotType": "LINE",
+        "minAlignmentPeriod": "${ds.min_period}"
+       }
+      ]
+     }
+    }
+  ])}
+ }
+}

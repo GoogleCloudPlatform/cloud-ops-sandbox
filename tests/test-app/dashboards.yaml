@@ -1,0 +1,64 @@
+name: test-app dashboards
+version: alpha/0.1
+log_based_metrics:
+- name: test_log_based_metric_1
+  # optional
+  display_name: "test log-based metric #1"
+  # required
+  filter: "logName:\"cloudaudit.googleapis.com\""
+  # required
+  kind: "DELTA"
+  # required
+  type: "INT64"
+  unit: "1"
+  # optional
+  labels:
+    product_id:
+      # required
+      extractor: "REGEXP_EXTRACT(jsonPayload.message, \"id=\\\\\\\"([^\\\"]+)\\\\\\\"\")"
+      # optional
+      description: "unique product id"
+    product_name:
+      # required
+      extractor: "REGEXP_EXTRACT(jsonPayload.message, \"id=\\\\\\\"([^\\\"]+)\\\\\\\"\")"
+      # optional
+      description: "unique product id"
+      # optional
+      type: "INT64"
+dashboards:
+- name: test_dashboard_1
+  display_name: "Test Dashboard #1"
+  widgets:
+  - title: Widget 1 1
+    y_axis_label: y1Axis
+    datasets:
+    - time_series:
+        filter:
+          query: "metric.type=\"compute.googleapis.com/instance/cpu/usage_time\" resource.type=\"gce_instance\""
+          aggregation:
+            aligner: ALIGN_MEAN
+        unit_override: "1"
+      min_period: 60s
+  - title: Widget 1 2
+    y_axis_label: yAxis
+    datasets:
+    - time_series:
+        filter:
+          query: "metric.type=\"compute.googleapis.com/instance/cpu/usage_time\" resource.type=\"gce_instance\""
+          aggregation:
+            aligner: ALIGN_MEAN
+        unit_override: "1"
+      min_period: 60s
+- name: test_dashboard_2
+  display_name: "Test Dashboard #2"
+  widgets:
+  - title: Widget 2 1
+    y_axis_label: y axis
+    datasets:
+    - time_series:
+        filter:
+          query: "metric.type=\"compute.googleapis.com/instance/cpu/usage_time\" resource.type=\"gce_instance\""
+          aggregation:
+            aligner: ALIGN_MEAN
+        unit_override: "1"
+      min_period: 60s
