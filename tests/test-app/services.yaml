@@ -1,0 +1,38 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+app_id: test-app
+version: 0.1.0-alpha
+custom_services:
+- name: test-custom-service-1
+  display_name: "Test Custom Service #1"
+
+service_slos:
+- name: test-service-slo-basic-1
+  display_name: "Test Service SLO Basic 1"
+  service: "gae:${project_id}_sandbox-e2e-test-service"
+  goal: 0.5
+  calendar_period: DAY
+  basic_sli:
+    latency:
+      threshold: 10s
+
+- name: test-service-slo-basic-2
+  display_name: "Test Service SLO Basic 2"
+  service: "gae:${project_id}_sandbox-e2e-test-service"
+  goal: 0.5
+  rolling_period_days: 1
+  basic_sli:
+    availability:
+      enabled: true

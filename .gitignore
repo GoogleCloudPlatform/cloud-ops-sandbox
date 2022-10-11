@@ -5,6 +5,7 @@ pkg/
 *~
 .vscode/
 .vs/
-terraform/**/terraform.*
+terraform/**/.terraform.*
+terraform/**/terraform.tfstate
 terraform/**/.terraform/*
 .token

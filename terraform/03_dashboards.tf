@@ -13,7 +13,7 @@
 # limitations under the License.
 
 locals {
-  dashboards_config = yamldecode(file("${var.cfg_file_location}/dashboards.yaml"))
+  dashboards_config = yamldecode(templatefile("${var.cfg_file_location}/dashboards.yaml", { project_id = var.project_id }))
   dashboards = {
     for dashboard in local.dashboards_config.dashboards : dashboard.name => dashboard
   }
@@ -24,7 +24,7 @@ locals {
 
 resource "google_logging_metric" "log_based_metrics" {
   for_each = local.log_based_metrics
-  name     = each.key
+  name     = each.value.name
   filter   = each.value.filter
   metric_descriptor {
     metric_kind = each.value.kind

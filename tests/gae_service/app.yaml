@@ -1,0 +1,3 @@
+runtime: go115
+service: sandbox-e2e-test-service
+
