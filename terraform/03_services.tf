@@ -14,19 +14,9 @@
 
 locals {
   services_config = yamldecode(templatefile("${var.cfg_file_location}/services.yaml", { project_id = var.project_id }))
-  services = {
-    for svc in local.services_config.custom_services : svc.name => svc
-  }
   service_slos = {
     for slo in local.services_config.service_slos : slo.name => slo
   }
-}
-
-resource "google_monitoring_custom_service" "service" {
-  for_each     = local.services
-  project      = var.project_id
-  service_id   = each.value.name
-  display_name = each.value.display_name
 }
 
 resource "google_monitoring_slo" "latency_slo" {
@@ -54,5 +44,4 @@ resource "google_monitoring_slo" "latency_slo" {
       }
     }
   }
-  depends_on = [google_monitoring_custom_service.service]
 }
