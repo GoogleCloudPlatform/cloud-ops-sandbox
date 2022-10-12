@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Pull request CI pipeline"
+name: "Continuous Integration"
 on: 
   pull_request:
     types: [opened,synchronize,reopened]

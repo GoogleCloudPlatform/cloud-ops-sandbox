@@ -1,6 +1,6 @@
 # Cloud Operations Sandbox (Alpha)
 
-![Continuous Integration](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/workflows/Continuous%20Integration/badge.svg)
+![Continuous Integration](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/workflows/Continuous%20Integration/badge.svg?branch=milestone%2F0.9)
 
 Cloud Operations Sandbox is an open-source tool that helps practitioners to learn Service Reliability Engineering practices from Google and apply them on their cloud services using [Cloud Operations](https://cloud.google.com/products/operations) (formerly Stackdriver).
 It is based on [Hipster Shop](https://github.com/GoogleCloudPlatform/microservices-demo), a cloud-native microservices application.
@@ -42,7 +42,7 @@ Click the Cloud Shell button for automated one-click installation of a new Sandb
 
 [![Open in Cloud Shell](http://www.gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=v0.8.1&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:v0.8.1&cloudshell_tutorial=docs/tutorial.md)
 
-__Note__: If installation stops due to billing account errors, set up the billing account and type: `sandboxctl create`.
+**Note**: If installation stops due to billing account errors, set up the billing account and type: `sandboxctl create`.
 
 ### Next Steps
 
