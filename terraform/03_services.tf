@@ -19,7 +19,7 @@ locals {
   }
 }
 
-resource "google_monitoring_slo" "latency_slo" {
+resource "google_monitoring_slo" "service_slos" {
   for_each            = local.service_slos
   slo_id              = each.value.name
   display_name        = each.value.display_name

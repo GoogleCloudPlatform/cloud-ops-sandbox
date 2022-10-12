@@ -38,4 +38,5 @@ resource "google_monitoring_alert_policy" "alerts" {
     content   = each.value.documentation.content
     mime_type = "text/markdown"
   }
+  depends_on = [google_monitoring_slo.service_slos, google_monitoring_uptime_check_config.uptime_checks]
 }
