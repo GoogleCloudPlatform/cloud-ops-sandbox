@@ -13,7 +13,7 @@
 # limitations under the License.
 
 locals {
-  gcp_services = toset(["cloudtrace", "clouderrorreporting", "monitoring", "logging"])
+  gcp_services = toset(["clouderrorreporting"])
 }
 
 resource "google_project_service" "services" {
