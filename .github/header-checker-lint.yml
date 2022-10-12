@@ -12,24 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Terraform configuration validation"
-on:
-  pull_request:
-    paths:
-    - 'terraform/**'
-
-jobs:
-  terraform-ci:  
-    runs-on: ubuntu-latest
-    - uses: actions/checkout@v3
-    - run: |
-        terraform -version
-    - name: terraform formatting
-      run: |
-        terraform fmt -recursive -check
-      working-directory: terraform/
-    - name: terraform validation
-      run: |
-        terraform init -backend=false
-        terraform validate
-      working-directory: terraform/
+allowedCopyrightHolders:
+  - 'Google LLC'
+allowedLicenses:
+  - 'Apache-2.0'
+  - 'MIT'
+  - 'BSD-3'
+sourceFileExtensions:
+  - 'tf'
+  - 'py'
+  - 'go'
+  - 'yaml'

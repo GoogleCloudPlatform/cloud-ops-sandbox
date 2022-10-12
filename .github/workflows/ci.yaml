@@ -1,0 +1,36 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "Pull request CI pipeline"
+on: 
+  pull_request:
+    types: [opened,synchronize,reopened]
+jobs:
+  main-pipeline:
+    name: "Main CI pipeline"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Terraform initialization
+      run: |-
+        terraform init -backend=false
+    - name: Terraform lint
+      run: |-
+        terraform -chdir terraform/ fmt -recursive -check
+    - name: Terraform validation
+      run: |-
+        terraform -chdir terraform/ validate
+    # TODO: add a step that verifies configuration schema in apps/ and tests/test-app/ folders
+    # TODO: add a step that builds CLI here
+
