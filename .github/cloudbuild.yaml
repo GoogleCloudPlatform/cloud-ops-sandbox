@@ -31,6 +31,7 @@ steps:
   args: 
   - '-c'
   - | 
+      echo execute terraform -chdir=terraform/ init -backend-config="bucket=$_STATE_BUCKET_NAME"
       terraform -chdir=terraform/ init -backend-config="bucket=$_STATE_BUCKET_NAME"
 
 - id: 'Apply Terraform configuration'
@@ -39,6 +40,7 @@ steps:
   args: 
   - '-c'
   - | 
+      echo execute terraform -chdir=terraform/ apply -auto-approve -var="project_id=$PROJECT_ID" -var="state_bucket_name=$_STATE_BUCKET_NAME" -var="cfg_file_location=$(readlink -f tests/test-app)"
       terraform -chdir=terraform/ apply -auto-approve -var="project_id=$PROJECT_ID" -var="state_bucket_name=$_STATE_BUCKET_NAME" -var="cfg_file_location=$(readlink -f tests/test-app)"
 
 - id: 'Cleanup Terraform configuration'

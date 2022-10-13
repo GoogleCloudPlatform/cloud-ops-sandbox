@@ -21,7 +21,7 @@ locals {
 
 resource "google_monitoring_slo" "service_slos" {
   for_each            = local.service_slos
-  slo_id              = each.value.name
+  slo_id              = "${each.value.name}${var.state_suffix}"
   display_name        = each.value.display_name
   service             = each.value.service
   goal                = tonumber(each.value.goal)

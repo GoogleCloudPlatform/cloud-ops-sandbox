@@ -24,7 +24,7 @@ locals {
 
 resource "google_logging_metric" "log_based_metrics" {
   for_each = local.log_based_metrics
-  name     = each.value.name
+  name     = "${each.value.name}${var.state_suffix}"
   filter   = each.value.filter
   metric_descriptor {
     metric_kind = each.value.kind

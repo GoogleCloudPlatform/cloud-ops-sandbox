@@ -20,4 +20,7 @@ resource "google_project_service" "services" {
   for_each                   = local.gcp_services
   service                    = "${each.value}.googleapis.com"
   disable_dependent_services = false
+  lifecycle {
+    prevent_destroy = true
+  }
 }
