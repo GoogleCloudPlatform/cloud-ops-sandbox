@@ -27,10 +27,10 @@ jobs:
         terraform init -backend=false
     - name: Terraform lint
       run: |-
-        terraform -chdir terraform/ fmt -recursive -check
+        terraform -chdir=terraform/ fmt -recursive -check
     - name: Terraform validation
       run: |-
-        terraform -chdir terraform/ validate
+        terraform -chdir=terraform/ validate
     # TODO: add a step that verifies configuration schema in apps/ and tests/test-app/ folders
     # TODO: add a step that builds CLI here
 
