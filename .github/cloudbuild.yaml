@@ -14,7 +14,7 @@
 
 steps:
 - id: 'Verify Terraform state bucket existence'
-  name: 'gcr.io/cloud-builders/gcloud:slim'
+  name: 'gcr.io/cloud-builders/gcloud'
   entrypoint: 'sh'
   args: 
   - '-c'
