@@ -39,7 +39,7 @@ steps:
   args: 
   - '-c'
   - | 
-      terraform -chdir=terraform/ apply -auto-approve -var="project_id=$PROJECT_ID" -var="state_bucket_name=$_STATE_BUCKET_NAME" -var="$(readlink -f tests/test-app)"
+      terraform -chdir=terraform/ apply -auto-approve -var="project_id=$PROJECT_ID" -var="state_bucket_name=$_STATE_BUCKET_NAME" -var="cfg_file_location=$(readlink -f tests/test-app)"
 
 - id: 'Cleanup Terraform configuration'
   name: 'hashicorp/terraform:1.3.1'
@@ -47,4 +47,4 @@ steps:
   args: 
   - '-c'
   - | 
-      terraform -chdir=terraform/ destroy -auto-approve -var="project_id=$PROJECT_ID" -var="state_bucket_name=$_STATE_BUCKET_NAME" -var="$(readlink -f tests/test-app)"
+      terraform -chdir=terraform/ destroy -auto-approve -var="project_id=$PROJECT_ID" -var="state_bucket_name=$_STATE_BUCKET_NAME" -var="cfg_file_location=$(readlink -f tests/test-app)"
