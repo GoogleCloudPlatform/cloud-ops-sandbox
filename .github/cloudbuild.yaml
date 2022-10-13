@@ -14,7 +14,7 @@
 
 steps:
 - id: 'Verify Terraform state bucket existence'
-  name: 'gcloud:sim'
+  name: 'gcloud'
   entrypoint: 'sh'
   args: 
   - '-c'
