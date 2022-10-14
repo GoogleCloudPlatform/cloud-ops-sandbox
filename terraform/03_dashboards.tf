@@ -13,7 +13,7 @@
 # limitations under the License.
 
 locals {
-  dashboards_config = yamldecode(templatefile("${var.cfg_file_location}/dashboards.yaml", { project_id = var.project_id }))
+  dashboards_config = yamldecode(templatefile("${var.cfg_file_location}/dashboards.yaml", local.config_file_subsitutes))
   dashboards = {
     for dashboard in local.dashboards_config.dashboards : dashboard.name => dashboard
   }
@@ -24,7 +24,7 @@ locals {
 
 resource "google_logging_metric" "log_based_metrics" {
   for_each = local.log_based_metrics
-  name     = each.value.name
+  name     = "${each.value.name}${local.name_suffix}"
   filter   = each.value.filter
   metric_descriptor {
     metric_kind = each.value.kind
@@ -40,12 +40,11 @@ resource "google_logging_metric" "log_based_metrics" {
     }
     display_name = each.value.display_name
   }
-  # Regex extractor has matching group to match the product name or product id. Example: orderedItem="Terrarium", id="L9ECAV7KIM" 
-  # matches Terrarium for product name and L9ECAV7KIM for product id.
+  # Extractors have to match labels in the metric descriptor
   label_extractors = { for k, v in each.value.labels : k => v.extractor }
 }
 
 resource "google_monitoring_dashboard" "dashboards" {
   for_each       = local.dashboards
-  dashboard_json = templatefile("templates/dashboard.tftpl", each.value)
+  dashboard_json = templatefile("templates/dashboard.tftpl", merge(each.value, local.config_file_subsitutes))
 }

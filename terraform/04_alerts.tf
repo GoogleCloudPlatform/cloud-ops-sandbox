@@ -13,7 +13,7 @@
 # limitations under the License.
 
 locals {
-  alerts_config = yamldecode(templatefile("${var.cfg_file_location}/alerts.yaml", { project_id = var.project_id }))
+  alerts_config = yamldecode(templatefile("${var.cfg_file_location}/alerts.yaml", local.config_file_subsitutes))
   alerts = {
     for p in local.alerts_config.alerts : p.name => p
   }

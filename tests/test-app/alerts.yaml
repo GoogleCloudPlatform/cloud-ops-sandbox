@@ -19,7 +19,7 @@ alerts:
   display_name: "Test Alert #1"
   condition:
     # condition is for the basic availability SLO (test-service-slo-basic-2) defined in services.yaml
-    filter: "select_slo_burn_rate(\"projects/${project_id}/services/gae:${project_id}_sandbox-e2e-test-service/serviceLevelObjectives/test-service-slo-basic-2\", 60m)"
+    filter: "select_slo_burn_rate(\"projects/${project_id}/services/gae:${project_id}_sandbox-e2e-test-service/serviceLevelObjectives/test-service-slo-basic-2${name_suffix}\", 60m)"
     threshold: "2"
     duration: "60s"
     comparison: "COMPARISON_GT"
