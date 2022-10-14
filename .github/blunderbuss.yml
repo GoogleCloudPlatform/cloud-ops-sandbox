@@ -13,6 +13,6 @@
 # limitations under the License.
 
 assign_issues:
-  - GoogleCloudPlatform/observability-devx
+  - GoogleCloudPlatform/dee-observability
 assign_prs:
-  - GoogleCloudPlatform/observability-devx
+  - GoogleCloudPlatform/dee-observability

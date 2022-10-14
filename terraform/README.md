@@ -28,7 +28,7 @@ Use `<your-custom-suffix-here>` only if you plan to reuse the same GCS bucket
 for provisioning provision more than one Sandbox instance.
 Otherwise, you can omit this parameter or pass empty string instead.
 This optional parameter is mainly used in the end-to-end testing environment.
-It allows reusing the same GCS bucket for provisioning multiple Sandbox`s
+It allows reusing the same GCS bucket for provisioning multiple Sandboxes
 in parallel.
 
 Use `<path-to-application-config-files-here>` to provide absolute or relative
@@ -40,7 +40,7 @@ The test configurations used for end-to-end testing are stored under
 ## Terraform templates
 
 Current implementation uses `dashboard.tftpl` template to compose values for
-the `dashboard_json` argument of the "[google_monitoring_dashboard][gmd-doc]" TF
+the `dashboard_json` argument of the "[google_monitoring_dashboard][]" TF
 resource.
 Using the template, TF configuration (in `03_dashboards.tf`) generates a
 [JSON configuration][json-config] that describes Cloud Monitoring dashboards.
@@ -55,6 +55,6 @@ the call to `jsonencode()` is in Json syntax while the text passed as the
 argument to `jsonencode()` is in the Terraform object syntax.
 
 [tf-gcs]: https://www.terraform.io/language/settings/backends/gcs
-[gmd-doc]: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/monitoring_dashboard
+[google_monitoring_dashboard]: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/monitoring_dashboard
 [json-config]: https://cloud.google.com/monitoring/api/ref_v3/rest/v1/projects.dashboards
 [for-doc]: https://www.terraform.io/language/expressions/strings#directives
