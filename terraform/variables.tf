@@ -21,21 +21,33 @@
 
 variable "project_id" {
   type        = string
-  description = "(required) Project id of the destination GCP project for Sandbox."
+  description = <<-EOT
+    (required) Project id of the destination GCP project for Sandbox.
+    EOT
 }
 
 variable "state_bucket_name" {
   type        = string
-  description = "(required) Case sensitive GCS bucket name to store Terraform state."
+  description = <<-EOT
+    (required) Case sensitive GCS bucket name to store Terraform state.
+    EOT
 }
 
 variable "cfg_file_location" {
   type        = string
-  description = "(required) Absolute path to a folder where deployment configurations are stored."
+  description = <<-EOT
+    (required) Absolute path to a folder where deployment configurations are
+    stored.
+    EOT
 }
 
 variable "state_suffix" {
   type        = string
   default     = ""
-  description = "(optional) Use unique suffix to store multiple Terraform state within the same GCS bucket."
+  description = <<-EOT
+    (optional) A short string appended to Terraform state file name to support
+    storing Terraform state of the multiple Sandboxes in the same backend.
+    Intended for use in test environment for running parallel deployments.
+    DO NOT use it with real applications unless you understand what you do.
+    EOT
 }

@@ -31,8 +31,7 @@ steps:
   args: 
   - '-c'
   - | 
-      echo $$(($$RANDOM % 9999 + 1)) > /workspace/random_suffix.txt
-      terraform -chdir=terraform/ init -backend-config="bucket=$_STATE_BUCKET_NAME" -backend-config="prefix=terraform/state$(cat /workspace/random_suffix.txt)" -lockfile=false
+      terraform -chdir=terraform/ init -backend-config="bucket=$_STATE_BUCKET_NAME" -backend-config="prefix=terraform/state_$SHORT_SHA" -lockfile=false
 
 - id: 'Apply Terraform configuration'
   name: 'hashicorp/terraform:1.3.1'
@@ -40,7 +39,7 @@ steps:
   args: 
   - '-c'
   - | 
-      terraform -chdir=terraform/ apply -auto-approve -var="project_id=$PROJECT_ID" -var="state_bucket_name=$_STATE_BUCKET_NAME" -var="cfg_file_location=$(readlink -f tests/test-app)" -var="state_suffix=$(cat /workspace/random_suffix.txt)"
+      terraform -chdir=terraform/ apply -auto-approve -var="project_id=$PROJECT_ID" -var="state_bucket_name=$_STATE_BUCKET_NAME" -var="cfg_file_location=$(readlink -f tests/test-app)" -var="state_suffix=$SHORT_SHA"
 
 - id: 'Cleanup Terraform configuration'
   name: 'hashicorp/terraform:1.3.1'
@@ -48,5 +47,4 @@ steps:
   args: 
   - '-c'
   - | 
-      terraform -chdir=terraform/ destroy -auto-approve -var="project_id=$PROJECT_ID" -var="state_bucket_name=$_STATE_BUCKET_NAME" -var="cfg_file_location=$(readlink -f tests/test-app)" -var="state_suffix=$(cat /workspace/random_suffix.txt)"
-      rm /workspace/random_suffix.txt
+      terraform -chdir=terraform/ destroy -auto-approve -var="project_id=$PROJECT_ID" -var="state_bucket_name=$_STATE_BUCKET_NAME" -var="cfg_file_location=$(readlink -f tests/test-app)" -var="state_suffix=$SHORT_SHA"

@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,13 @@
 # limitations under the License.
 
 locals {
-  gcp_services = toset(["clouderrorreporting"])
-}
+  # Name suffix prefixed with dash for readability
+  name_suffix = var.state_suffix != "" ? "-${var.state_suffix}" : ""
 
-resource "google_project_service" "services" {
-  for_each                   = local.gcp_services
-  service                    = "${each.value}.googleapis.com"
-  disable_dependent_services = false
-  lifecycle {
-    prevent_destroy = true
+  # Map of vars to be used with templatefile() call to read configurations
+  config_file_subsitutes = {
+    project_id  = var.project_id
+    name_suffix = local.name_suffix
   }
 }
+

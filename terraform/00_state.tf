@@ -21,6 +21,6 @@ data "terraform_remote_state" "state" {
   backend = "gcs"
   config = {
     bucket = var.state_bucket_name
-    prefix = "terraform/state${var.state_suffix}"
+    prefix = "terraform/state_${var.state_suffix}"
   }
 }

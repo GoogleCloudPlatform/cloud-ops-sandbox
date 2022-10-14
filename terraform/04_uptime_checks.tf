@@ -13,7 +13,7 @@
 # limitations under the License.
 
 locals {
-  ut_checks_config = yamldecode(templatefile("${var.cfg_file_location}/uptime_checks.yaml", { project_id = var.project_id }))
+  ut_checks_config = yamldecode(templatefile("${var.cfg_file_location}/uptime_checks.yaml", local.config_file_subsitutes))
   ut_checks = {
     for c in local.ut_checks_config.checks : c.name => c
   }

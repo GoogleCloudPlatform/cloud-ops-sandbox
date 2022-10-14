@@ -13,7 +13,7 @@
 # limitations under the License.
 
 locals {
-  services_config = yamldecode(templatefile("${var.cfg_file_location}/services.yaml", { project_id = var.project_id }))
+  services_config = yamldecode(templatefile("${var.cfg_file_location}/services.yaml", local.config_file_subsitutes))
   service_slos = {
     for slo in local.services_config.service_slos : slo.name => slo
   }
@@ -21,7 +21,7 @@ locals {
 
 resource "google_monitoring_slo" "service_slos" {
   for_each            = local.service_slos
-  slo_id              = "${each.value.name}${var.state_suffix}"
+  slo_id              = "${each.value.name}${local.name_suffix}"
   display_name        = each.value.display_name
   service             = each.value.service
   goal                = tonumber(each.value.goal)
