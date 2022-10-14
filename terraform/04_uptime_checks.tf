@@ -23,7 +23,7 @@ resource "google_monitoring_uptime_check_config" "uptime_checks" {
   for_each     = local.ut_checks
   display_name = each.value.display_name
   timeout      = each.value.timeout
-  period       = each.value.period
+  period       = try(each.value.period, "300s")
   dynamic "content_matchers" {
     for_each = can(each.value.content_matcher) ? toset([1]) : toset([])
     content {
@@ -32,7 +32,7 @@ resource "google_monitoring_uptime_check_config" "uptime_checks" {
     }
   }
   http_check {
-    path = each.value.http_check.path
+    path = startswith(each.value.http_check.path, "/") ? each.value.http_check.path : "/${each.value.http_check.path}"
   }
   dynamic "monitored_resource" {
     for_each = can(each.value.resource) ? toset([1]) : toset([])
