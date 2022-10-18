@@ -25,8 +25,8 @@ data "local_file" "versions" {
 }
 
 resource "google_compute_project_metadata_item" "sandbox_metadata" {
-  key   = "sandbox-metadata"
-  value = "{\"sandbox-version\":\"${local.sandbox_version}\",\"app-id\":\"${one(regex(".*/([[:alnum:]-]+)/?", var.cfg_file_location))}\"}"
+  key        = "sandbox-metadata"
+  value      = "{\"sandbox-version\":\"${local.sandbox_version}\",\"app-id\":\"${one(regex(".*/([[:alnum:]-]+)/?", var.cfg_file_location))}\"}"
   depends_on = [google_project_service.services]
 }
 
