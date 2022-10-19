@@ -1,7 +1,7 @@
 # Cart Service
 
 The Cart Service is a microservice written in C# and
-the [.NET 5](https://docs.microsoft.com/en-us/dotnet/core/dotnet-five) framework. It manages
+the [.NET 6](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-6) framework. It manages
 shopping cart state for users of the Hipster Shop.
 
 ## Overview
