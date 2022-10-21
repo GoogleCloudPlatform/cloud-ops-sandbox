@@ -9,6 +9,8 @@ The repo uses the following Github applications:
 * [Header checker][hdr-chk-lint]: runs checks that ensure existence of the
   proper copyright header with Google LLC license in all files (except
   markdown).
+* [Do not merge][dont-merge]: prevents PR from being merged if the label
+  <span style="background-color:red,color:white">do not merge</span> is set.
 
 The repo's workflows include "Continuous Integration" and "End to end testing".
 They are implemented differently due to existing authentication constraints.
@@ -46,3 +48,4 @@ Terraform state.
 [github-runners]: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
 [gcb-app]: https://github.com/apps/google-cloud-build
 [no-key]: https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions
+[dont-merge]: https://github.com/apps/do-not-merge-gcf

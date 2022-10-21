@@ -1,5 +1,4 @@
 bin/
-pkg/
 *.pyc
 *.swp
 *~
