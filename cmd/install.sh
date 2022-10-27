@@ -338,7 +338,7 @@ function SendTelemetry {
   local key=$(echo "${project_id}_CLOUDOPS_SANDBOX_${app_id}" | sha256sum --text | cut -d' ' -f1) # hash key is 64 digit presentation of SHA256
 
   # 'session' field is provided for backward compatability
-  gcloud pubsub topics publish "telemetry_prod" --message="{\"session\": \"\",\"project\":\"${hey}\",\"event\":\"${ops}\",\"datetime\":\"$(date --utc +%s.%N)\",\"version\":\"${sandbox_version}" --project "stackdriver-sandbox-230822" --quiet 2> /dev/null
+  gcloud pubsub topics publish "telemetry_prod" --message="{\"session\": \"\",\"project\":\"${key}\",\"event\":\"${ops}\",\"datetime\":\"$(date --utc +%s.%N)\",\"version\":\"${sandbox_version}\"}" --project "stackdriver-sandbox-230822" --quiet 2> /dev/null
 }
 
 # RunTerraform(action) runs `apply` or `destroy` terraform command
