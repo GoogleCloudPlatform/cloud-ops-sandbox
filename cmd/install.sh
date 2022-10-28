@@ -38,11 +38,11 @@ function CheckEnvironment {
     err=1
     Log "Terraform is not available"
   fi
-#   sandboxctl --version > /dev/null 2>&1
-#   if [ "$?" -ne 0 ]; then
-#     err=1
-#     Log "sandboxctl is not available"
-#   fi
+  #sandboxctl --version > /dev/null 2>&1
+  #if [ "$?" -ne 0 ]; then
+  #  err=1
+  #  Log "sandboxctl is not available"
+  #fi
   kubectl version --client=true > /dev/null 2>&1
   if [ "$?" -ne 0 ]; then
     err=1
@@ -59,6 +59,7 @@ function CheckEnvironment {
   fi
 }
 
+# LogUsage() prints usage hint
 function LogUsage {
   Log "install.sh command options"
   Log ""
@@ -77,7 +78,7 @@ function LogUsage {
   Log ""
 }
 
-# ParseArguments parses script's execution parameters
+# ParseArguments(args...) parses script's execution parameters
 function ParseArguments {
   project_id="$GOOGLE_CLOUD_PROJECT"
   ob_args="$OB_ARGS"
@@ -160,6 +161,7 @@ function ParseArguments {
   fi
 }
 
+# AuthenticateToGCP() trigger GCloud CLI authentication if necessary
 function AuthenticateToGCP {
   tries=0
   auth_result=$(gcloud --quiet auth list --format="value(account)")
@@ -178,6 +180,7 @@ function AuthenticateToGCP {
   fi
 }
 
+# BillingAccountHelp() prints help in an event of billing account error
 function BillingAccountHelp {
   Log "Error: no active billing accounts were detected. In order to create a sandboxed environment,"
   Log "the script needs to create a new GCP project and associate it with an active billing account"
@@ -188,6 +191,7 @@ function BillingAccountHelp {
   Log "gcloud beta billing accounts list --filter open=true"
 }
 
+# SelectProject() helps a user to select a destination GCP project and set its id to $project_id
 function SelectProject {
   if [ -n "$project_id" ]; then
       return
@@ -219,6 +223,7 @@ function SelectProject {
   ${saved_IFS+"false"} && unset IFS || IFS="$saved_IFS" # restore IFS
 }
 
+# SelectBillingAccount() helps a user to select a billing account for a new GCP project and sets its id to $billing_account
 function SelectBillingAccount {
   if [ -n "$billing_account" ]; then
     return
@@ -262,6 +267,7 @@ function SelectBillingAccount {
   ${saved_IFS+"false"} && unset IFS || IFS="$saved_IFS" # restore IFS
 }
 
+# ProvisionProject() helps to create a new GCP project
 function ProvisionProject {
   if [ -z "$billing_account" ]; then
     SelectBillingAccount
@@ -304,6 +310,7 @@ function ProvisionProject {
   fi
 }
 
+# CheckOrCreateBucket(name) checks if a GCP bucket with the provided name exists and creates a new one if necessary
 function CheckOrCreateBucket {
   local create_bucket=$1
   found_bucket=$(gcloud --quiet storage buckets list --project=$project_id --format="value(name)" --filter="name=$project_id-tf-state")
@@ -321,10 +328,33 @@ function CheckOrCreateBucket {
   fi
 }
 
+# SendTelemetry(operation) posts a telemetry message to PubSub
+function SendTelemetry {
+  if [ $COLLECT_USER_METRICS = "false" ]; then
+    return
+  fi
+
+  local ops=$1
+  local key=$(echo "${project_id}_CLOUDOPS_SANDBOX_${app_id}" | sha256sum --text | cut -d' ' -f1) # hash key is 64 digit presentation of SHA256
+
+  # 'session' field is provided for backward compatability
+  gcloud pubsub topics publish "telemetry_prod" --message="{\"session\": \"\",\"project\":\"${key}\",\"event\":\"${ops}\",\"datetime\":\"$(date --utc +%s.%N)\",\"version\":\"${sandbox_version}\"}" --project "stackdriver-sandbox-230822" --quiet 2> /dev/null
+}
+
+# RunTerraform(action) runs `apply` or `destroy` terraform command
 function RunTerraform {
   local action=$1
   
-  # just in case
+  if [ ${action} != "apply" ] && [  ${action} != "destroy" ]; then
+    return
+  fi
+  if [ ${action} = "apply" ]; then
+    local operation="create-sandbox"
+  else
+    local operation="destroy-sandbox"
+  fi
+
+  # just in case there was a broken setup
   rm -rf .terraform/
 
   Log "🧭 initialize Terraform with GCS backend at gs://${bucket_name}"
@@ -341,6 +371,7 @@ function RunTerraform {
   fi
 
   terraform ${action} -auto-approve -var="project_id=${project_id}" -var="state_bucket_name=${state_bucket_name}" -var="cfg_file_location=${config_path}"
+  SendTelemetry "${operation}"
 }
 
 
@@ -361,9 +392,11 @@ if [ -n "$project_id" ]; then
   if [ "$?" -eq 0 ] && [ -n "$metadata" ]; then
     sandbox_version=$(jq -r '."sandbox-version"' <<< "$metadata")
     stored_app_id=`jq -r '."app-id"' <<< "$metadata"`
-    # if app id is not define, set it to be stored app id
     if [ -z "$app_id" ]; then
       app_id="$stored_app_id"
+    fi
+    if [ -z "${sandbox_version}" ] && [ -f "../versions.json" ]; then
+      sandbox_version=$(jq -r '."version"' "../versions.json")
     fi
   fi
 fi
