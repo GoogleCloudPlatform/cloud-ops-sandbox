@@ -358,19 +358,23 @@ function RunTerraform {
   rm -rf .terraform/
 
   Log "🧭 initialize Terraform with GCS backend at gs://${bucket_name}"
-  if terraform init -backend-config="bucket=$state_bucket_name" -backend-config="prefix=terraform/state_" -lockfile=false 2> /dev/null; then
+  if terraform init -backend-config="bucket=$state_bucket_name" -backend-config="prefix=terraform/state_${SANDBOX_TERRAFORM_STATE_SUFFIX}" -lockfile=false 2> /dev/null; then
     Log ""
     Log "completed."
   else
     Log ""
     Log "Error: Credential check failed. Please, login with ADC to run terraform."
     gcloud auth application-default login
-    if terraform init -backend-config="bucket=$state_bucket_name" -backend-config="prefix=terraform/state_" -lockfile=false 2> /dev/null; then
+    if terraform init -backend-config="bucket=$state_bucket_name" -backend-config="prefix=terraform/state_${SANDBOX_TERRAFORM_STATE_SUFFIX}" -lockfile=false 2> /dev/null; then
       exit 1
     fi
   fi
 
-  terraform ${action} -auto-approve -var="project_id=${project_id}" -var="state_bucket_name=${state_bucket_name}" -var="cfg_file_location=${config_path}"
+  terraform ${action} -auto-approve \
+      -var="project_id=${project_id}" \
+      -var="state_bucket_name=${state_bucket_name}" \
+      -var="cfg_file_location=${config_path}" \
+      -var="state_suffix=${SANDBOX_TERRAFORM_STATE_SUFFIX}"
   SendTelemetry "${operation}"
 }
 
