@@ -9,3 +9,4 @@ terraform/**/.terraform.*
 terraform/**/terraform.tfstate
 terraform/**/.terraform/*
 .token
+**/.sandboxcfg
