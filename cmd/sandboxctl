@@ -15,213 +15,252 @@
 # limitations under the License.
 
 # -*- coding: utf-8 -*-
+# pylint: disable=unnecessary-pass,subprocess-run-check
 """
-This CLI is the interface for sre recipes. It deploys and rolls back
-broken services as well as verifies that the user found the correct
-cause of the broken service.
+This is Sandbox CLI to operate Cloud Ops Sandbox.
+It supports to create and destroy Cloud Ops Sandbox instances
+and to run Sandbox recipes for installed instances.
 
 For information on how to run the CLI, run the following:
-`python3 sandboxctl --help`
+`sandboxctl --help`
 """
 
-import logging
+import json
 import os
-import glob
-import signal
 import subprocess
-import sys
 
 import click
-
-import utils
-from recipe_runner import ImplBasedRecipeRunner
-from recipe_runner import ConfigBasedRecipeRunner
-
-cli = click.Group()
+import yaml
 
 
-def get_config_based_recipes():
-    files = glob.glob(os.path.join(os.path.dirname(
-        os.path.abspath(__file__)), "recipes/configs_based/*.yaml"))
-    recipe_names = [os.path.basename(x).split(".")[0] for x in files]
-    return recipe_names
+CLI_OS_PATH = os.path.dirname(os.path.abspath(__file__))
+LOCAL_CACHE_PATH = "./.sandboxcfg"
 
 
-def get_impl_based_recipes():
-    files = glob.glob(os.path.join(os.path.dirname(
-        os.path.abspath(__file__)), "recipes/impl_based/*recipe*.py"))
-    recipe_names = [os.path.basename(x).split(".")[0] for x in files]
-    return recipe_names
+# @@@ Private methods
+def _run_shell_command(command: str) -> int:
+    result = subprocess.run(command, shell=True, bufsize=0)
+    return result.returncode
 
 
-CONFIG_RECIPES = get_config_based_recipes()
-IMPL_RECIPES = get_impl_based_recipes()
+def _shell_command_output(command: str) -> str:
+    result = subprocess.run(command, shell=True,
+                            bufsize=0, capture_output=True, text=True)
+    return result.stdout
 
 
-@cli.command()
-@click.argument('action', type=click.Choice(
-    ['break', 'restore', 'verify', 'hint']))
-@click.argument('recipe_name', type=click.Choice(
-    sorted(CONFIG_RECIPES + IMPL_RECIPES)))
-@click.option('--skip-loadgen', is_flag=True, help="Ignore loadgen actions in config based recipes.")
-def sre_recipes(action, recipe_name, skip_loadgen):
-    """Performs an action on a recipe."""
-    logging.basicConfig(filename='srerecipes.log', level=logging.INFO,
-                        format='%(asctime)s %(message)s')
+def _run_install_script(
+        action: str,
+        project_id: str = None,
+        app_id: str = None,
+        billing_acc: str = None,
+        verbose_flag: bool = None) -> int:
 
+    command = f'./install.sh {action}'
+    if project_id:
+        command += f' --project {project_id}'
+    # add application id
+    if app_id:
+        command += f' --app-id {app_id}'
+    if billing_acc:
+        command += f' --billing-acc {billing_acc}'
+    if verbose_flag:
+        command += ' --verbose'
+
+    cwd = os.getcwd()
+    os.chdir(CLI_OS_PATH)
     try:
-        has_config = recipe_name in CONFIG_RECIPES
-        has_impl = recipe_name in IMPL_RECIPES
+        return _run_shell_command(command)
+    finally:
+        os.chdir(cwd)
 
-        recipe = None
-        if has_config and has_impl:
-            print(f"Find conflicting config & impl for {recipe_name}")
-            return
-        elif has_config:
-            recipe = ConfigBasedRecipeRunner(recipe_name, skip_loadgen=skip_loadgen)
-        elif has_impl:
-            recipe = ImplBasedRecipeRunner(recipe_name)
+
+def _load_json_from_file(file_path: str) -> dict:
+    if os.path.isfile(file_path):
+        try:
+            f = open(file_path, mode="r", encoding="utf-8")
+        except OSError:
+            return {}
+        with f:
+            try:
+                return json.load(f)
+            except (OSError, json.JSONDecodeError):
+                pass  # ignore error and return empty dictionary
+    return {}
+
+
+def _store_json_file(file_path: str, data: dict) -> None:
+    try:
+        with open(file_path, mode="w", encoding="utf-8") as f:
+            json.dump(data, f)
+    except OSError:
+        pass  # ignore error and return empty dictionary
+
+
+def _load_yaml_from_file(file_path: str) -> dict:
+    if os.path.isfile(file_path):
+        try:
+            f = open(file_path, mode="r", encoding="utf-8")
+        except OSError:
+            return {}
+        with f:
+            try:
+                return yaml.safe_load(f)
+            except (OSError, yaml.MarkedYAMLError):
+                pass  # ignore error and return empty dictionary
+    return {}
+
+
+def _discover_project_id(project_id: str = None) -> str:
+    """Acquire Google Cloud project ID if missing"""
+    # use cloud shell environment variable
+    # (https://cloud.google.com/shell/docs/how-cloud-shell-works)
+    if not project_id:
+        project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+    if not project_id:
+        project_id = _shell_command_output(
+            "gcloud config get-value core/project")
+    if not project_id or project_id == "(unset)":
+        return None
+    return project_id
+
+
+def _read_stored_app_id(project_id: str) -> str:
+    """Read application ID local cache or from the project's metadata"""
+    cfg = _load_json_from_file(LOCAL_CACHE_PATH)
+    if project_id == cfg.get("project-id", "") and cfg.get("app-id", ""):
+        return cfg.get("app-id", "")
+
+    command = f'gcloud --quiet compute project-info describe --project="{project_id}"'\
+        ' --format="value[](commonInstanceMetadata.items.sandbox-metadata)"'
+    metadata = _shell_command_output(command)
+    cfg = json.loads(metadata)
+
+    # cache cfg locally for further calls
+    _write_sandbox_configuration(
+        cfg.get("sandbox-version", ""), project_id, cfg.get("app-id", ""))
+    return cfg.get("app-id", "")
+
+
+def _read_recipe_configuration(app_id: str) -> dict:
+    """Read recipes of the application configuration"""
+    cfg_path = f'{CLI_OS_PATH}/../apps/{app_id}'
+    return _load_yaml_from_file(f'{cfg_path}/recipes.yaml')
+
+
+def _write_sandbox_configuration(sandbox_version: str, project_id: str, app_id: str) -> None:
+    data = {
+        "sandbox-version": sandbox_version,
+        "project-id": project_id,
+        "app-id": app_id
+    }
+    _store_json_file(LOCAL_CACHE_PATH, data)
+
+
+def _version_from_file() -> str:
+    """Read Sandbox version from file"""
+    version_file = f'{CLI_OS_PATH}/../versions.json'
+    data = _load_json_from_file(version_file)
+    return data.get("version", "<unknown>")
+
+
+# @@@ Command groups
+@ click.group()
+@ click.version_option(version=_version_from_file(), prog_name="CloudOps Sandbox CLI")
+def cli():
+    """Cloud Ops Sandbox CLI to operate Cloud Ops Sandbox.
+It supports to create and destroy Cloud Ops Sandbox instances
+and to run Sandbox recipes for installed instances.
+For information on how to run the CLI, run the following:
+
+sandboxctl --help"""
+    pass
+
+
+@ cli.group()
+def recipes():
+    """Executes Cloud Ops Sandbox recipes"""
+    pass
+
+
+# @@@ Recipes Commands
+@ recipes.command(name="list")
+@ click.option('--project', '-p', default=None,
+               help='Google Cloud project ID where Sandbox is hosted.')
+def recipes_list(project) -> int:
+    """List all recipes available for the installed application configuration"""
+    project = _discover_project_id(project)
+    if not project:
+        print("Cannot find project where Sandbox is installed")
+        return 1
+    app_id = _read_stored_app_id(project)
+    if not app_id:
+        print(
+            f'Cannot discover application configuration of Sandbox in project {project}')
+        return 1
+    recipes_cfg = _read_recipe_configuration(app_id)
+    if recipes_cfg.get("app_id", "") != app_id:
+        print("Invalid recipes configuration file")
+        return 1
+
+    for idx, recipe in enumerate(recipes_cfg.get("recipes", [])):
+        name = recipe.get("name", "noname")
+        description = recipe.get("description", "")
+        if description:
+            print(f'({idx+1}) {name}: {description}')
         else:
-            # should not reach here due to 'click.Choice' above
-            print(f"Cannot find config or impl for {recipe_name}")
-            return
-
-        if action == 'break':
-            logging.info(f"Breaking {recipe_name}")
-            recipe.run_break()
-        elif action == 'restore':
-            logging.info(f"Restoring {recipe_name}")
-            recipe.run_restore()
-        elif action == 'verify':
-            logging.info(f"Verifying {recipe_name}")
-            recipe.run_verify()
-        elif action == 'hint':
-            logging.info(f"Giving hint for {recipe_name}")
-            recipe.run_hint()
-    except Exception as e:
-        logging.error(e)
-        print(f"Failed to run SRE Recipe {recipe_name}: {e}")
-        exit(1)
+            print(f'({idx+1}) {name}')
+    return 0
 
 
-@cli.command()
-@click.argument('traffic_pattern', type=click.Choice(['basic', 'step']))
-def loadgen(traffic_pattern):
-    """Change traffic patterns for the loadgenerator service"""
-    #We will always switch back to cloud-ops-sandbox cluster after successful
-    #completion of this command, assuming it is the most common cluster to be in.
-    set_env_command = "kubectl set env deployment/loadgenerator "\
-        f"LOCUST_TASK={traffic_pattern}"
-    delete_pods_command = "kubectl delete pods -l app=loadgenerator"
-
-    if not utils.auth_cluster('loadgenerator'):
-        print("Failed to authenticate into load generator cluster")
-        return
-    print('Redeploying Loadgenerator...')
-    _, err = utils.run_shell_command(set_env_command)
-    if err:
-        print("Failed to set traffic pattern for load generator: ", err)
-    _, err = utils.run_shell_command(delete_pods_command)
-    if err:
-        print("Failed to redeploy updated load generator: ", err)
-    print(f'Loadgenerator deployed using {traffic_pattern} pattern')
-    ip_addr, err = utils.get_loadgen_ip()
-    if err:
-        print("Failed to get load generator IP: ", err)
-    elif not ip_addr:
-        print("Found empty load generator IP")
-    else:
-        print(f"Loadgenerator web UI: http://{ip_addr}")
-
-    # Try switching back to cloud-ops-sandbox cluster.
-    # Do not error even if we fail
-    utils.auth_cluster('cloud-ops-sandbox')
+# @@@ CLI Commands
+@ cli.command()
+@ click.option('--project', '-p', default=None, required=True,
+               help='Google Cloud project ID where to install Cloud Ops Sandbox.')
+@ click.option('--app-id', '-app', default=None, required=True,
+               help="An application ID that identifies the Sandbox configuration.")
+# @click.option('--billing_acc', default=None,
+#               help="A billing account to use with 'create-all' command to new created GCP project.")
+@ click.option('--verbose', '-v', default=False, is_flag=True,
+               help='Prints execution trace (same as setting DEBUG environment variable).')
+def create(project: str, app_id: str, verbose: bool):
+    """Create a new Sandbox installation"""
+    return _run_install_script(action="create", project_id=project, app_id=app_id, verbose_flag=verbose)
 
 
-@cli.command()
-@click.option('--project', '-p', default=None,
-              help='GCP project to deploy Cloud Operations Sandbox to')
-@click.option('--verbose', '-v', default=False, is_flag=True,
-              help='print commands as they run (set -x)')
-@click.option('--skip-loadgenerator', default=False,  is_flag=True,
-              help="Don't deploy the loadgenerator instance")
-@click.option('--skip-ratingservice', default=False,  is_flag=True,
-              help="Don't deploy the ratingservice")
-@click.option('--service-wait', default=False,  is_flag=True,
-              help='Wait indefinitely for services to be detected by Cloud Monitoring')
-def create(project, *args, **kwargs):
-    """Create a new sandbox"""
-    os.chdir(os.path.abspath(sys.path[0]))
-    command = "../terraform/install.sh"
-    # add optional project argument
-    if project:
-        command += f' --project {project}'
-    # add flags passed in to function
-    for (arg, value) in kwargs.items():
-        if value:
-            command += f' --{arg.replace("_", "-")}'
-    os.setpgrp()
-    complete = False
-    try:
-        # run install.sh in a background shell
-        process = subprocess.Popen(command, bufsize=0, shell=True)
-        process.communicate()
-        complete = True
-    finally:
-        # kill background process if script is terminated
-        if not complete:
-            os.killpg(0, signal.SIGTERM)
+@ cli.command()
+@ click.option('--project', '-p', default=None,
+               help='Google Cloud project ID where to install Cloud Ops Sandbox.')
+@ click.option('--billing-acc', default=None,
+               help="A billing account to use with 'create-all' command to new created GCP project.")
+@ click.option('--verbose', '-v', default=False, is_flag=True,
+               help='Prints execution trace (same as setting DEBUG environment variable).')
+def create_all(project, billing_acc, verbose) -> int:
+    """Deploy Online Boutique with a new Sandbox installation"""
+    return _run_install_script(
+        action="create-all",
+        project_id=project,
+        app_id="online-boutique",
+        billing_acc=billing_acc,
+        verbose_flag=verbose)
 
 
-@cli.command()
-def describe():
-    """Show information about an existing sandbox"""
-    gcp_path = "https://console.cloud.google.com"
-    project_id, err = utils.get_project_id()
-    if err:
-        print("Failed to get project ID:", err)
-    external_ip, err = utils.get_external_ip()
-    if err:
-        print("Failed to get external ID:", err)
-    loadgen_ip, err = utils.get_loadgen_ip()
-    if err:
-        print("Failed to get loadgen ID:", err)
-    gcp_kubernetes_path = gcp_path + '/kubernetes/workload?project=' + project_id
-    gcp_monitoring_path = gcp_path + '/monitoring?project=' + project_id
-    print(f"""Cloud Operations Sandbox info for project: {project_id}
-    - Load generator web interface: http://{loadgen_ip}
-    - Hipstershop web app address: http://{external_ip}
-    - Google Cloud Console KBE Dashboard: {gcp_kubernetes_path}
-    - Google Cloud Console Monitoring Workspace {gcp_monitoring_path}""")
+@ cli.command()
+@ click.option('--project', '-p', default=None, required=True,
+               help='Google Cloud project ID where Cloud Ops Sandbox is installed.')
+@ click.option('--verbose', '-v', default=False, is_flag=True,
+               help='Prints execution trace (same as setting DEBUG environment variable).')
+def destroy(project, verbose) -> int:
+    """Delete an existing instance of Sandbox"""
+    return _run_install_script(action="destroy", project_id=project, verbose_flag=verbose)
 
 
-@cli.command()
-def destroy():
-    """Delete an existing sandbox"""
-    os.chdir(os.path.abspath(sys.path[0]))
-    destroy_command = "../terraform/destroy.sh"
-    utils.run_interactive_shell_command(destroy_command)
+# @cli.command()
+# @click.option('--app-id', '-app', default=None, required=True,
+#               help="An application ID that identifies the Sandbox configuration.")
+# def validate(app_id):
+#     """Delete an existing sandbox"""
 
-@cli.command()
-@click.option('--skip-ratingservice', default=False,  is_flag=True,
-              help="Don't test the ratingservice")
-def test(skip_ratingservice):
-    """Run tests to ensure environment is working as expected"""
-    os.chdir(os.path.abspath(sys.path[0]))
-    command = "../tests/run_tests.sh"
-    if skip_ratingservice:
-        command = f'SKIP_RATINGS_TEST=TRUE {command}'
-    os.setpgrp()
-    complete = False
-    try:
-        # run install.sh in a background shell
-        process = subprocess.Popen(command, bufsize=0, shell=True)
-        process.communicate()
-        complete = True
-    finally:
-        # kill background process if script is terminated
-        if not complete:
-            os.killpg(0, signal.SIGTERM)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     cli()
