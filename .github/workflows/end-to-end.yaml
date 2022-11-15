@@ -1,0 +1,55 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "End-to-end testing"
+on:
+  workflow_call: {}
+  workflow_dispatch: {}
+  pull_request:
+    types: [opened,synchronize,reopened]
+jobs:
+  e2e-pipeline:
+    name: "e2e pipeline"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - id: 'auth'
+      name: "Authenticate to Google Cloud"
+      uses: google-github-actions/auth@v1
+      with:
+        token_format: "access_token"
+        workload_identity_provider: ${{ secrets.E2E_IDENTITY_PROVIDER }}
+        service_account: ${{ secrets.E2E_SERVICE_ACCOUNT }}
+        access_token_lifetime: "1800s" # 30 min lifetime
+    - name: "set up Cloud SDK"
+      uses: google-github-actions/setup-gcloud@v1
+    - name: "run e2e installation of test application"
+      env:
+        GOOGLE_OAUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        SHA: ${{ github.sha }}
+      run: |-
+        cd "${{ github.workspace }}/cmd"
+        export SANDBOX_TERRAFORM_STATE_SUFFIX="${SHA:0:7}"
+        ./sandboxctl create --project "${{ secrets.E2E_PROJECT_ID }}" --app-id "../tests/test-app" --verbose
+    - name: "run e2e installation of test application"
+      env:
+        GOOGLE_OAUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        SHA: ${{ github.sha }}
+      run: |-
+        cd "${{ github.workspace }}/cmd"
+        export SANDBOX_TERRAFORM_STATE_SUFFIX="${SHA:0:7}"
+        ./sandboxctl destroy --project "${{ secrets.E2E_PROJECT_ID }}" --app-id "../tests/test-app" --verbose
+    # TODO: add a step that verifies configuration schema in apps/ and tests/test-app/ folders
+    # TODO: add a step that builds CLI here
+
