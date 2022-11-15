@@ -34,7 +34,6 @@ jobs:
       uses: google-github-actions/setup-gcloud@v1
     - name: "run e2e installation of test application"
       env:
-        GOOGLE_OAUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
         SHA: ${{ github.sha }}
       run: |-
         cd "${{ github.workspace }}/cmd"
@@ -42,7 +41,6 @@ jobs:
         ./sandboxctl create --project "${{ secrets.E2E_PROJECT_ID }}" --app-id "../tests/test-app" --verbose
     - name: "run e2e installation of test application"
       env:
-        GOOGLE_OAUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
         SHA: ${{ github.sha }}
       run: |-
         cd "${{ github.workspace }}/cmd"
