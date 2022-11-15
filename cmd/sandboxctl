@@ -235,7 +235,7 @@ def create(project: str, app_id: str, verbose: bool):
                help="A billing account to use with 'create-all' command to new created GCP project.")
 @ click.option('--verbose', '-v', default=False, is_flag=True,
                help='Prints execution trace (same as setting DEBUG environment variable).')
-def create_all(project, billing_acc, verbose) -> int:
+def create_all(project: str, billing_acc: str, verbose: bool) -> int:
     """Deploy Online Boutique with a new Sandbox installation"""
     return _run_install_script(
         action="create-all",
@@ -248,11 +248,13 @@ def create_all(project, billing_acc, verbose) -> int:
 @ cli.command()
 @ click.option('--project', '-p', default=None, required=True,
                help='Google Cloud project ID where Cloud Ops Sandbox is installed.')
+@ click.option('--app-id', '-app', default=None,
+               help="An application ID that identifies the Sandbox configuration.")
 @ click.option('--verbose', '-v', default=False, is_flag=True,
                help='Prints execution trace (same as setting DEBUG environment variable).')
-def destroy(project, verbose) -> int:
+def destroy(project: str, app_id: str, verbose: bool) -> int:
     """Delete an existing instance of Sandbox"""
-    return _run_install_script(action="destroy", project_id=project, verbose_flag=verbose)
+    return _run_install_script(action="destroy", project_id=project, app_id=app_id, verbose_flag=verbose)
 
 
 # @cli.command()
