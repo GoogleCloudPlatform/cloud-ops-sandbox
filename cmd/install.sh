@@ -66,7 +66,7 @@ function LogUsage {
   Log "commands:"
   Log "create       Creates Sandbox artifacts in the provided GCP project and configures them for the provided demo application"
   Log "create-all   Provisions Online Boutique application and creates Sandbox artifacts configured to work with it"
-  Log "delete       Deletes all Sandbox artifacts created in the provided GCP project"
+  Log "destroy      Destroys all Sandbox artifacts created in the provided GCP project"
   Log ""
   Log "options:"
   Log "-p <id>|--project <id>   Google Cloud project ID where to install Cloud Ops Sandbox."
@@ -93,8 +93,8 @@ function ParseArguments {
       command="create-all"
       shift
       ;;
-    delete)
-      command="delete"
+    destroy)
+      command="destroy"
       shift
       ;;
     -p|--project)
@@ -150,7 +150,7 @@ function ParseArguments {
 
   # exit script if command is not defined
   if [ -z "$command" ]; then
-    Log "Error: Please provide one of 'create' 'create-all' or 'delete' commands."
+    Log "Error: Please provide one of 'create' 'create-all' or 'destroy' commands."
     exit 1
   fi
 
@@ -412,8 +412,8 @@ if [ -z "$app_id" ]; then
 fi
 
 # do not allow installing Sandbox configuration over different Sandbox configuration (TODO: handle this case)
-if [ -n "$stored_app_id" ] && [ "$app_id" != "$stored_app_id" ] && [ "$command" != "delete" ]; then
-  Log "Warning: $project_id already has Sandbox configuration for $stored_app_id. Delete old Sandbox configuration first."
+if [ -n "$stored_app_id" ] && [ "$app_id" != "$stored_app_id" ] && [ "$command" != "destroy" ]; then
+  Log "Warning: $project_id already has Sandbox configuration for $stored_app_id. Remove old Sandbox configuration first."
   exit 0
 fi
 
@@ -453,7 +453,7 @@ create-all)
   CheckOrCreateBucket true
   RunTerraform apply
   ;;
-delete)
+destroy)
   CheckOrCreateBucket false; # do not create the bucket; state bucket has to be there
   # ensure that bucket exist and exit if it does not
   RunTerraform destroy
