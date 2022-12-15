@@ -44,16 +44,7 @@ body {
   font-family: Roboto, Arial, sans-serif;
   height: 100%;
   position: relative;
-  display: flex;
-  margin: 0;
-  justify-content: center;
-  align-items: center;
-  background-image: url('../images/bg_01.png'), url('../images/hex_bg.svg');
-  background-position: right -20px top 50%, right -20px center;
-  background-position-x: calc(50% + 600px), calc(100% + 20px);
-  background-position-y: calc(50% - 40px), 50%;
-  background-size: 568px 343px, 511px 723px;
-  background-repeat: no-repeat;
+  chore: ignore terraform artifacts at any level instead of root
 }
 
 .page {
@@ -312,10 +303,11 @@ li b {
   position: relative;
 }
 
-.message {
+.alert {
   padding: 20px;
-  background-color: #f8f9fa;
-  border-color: hsl(12, 64%, 33%) !important;
+  background-color: #04AA6D;
+  /* Green */
+  color: white;
   margin-bottom: 15px;
 }
 
