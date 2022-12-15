@@ -309,6 +309,13 @@ li b {
   position: relative;
 }
 
+.alert {
+  padding: 20px;
+  background-color: #04AA6D; /* Green */
+  color: white;
+  margin-bottom: 15px;
+}
+
 /* mobile view */
 @media (max-width: 1130px) {
   body {

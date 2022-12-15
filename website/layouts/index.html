@@ -16,6 +16,7 @@
 -->
 
 <html>
+
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -26,7 +27,7 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-137862890-1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
     gtag('config', 'UA-137862890-1');
@@ -34,9 +35,17 @@
   <!-- End of Google Analytics -->
   <script type="text/javascript" src='https://www.google.com/tools/feedback/api.js'></script>
 </head>
+
 <body>
   <section class="page">
-
+    <section class="title-row">
+      <div class="alert">
+        <strong>Attention: </strong>
+        The landing page of Cloud Ops Sandbox has moved. Please see our <a href="https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/main/docs">documentation</a> and our <a href="https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/">Github repo</a> for the latest updates.
+        <br />
+        This website has been deprecated with version <strong>0.9.0</strong>, and will be taken down in June 2023.
+      </div>
+    </section>
     <section class="title-row">
       <img src="images/logo_stackdriver.svg" class="stackdriver-logo" width="64" alt="Cloud Operations logo">
       <h1>Cloud Operations Sandbox</h1>
@@ -56,8 +65,7 @@
       <h2>Get started now</h2>
       <div class="steps">
         <div class="step step-1">
-          <a class="console-btn" href="https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=v0.8.1&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:v0.8.1&cloudshell_tutorial=docs/tutorial.md"
-             target="_blank">Open in Google Cloud Shell</a>
+          <a class="console-btn" href="https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=v0.8.1&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:v0.8.1&cloudshell_tutorial=docs/tutorial.md" target="_blank">Open in Google Cloud Shell</a>
         </div>
         <img src="images/bg_02.png" class="cloud-shell" alt="cloud shell">
       </div>
@@ -68,7 +76,7 @@
       <div class="steps">
         <div class="step step-2">
           <label><a class="docs-btn" href="/docs/">User Guide</a></label>
-	</div>
+        </div>
       </div>
     </section>
   </section>
@@ -79,4 +87,5 @@
     </p>
   </footer>
 </body>
+
 </html>
