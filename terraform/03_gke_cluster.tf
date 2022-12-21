@@ -241,6 +241,7 @@ resource "null_resource" "deploy_services" {
 }
 
 # We wait for all of our microservices to become available on kubernetes
+# kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/emailservice
 resource "null_resource" "delay" {
   provisioner "local-exec" {
     command = <<-EOT
@@ -248,7 +249,6 @@ resource "null_resource" "delay" {
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/cartservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/checkoutservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/currencyservice
-    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/emailservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/frontend
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/opentelemetrycollector
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/paymentservice
