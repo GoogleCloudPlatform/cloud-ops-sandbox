@@ -219,6 +219,7 @@ resource "null_resource" "install_asm" {
 }
 
 # Deploy microservices into GKE cluster
+# kubectl apply -f ../kubernetes-manifests/emailservice.yaml email service needed??
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
     command = <<-EOT
@@ -227,7 +228,6 @@ resource "null_resource" "deploy_services" {
     kubectl apply -f ../kubernetes-manifests/cartservice.yaml
     kubectl apply -f ../kubernetes-manifests/checkoutservice.yaml
     kubectl apply -f ../kubernetes-manifests/currencyservice.yaml
-    kubectl apply -f ../kubernetes-manifests/emailservice.yaml
     kubectl apply -f ../kubernetes-manifests/frontend.yaml
     kubectl apply -f ../kubernetes-manifests/opentelemetrycollector.yaml
     kubectl apply -f ../kubernetes-manifests/paymentservice.yaml
