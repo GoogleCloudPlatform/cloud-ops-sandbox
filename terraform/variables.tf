@@ -51,7 +51,7 @@ variable "gke_cluster_name" {
 }
 
 variable "gke_location" {
-  default     = "us-central1-c"
+  default     = ""
   type        = string
   description = "GKE Cloud Operations Sandbox's Cluster location."
 
