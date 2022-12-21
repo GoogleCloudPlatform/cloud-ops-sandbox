@@ -32,7 +32,7 @@ spec:
           command: ['bin/sh', '-c', 'until nslookup redis-cart.default.svc.cluster.local; do echo waiting for redis; sleep 2; done;']
       containers:
       - name: cartservice
-        image: gcr.io/stackdriver-sandbox-230822/sandbox/cartservice:latest
+        image: gcr.io/stackdriver-sandbox-230822/sandbox/cartservice:v0.8.1
         ports:
         - containerPort: 7070
         env:
