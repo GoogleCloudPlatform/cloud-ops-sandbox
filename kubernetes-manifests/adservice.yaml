@@ -36,10 +36,10 @@ spec:
           value: "9555"
         resources:
           requests:
-            cpu: 200m
+            cpu: 50m
             memory: 180Mi
           limits:
-            cpu: 300m
+            cpu: 50m
             memory: 300Mi
         readinessProbe:
           initialDelaySeconds: 20

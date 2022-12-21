@@ -36,7 +36,7 @@ spec:
           value: "productcatalogservice:3550"
         resources:
           requests:
-            cpu: 100m
+            cpu: 50m
             memory: 220Mi
           limits:
             cpu: 200m
