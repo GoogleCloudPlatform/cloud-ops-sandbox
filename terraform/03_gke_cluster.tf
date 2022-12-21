@@ -220,11 +220,11 @@ resource "null_resource" "install_asm" {
 
 # Deploy microservices into GKE cluster
 # kubectl apply -f ../kubernetes-manifests/emailservice.yaml email service needed??
+# kubectl apply -f ../kubernetes-manifests/adservice.yaml
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
     command = <<-EOT
     kubectl apply -f ../kubernetes-manifests/redis.yaml
-    kubectl apply -f ../kubernetes-manifests/adservice.yaml
     kubectl apply -f ../kubernetes-manifests/cartservice.yaml
     kubectl apply -f ../kubernetes-manifests/checkoutservice.yaml
     kubectl apply -f ../kubernetes-manifests/currencyservice.yaml
@@ -242,10 +242,10 @@ resource "null_resource" "deploy_services" {
 
 # We wait for all of our microservices to become available on kubernetes
 # kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/emailservice
+# kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/adservice
 resource "null_resource" "delay" {
   provisioner "local-exec" {
     command = <<-EOT
-    kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/adservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/cartservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/checkoutservice
     kubectl wait \-\-for=condition=available \-\-timeout=600s deployment/currencyservice
