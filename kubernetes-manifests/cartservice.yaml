@@ -29,7 +29,7 @@ spec:
       initContainers:
         - name: init-redis-ready
           image: busybox
-          command: ['bin/sh', '-c', 'until nslookup redis-cart; do echo waiting for redis; sleep 2; done;']
+          command: ['bin/sh', '-c', 'until nslookup redis-cart.default.svc.cluster.local; do echo waiting for redis; sleep 2; done;']
       containers:
       - name: cartservice
         image: gcr.io/stackdriver-sandbox-230822/sandbox/cartservice:latest
