@@ -54,6 +54,14 @@ echo "Installing ASM..."
 echo "Setting up Ingress Gateway"
 kubectl create ns asm-ingress
 kubectl label namespace asm-ingress istio-injection=enabled --overwrite
+
+# sed commands to alter min and max replicas as well as cpu consumption for labs...
+sed -i 's/minReplicas: 3/minReplicas: 1/g' $WORK_DIR/asm_output/samples/gateways/istio-ingressgateway/deployment.yaml
+sed -i 's/maxReplicas: 5/maxReplicas: 1/g' $WORK_DIR/asm_output/samples/gateways/istio-ingressgateway/deployment.yaml
+sed -i 's/replicas: 3/replicas: 1/g' $WORK_DIR/asm_output/samples/gateways/istio-ingressgateway/deployment.yaml
+sed -i 's/cpu: 2000m/cpu: 200m/g' $WORK_DIR/asm_output/samples/gateways/istio-ingressgateway/deployment.yaml
+sed -i 's/memory: 1024Mi/memory: 256Mi/g' $WORK_DIR/asm_output/samples/gateways/istio-ingressgateway/deployment.yaml
+
 kubectl apply -n asm-ingress -f $WORK_DIR/asm_output/samples/gateways/istio-ingressgateway
 
 echo "Enabling Sidecar Injection..."
