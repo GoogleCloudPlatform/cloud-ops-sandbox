@@ -49,7 +49,7 @@ body {
   justify-content: center;
   align-items: center;
   background-image: url('../images/bg_01.png'), url('../images/hex_bg.svg');
-  background-position: right -20px  top 50%, right -20px center;
+  background-position: right -20px top 50%, right -20px center;
   background-position-x: calc(50% + 600px), calc(100% + 20px);
   background-position-y: calc(50% - 40px), 50%;
   background-size: 568px 343px, 511px 723px;
@@ -68,7 +68,8 @@ h1 {
   font-weight: 500;
 }
 
-h2, h3 {
+h2,
+h3 {
   font-family: 'Google Sans', Arial, sans-serif;
 }
 
@@ -78,6 +79,7 @@ h3 {
   font-weight: 200;
   line-height: 33px;
 }
+
 h3 span {
   color: var(--gre500);
 }
@@ -149,6 +151,7 @@ nav {
   content: '$ ';
   display: inline;
 }
+
 .step code::after {
   display: inline-block;
   content: '';
@@ -260,7 +263,7 @@ footer p {
   display: inline-block;
   width: 20px;
   height: 20px;
-  margin: -1px 0 0 .3em ;
+  margin: -1px 0 0 .3em;
   opacity: .6;
   background-image: url('../images/github.svg');
 }
@@ -309,10 +312,10 @@ li b {
   position: relative;
 }
 
-.alert {
+.message {
   padding: 20px;
-  background-color: #04AA6D; /* Green */
-  color: white;
+  background-color: #f8f9fa;
+  border-color: hsl(12, 64%, 33%) !important;
   margin-bottom: 15px;
 }
 
@@ -324,20 +327,24 @@ li b {
     background-position: right -20px center;
     background-position-x: calc(100% + 20px);
     background-position-y: 50%;
-    background-size:255px 361px;
+    background-size: 255px 361px;
   }
+
   .page {
     width: 90%;
     margin: 0 auto;
     position: relative;
   }
+
   .title-row {
     margin: 3em 0 1em 0;
   }
+
   h1 {
     font-size: 26px;
     line-height: 26px;
   }
+
   .badge.alpha {
     padding: 0 1em;
     font-size: 12px;
@@ -359,6 +366,7 @@ li b {
     margin: 1em auto;
     max-width: unset;
   }
+
   .line {
     display: none;
   }
@@ -379,6 +387,7 @@ li b {
     border-radius: 4px;
     width: 225px;
   }
+
   .console-btn::before {
     content: '';
     display: inline-block;
@@ -406,6 +415,7 @@ li b {
     position: unset;
     width: 100%;
   }
+
   footer p {
     width: 100%;
     padding: 1em;

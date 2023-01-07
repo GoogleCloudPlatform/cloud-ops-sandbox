@@ -312,11 +312,10 @@ li b {
   position: relative;
 }
 
-.alert {
+.message {
   padding: 20px;
-  background-color: #04AA6D;
-  /* Green */
-  color: white;
+  background-color: #f8f9fa;
+  border-color: hsl(12, 64%, 33%) !important;
   margin-bottom: 15px;
 }
 

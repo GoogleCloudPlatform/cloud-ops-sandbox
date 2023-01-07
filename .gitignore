@@ -10,12 +10,20 @@ pkg/
 .skaffold-*.yaml
 .kubernetes-manifests-*/
 release/*
+
+.token
+skaffold
+website/resources*
+srerecipes.log
+
+# terraform artifacts
 terraform/terraform_0.11.11_linux_amd64.zip
 terraform/**/terraform.*
 terraform/**/.terraform/*
 terraform/istio/istioctl
 terraform/istio/istio-*/**
-.token
-skaffold
-website/resources*
-srerecipes.log
+**/.terraform.lock*
+
+# npm artifacts
+**/node_modules/
+package*.json
