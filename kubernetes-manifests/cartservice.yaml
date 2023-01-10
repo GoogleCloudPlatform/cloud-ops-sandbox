@@ -28,7 +28,8 @@ spec:
       terminationGracePeriodSeconds: 5
       initContainers:
         - name: init-redis-ready
-          image: busybox
+          # backporting busybox to 1.28 solves the nslookup bug. See  #996
+          image: busybox:1.28
           command: ['bin/sh', '-c', 'until nslookup redis-cart; do echo waiting for redis; sleep 2; done;']
       containers:
       - name: cartservice
