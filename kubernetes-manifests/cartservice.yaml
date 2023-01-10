@@ -27,9 +27,12 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       initContainers:
-        - name: init-redis-ready
+        # Noet this is a workaround until busybox will fix its nslookup misbehaviour (see #995 )
+        - name: init-redis-ready-workaround
+          # latest image v1.36 is still buggy. Tried 1.35 and 1.34 same issue.
+          # TODO(ricc): remove the Address: when the busybox returns correctly in v1.37 hopefully
           image: busybox
-          command: ['bin/sh', '-c', 'until nslookup redis-cart; do echo waiting for redis; sleep 2; done;']
+          command: ['bin/sh', '-c', 'until nslookup redis-cart|grep Address: ; do echo waiting for redis; sleep 2; done;']
       containers:
       - name: cartservice
         image: gcr.io/stackdriver-sandbox-230822/sandbox/cartservice:v0.8.1
