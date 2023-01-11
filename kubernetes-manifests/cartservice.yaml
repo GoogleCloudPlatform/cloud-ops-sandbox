@@ -28,7 +28,7 @@ spec:
       terminationGracePeriodSeconds: 5
       initContainers:
         - name: init-redis-ready
-          image: busybox
+          image: busybox:1.28
           command: ['bin/sh', '-c', 'until nslookup redis-cart; do echo waiting for redis; sleep 2; done;']
       containers:
       - name: cartservice
