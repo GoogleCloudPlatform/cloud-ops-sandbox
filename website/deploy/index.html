@@ -1,25 +1,10 @@
 <!DOCTYPE html>
-<!--
- Copyright 2021 Google LLC
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
--->
-
 
 
 <html>
+
 <head>
-	<meta name="generator" content="Hugo 0.82.1" />
+	<meta name="generator" content="Hugo 0.80.0" />
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Cloud Operations Sandbox</title>
@@ -29,7 +14,7 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-137862890-1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
     gtag('config', 'UA-137862890-1');
@@ -37,9 +22,15 @@
   
   <script type="text/javascript" src='https://www.google.com/tools/feedback/api.js'></script>
 </head>
+
 <body>
   <section class="page">
-
+    <div class="message">
+      <strong>Attention: </strong>
+      The landing page of Cloud Ops Sandbox has moved. Please see our <a href="https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/main/docs">documentation</a> and our <a href="https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/">Github repo</a> for the latest updates.
+      <br />
+      This website has been deprecated with version <strong>0.9.0</strong>, and will be taken down in June 2023.
+    </div>
     <section class="title-row">
       <img src="images/logo_stackdriver.svg" class="stackdriver-logo" width="64" alt="Cloud Operations logo">
       <h1>Cloud Operations Sandbox</h1>
@@ -59,8 +50,7 @@
       <h2>Get started now</h2>
       <div class="steps">
         <div class="step step-1">
-          <a class="console-btn" href="https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=develop&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:latest&cloudshell_tutorial=docs/tutorial.md"
-             target="_blank">Open in Google Cloud Shell</a>
+          <a class="console-btn" href="https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=v0.8.1&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:v0.8.1&cloudshell_tutorial=docs/tutorial.md" target="_blank">Open in Google Cloud Shell</a>
         </div>
         <img src="images/bg_02.png" class="cloud-shell" alt="cloud shell">
       </div>
@@ -71,15 +61,16 @@
       <div class="steps">
         <div class="step step-2">
           <label><a class="docs-btn" href="/docs/">User Guide</a></label>
-	</div>
+        </div>
       </div>
     </section>
   </section>
 
   <footer>
     <p class="fineprint">* Note: This is <b>NOT</b> an official Google product. Customers will be billed for using cloud resources when creating a sandbox cluster.
-      <button onclick="userfeedback.api.startFeedback({ 'productId': '5235454', 'productVersion': 'develop' });">Submit Feedback</button>
+      <button onclick="userfeedback.api.startFeedback({ 'productId': '5235454', 'productVersion': 'v0.8.1' });">Submit Feedback</button>
     </p>
   </footer>
 </body>
+
 </html>
