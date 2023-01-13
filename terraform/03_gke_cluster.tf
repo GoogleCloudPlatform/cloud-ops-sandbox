@@ -101,7 +101,7 @@ resource "google_container_cluster" "gke" {
 
     autoscaling {
       min_node_count = 2
-      max_node_count = 2
+      max_node_count = 3
     }
 
     management {
