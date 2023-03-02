@@ -1,27 +1,22 @@
 # How to Contribute
 
 We'd love to accept your patches and contributions to this project. There are
-just a few small guidelines you need to follow. In the last section [Build Sandbox Locally](#build-sandbox-locally), we will show you how to build the project locally.
-
-## Development Principles (for Googlers)
-
-There are a few principles for developing or refactoring the service
-implementations. Read the [Development Principles
-Guide](./docs/development-principles.md).
+just a few small guidelines you need to follow.
 
 ## Contributor License Agreement
 
 Contributions to this project must be accompanied by a Contributor License
-Agreement. You (or your employer) retain the copyright to your contribution;
-this simply gives us permission to use and redistribute your contributions as
-part of the project. Head over to <https://cla.developers.google.com/> to see
-your current agreements on file or to sign a new one.
+Agreement (CLA). You (or your employer) retain the copyright to your
+contribution; this simply gives us permission to use and redistribute your
+contributions as part of the project. Head over to
+<https://cla.developers.google.com/> to see your current agreements on file or
+to sign a new one.
 
 You generally only need to submit a CLA once, so if you've already submitted one
 (even if it was for a different project), you probably don't need to do it
 again.
 
-## Code reviews
+## Code Reviews
 
 All submissions, including submissions by project members, require review. We
 use GitHub pull requests for this purpose. Consult
@@ -30,29 +25,10 @@ information on using pull requests.
 
 ## Community Guidelines
 
-This project follows [Google's Open Source Community
-Guidelines](https://opensource.google.com/conduct/).
+This project follows
+[Google's Open Source Community Guidelines](https://opensource.google/conduct/).
 
-## Git Workflow
-
-This project conforms to the [Gitflow Workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-wokflow).
-The repo contains two important branches:
-- the `main` branch stores the official release history
-- the `develop` branch contains the current working codebase.
-
-As a contributor, your workflow will be to create a temporary branch off of `develop`, add your code, and create a PR back to `develop`:
-
-```
-git checkout develop
-git checkout -b new_branch
-git commit -m "new commit"
-git push --set-upstream origin new_branch
-# create a PR on GitHub
-```
-
-Periodically, we will coordinate to publish release PRs to merge the latest state of `develop` back into `main`.
-
-
+<!-- 
 ## Conventional Commits
 
 This project expects PR titles to conform to the [conventional commits standard](https://www.conventionalcommits.org/en/v1.0.0/).
@@ -352,4 +328,4 @@ and opening the following url:
 
 https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=**your-branch-here**&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:latest
 
-When you're ready to open a PR, a GitHub Actions bot will attach an Open in Cloud Shell button directing to your changes automatically
+When you're ready to open a PR, a GitHub Actions bot will attach an Open in Cloud Shell button directing to your changes automatically -->
