@@ -1,0 +1,13 @@
+# Trigger presubmit tests for trusted contributors
+# https://github.com/googleapis/repo-automation-bots/tree/main/packages/trusted-contribution
+# Install: https://github.com/apps/trusted-contributions-gcf
+
+trustedContributors:
+  - "renovate-bot"
+annotations:
+  # Trigger Cloud Build tests
+  - type: comment
+    text: "/gcbrun"
+  # Trigger Kokoro example
+  # - type: label
+  #   text: "kokoro:force-run"

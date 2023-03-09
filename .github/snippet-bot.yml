@@ -1,0 +1,3 @@
+# Presubmit test to check for mismatched region tags in PRs
+# https://github.com/googleapis/repo-automation-bots/tree/main/packages/snippet-bot
+# Install: https://github.com/apps/snippet-bot

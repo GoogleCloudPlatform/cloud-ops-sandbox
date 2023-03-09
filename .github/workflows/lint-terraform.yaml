@@ -1,0 +1,75 @@
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Terraform Lint
+on:
+  pull_request:
+    types: [opened,synchronize,reopened]
+    paths:
+    - 'provisioning/terraform/**'
+
+jobs:
+  tflint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout source code
+
+    - name: Terraform backend initialization
+      run: terraform -chdir=./provisioning/terraform/ init -backend=false
+
+    - uses: actions/cache@v3
+      name: Cache plugin dir
+      with:
+        path: ~/.tflint.d/plugins
+        key: tflint-${{ hashFiles('.tflint.hcl') }}
+
+    - uses: terraform-linters/setup-tflint@v3
+      name: Setup TFLint
+      with:
+        tflint_version: v0.45.0
+
+    - name: Show version
+      run: tflint --version
+
+    - name: Init TFLint
+      run: tflint --init
+      env:
+        # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Run TFLint
+      run: tflint -f compact --chdir ./provisioning/terraform --recursive
+
+---
+# enable use of this workflow as required action by ignoring all triggers that caused by non-terraform changes
+# for details see https://github.com/orgs/community/discussions/49124
+name: Terraform Lint
+on:
+  pull_request:
+    types: [opened,synchronize,reopened]
+    paths-ignore:
+    - 'provisioning/terraform/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - run: 'echo "No terraform lint required"'
