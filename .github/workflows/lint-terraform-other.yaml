@@ -8,7 +8,8 @@ on:
     - 'provisioning/terraform/**'
 
 jobs:
-  build:
+  tflint:
+    name: "syntax and lint validation"
     runs-on: ubuntu-latest
     steps:
     - run: 'echo "No terraform lint required"'
