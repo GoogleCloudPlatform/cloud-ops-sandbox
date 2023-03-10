@@ -49,6 +49,8 @@ jobs:
 
     - name: "set up Cloud CLI"
       uses: google-github-actions/setup-gcloud@v1
+      with:
+        install_components: 'gke-gcloud-auth-plugin'
 
     - name: "deploy Sandbox"
       env:
