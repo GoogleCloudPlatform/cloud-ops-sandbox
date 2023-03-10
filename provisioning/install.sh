@@ -191,6 +191,9 @@ applyTerraform() {
   -var=\"state_prefix=${terraform_state_prefix:-""}\"
   --var=\"gcp_project_id=${project_id}\""
 
+  if [[ -n $CLOUDOPS_SANDBOX_LOCATION ]]; then
+    terraform_command+=" --var=\"gke_cluster_name=${cluster_name}\""
+  fi
   # customize ASM provisioning
   local ingress_path=""  
   if [[ -z "${skip_asm}" ]]; then
@@ -285,6 +288,15 @@ checkAuthentication() {
 parseArguments() {
   while (( "$#" )); do
     case "$1" in
+    --cluster-name)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        cluster_name=$2
+        shift 2
+      else
+        log "Error: Argument for $1 is missing" >&2
+        exit 1
+      fi
+      ;;
     -p|--project|--project-id)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
         project_id=$2
