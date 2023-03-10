@@ -21,7 +21,6 @@ on:
 
 jobs:
   tflint:
-    name: "syntax and lint validation"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -57,4 +56,4 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
 
     - name: Run TFLint
-      run: tflint -f compact --chdir ./provisioning/terraform --recursive
+      run: tflint -f compact --chdir ./provisioning/terraform
