@@ -13,5 +13,5 @@
 # limitations under the License.
 
 output "frontend_external_ip" {
-  value = data.external.frontend_service_external_ip.result.ip
+  value = data.kubernetes_service.frontend_external_service.status[0].load_balancer[0].ingress[0].ip
 }

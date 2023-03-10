@@ -180,20 +180,24 @@ getOrCreateBucket() {
 }
 
 applyTerraform() {
-  rm -f .terraform/terraform.tfstate.*
+  rm -f .terraform/terraform.tfstate*
 
   log "🏁 Installing CloudOps Sandbox with Online Boutique..."
 
   pushd "./terraform"
-  terraform init -reconfigure -backend-config "bucket=${bucket_name}" -backend-config "prefix=${terraform_state_prefix}" -lockfile=false #2> /dev/null
+  terraform init -backend-config "bucket=${bucket_name}" -backend-config "prefix=${terraform_state_prefix}" -lockfile=false #2> /dev/null
   terraform_command="terraform apply -auto-approve \
   -var=\"state_bucket_name=${bucket_name}\"
   -var=\"state_prefix=${terraform_state_prefix:-""}\"
   --var=\"gcp_project_id=${project_id}\""
 
-  if [[ -n $CLOUDOPS_SANDBOX_LOCATION ]]; then
+  if [[ -n ${cluster_name} ]]; then
     terraform_command+=" --var=\"gke_cluster_name=${cluster_name}\""
   fi
+  if [[ -n ${cluster_location} ]]; then
+    terraform_command+=" --var=\"gke_cluster_location=${cluster_location}\""
+  fi
+
   # customize ASM provisioning
   local ingress_path=""  
   if [[ -z "${skip_asm}" ]]; then
@@ -205,10 +209,6 @@ applyTerraform() {
     terraform_command+=" --var=\"filepath_manifest=../kustomize/online-boutique/${ingress_path}\"" 
   else
     terraform_command+=" --var=\"filepath_manifest=../kustomize/online-boutique/no-loadgenerator/${ingress_path}\"" 
-  fi
-  # customize region/zone location (default is 'us-central1')
-  if [[ -n $CLOUDOPS_SANDBOX_LOCATION ]]; then
-    terraform_command+=" --var=\"gke_cluster_location=${CLOUDOPS_SANDBOX_LOCATION}\""
   fi
   # customize default node pool configuration (default is 4 instances of 'e2-standard-4' VMs)
   # the expected value is a fully formatted JSON string (see ./terraform/variables.tf for the schema)
@@ -297,6 +297,15 @@ parseArguments() {
         exit 1
       fi
       ;;
+    --cluster-location)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        cluster_location=$2
+        shift 2
+      else
+        log "Error: Argument for $1 is missing" >&2
+        exit 1
+      fi
+      ;;
     -p|--project|--project-id)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
         project_id=$2
@@ -368,7 +377,6 @@ getOrCreateBucket;
 
 # deploy
 applyTerraform;
-getExternalIp;
 displaySuccessMessage;
 
 # restore to calling directory

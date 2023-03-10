@@ -36,9 +36,9 @@ terraform {
       source  = "hashicorp/null"
       version = "~>3.2.1"
     }
-    external = {
-      source  = "hashicorp/external"
-      version = "~>2.3.1"
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~>2.18.1"
     }
   }
   backend "gcs" {}
@@ -50,6 +50,10 @@ provider "google" {
 
 provider "google-beta" {
   project = var.gcp_project_id
+}
+
+provider "kubernetes" {
+  config_path = "~/.kube/config"
 }
 
 # tflint-ignore: terraform_unused_declarations

@@ -47,14 +47,14 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   }
 }
 
-# Enable side-cars in manifest_namespace
-resource "null_resource" "enable_namespace_for_istio" {
+resource "null_resource" "mark_manifest_namespace_for_istio_injection" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command     = "kubectl label namespace ${var.manifest_namespace} istio-injection=enabled --overwrite"
   }
 
   depends_on = [
-    resource.google_gke_hub_feature_membership.feature_member
+    resource.google_gke_hub_feature_membership.feature_member,
+    resource.null_resource.apply_kustomization
   ]
 }

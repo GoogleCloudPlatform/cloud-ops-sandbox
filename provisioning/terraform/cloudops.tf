@@ -12,15 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-data "external" "frontend_service_external_ip" {
+data "kubernetes_service" "frontend_external_service" {
   depends_on = [resource.null_resource.wait_kustomize_conditions]
-  program    = ["bash", "./external_ip.sh"]
+  metadata {
+    name      = "frontend-external"
+    namespace = var.manifest_namespace
+  }
 }
 
 module "monitoring" {
   source               = "./monitoring"
   gcp_project_id       = var.gcp_project_id
-  frontend_external_ip = data.external.frontend_service_external_ip.result.ip
+  frontend_external_ip = data.kubernetes_service.frontend_external_service.status[0].load_balancer[0].ingress[0].ip
   gke_cluster_name     = var.gke_cluster_name
   manifest_namespace   = var.manifest_namespace
+  name_suffix          = "-${var.state_prefix}" # re-use prefix to customize resources within the same project
 }
