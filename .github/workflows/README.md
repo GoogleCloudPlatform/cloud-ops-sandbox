@@ -47,7 +47,10 @@ on:
 ```
 
 It uses the [tflint] Github action.
-To support required checks, the file contains "extra" workflow that _does nothing_ when triggered for changes outside the Terraform configuration.
+
+#### Handling skipped but required checks
+
+To allow using this workflow as a [required status check] the file [lint-terraform-other.yaml] is used. It defines the workflow with the same name that _does nothing_ when triggered for changes outside the Terraform configuration.
 
 ### End-to-end Deployment
 
@@ -68,7 +71,9 @@ The installation is triggered with the following parameters:
 [hosted]: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
 [bots]: ../README.md
 [lint-terraform.yaml]: ./lint-terraform.yaml
+[lint-terraform-other.yaml]: ./lint-terraform-other.yaml
 [tflint]: https://github.com/marketplace/actions/setup-tflint
 [blog]: https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions
 [install.sh]: ../../provisioning/install.sh
 [sha]: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+[required status check]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-status-checks-before-merging

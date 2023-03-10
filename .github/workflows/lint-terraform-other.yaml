@@ -1,0 +1,14 @@
+# enable use of the "terraform lint" workflow as required check when changes aren't terraform files
+# for details see https://github.com/orgs/community/discussions/49124
+name: terraform lint
+on:
+  pull_request:
+    types: [opened,synchronize,reopened]
+    paths-ignore:
+    - 'provisioning/terraform/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - run: 'echo "No terraform lint required"'

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: end-to-end deployment
+name: end-to-end integration testing
 on:
   pull_request:
     types: [opened,synchronize,reopened]
@@ -26,7 +26,7 @@ on:
 
 jobs:
   e2e-deployment:
-    name: "end-to-end deployment"
+    name: "provision and deploy Cloud Sandbox with Online Boutique"
     runs-on: ubuntu:latest
     permissions:
       contents: 'read'

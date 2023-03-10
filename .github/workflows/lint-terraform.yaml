@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Terraform Lint
+name: terraform lint
 on:
   pull_request:
     types: [opened,synchronize,reopened]
@@ -21,6 +21,7 @@ on:
 
 jobs:
   tflint:
+    name: "syntax and lint validation"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -29,14 +30,14 @@ jobs:
       cancel-in-progress: true
 
     steps:
-    - uses: actions/checkout@v3
-      name: Checkout source code
-
+    - name: Checkout source code
+      uses: actions/checkout@v3
+      
     - name: Terraform backend initialization
       run: terraform -chdir=./provisioning/terraform/ init -backend=false
 
-    - uses: actions/cache@v3
-      name: Cache plugin dir
+    - name: Cache plugin dir
+      uses: actions/cache@v3
       with:
         path: ~/.tflint.d/plugins
         key: tflint-${{ hashFiles('.tflint.hcl') }}
@@ -57,19 +58,3 @@ jobs:
 
     - name: Run TFLint
       run: tflint -f compact --chdir ./provisioning/terraform --recursive
-
----
-# enable use of this workflow as required action by ignoring all triggers that caused by non-terraform changes
-# for details see https://github.com/orgs/community/discussions/49124
-name: Terraform Lint
-on:
-  pull_request:
-    types: [opened,synchronize,reopened]
-    paths-ignore:
-    - 'provisioning/terraform/**'
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - run: 'echo "No terraform lint required"'
