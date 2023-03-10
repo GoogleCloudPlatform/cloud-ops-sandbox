@@ -52,12 +52,21 @@ jobs:
       with:
         install_components: 'gke-gcloud-auth-plugin'
 
+    # select a zone in us-central1 region and use it to next steps as ${{ env.cluster_location }}
+    - name: "select deployment zone"
+      run: |-
+        zones=("us-central1-a","us-central1-b","us-central1-c","us-central1-f")
+        selected_location=${zones[ $RANDOM % ${#zones[@]} ]}
+        echo "Terraform will provision GKE cluster in \"${selected_location}\""
+        echo "cluster_location=${selected_location}" >> $GITHUB_ENV
+
     - name: "deploy Sandbox"
       env:
         SHA: ${{ github.sha }}
       run: |-
         cd "${{ github.workspace }}/provisioning"
-        ./install.sh --project "${{ secrets.E2E_PROJECT_ID }}" --terraform-prefix "${SHA:0:7}" --cluster-name "${SHA:0:7}-cloudops-sandbox" --skip-asm --verbose
+        ./install.sh --project "${{ secrets.E2E_PROJECT_ID }}" --terraform-prefix "${SHA:0:7}" \
+        --cluster-name "${SHA:0:7}-cloudops-sandbox" --cluster-location "${{ env.cluster_location }}" --skip-asm --verbose
     
     - name: "clean up"
       env:
@@ -65,4 +74,5 @@ jobs:
       run: |-
         cd "${{ github.workspace }}/provisioning/terraform"
         terraform destroy --var="gcp_project_id=${{ secrets.E2E_PROJECT_ID }}" --var="state_bucket_name=${{ secrets.E2E_PROJECT_ID }}-terraform-state"" \
-        --var="state_bucket_prefix=${SHA:0:7}" --var="gke_cluster_name=${SHA:0:7}-cloudops-sandbox" --var="filepath_manifest=../kustomize/online-boutique/"
+        --var="state_prefix=${SHA:0:7}" --var="gke_cluster_name=${SHA:0:7}-cloudops-sandbox" \
+        --var="gke_cluster_location=${{ env.cluster_location }}" --var="filepath_manifest=../kustomize/online-boutique/"
