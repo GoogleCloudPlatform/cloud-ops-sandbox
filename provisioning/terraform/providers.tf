@@ -32,6 +32,14 @@ terraform {
       source  = "hashicorp/google-beta"
       version = "4.54.0"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "~>3.2.1"
+    }
+    external = {
+      source  = "hashicorp/external"
+      version = "~>2.3.1"
+    }
   }
   backend "gcs" {}
 }
@@ -44,6 +52,7 @@ provider "google-beta" {
   project = var.gcp_project_id
 }
 
+# tflint-ignore: terraform_unused_declarations
 data "terraform_remote_state" "state" {
   backend = "gcs"
   config = {
