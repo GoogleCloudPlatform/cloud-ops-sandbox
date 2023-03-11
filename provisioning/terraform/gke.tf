@@ -96,11 +96,22 @@ resource "null_resource" "apply_kustomization" {
   ]
 }
 
-# Wait condition for all Pods to be ready before finishing
-resource "null_resource" "wait_kustomize_conditions" {
+# Wait condition for all resources to be ready before finishing
+resource "null_resource" "wait_pods_conditions" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command     = "kubectl wait --for=condition=ready pods --all -n ${var.manifest_namespace} --timeout=-1s 2> /dev/null"
+  }
+
+  depends_on = [
+    resource.null_resource.apply_kustomization
+  ]
+}
+
+resource "null_resource" "wait_service_conditions" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command     = "while [[ -z $ip ]]; do ip=$(kubectl get svc frontend-external -n ${var.manifest_namespace} --output='go-template={{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'); sleep 1; done 2> /dev/null"
   }
 
   depends_on = [

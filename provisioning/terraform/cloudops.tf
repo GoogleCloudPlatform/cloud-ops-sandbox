@@ -13,11 +13,14 @@
 # limitations under the License.
 
 data "kubernetes_service" "frontend_external_service" {
-  depends_on = [resource.null_resource.wait_kustomize_conditions]
   metadata {
     name      = "frontend-external"
     namespace = var.manifest_namespace
   }
+  depends_on = [
+    resource.null_resource.wait_pods_conditions,
+    resource.null_resource.wait_service_conditions
+  ]
 }
 
 module "monitoring" {
