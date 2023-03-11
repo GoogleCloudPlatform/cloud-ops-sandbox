@@ -75,6 +75,7 @@ jobs:
       run: |-
         cd "${{ github.workspace }}/provisioning/terraform"
         state_prefix="${SHA:0:7}"
-        terraform destroy --var="gcp_project_id=${{ secrets.E2E_PROJECT_ID }}" --var="state_bucket_name=${{ secrets.E2E_PROJECT_ID }}-terraform-state"" \
+        terraform destroy --var="gcp_project_id=${{ secrets.E2E_PROJECT_ID }}" \
+        --var="state_bucket_name=${{ secrets.E2E_PROJECT_ID }}-cloud-ops-sandbox-terraform-state" \
         --var="state_prefix=${state_prefix}" --var="gke_cluster_name=cloudops-sandbox-${state_prefix}" \
         --var="gke_cluster_location=${{ env.cluster_location }}" --var="filepath_manifest=../kustomize/online-boutique/"
