@@ -65,14 +65,16 @@ jobs:
         SHA: ${{ github.sha }}
       run: |-
         cd "${{ github.workspace }}/provisioning"
-        ./install.sh --project "${{ secrets.E2E_PROJECT_ID }}" --terraform-prefix "${SHA:0:7}" \
-        --cluster-name "${SHA:0:7}-cloudops-sandbox" --cluster-location "${{ env.cluster_location }}" --skip-asm --verbose
+        state_prefix="${SHA:0:7}"
+        ./install.sh --project "${{ secrets.E2E_PROJECT_ID }}" --terraform-prefix "${state_prefix}" \
+        --cluster-name "cloudops-sandbox-${state_prefix}" --cluster-location "${{ env.cluster_location }}" --skip-asm --verbose
     
     - name: "clean up"
       env:
         SHA: ${{ github.sha }}
       run: |-
         cd "${{ github.workspace }}/provisioning/terraform"
+        state_prefix="${SHA:0:7}"
         terraform destroy --var="gcp_project_id=${{ secrets.E2E_PROJECT_ID }}" --var="state_bucket_name=${{ secrets.E2E_PROJECT_ID }}-terraform-state"" \
-        --var="state_prefix=${SHA:0:7}" --var="gke_cluster_name=${SHA:0:7}-cloudops-sandbox" \
+        --var="state_prefix=${state_prefix}" --var="gke_cluster_name=cloudops-sandbox-${state_prefix}" \
         --var="gke_cluster_location=${{ env.cluster_location }}" --var="filepath_manifest=../kustomize/online-boutique/"
