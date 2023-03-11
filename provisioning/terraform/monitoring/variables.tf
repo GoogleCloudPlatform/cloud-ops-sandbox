@@ -40,12 +40,6 @@ variable "gke_cluster_name" {
   default     = "cloud-ops-sandbox"
 }
 
-variable "manifest_namespace" {
-  type        = string
-  description = "Defines namespace scope when applying Kubernetes resources defined in the manifest filepath"
-  default     = "default"
-}
-
 variable "notification_channel_email" {
   type        = string
   description = "Email address to use for alert notification channel."

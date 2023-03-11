@@ -14,7 +14,7 @@
 
 resource "google_logging_metric" "checkoutservice_logging_metric" {
   name   = "checkoutservice_log_metric${var.name_suffix}"
-  filter = "resource.type=k8s_container AND resource.labels.cluster_name=${var.gke_cluster_name} AND resource.labels.namespace_name=${var.manifest_namespace} AND resource.labels.container_name=server AND orderedItem"
+  filter = "resource.type=k8s_container AND resource.labels.cluster_name=${var.gke_cluster_name} AND resource.labels.namespace_name=default AND resource.labels.container_name=server AND orderedItem"
   metric_descriptor {
     metric_kind = "DELTA" # set to DELTA for counter-based metric
     value_type  = "INT64" # set to INT64 for counter-based metric

@@ -84,11 +84,11 @@ module "gcloud" {
 # NOTE: when re-applying the previous resources might not be disposed
 resource "null_resource" "apply_kustomization" {
   triggers = {
-    shell_command = "kubectl apply -k ${var.filepath_manifest} -n ${var.manifest_namespace}"
+    shell_command = "kubectl apply -k ${var.filepath_manifest} -n default"
   }
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -k ${var.filepath_manifest} -n ${var.manifest_namespace}"
+    command     = "kubectl apply -k ${var.filepath_manifest} -n default"
   }
 
   depends_on = [
@@ -100,7 +100,7 @@ resource "null_resource" "apply_kustomization" {
 resource "null_resource" "wait_pods_conditions" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl wait --for=condition=ready pods --all -n ${var.manifest_namespace} --timeout=-1s 2> /dev/null"
+    command     = "kubectl wait --for=condition=ready pods --all -n default --timeout=-1s 2> /dev/null"
   }
 
   depends_on = [
@@ -111,7 +111,7 @@ resource "null_resource" "wait_pods_conditions" {
 resource "null_resource" "wait_service_conditions" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "while [[ -z $ip ]]; do ip=$(kubectl get svc frontend-external -n ${var.manifest_namespace} --output='go-template={{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'); sleep 1; done 2> /dev/null"
+    command     = "while [[ -z $ip ]]; do ip=$(kubectl get svc frontend-external -n default --output='go-template={{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'); sleep 1; done 2> /dev/null"
   }
 
   depends_on = [

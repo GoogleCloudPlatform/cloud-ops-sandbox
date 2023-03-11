@@ -10,7 +10,7 @@
             {
               "timeSeriesQuery": {
                 "timeSeriesFilter": {
-                  "filter": "metric.type=\"kubernetes.io/container/cpu/limit_utilization\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"${cluster_name}\" AND resource.labels.\"namespace_name\"=\"${cluster_namespace}\" metadata.user_labels.\"app\"=\"adservice\" resource.label.\"container_name\"=\"server\"",
+                  "filter": "metric.type=\"kubernetes.io/container/cpu/limit_utilization\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"${cluster_name}\" AND resource.labels.\"namespace_name\"=\"default\" metadata.user_labels.\"app\"=\"adservice\" resource.label.\"container_name\"=\"server\"",
                   "aggregation": {
                     "perSeriesAligner": "ALIGN_MEAN"
                   }
@@ -37,7 +37,7 @@
             {
               "timeSeriesQuery": {
                 "timeSeriesFilter": {
-                  "filter": "metric.type=\"istio.io/service/server/request_count\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"${cluster_name}\" AND resource.labels.\"namespace_name\"=\"${cluster_namespace}\" metadata.user_labels.\"app\"=\"adservice\"",
+                  "filter": "metric.type=\"istio.io/service/server/request_count\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"${cluster_name}\" AND resource.labels.\"namespace_name\"=\"default\" metadata.user_labels.\"app\"=\"adservice\"",
                   "aggregation": {
                     "perSeriesAligner": "ALIGN_RATE"
                   }
@@ -118,7 +118,7 @@
             {
               "timeSeriesQuery": {
                 "timeSeriesFilter": {
-                  "filter": "metric.type=\"istio.io/service/server/response_latencies\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"${cluster_name}\" AND resource.labels.\"namespace_name\"=\"${cluster_namespace}\" metadata.user_labels.\"app\"=\"adservice\"",
+                  "filter": "metric.type=\"istio.io/service/server/response_latencies\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"${cluster_name}\" AND resource.labels.\"namespace_name\"=\"default\" metadata.user_labels.\"app\"=\"adservice\"",
                   "aggregation": {
                     "perSeriesAligner": "ALIGN_PERCENTILE_99"
                   }

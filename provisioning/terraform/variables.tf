@@ -70,12 +70,6 @@ variable "gke_node_pool" {
   }
 }
 
-variable "manifest_namespace" {
-  type        = string
-  description = "Defines namespace scope when applying Kubernetes resources defined in the manifest filepath"
-  default     = "default"
-}
-
 variable "state_prefix" {
   type        = string
   description = "Use to store multiple states when provisioning with the same state_bucket_name"

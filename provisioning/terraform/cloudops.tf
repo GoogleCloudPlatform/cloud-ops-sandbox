@@ -15,10 +15,9 @@
 data "kubernetes_service" "frontend_external_service" {
   metadata {
     name      = "frontend-external"
-    namespace = var.manifest_namespace
+    namespace = "default"
   }
   depends_on = [
-    resource.null_resource.wait_pods_conditions,
     resource.null_resource.wait_service_conditions
   ]
 }
@@ -28,6 +27,5 @@ module "monitoring" {
   gcp_project_id       = var.gcp_project_id
   frontend_external_ip = data.kubernetes_service.frontend_external_service.status[0].load_balancer[0].ingress[0].ip
   gke_cluster_name     = var.gke_cluster_name
-  manifest_namespace   = var.manifest_namespace
   name_suffix          = "-${var.state_prefix}" # re-use prefix to customize resources within the same project
 }

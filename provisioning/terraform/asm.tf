@@ -47,10 +47,10 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   }
 }
 
-resource "null_resource" "mark_manifest_namespace_for_istio_injection" {
+resource "null_resource" "mark_default_namespace_for_istio_injection" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl label namespace ${var.manifest_namespace} istio-injection=enabled --overwrite"
+    command     = "kubectl label namespace default istio-injection=enabled --overwrite"
   }
 
   depends_on = [

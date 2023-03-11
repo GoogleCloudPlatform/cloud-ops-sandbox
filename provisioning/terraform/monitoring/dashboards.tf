@@ -30,8 +30,7 @@ locals {
     }
   ]
   cluster_vars = {
-    cluster_name      = var.gke_cluster_name
-    cluster_namespace = var.manifest_namespace
+    cluster_name = var.gke_cluster_name
   }
 }
 
