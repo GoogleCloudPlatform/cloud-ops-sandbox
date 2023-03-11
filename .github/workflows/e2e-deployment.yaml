@@ -55,7 +55,7 @@ jobs:
     # select a zone in us-central1 region and use it to next steps as ${{ env.cluster_location }}
     - name: "select deployment zone"
       run: |-
-        zones=("us-central1-a","us-central1-b","us-central1-c","us-central1-f")
+        zones=("us-central1-a" "us-central1-b" "us-central1-c" "us-central1-f")
         selected_location=${zones[ $RANDOM % ${#zones[@]} ]}
         echo "Terraform will provision GKE cluster in \"${selected_location}\""
         echo "cluster_location=${selected_location}" >> $GITHUB_ENV
