@@ -44,18 +44,6 @@ terraform {
   backend "gcs" {}
 }
 
-provider "google" {
-  project = var.gcp_project_id
-}
-
-provider "google-beta" {
-  project = var.gcp_project_id
-}
-
-provider "kubernetes" {
-  config_path = "~/.kube/config"
-}
-
 # tflint-ignore: terraform_unused_declarations
 data "terraform_remote_state" "state" {
   backend = "gcs"
@@ -63,4 +51,23 @@ data "terraform_remote_state" "state" {
     bucket = var.state_bucket_name
     prefix = var.state_prefix
   }
+}
+
+provider "google" {
+  project = var.gcp_project_id
+}
+
+# Retrieve an access token as the Terraform runner
+data "google_client_config" "provider" {}
+
+provider "google-beta" {
+  project = var.gcp_project_id
+}
+
+provider "kubernetes" {
+  host  = "https://${resource.google_container_cluster.sandbox.endpoint}"
+  token = data.google_client_config.provider.access_token
+  cluster_ca_certificate = base64decode(
+    resource.google_container_cluster.sandbox.master_auth[0].cluster_ca_certificate,
+  )
 }
