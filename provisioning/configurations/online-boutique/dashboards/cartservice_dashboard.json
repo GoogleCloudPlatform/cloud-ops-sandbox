@@ -1,0 +1,198 @@
+{
+  "displayName": "Cart Service Dashboard",
+  "gridLayout": {
+    "columns": "2",
+    "widgets": [
+      {
+        "title": "Memory Limit Utilization - Cart Service",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"kubernetes.io/container/memory/limit_utilization\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"${cluster_name}\" AND resource.labels.\"namespace_name\"=\"default\" metadata.user_labels.\"app\"=\"cartservice\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_MEAN"
+                  }
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "Memory Usage - Checkout Service",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"kubernetes.io/container/memory/used_bytes\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"${cluster_name}\" AND resource.labels.\"namespace_name\"=\"default\" metadata.user_labels.\"app\"=\"checkoutservice\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_MEAN"
+                  }
+                },
+                "unitOverride": "By"
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "Client Request Count - Cart Service",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"istio.io/service/client/request_count\" resource.type=\"istio_canonical_service\" resource.label.\"canonical_service_name\"=\"cartservice\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_RATE"
+                  }
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "Server Request Count - Cart Service",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"istio.io/service/server/request_count\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"${cluster_name}\" AND resource.labels.\"namespace_name\"=\"default\" metadata.user_labels.\"app\"=\"cartservice\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_RATE"
+                  }
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "gRPC Calls OK Status - Cart Service",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs\" metric.label.\"grpc_client_method\"=starts_with(\"hipstershop.CartService\") metric.label.\"grpc_client_status\"=\"OK\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_RATE"
+                  }
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "gRPC Calls Errors - Cart Service",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs\" metric.label.\"grpc_client_method\"=starts_with(\"hipstershop.CartService\") metric.label.\"grpc_client_status\"!=\"OK\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_RATE"
+                  }
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "Server Response Latencies, 99th Percentile - Cart Service",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"istio.io/service/server/response_latencies\" resource.type=\"k8s_container\" resource.label.\"cluster_name\"=\"${cluster_name}\" AND resource.labels.\"namespace_name\"=\"default\" metadata.user_labels.\"app\"=\"cartservice\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_DELTA",
+                    "crossSeriesReducer": "REDUCE_PERCENTILE_99"
+                  }
+                },
+                "unitOverride": "ms"
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      }
+    ]
+  }
+}

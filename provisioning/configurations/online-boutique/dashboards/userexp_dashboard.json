@@ -1,0 +1,96 @@
+{
+  "displayName": "User Experience Dashboard",
+  "gridLayout": {
+    "columns": "2",
+    "widgets": [
+      {
+        "title": "HTTP Request Count by Method",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"custom.googleapis.com/opencensus/opencensus.io/http/server/request_count_by_method\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_RATE"
+                  },
+                  "secondaryAggregation": {}
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "HTTP Response Errors",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"custom.googleapis.com/opencensus/opencensus.io/http/server/response_count_by_status_code\" metric.label.\"http_status\"!=\"200\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_RATE"
+                  },
+                  "secondaryAggregation": {}
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "HTTP Request Latency, 99th Percentile",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"custom.googleapis.com/opencensus/opencensus.io/http/server/latency\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_DELTA",
+                    "crossSeriesReducer": "REDUCE_PERCENTILE_99"
+                  },
+                  "secondaryAggregation": {}
+                },
+                "unitOverride": "ms"
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      }
+    ]
+  }
+}
