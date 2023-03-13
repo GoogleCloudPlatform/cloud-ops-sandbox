@@ -35,9 +35,9 @@ jobs:
       cancel-in-progress: true
 ```
 
-### Terraform Lint - [lint-terraform.yaml]
+### Terraform workflow ([terraform.yaml])
 
-The workflow is triggered by changes to Terraform configurations used for provisioning Cloud Ops Sandbox:
+The workflow is triggered by changes to Terraform configurations in the project:
 
 ```yaml
 on:
@@ -46,19 +46,14 @@ on:
       - 'provisioning/terraform/**'
 ```
 
-It uses the [tflint] Github action.
+It defines two jobs:
 
-#### Handling skipped but required checks
+1. Linting that validates formatting and other rules and dependecies using [tflint]
+2. End-to-end deployment that provisions Online Boutique demo app with Sandbox from scratch.
+And destroys it afterward.
 
-To allow using this workflow as a [required status check] the file [lint-terraform-other.yaml] is used. It defines the workflow with the same name that _does nothing_ when triggered for changes outside the Terraform configuration.
+#### End-to-end deployment steps
 
-### End-to-end Deployment
-
-The workflow is triggered by pull request modifications (excluding a closure of the request) for branches `main` and branches with names starting with `milestone/` or `release/`.
-The workflow is not triggered for changes to documentation or markdown files.
-Permissions are updated to acquire the identity token from Google Cloud Identity service. See [blog] for more details.
-
-The workflow installs Google Cloud CLI to complete the list of required binaries (gcloud, git, kubectl).
 Then it triggers installation of Cloud Ops Sandbox using [install.sh] script.
 The deployment reuses the same GCS bucket to maintain Terraform state for all workflow executions but prefixes each one with the first 7 digits of SHA ( [`${{ github.sha }}`][sha] )of the commit.
 The installation is triggered with the following parameters:
@@ -68,10 +63,29 @@ The installation is triggered with the following parameters:
 * Allowing deployment of the load generator
 * Disabling configuration of Anthos Service Mesh and deployment of Online Boutique ingress
 
+#### Handling skipped but required checks
+
+The additional file [non-terraform.yaml] defines the workflow with the same name to support
+the use of the workflow as [required status check].
+It is configured to run on any "non-terraform" changes, so the required workflow will always
+guaranteed to terminate.
+
+### Required workflows
+
+The workflows triggered by pull request modifications (excluding a closure of the request)
+are enforced on `main` and branches with names starting with `milestone/` or `release/`.
+
+### Running jobs that require Google Cloud authentication
+
+Jobs that need to authenticate vs. Google Cloud use keyless authentication method.
+The method is described with more details in the [blog].
+Job permissions are updated to allow storing id token.
+The workflow installs Google Cloud CLI to complete the list of required binaries (gcloud, git, kubectl).
+
 [hosted]: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
 [bots]: ../README.md
-[lint-terraform.yaml]: ./lint-terraform.yaml
-[lint-terraform-other.yaml]: ./lint-terraform-other.yaml
+[terraform.yaml]: ./terraform.yaml
+[non-terraform.yaml]: ./non-terraform.yaml
 [tflint]: https://github.com/marketplace/actions/setup-tflint
 [blog]: https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions
 [install.sh]: ../../provisioning/install.sh
