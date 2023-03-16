@@ -2,7 +2,7 @@
 Thank you for opening a Pull Request! Before submitting your PR, there are a few things you can do to make sure it goes smoothly:
 
 - [ ] Make sure to open an issue before writing your code! That way we can discuss the change, evaluate designs, and agree on the general idea
-- [ ] Your change follows guidelines in the [Contributor guide](../CONTRIBUTING.md)
+- [ ] Your change follows guidelines in the [Contributor guide](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/main/CONTRIBUTING.md)
 - [ ] Communicate test infrastructure changes, i.e. API enablement, secrets
 - [ ] Appropriate docs were updated (if necessary)
 
