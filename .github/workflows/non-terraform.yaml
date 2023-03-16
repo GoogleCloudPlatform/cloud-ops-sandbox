@@ -11,19 +11,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+name: Terraform
 
-# allow use of the workflow as required status check when no changes in provisioning/terraform/**
-# for details see https://github.com/orgs/community/discussions/49124
-name: terraform lint
 on:
   pull_request:
     types: [opened,synchronize,reopened]
     paths-ignore:
     - 'provisioning/terraform/**'
 
+
 jobs:
   tflint:
-    name: "not terraform files"
-    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
     steps:
-    - run: 'echo "No terraform lint required"'
+    - run: 'echo "No work to do for non-terraform changes"'
+  
+  
+  e2e-deployment:
+    permissions:
+      contents: read
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+    - run: 'echo "No work to do for non-terraform changes"'

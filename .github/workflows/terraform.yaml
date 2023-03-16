@@ -11,22 +11,58 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+name: Terraform
 
-name: end-to-end integration testing
 on:
   pull_request:
     types: [opened,synchronize,reopened]
-    branches: ["main","milestone/*","release/*"]
-    paths-ignore:
-    - 'docs/**'
-    - '**/*.md'
-    - '**/*.txt'
-    - '**/*.html'
-    - '**/*.css'
+    paths:
+    - 'provisioning/terraform/**'
+
 
 jobs:
+
+  tflint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v3
+      
+    - name: Terraform backend initialization
+      run: terraform -chdir=./provisioning/terraform/ init -backend=false
+
+    - name: Cache plugin dir
+      uses: actions/cache@v3
+      with:
+        path: ~/.tflint.d/plugins
+        key: tflint-${{ hashFiles('.tflint.hcl') }}
+
+    - name: Setup TFLint
+      uses: terraform-linters/setup-tflint@v3
+      with:
+        tflint_version: v0.45.0
+
+    - name: Show version
+      run: tflint --version
+
+    - name: Init TFLint
+      run: tflint --init
+      env:
+        # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Run TFLint
+      run: tflint -f compact --chdir ./provisioning/terraform
+
+
   e2e-deployment:
-    name: "provision and deploy Cloud Sandbox with Online Boutique"
+    needs: tflint
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
@@ -36,31 +72,31 @@ jobs:
       cancel-in-progress: true
 
     steps:
-    - uses: actions/checkout@v3
-      name: "checkout source code"
+    - name: Checkout source code
+      uses: actions/checkout@v3
 
-    - id: 'auth'
-      name: "authenticate to Google Cloud"
+    - name: Authenticate to Google Cloud
+      id: 'auth'
       uses: google-github-actions/auth@v1
       with:
         token_format: 'access_token'
         workload_identity_provider: ${{ secrets.E2E_IDENTITY_PROVIDER }}
         service_account: ${{ secrets.E2E_SERVICE_ACCOUNT }}
 
-    - name: "set up Cloud CLI"
+    - name: Setup GCloud CLI
       uses: google-github-actions/setup-gcloud@v1
       with:
         install_components: 'gke-gcloud-auth-plugin'
 
     # select a zone in us-central1 region and use it to next steps as ${{ env.cluster_location }}
-    - name: "select deployment zone"
+    - name: Setup deployment location to random zone
       run: |-
         zones=("us-central1-a" "us-central1-b" "us-central1-c" "us-central1-f")
         selected_location=${zones[ $RANDOM % ${#zones[@]} ]}
         echo "Terraform will provision GKE cluster in \"${selected_location}\""
         echo "cluster_location=${selected_location}" >> $GITHUB_ENV
 
-    - name: "deploy Sandbox"
+    - name: Deploy Online Boutique with Sandbox
       env:
         SHA: ${{ github.sha }}
       run: |-
@@ -69,7 +105,7 @@ jobs:
         ./install.sh --project "${{ secrets.E2E_PROJECT_ID }}" --terraform-prefix "${state_prefix}" \
         --cluster-name "cloudops-sandbox-${state_prefix}" --cluster-location "${{ env.cluster_location }}" --skip-asm --verbose
     
-    - name: "clean up"
+    - name: Clean up deployment
       env:
         SHA: ${{ github.sha }}
       run: |-
