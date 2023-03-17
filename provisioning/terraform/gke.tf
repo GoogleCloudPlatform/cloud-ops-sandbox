@@ -13,8 +13,8 @@
 # limitations under the License.
 
 locals {
-  cluster_name = google_container_cluster.sandbox.name
-  mesh_id      = "proj-${data.google_project.info.number}"
+  mesh_id        = "proj-${data.google_project.info.number}"
+  location_label = length(split("-", var.gke_cluster_location)) == 2 ? "--region" : (length(split("-", var.gke_cluster_location)) == 3 ? "--zone" : "--location")
 }
 
 resource "google_container_cluster" "sandbox" {
@@ -25,7 +25,7 @@ resource "google_container_cluster" "sandbox" {
     channel = "STABLE"
   }
 
-  # Connects to ASM
+  # always add mesh label to simplify cluster provisioning
   resource_labels = {
     "mesh_id" = local.mesh_id
   }
@@ -66,7 +66,6 @@ resource "google_container_cluster" "sandbox" {
   ]
 }
 
-# Get credentials for cluster
 module "gcloud" {
   source  = "terraform-google-modules/gcloud/google"
   version = "~> 3.1.0"
@@ -77,44 +76,5 @@ module "gcloud" {
   create_cmd_entrypoint = "gcloud"
   # Module does not support explicit dependency
   # Use 'local.cluster_name' to enforce implicit dependency because 'depends_on' is not available for this module
-  create_cmd_body = "container clusters get-credentials ${local.cluster_name} --zone=${var.gke_cluster_location} --project=${var.gcp_project_id}"
-}
-
-# Apply YAML kubernetes-manifest configurations
-# NOTE: when re-applying the previous resources might not be disposed
-resource "null_resource" "apply_kustomization" {
-  triggers = {
-    shell_command = "kubectl apply -k ${var.filepath_manifest} -n default"
-  }
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -k ${var.filepath_manifest} -n default"
-  }
-
-  depends_on = [
-    module.gcloud
-  ]
-}
-
-# Wait condition for all resources to be ready before finishing
-resource "null_resource" "wait_pods_conditions" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command     = "kubectl wait --for=condition=ready pods --all -n default --timeout=-1s 2> /dev/null"
-  }
-
-  depends_on = [
-    resource.null_resource.apply_kustomization
-  ]
-}
-
-resource "null_resource" "wait_service_conditions" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command     = "while [[ -z $ip ]]; do ip=$(kubectl get svc frontend-external -n default --output='go-template={{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'); sleep 1; done 2> /dev/null"
-  }
-
-  depends_on = [
-    resource.null_resource.apply_kustomization
-  ]
+  create_cmd_body = "container clusters get-credentials ${resource.google_container_cluster.sandbox.name} ${local.location_label}=${resource.google_container_cluster.sandbox.location} --project=${var.gcp_project_id}"
 }

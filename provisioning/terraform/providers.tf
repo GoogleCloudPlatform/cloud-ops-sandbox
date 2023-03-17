@@ -58,7 +58,7 @@ provider "google" {
 }
 
 # Retrieve an access token as the Terraform runner
-data "google_client_config" "provider" {}
+data "google_client_config" "default" {}
 
 provider "google-beta" {
   project = var.gcp_project_id
@@ -66,7 +66,7 @@ provider "google-beta" {
 
 provider "kubernetes" {
   host  = "https://${resource.google_container_cluster.sandbox.endpoint}"
-  token = data.google_client_config.provider.access_token
+  token = data.google_client_config.default.access_token
   cluster_ca_certificate = base64decode(
     resource.google_container_cluster.sandbox.master_auth[0].cluster_ca_certificate,
   )

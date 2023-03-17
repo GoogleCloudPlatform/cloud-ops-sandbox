@@ -50,6 +50,8 @@ variable "gke_cluster_location" {
   default     = "us-central1"
 }
 
+# Default values for node pool support connecting the cluster to ASM
+# https://cloud.google.com/service-mesh/docs/unified-install/anthos-service-mesh-prerequisites#cluster_requirements
 variable "gke_node_pool" {
   type = object({
     initial_node_count = number

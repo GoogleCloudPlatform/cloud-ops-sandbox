@@ -12,49 +12,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-resource "google_gke_hub_membership" "membership" {
-  count    = var.enable_asm == true ? 1 : 0
-  provider = google-beta
 
-  membership_id = "membership-${var.gke_cluster_name}"
-  endpoint {
-    gke_cluster {
-      resource_link = "//container.googleapis.com/${google_container_cluster.sandbox.id}"
-    }
-  }
-  depends_on = [module.enable_google_apis]
-}
-
-resource "google_gke_hub_feature" "feature" {
-  count    = var.enable_asm == true ? 1 : 0
-  provider = google-beta
-
-  name     = "servicemesh"
-  location = "global"
-
-  depends_on = [module.enable_google_apis]
-}
-
-resource "google_gke_hub_feature_membership" "feature_member" {
-  count    = var.enable_asm == true ? 1 : 0
-  provider = google-beta
-
-  location   = "global"
-  feature    = google_gke_hub_feature.feature[0].name
-  membership = google_gke_hub_membership.membership[0].membership_id
-  mesh {
-    management = "MANAGEMENT_AUTOMATIC"
-  }
-}
-
-resource "null_resource" "mark_default_namespace_for_istio_injection" {
+resource "null_resource" "install_asm" {
+  count = var.enable_asm ? 1 : 0
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl label namespace default istio-injection=enabled --overwrite"
+    command     = "./scripts/install_asm.sh --project ${var.gcp_project_id} --cluster_name ${resource.google_container_cluster.sandbox.name} --cluster_location ${resource.google_container_cluster.sandbox.location}"
+  }
+  depends_on = [
+    resource.google_container_cluster.sandbox,
+    module.gcloud,
+  ]
+}
+
+resource "null_resource" "asm_ingress_kustomization" {
+  count = var.enable_asm ? 1 : 0
+  triggers = {
+    kustomize_path = sha256(var.filepath_manifest)
+  }
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command     = "kubectl apply -k \"../kustomize/asm/\""
   }
 
   depends_on = [
-    resource.google_gke_hub_feature_membership.feature_member,
-    resource.null_resource.apply_kustomization
+    null_resource.install_asm
+  ]
+}
+
+resource "null_resource" "online_boutique_gateways_kustomization" {
+  count = var.enable_asm ? 1 : 0
+  triggers = {
+    kustomize_path = sha256(var.filepath_manifest)
+  }
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command     = "kubectl apply -k \"../kustomize/online-boutique/gateway-ingress/\" -n default"
+  }
+
+  depends_on = [
+    null_resource.asm_ingress_kustomization
   ]
 }

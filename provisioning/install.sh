@@ -17,10 +17,11 @@
 set -o errexit  # Exit on error
 if [[ -n "$DEBUG" ]]; then set -x; fi
 
+SCRIPT_NAME="${0##*/}"; readonly SCRIPT_NAME
 
-log() { echo "$1" >&2; }
-
-source telemetry.sh
+info() {
+  echo "⚙️  ${SCRIPT_NAME}: ${1}" >&2
+}
 
 # ensure the working dir is the script's folder
 SCRIPT_DIR=$(realpath $(dirname "$0"))
@@ -30,18 +31,41 @@ pushd $SCRIPT_DIR
 if [[ -z "$SESSION" ]]; then export SESSION=$(python3 -c "import uuid; print(uuid.uuid4())"); fi
 if [[ -z "$VERSION" ]]; then export VERSION=$(cat version.txt | tr -d '\n'); fi
 
-promptForBillingAccount() {
-  log "Checking for billing accounts..."
+obfuscate() {
+    local value=${1}
+    local result=($(echo "${value}" | sha256sum))
+    echo ${result}
+}
+
+# send_telemetry arg1=project_id, arg_2=event
+send_telemetry() {
+    local timestamp=$(date --utc +%s.%N)
+    local project_id=$1
+    project_id=$(obfuscate project_id)
+    local event=$2
+    gcloud pubsub topics publish "telemetry_test" \
+    --user-output-enabled=false \
+    --project "stackdriver-sandbox-230822" \
+    --message="{ \
+    \"session\":\"$SESSION\", \
+    \"project\":\"$project_id\", \
+    \"event\":\"$event\", \
+    \"datetime\":\"$timestamp\", \
+    \"version\":\"$VERSION\"}"
+}
+
+prompt_for_billing_account() {
+  info "Checking for billing accounts..."
   found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter="open=true" --sort-by=displayName)
   if [ -z "$found_accounts" ] || [[ ${#found_accounts[@]} -eq 0 ]]; then
-    log "error: no active billing accounts were detected. In order to create a sandboxed environment,"
-    log "the script needs to create a new GCP project and associate it with an active billing account"
-    log "Follow this link to setup a billing account:"
-    log "https://cloud.google.com/billing/docs/how-to/manage-billing-account"
-    log ""
-    log "To list active billing accounts, run:"
-    log "gcloud beta billing accounts list --filter open=true"
-    send_telemetry $SESSION "none" no-active-billing $VERSION
+    info "error: no active billing accounts were detected. In order to create a sandboxed environment,"
+    info "the script needs to create a new GCP project and associate it with an active billing account"
+    info "Follow this link to setup a billing account:"
+    info "https://cloud.google.com/billing/docs/how-to/manage-billing-account"
+    info ""
+    info "To list active billing accounts, run:"
+    info "gcloud beta billing accounts list --filter open=true"
+    send_telemetry "none" no-active-billing
     exit 1;
   fi
 
@@ -60,13 +84,13 @@ promptForBillingAccount() {
   done
 
   if [[ $(echo "${found_accounts}" | wc -l) -gt 1 ]]; then
-      log "Enter the number next to the billing account you would like to use:"
+      info "Enter the number next to the billing account you would like to use:"
       IFS=$'\n'
       select opt in ${found_accounts} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
           exit 0
         elif [[ -z "${opt}" ]]; then
-          log "invalid response"
+          info "invalid response"
         else
           billing_acct=${opt}
           billing_id=${map[$billing_acct]}
@@ -80,8 +104,8 @@ promptForBillingAccount() {
   IFS=$IFS_bak
 }
 
-promptForProject() {
-  log "Checking for project list..."
+prompt_for_project() {
+  info "Checking for project list..."
   acct=$(gcloud info --format="value(config.account)")
   # get projects associated with the billing account
   billed_projects=$(gcloud beta billing projects list --billing-account="$billing_id" --filter="project_id:cloud-ops-sandbox-*" --format="value(projectId)")
@@ -99,20 +123,20 @@ promptForProject() {
 
   # prompt user to choose a project
   if [ -z "$found_projects" ] || [[ ${#found_projects[@]} -eq 0 ]]; then
-    createProject;
+    create_project;
   else
-      log "Enter the number next to the project you would like to use:"
+      info "Enter the number next to the project you would like to use:"
       IFS_bak=$IFS
       IFS=$'\n'
       select opt in "create a new Sandbox" ${found_projects[@]} "cancel"; do
         if [[ "${opt}" == "cancel" ]]; then
           exit 0
         elif [[ "${opt}" == "create a new Sandbox" ]]; then
-          log "create a new Sandbox!"
+          info "create a new Sandbox!"
           createProject;
           break
         elif [[ -z "${opt}" ]]; then
-          log "invalid response"
+          info "invalid response"
         else
           IFS=$' |'
           opt=($opt)
@@ -124,7 +148,7 @@ promptForProject() {
   fi
 }
 
-createProject() {
+create_project() {
     # generate random id
     project_id="cloud-ops-sandbox-$(od -N 4 -t uL -An /dev/urandom | tr -d " ")"
     # create project
@@ -132,12 +156,12 @@ createProject() {
     then
       YELLOW=`tput setaf 3`
       REVERT=`tput sgr0`
-      log ""
-      log "${YELLOW}Note: your project will be created in the /untrusted/demos/cloud-ops-sandboxes folder."
-      log "${YELLOW}If you don't have access to this folder, please make sure to request at:"
-      log "${YELLOW}go/cloud-ops-sandbox-access"
-      log "${REVERT}"
-      send_telemetry $SESSION $project_id new-sandbox-googler $VERSION
+      info ""
+      info "${YELLOW}Note: your project will be created in the /untrusted/demos/cloud-ops-sandboxes folder."
+      info "${YELLOW}If you don't have access to this folder, please make sure to request at:"
+      info "${YELLOW}go/cloud-ops-sandbox-access"
+      info "${REVERT}"
+      send_telemetry $project_id new-sandbox-googler
       select opt in "continue" "cancel"; do
         if [[ "$opt" == "continue" ]]; then
           break;
@@ -148,30 +172,30 @@ createProject() {
       folder_id="470827991545" # /cloud-ops-sandboxes
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo" --folder="$folder_id"
     else
-      send_telemetry $SESSION $project_id new-sandbox-non-googler $VERSION
+      send_telemetry $project_id new-sandbox-non-googler
       gcloud projects create "$project_id" --name="Cloud Operations Sandbox Demo"
     fi;
     # link billing account
     gcloud beta billing projects link "$project_id" --billing-account="$billing_id"
 }
 
-getOrCreateBucket() {
+get_create_bucket() {
   # bucket name should be globally unique
   bucket_name="$project_id-cloud-ops-sandbox-terraform-state"
 
   # check if bucket already exists
   if [[ -n "$(gcloud storage buckets list --filter=\'$bucket_name\' --project $project_id)" ]]; then
-    log "Bucket $bucket_name already exists"
+    info "Bucket $bucket_name already exists"
   else
     # create new bucket
     TRIES=0
     while [[ "$(gcloud storage buckets create gs://$bucket_name --project $project_id)" || "${TRIES}" -lt 5 ]]; do
-      log "Checking if bucket $bucket_name exists..."
+      info "Checking if bucket $bucket_name exists..."
       if [[ -n "$(gcloud storage buckets list --filter=\'$bucket_name\' --project $project_id)" ]]; then
-        log "Bucket $bucket_name created"
+        info "Bucket $bucket_name created"
         break;
       else
-        log "Bucket creation failed. retrying..."
+        info "Bucket creation failed. retrying..."
         sleep 1
         TRIES=$((TRIES + 1))
       fi
@@ -179,12 +203,12 @@ getOrCreateBucket() {
   fi
 }
 
-applyTerraform() {
-  rm -f .terraform/terraform.tfstate*
-
-  log "🏁 Installing CloudOps Sandbox with Online Boutique..."
+apply_terraform() {
+  info "🏁 Installing CloudOps Sandbox with Online Boutique..."
 
   pushd "./terraform"
+  rm -f .terraform/terraform.tfstate* 2> /dev/null
+
   terraform init -backend-config "bucket=${bucket_name}" -backend-config "prefix=${terraform_state_prefix}" -lockfile=false #2> /dev/null
   terraform_command="terraform apply -auto-approve \
   -var=\"state_bucket_name=${bucket_name}\"
@@ -202,13 +226,12 @@ applyTerraform() {
   local ingress_path=""  
   if [[ -z "${skip_asm}" ]]; then
     terraform_command+=" --var=\"enable_asm=true\""
-    ingress_path="with-ingress/"
   fi
   # customize Online Boutique deployment with/without load generator and with/without ASM ingress
   if [[ -z "${skip_loadgen}" ]]; then
-    terraform_command+=" --var=\"filepath_manifest=../kustomize/online-boutique/${ingress_path}\"" 
+    terraform_command+=" --var=\"filepath_manifest=../kustomize/online-boutique/\"" 
   else
-    terraform_command+=" --var=\"filepath_manifest=../kustomize/online-boutique/no-loadgenerator/${ingress_path}\"" 
+    terraform_command+=" --var=\"filepath_manifest=../kustomize/online-boutique/no-loadgenerator/\"" 
   fi
   # customize default node pool configuration (default is 4 instances of 'e2-standard-4' VMs)
   # the expected value is a fully formatted JSON string (see ./terraform/variables.tf for the schema)
@@ -217,63 +240,73 @@ applyTerraform() {
   fi
   eval $terraform_command
 
-  log ""
-  log "🏁 Installation of CloudOps Sandbox is complete."
+  info ""
+  info "🏁 Installation of CloudOps Sandbox is complete."
 
   external_ip=$(terraform output --raw frontend_external_ip)
   if [[ -z $external_ip ]]; then
-    log "Could not retrieve external IP... skipping monitoring configuration."
+    info "Could not retrieve external IP... skipping monitoring configuration."
     return 1
   fi
   popd
 }
 
-validateExternalIp() {
-  log -n "Retrieving Online Boutique public endpoint.";
-  while [ -z $external_ip ]; do
-     log -n "."
-     external_ip=$(kubectl get service frontend-external -n default -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
-     [ -z "$external_ip" ] && sleep 10;
-  done;
-  log ""
-  if [[ -n "${external_ip}" ]] && [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
-      log "Hipster Shop app is available at http://$external_ip"
-      send_telemetry $SESSION $project_id hipstershop-available $VERSION
-  else
-      log "error: Online Boutique app at http://$external_ip is unreachable"
-      send_telemetry $SESSION $project_id hipstershop-unavailable $VERSION
+x_usage() {
+  cat << EOF
+${SCRIPT_NAME}
+usage: ${SCRIPT_NAME} [PARAMETER]...
+
+Deploy Cloud Operations Sandbox to a GCP project.
+
+PARAMETERS:
+  --cluster_location                  (Optional) Zone or region name where the
+                                      cluster is provisioned. Default value is
+                                      us-central1 region.
+  --cluster_name                      (Optional) The name of GKE cluster.
+                                      Default is 'cloud-ops-sandbox'.
+  --project                           Google Cloud Project ID that
+                                      hosts the cluster.
+  --skip-asm                          (Optional) Set to not install Anthos
+                                      Service Mesh. Default is false.
+  --skip-loadgenerator                (Optional) Set to not deploy load
+                                      generator. Default is false.
+  --terraform_prefix                  (Optional) Customize Terraform state
+                                      storage prefix to store multiple states
+                                      in the same project. Default is ''.
+  -v | --verbose                      (Optional) Prints out all commands.
+EOF
+}
+
+x_success_message() {
+  local gcp_path="https://console.cloud.google.com"
+  if [[ -n "${project_id}" ]]; then
+      gcp_kubernetes_path="${gcp_path}/kubernetes/workload?project=${project_id}"
+      gcp_monitoring_path="${gcp_path}/monitoring?project=${project_id}"
   fi
+
+  cat << EOF
+
+********************************************************************************
+Cloud Operations Sandbox deployed successfully!
+
+     Google Cloud Console GKE Dashboard: ${gcp_kubernetes_path}
+     Google Cloud Console Monitoring Workspace: ${gcp_monitoring_path}
+     Online Boutique web app address: http://${external_ip}
+
+To remove the Sandbox once finished using it, run
+
+     sandboxctl destroy
+
+********************************************************************************
+EOF
 }
 
-displaySuccessMessage() {
-    gcp_path="https://console.cloud.google.com"
-    if [[ -n "${project_id}" ]]; then
-        gcp_kubernetes_path="$gcp_path/kubernetes/workload?project=$project_id"
-        gcp_monitoring_path="$gcp_path/monitoring?project=$project_id"
-    fi
-
-    log ""
-    log ""
-    log "********************************************************************************"
-    log "Cloud Operations Sandbox deployed successfully!"
-    log ""
-    log "     Google Cloud Console GKE Dashboard: $gcp_kubernetes_path"
-    log "     Google Cloud Console Monitoring Workspace: $gcp_monitoring_path"
-    log "     Online Boutique web app address: http://$external_ip"
-    log ""
-    log "To remove the Sandbox once finished using it, run"
-    log ""
-    log "     sandboxctl destroy"
-    log ""
-    log "********************************************************************************"
-}
-
-checkAuthentication() {
+check_authentication() {
     TRIES=0
     AUTH_ACCT=$(gcloud auth list --format="value(account)")
     if [[ -z $AUTH_ACCT ]]; then
-        log "Authentication failed"
-        log "Please allow gcloud and Cloud Shell to access your GCP account"
+        info "Authentication failed"
+        info "Please allow gcloud and Cloud Shell to access your GCP account"
     fi
     while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 300  ]]; do
         AUTH_ACCT=$(gcloud auth list --format="value(account)")
@@ -285,42 +318,42 @@ checkAuthentication() {
     fi
 }
 
-parseArguments() {
+parse_arguments() {
   while (( "$#" )); do
     case "$1" in
-    --cluster-name)
+    --cluster_name)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
         cluster_name=$2
         shift 2
       else
-        log "Error: Argument for $1 is missing" >&2
+        info "Error: Argument for $1 is missing" >&2
         exit 1
       fi
       ;;
-    --cluster-location)
+    --cluster_location)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
         cluster_location=$2
         shift 2
       else
-        log "Error: Argument for $1 is missing" >&2
+        info "Error: Argument for $1 is missing" >&2
         exit 1
       fi
       ;;
-    -p|--project|--project-id)
+    --project)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
         project_id=$2
         shift 2
       else
-        log "Error: Argument for $1 is missing" >&2
+        info "Error: Argument for $1 is missing" >&2
         exit 1
       fi
       ;;
-    --terraform-prefix)
+    --terraform_prefix)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
         terraform_state_prefix=$2
         shift 2
       else
-        log "Error: Argument for $1 is missing" >&2
+        info "Error: Argument for $1 is missing" >&2
         exit 1
       fi
       ;;
@@ -332,52 +365,43 @@ parseArguments() {
       skip_asm=1
       shift
       ;;
-    --service-wait)
-      service_wait=1
-      shift
-      ;;
     -v|--verbose)
       set -x
       shift
       ;;
     -h|--help)
-      log "Deploy Cloud Operations Sandbox to a GCP project"
-      log ""
-      log "options:"
-      log "-p|--project|--project-id     GCP project to deploy Cloud Operations Sandbox to"
-      log "-v|--verbose                  print commands as they run (set -x)"
-      log "--skip-loadgenerator          Don't deploy a loadgenerator instance"
-      log "--service-wait                Wait indefinitely for services to be detected by Cloud Monitoring"
-      log ""
+      x_usage
       exit 0
       ;;
-    -*|--*=) # unsupported flags
-      log "Error: Unsupported flag $1" >&2
-      exit 1
-      ;;
-    *) # ignore positional arguments
-      shift
+    *)
+      x_usage
+      exit 2
       ;;
     esac
   done
+
+  if [[ -n "${project_id}" && -z $("gcloud projects list --filter='project_id:${project_id}'") ]]; then
+    info "[WARNING] Project with project id '${project_id}' does not exist."
+    exit 2
+  fi
 }
 
 # check for command line arguments
-parseArguments $*;
+parse_arguments $*;
 
 # ensure gcloud and cloudshell are authenticated
-checkAuthentication;
+check_authentication;
 
 # prompt user for missing information
 if [[ -z "$project_id" ]]; then
-  promptForBillingAccount;
-  promptForProject;
+  prompt_for_billing_account;
+  prompt_for_project;
 fi
-getOrCreateBucket;
+get_create_bucket;
 
 # deploy
-applyTerraform;
-displaySuccessMessage;
+apply_terraform;
+x_success_message;
 
 # restore to calling directory
 popd

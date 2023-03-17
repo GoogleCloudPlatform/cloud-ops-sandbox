@@ -15,7 +15,4 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- ../base
-- https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/main/istio-manifests/allow-egress-googleapis.yaml
-- https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/main/istio-manifests/frontend-gateway.yaml
-- https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/main/istio-manifests/frontend.yaml
+- ingress-manifests.yaml
