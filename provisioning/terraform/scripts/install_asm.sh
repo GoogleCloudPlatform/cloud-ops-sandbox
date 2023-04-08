@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2020 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -94,7 +94,9 @@ parse_args() {
     exit 2
   fi
   if [[ "${CHANNEL}" != "stable" && "${CHANNEL}" != "regular" && "${CHANNEL}" != "rapid" ]]; then
-    info "Valid channel is not found. 'stable' channel will be used."
+    if [[ -n "${CHANNEL}" ]]; then
+      info "Valid channel is not found. 'stable' channel will be used."
+    fi
     CHANNEL="stable"
   fi
 }
@@ -119,16 +121,16 @@ info "Installing managed ASM version ${ASM_VERSION} for GKE cluster ${CLUSTER_NA
   --use_managed_cni
 
 info "Annotating GKE service accounts and namespaces ..."
+PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
 gcloud iam service-accounts add-iam-policy-binding ${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
     --member="serviceAccount:${PROJECT_ID}.svc.id.goog[default/default]" \
     --role="roles/iam.workloadIdentityUser" \
     --project ${PROJECT_ID}
 
-PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
 # use default Kuberentes service account
 kubectl -n default annotate serviceaccount default iam.gke.io/gcp-service-account="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
 # use default Kuberentes namespace as a primary deployment location
-kubectl label namespace default istio-injection- istio.io/rev=asm-managed-${REVISION} --overwrite
+kubectl label namespace default istio-injection- istio.io/rev=asm-managed-${CHANNEL} --overwrite
 
 # clean up
 rm ./asmcli

@@ -25,6 +25,10 @@ resource "google_container_cluster" "sandbox" {
     channel = "STABLE"
   }
 
+  gateway_api_config {
+    channel = "CHANNEL_STANDARD"
+  }
+
   # always add mesh label to simplify cluster provisioning
   resource_labels = {
     "mesh_id" = local.mesh_id

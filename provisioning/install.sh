@@ -209,7 +209,7 @@ apply_terraform() {
   pushd "./terraform"
   rm -f .terraform/terraform.tfstate* 2> /dev/null
 
-  terraform init -backend-config "bucket=${bucket_name}" -backend-config "prefix=${terraform_state_prefix}" -lockfile=false #2> /dev/null
+  terraform init -backend-config "bucket=${bucket_name}" -backend-config "prefix=${terraform_state_prefix}" -lockfile=false 2> /dev/null
   terraform_command="terraform apply -auto-approve \
   -var=\"state_bucket_name=${bucket_name}\"
   -var=\"state_prefix=${terraform_state_prefix:-""}\"
@@ -226,19 +226,35 @@ apply_terraform() {
   local ingress_path=""  
   if [[ -z "${skip_asm}" ]]; then
     terraform_command+=" --var=\"enable_asm=true\""
+  else
+    terraform_command+=" --var=\"enable_asm=false\""
   fi
   # customize Online Boutique deployment with/without load generator and with/without ASM ingress
-  if [[ -z "${skip_loadgen}" ]]; then
-    terraform_command+=" --var=\"filepath_manifest=../kustomize/online-boutique/\"" 
-  else
-    terraform_command+=" --var=\"filepath_manifest=../kustomize/online-boutique/no-loadgenerator/\"" 
+  local ob_kpath="../kustomize/online-boutique/"
+
+  # patch kustomize config
+  cp "${ob_kpath}kustomization.yaml" "${ob_kpath}kustomization.yaml.bak" 2> /dev/null
+  local sed_expression=""
+  # uncomment 'without-loadgenerator' component if skip_loadgen is set
+  if [[ -n "${skip_loadgen}" ]]; then
+    sed_expression+=" -e '/without-loadgenerator$/s/^#//'"
   fi
+  # uncomment 'service-mesh-istio' component if skip_asm is NOT set
+  if [[ -z "${skip_asm}" ]]; then
+    sed_expression+=" -e '/service-mesh-istio$/s/^#//'"
+  fi
+  if [[ -n "${sed_expression}" ]]; then
+    eval "sed ${sed_expression} ${ob_kpath}kustomization.yaml.bak > ${ob_kpath}kustomization.yaml"
+  fi
+
+  terraform_command+=" --var=\"filepath_manifest=${ob_kpath}\"" 
   # customize default node pool configuration (default is 4 instances of 'e2-standard-4' VMs)
   # the expected value is a fully formatted JSON string (see ./terraform/variables.tf for the schema)
   if [[ -n $CLOUDOPS_SANDBOX_POOL_CFG ]]; then
     terraform_command+=" -var=\"gke_node_pool=$ONLINE_BOUTIQUE_NODE_POOL_CFG\"" 
   fi
-  eval $terraform_command
+
+  eval $terraform_command || mv "${ob_kpath}kustomization.yaml.bak" "${ob_kpath}kustomization.yaml" 2> /dev/null
 
   info ""
   info "🏁 Installation of CloudOps Sandbox is complete."
@@ -259,10 +275,10 @@ usage: ${SCRIPT_NAME} [PARAMETER]...
 Deploy Cloud Operations Sandbox to a GCP project.
 
 PARAMETERS:
-  --cluster_location                  (Optional) Zone or region name where the
+  --cluster-location                  (Optional) Zone or region name where the
                                       cluster is provisioned. Default value is
                                       us-central1 region.
-  --cluster_name                      (Optional) The name of GKE cluster.
+  --cluster-name                      (Optional) The name of GKE cluster.
                                       Default is 'cloud-ops-sandbox'.
   --project                           Google Cloud Project ID that
                                       hosts the cluster.
@@ -270,7 +286,7 @@ PARAMETERS:
                                       Service Mesh. Default is false.
   --skip-loadgenerator                (Optional) Set to not deploy load
                                       generator. Default is false.
-  --terraform_prefix                  (Optional) Customize Terraform state
+  --terraform-prefix                  (Optional) Customize Terraform state
                                       storage prefix to store multiple states
                                       in the same project. Default is ''.
   -v | --verbose                      (Optional) Prints out all commands.
@@ -279,10 +295,8 @@ EOF
 
 x_success_message() {
   local gcp_path="https://console.cloud.google.com"
-  if [[ -n "${project_id}" ]]; then
-      gcp_kubernetes_path="${gcp_path}/kubernetes/workload?project=${project_id}"
-      gcp_monitoring_path="${gcp_path}/monitoring?project=${project_id}"
-  fi
+  local gcp_kubernetes_path="${gcp_path}/kubernetes/workload?project=${project_id}"
+  local gcp_monitoring_path="${gcp_path}/monitoring?project=${project_id}"
 
   cat << EOF
 
@@ -291,11 +305,7 @@ Cloud Operations Sandbox deployed successfully!
 
      Google Cloud Console GKE Dashboard: ${gcp_kubernetes_path}
      Google Cloud Console Monitoring Workspace: ${gcp_monitoring_path}
-     Online Boutique web app address: http://${external_ip}
-
-To remove the Sandbox once finished using it, run
-
-     sandboxctl destroy
+     Try Online Boutique at http://${external_ip}
 
 ********************************************************************************
 EOF
@@ -321,18 +331,18 @@ check_authentication() {
 parse_arguments() {
   while (( "$#" )); do
     case "$1" in
-    --cluster_name)
+    --cluster-name)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-        cluster_name=$2
+        cluster_name="${2}"
         shift 2
       else
         info "Error: Argument for $1 is missing" >&2
         exit 1
       fi
       ;;
-    --cluster_location)
+    --cluster-location)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-        cluster_location=$2
+        cluster_location="${2}"
         shift 2
       else
         info "Error: Argument for $1 is missing" >&2
@@ -341,16 +351,16 @@ parse_arguments() {
       ;;
     --project)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-        project_id=$2
+        project_id="${2}"
         shift 2
       else
         info "Error: Argument for $1 is missing" >&2
         exit 1
       fi
       ;;
-    --terraform_prefix)
+    --terraform-prefix)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-        terraform_state_prefix=$2
+        terraform_state_prefix="${2}"
         shift 2
       else
         info "Error: Argument for $1 is missing" >&2
@@ -374,13 +384,14 @@ parse_arguments() {
       exit 0
       ;;
     *)
+      info "[WARNING] Unknown parameter $1"
       x_usage
       exit 2
       ;;
     esac
   done
 
-  if [[ -n "${project_id}" && -z $("gcloud projects list --filter='project_id:${project_id}'") ]]; then
+  if [[ -n "${project_id}" && -z "$(gcloud projects list --filter=project_id:${project_id})" ]]; then
     info "[WARNING] Project with project id '${project_id}' does not exist."
     exit 2
   fi

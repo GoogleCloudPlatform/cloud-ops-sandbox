@@ -21,7 +21,7 @@
 
 terraform {
   # The module has 0.12 syntax and is not compatible with any versions below 0.12.
-  required_version = "~> 1.3.1"
+  required_version = "~> 1.4.1"
 
   required_providers {
     google = {

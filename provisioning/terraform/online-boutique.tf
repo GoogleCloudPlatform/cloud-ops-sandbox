@@ -12,26 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Apply YAML kubernetes-manifest configurations
-# NOTE: when re-applying the previous resources might not be disposed
-
 locals {
-  load_balancer_service_name      = var.enable_asm ? "asm-ingressgateway" : "frontend-external"
-  load_balancer_service_namespace = var.enable_asm ? "asm-ingress" : "default"
+  service_name   = var.enable_asm ? "istio-gateway" : "frontend-external"
+  namespace_name = "default"
 }
 
+# Deploy kustomized manifests
+# NOTE: when re-applying the previous resources might not be disposed
 resource "null_resource" "online_boutique_kustomization" {
   triggers = {
     kustomize_path = sha256(var.filepath_manifest)
   }
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -k ${var.filepath_manifest} -n default"
+    command     = "kubectl apply -k ${var.filepath_manifest} -n ${local.namespace_name}"
   }
 
   depends_on = [
     module.gcloud,
-    null_resource.online_boutique_gateways_kustomization,
+    null_resource.install_asm
   ]
 }
 
@@ -39,7 +38,7 @@ resource "null_resource" "online_boutique_kustomization" {
 resource "null_resource" "wait_pods_are_ready" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl wait --for=condition=ready pods --all -n default --timeout=5m 2>/dev/null"
+    command     = "kubectl wait --for=condition=ready pods --all -n ${local.namespace_name} --timeout=5m 2>/dev/null"
   }
 
   depends_on = [
@@ -47,13 +46,33 @@ resource "null_resource" "wait_pods_are_ready" {
   ]
 }
 
+# # TODO: refactor waiting and retrieving external IP
 resource "null_resource" "wait_service_conditions" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "while [[ -z $ip ]]; do ip=$(kubectl get svc ${local.load_balancer_service_name} -n ${local.load_balancer_service_namespace} --output='go-template={{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'); sleep 1; done 2>/dev/null"
+    command     = <<EOF
+while [[ -z $ip ]]; do \
+    ip=$(kubectl get svc ${local.service_name} \
+    -n ${local.namespace_name} \
+    --output='go-template={{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'); \
+    sleep 1; \
+done 2>/dev/null
+EOF
   }
 
   depends_on = [
     null_resource.online_boutique_kustomization
+  ]
+}
+
+data "kubernetes_service" "frontend_external_service" {
+  metadata {
+    name      = local.service_name
+    namespace = local.namespace_name
+  }
+  # Kubernetes data sources do not support implicit dependencies
+  # https://github.com/hashicorp/terraform-provider-kubernetes/issues/1867
+  depends_on = [
+    null_resource.wait_service_conditions
   ]
 }
