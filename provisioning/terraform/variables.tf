@@ -26,6 +26,16 @@ variable "state_bucket_name" {
 }
 
 # Optional input variables
+variable "asm_channel" {
+  type        = string
+  description = "Defines one of the following managed ASM channels/revisions: 'rapid', 'regular' or stable'"
+  default     = "stable"
+  validation {
+    condition     = can(regex("^(rapid|regular|stable)$", var.asm_channel))
+    error_message = "ASM channel/revision can be only 'rapid', 'regular' or stable'"
+  }
+}
+
 variable "enable_asm" {
   type        = bool
   description = "If true, installs Anthos Service Mesh (managed version of Istio) on the GKE cluster"
@@ -50,6 +60,8 @@ variable "gke_cluster_location" {
   default     = "us-central1"
 }
 
+# Default values for node pool support connecting the cluster to ASM
+# https://cloud.google.com/service-mesh/docs/unified-install/anthos-service-mesh-prerequisites#cluster_requirements
 variable "gke_node_pool" {
   type = object({
     initial_node_count = number

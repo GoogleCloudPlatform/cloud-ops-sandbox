@@ -12,16 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-data "kubernetes_service" "frontend_external_service" {
-  metadata {
-    name      = "frontend-external"
-    namespace = "default"
-  }
-  depends_on = [
-    resource.null_resource.wait_service_conditions
-  ]
-}
-
 module "monitoring" {
   source               = "./monitoring"
   gcp_project_id       = var.gcp_project_id
