@@ -17,11 +17,12 @@ locals {
   base_apis = [
     "clouderrorreporting.googleapis.com",
     "cloudprofiler.googleapis.com",
-    "cloudresourcemanager.googleapis.com", /* required for ASM */
-    "cloudtrace.googleapis.com",
     "container.googleapis.com", /* compute.googleapis.com is provisioned as a dependency */
-    "mesh.googleapis.com", /* required for ASM */
-    "monitoring.googleapis.com",
+  ]
+  mesh_apis = [
+    "mesh.googleapis.com",
+    #    "meshtelemetry.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
   ]
 }
 
@@ -33,7 +34,7 @@ module "enable_google_apis" {
   project_id                  = var.gcp_project_id
   disable_services_on_destroy = false
 
-  activate_apis = local.base_apis
+  activate_apis = concat(local.base_apis, var.enable_asm ? local.mesh_apis : [])
 }
 
 data "google_project" "info" {
