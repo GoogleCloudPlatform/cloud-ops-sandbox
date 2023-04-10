@@ -17,16 +17,16 @@ locals {
   # List of services to use for provisioning generic dashboards
   generic_services = [
     {
-      service_name = "Payment Service"
-      service_id   = "paymentservice"
+      name = "Payment Service"
+      id   = "paymentservice"
     },
     {
-      service_name = "Email Service"
-      service_id   = "emailservice"
+      name = "Email Service"
+      id   = "emailservice"
     },
     {
-      service_name = "Shipping Service"
-      service_id   = "shippingservice"
+      name = "Shipping Service"
+      id   = "shippingservice"
     }
   ]
   cluster_vars = {
@@ -76,14 +76,24 @@ resource "google_monitoring_dashboard" "productcatalogservice_dashboard" {
   dashboard_json = templatefile("${var.filepath_configuration}/dashboards/productcatalogservice_dashboard.json", local.cluster_vars)
 }
 
+# Creates a dashboard for custom log-based metric.
+resource "google_monitoring_dashboard" "log_based_metric_dashboard" {
+  dashboard_json = templatefile(
+    "${var.filepath_configuration}/dashboards/log_based_metric_dashboard.json",
+    {
+      metric_name = google_logging_metric.checkoutservice_logging_metric.name,
+    }
+  )
+}
+
 # Generated dashboard configurations from a template.data "" "name" {
 # Dashboards will show the same charts for different services.
 data "template_file" "generated_configurations" {
   template = file("${var.filepath_configuration}/dashboards/generic_dashboard.tmpl")
   count    = length(local.generic_services)
   vars = merge(local.cluster_vars, {
-    service_name = local.generic_services[count.index].service_name
-    service_id   = local.generic_services[count.index].service_id
+    service_name = local.generic_services[count.index].name
+    service_id   = local.generic_services[count.index].id
   })
 }
 
