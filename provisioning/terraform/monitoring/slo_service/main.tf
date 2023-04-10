@@ -12,6 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+/*
+ * Custom function implemented via sub-module due the lack of
+ * support for custom functions in Terraform.
+ * Usage:
+    module "my_service" {
+      source = "./slo_service"
+      project_number = "123456"
+      name = "my-service"
+      namespace = "service-namespace"
+    }
+  . . .
+  # retrieve unique service ID
+  module.slo_service.my_service.id
+ */
 variable "project_number" {
   type        = string
   description = "The GCP project number"
@@ -35,13 +49,16 @@ locals {
 }
 
 output "id" {
-  value = local.id
+  value       = local.id
+  description = "Canonical Istio service ID"
 }
 
 output "qualified_name" {
-  value = local.qualified_name
+  value       = local.qualified_name
+  description = "Fully qualified service ID"
 }
 
 output "url" {
-  value = "${local.url}/${local.qualified_name}"
+  value       = "${local.url}/${local.qualified_name}"
+  description = "URL for get service Monitoring API"
 }
