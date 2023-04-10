@@ -254,7 +254,12 @@ apply_terraform() {
     terraform_command+=" -var=\"gke_node_pool=$ONLINE_BOUTIQUE_NODE_POOL_CFG\"" 
   fi
 
-  eval $terraform_command || mv "${ob_kpath}kustomization.yaml.bak" "${ob_kpath}kustomization.yaml" 2> /dev/null
+  trap "mv ${ob_kpath}kustomization.yaml.bak ${ob_kpath}kustomization.yaml 2> /dev/null" EXIT
+  eval $terraform_command
+  trap - EXIT
+
+  # restore kustomize modifications and exit if error
+  mv "${ob_kpath}kustomization.yaml.bak" "${ob_kpath}kustomization.yaml" 2> /dev/null
 
   info ""
   info "🏁 Installation of CloudOps Sandbox is complete."

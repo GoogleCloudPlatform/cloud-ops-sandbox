@@ -27,6 +27,16 @@ variable "gcp_project_id" {
   description = "The GCP project ID to apply this config to"
 }
 
+variable "gcp_project_number" {
+  type        = string
+  description = "The GCP project number to apply this config to"
+}
+
+variable "enable_asm" {
+  type        = bool
+  description = "Flags to provision ASM related resources"
+}
+
 # Optional input variables
 variable "filepath_configuration" {
   type        = string
@@ -54,7 +64,7 @@ variable "name_suffix" {
   type        = string
   description = "Custom suffix to allow provisioning multiple copies of the resource within the same GCP project"
   validation {
-    condition     = can(regex("^[\\w_-]{1,100}$", var.name_suffix))
+    condition     = can(regex("^$|^[\\w_-]{1,100}$", var.name_suffix))
     error_message = "The value should be a valid email address"
   }
   default = ""

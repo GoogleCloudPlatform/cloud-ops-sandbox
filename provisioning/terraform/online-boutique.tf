@@ -46,16 +46,16 @@ resource "null_resource" "wait_pods_are_ready" {
   ]
 }
 
-# # TODO: refactor waiting and retrieving external IP
+# waiting for external provisioning of LB
 resource "null_resource" "wait_service_conditions" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command     = <<EOF
 while [[ -z $ip ]]; do \
-    ip=$(kubectl get svc ${local.service_name} \
-    -n ${local.namespace_name} \
-    --output='go-template={{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'); \
-    sleep 1; \
+  ip=$(kubectl get svc ${local.service_name} \
+  -n ${local.namespace_name} \
+  --output='go-template={{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'); \
+  sleep 1; \
 done 2>/dev/null
 EOF
   }
