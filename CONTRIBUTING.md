@@ -28,6 +28,13 @@ information on using pull requests.
 This project follows
 [Google's Open Source Community Guidelines](https://opensource.google/conduct/).
 
+## Additional Information
+
+For additional information about how to submit your PRs, branching model and
+version management, please look into [docs/][1] folder.
+
+[1]: https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/tree/main/docs
+
 <!-- 
 ## Conventional Commits
 
