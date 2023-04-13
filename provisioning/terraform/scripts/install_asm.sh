@@ -120,16 +120,7 @@ info "Installing managed ASM version ${ASM_VERSION} for GKE cluster ${CLUSTER_NA
   --channel ${CHANNEL} \
   --use_managed_cni
 
-info "Annotating GKE service accounts and namespaces ..."
-PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
-gcloud iam service-accounts add-iam-policy-binding ${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
-    --member="serviceAccount:${PROJECT_ID}.svc.id.goog[default/default]" \
-    --role="roles/iam.workloadIdentityUser" \
-    --project ${PROJECT_ID}
-
-# use default Kuberentes service account
-kubectl -n default annotate serviceaccount default iam.gke.io/gcp-service-account="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
-# use default Kuberentes namespace as a primary deployment location
+info "Annotating default namespaces for istio injection ..."
 kubectl label namespace default istio-injection- istio.io/rev=asm-managed-${CHANNEL} --overwrite
 
 # clean up

@@ -17,7 +17,44 @@ locals {
   namespace_name = "default"
 }
 
-# Deploy kustomized manifests
+# Configure default compute SA to be used by K8s default SA in default ns
+data "google_compute_default_service_account" "default" {
+  # ensure that default compute service account is provisioned
+  depends_on = [
+    module.gcloud,
+  ]
+}
+
+resource "google_project_iam_binding" "default_compute_as_trace_agent" {
+  project = data.google_project.info.project_id
+  role    = "roles/cloudtrace.agent"
+
+  members = [
+    "serviceAccount:${data.google_compute_default_service_account.default.email}",
+  ]
+}
+
+resource "google_service_account_iam_binding" "default_compute_as_k8s_sa" {
+  service_account_id = data.google_compute_default_service_account.default.name
+  role               = "roles/iam.workloadIdentityUser"
+
+  members = [
+    "serviceAccount:${data.google_project.info.project_id}.svc.id.goog[default/default]",
+  ]
+}
+
+resource "kubernetes_annotations" "default_sa" {
+  api_version = "v1"
+  kind        = "ServiceAccount"
+  metadata {
+    name      = "default"
+    namespace = "default"
+  }
+  annotations = {
+    "iam.gke.io/gcp-service-account" = data.google_compute_default_service_account.default.email
+  }
+}
+
 # NOTE: when re-applying the previous resources might not be disposed
 resource "null_resource" "online_boutique_kustomization" {
   triggers = {

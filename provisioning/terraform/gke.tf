@@ -13,8 +13,8 @@
 # limitations under the License.
 
 locals {
-  mesh_id        = "proj-${data.google_project.info.number}"
-  location_label = length(split("-", var.gke_cluster_location)) == 2 ? "--region" : (length(split("-", var.gke_cluster_location)) == 3 ? "--zone" : "--location")
+  location_label  = length(split("-", var.gke_cluster_location)) == 2 ? "--region" : (length(split("-", var.gke_cluster_location)) == 3 ? "--zone" : "--location")
+  resource_labels = var.enable_asm ? { "mesh_id" = "proj-${data.google_project.info.number}" } : {}
 }
 
 resource "google_container_cluster" "sandbox" {
@@ -29,10 +29,7 @@ resource "google_container_cluster" "sandbox" {
     channel = "CHANNEL_STANDARD"
   }
 
-  # always add mesh label to simplify cluster provisioning
-  resource_labels = {
-    "mesh_id" = local.mesh_id
-  }
+  resource_labels = local.resource_labels
 
   description = "Provisioned for Cloud Ops Sandbox version ${file("../version.txt")}"
 
