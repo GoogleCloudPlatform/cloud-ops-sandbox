@@ -23,6 +23,14 @@ info() {
   echo "⚙️  ${SCRIPT_NAME}: ${1}" >&2
 }
 
+pushd () {
+    command pushd "$@" > /dev/null
+}
+
+popd () {
+    command popd "$@" > /dev/null
+}
+
 # ensure the working dir is the script's folder
 SCRIPT_DIR=$(realpath $(dirname "$0"))
 pushd $SCRIPT_DIR
@@ -58,9 +66,10 @@ prompt_for_billing_account() {
   info "Checking for billing accounts..."
   found_accounts=$(gcloud beta billing accounts list --format="value(displayName)" --filter="open=true" --sort-by=displayName)
   if [ -z "$found_accounts" ] || [[ ${#found_accounts[@]} -eq 0 ]]; then
-    info "error: no active billing accounts were detected. In order to create a sandboxed environment,"
-    info "the script needs to create a new GCP project and associate it with an active billing account"
-    info "Follow this link to setup a billing account:"
+    info "error: no active billing accounts were detected. In order to create a"
+    info "sandboxed environment, the script needs to create a new Google Cloud"
+    info "project and associate it with an active billing account. Follow this"
+    info "link to setup a billing account:"
     info "https://cloud.google.com/billing/docs/how-to/manage-billing-account"
     info ""
     info "To list active billing accounts, run:"
@@ -204,12 +213,12 @@ get_create_bucket() {
 }
 
 apply_terraform() {
-  info "🏁 Installing CloudOps Sandbox with Online Boutique..."
+  info "🏁 Installing Cloud Ops Sandbox with Online Boutique..."
 
   pushd "./terraform"
   rm -f .terraform/terraform.tfstate* 2> /dev/null
 
-  terraform init -backend-config "bucket=${bucket_name}" -backend-config "prefix=${terraform_state_prefix}" -lockfile=false 2> /dev/null
+  terraform init -backend-config "bucket=${bucket_name}" -backend-config "prefix=${terraform_state_prefix}" -lockfile=false
   terraform_command="terraform apply -auto-approve \
   -var=\"state_bucket_name=${bucket_name}\"
   -var=\"state_prefix=${terraform_state_prefix:-""}\"
@@ -277,7 +286,7 @@ x_usage() {
 ${SCRIPT_NAME}
 usage: ${SCRIPT_NAME} [PARAMETER]...
 
-Deploy Cloud Operations Sandbox to a GCP project.
+Deploy Cloud Operations Sandbox to a Google Cloud project.
 
 PARAMETERS:
   --cluster-location                  (Optional) Zone or region name where the
@@ -285,8 +294,10 @@ PARAMETERS:
                                       us-central1 region.
   --cluster-name                      (Optional) The name of GKE cluster.
                                       Default is 'cloud-ops-sandbox'.
-  --project                           Google Cloud Project ID that
-                                      hosts the cluster.
+  --project                           (Optional) Google Cloud Project ID that
+                                      will host Cloud Ops Sandbox. If not
+                                      provided, a new Google Cloud project will
+                                      be created.
   --skip-asm                          (Optional) Set to not install Anthos
                                       Service Mesh. Default is false.
   --skip-loadgenerator                (Optional) Set to not deploy load
@@ -321,7 +332,7 @@ check_authentication() {
     AUTH_ACCT=$(gcloud auth list --format="value(account)")
     if [[ -z $AUTH_ACCT ]]; then
         info "Authentication failed"
-        info "Please allow gcloud and Cloud Shell to access your GCP account"
+        info "Please allow gcloud and Cloud Shell to access your Google Cloud account"
     fi
     while [[ -z $AUTH_ACCT  && "${TRIES}" -lt 300  ]]; do
         AUTH_ACCT=$(gcloud auth list --format="value(account)")
@@ -341,7 +352,7 @@ parse_arguments() {
         cluster_name="${2}"
         shift 2
       else
-        info "Error: Argument for $1 is missing" >&2
+        info "[ERROR] Argument for $1 is missing" >&2
         exit 1
       fi
       ;;
@@ -350,7 +361,7 @@ parse_arguments() {
         cluster_location="${2}"
         shift 2
       else
-        info "Error: Argument for $1 is missing" >&2
+        info "[ERROR] Argument for $1 is missing" >&2
         exit 1
       fi
       ;;
@@ -359,7 +370,7 @@ parse_arguments() {
         project_id="${2}"
         shift 2
       else
-        info "Error: Argument for $1 is missing" >&2
+        info "[ERROR] Argument for $1 is missing" >&2
         exit 1
       fi
       ;;
@@ -368,7 +379,7 @@ parse_arguments() {
         terraform_state_prefix="${2}"
         shift 2
       else
-        info "Error: Argument for $1 is missing" >&2
+        info "[ERROR] Argument for $1 is missing" >&2
         exit 1
       fi
       ;;
@@ -397,7 +408,7 @@ parse_arguments() {
   done
 
   if [[ -n "${project_id}" && -z "$(gcloud projects list --filter=project_id:${project_id})" ]]; then
-    info "[WARNING] Project with project id '${project_id}' does not exist."
+    info "[ERROR] Project with project ID '${project_id}' does not exist."
     exit 2
   fi
 }
