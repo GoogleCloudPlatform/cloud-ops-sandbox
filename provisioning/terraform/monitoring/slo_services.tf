@@ -13,8 +13,8 @@
 # limitations under the License.
 
 locals {
-  burn_rate         = 2    # (common factor of 2x)
-  latency_threshold = 2000 # (common threshold 2000ms)
+  burn_rate         = 2    # (2x factor)
+  latency_threshold = 1000 # (ms)
   slo_services = [
     {
       title = "Frontend Service"
