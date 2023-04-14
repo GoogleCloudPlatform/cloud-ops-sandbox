@@ -246,11 +246,11 @@ apply_terraform() {
   local sed_expression=""
   # uncomment 'without-loadgenerator' component if skip_loadgen is set
   if [[ -n "${skip_loadgen}" ]]; then
-    sed_expression+=" -e '/without-loadgenerator$/s/^#//'"
+    sed_expression+=" -E '/without-loadgenerator(\?version\=v?[0-9]+\.[0-9]+\.[0-9]+)?$/s/^#//'"
   fi
   # uncomment 'service-mesh-istio' component if skip_asm is NOT set
   if [[ -z "${skip_asm}" ]]; then
-    sed_expression+=" -e '/service-mesh-istio$/s/^#//'"
+    sed_expression+=" -E '/service-mesh-istio(\?version\=v?[0-9]+\.[0-9]+\.[0-9]+)?$/s/^#//'"
   fi
   if [[ -n "${sed_expression}" ]]; then
     eval "sed ${sed_expression} ${ob_kpath}kustomization.yaml.bak > ${ob_kpath}kustomization.yaml"
