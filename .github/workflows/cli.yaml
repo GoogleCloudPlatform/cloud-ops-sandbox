@@ -11,7 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+name: CLI
 
-output "frontend_external_ip" {
-  value = length(data.kubernetes_service.frontend_external_service.status) > 0 ? data.kubernetes_service.frontend_external_service.status[0].load_balancer[0].ingress[0].ip : null
-}
+on:
+  pull_request:
+    types: [opened,synchronize,reopened]
+
+jobs:
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v3
+      
+    - name: Check CLI scripts
+      run: shellcheck provisioning/**/*.sh
