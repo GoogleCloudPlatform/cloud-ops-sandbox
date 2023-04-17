@@ -31,5 +31,5 @@ jobs:
     - name: Checkout source code
       uses: actions/checkout@v3
       
-    - name: Check CLI scripts
-      run: shellcheck provisioning/**/*.sh
+    - name: Check CLI script
+      run: shellcheck provisioning/sandboxctl

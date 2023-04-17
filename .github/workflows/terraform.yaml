@@ -57,9 +57,11 @@ jobs:
         # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
         GITHUB_TOKEN: ${{ github.token }}
 
-    - name: Run TFLint
+    - name: TF Linting
       run: tflint -f compact --chdir ./provisioning/terraform
 
+    - name: Linting convenience shell scripts
+      run: shellcheck provisioning/terraform/**/*.sh
 
   e2e-deployment:
     needs: tflint
