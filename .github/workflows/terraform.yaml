@@ -104,16 +104,14 @@ jobs:
       run: |-
         cd "${{ github.workspace }}/provisioning"
         state_prefix="${SHA:0:7}"
-        ./install.sh --project "${{ secrets.E2E_PROJECT_ID }}" --terraform-prefix "${state_prefix}" \
-        --cluster-name "cloudops-sandbox-${state_prefix}" --cluster-location "${{ env.cluster_location }}" --skip-asm --verbose
+        ./sandboxctl create -p "${{ secrets.E2E_PROJECT_ID }}" --terraform-prefix "${state_prefix}" \
+        -n "cloudops-sandbox-${state_prefix}" -l "${{ env.cluster_location }}" --skip-asm -v
     
     - name: Clean up deployment
       env:
         SHA: ${{ github.sha }}
       run: |-
-        cd "${{ github.workspace }}/provisioning/terraform"
+        cd "${{ github.workspace }}/provisioning"
         state_prefix="${SHA:0:7}"
-        terraform destroy -auto-approve --var="gcp_project_id=${{ secrets.E2E_PROJECT_ID }}" \
-        --var="state_bucket_name=${{ secrets.E2E_PROJECT_ID }}-cloud-ops-sandbox-terraform-state" \
-        --var="state_prefix=${state_prefix}" --var="gke_cluster_name=cloudops-sandbox-${state_prefix}" \
-        --var="gke_cluster_location=${{ env.cluster_location }}" --var="filepath_manifest=../kustomize/online-boutique/"
+        ./sandboxctl delete -p "${{ secrets.E2E_PROJECT_ID }}" --terraform-prefix "${state_prefix}" \
+        -n "cloudops-sandbox-${state_prefix}" -l "${{ env.cluster_location }}" --skip-asm -v
