@@ -88,10 +88,10 @@ create_subcommand() {
   prepare_terraform_state
   clean_cached_tf_state
   configure_terraform_input_vars
-  configure_kustomization
 
   pushd "${SCRIPT_DIR}/terraform" > /dev/null
   {
+    configure_kustomization
     terraform init -backend-config "bucket=${TF_BUCKET_NAME}" -backend-config "prefix=${TERRAFORM_PREFIX}" -lockfile=false && \
     terraform apply -auto-approve -var-file="${tf_FILE_LOCATION}" && \
     print_launch_instructions
@@ -484,7 +484,8 @@ EOF
 configure_kustomization() {
   KUSTOMIZE_FILE="${SCRIPT_DIR}/kustomize/online-boutique/kustomization.yaml"; readonly KUSTOMIZE_FILE
   cp "${KUSTOMIZE_FILE}" "${KUSTOMIZE_FILE}.origin" > /dev/null
-  local SED_EXPRESSION
+  local SED_EXPRESSION; SED_EXPRESSION=""
+  
   # uncomment 'without-loadgenerator' component if skip_loadgen is set
   if [[ "${SKIP_LOADGENERATOR}" == "1" ]]; then
     SED_EXPRESSION+=" -E '/without-loadgenerator(\?version\=v?[0-9]+\.[0-9]+\.[0-9]+)?$/s/^#//'"
