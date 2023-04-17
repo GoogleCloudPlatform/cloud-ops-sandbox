@@ -1,4 +1,4 @@
-# Launch Cloud Ops Sandbox Walkthrough
+# Cloud Ops Sandbox Walkthrough
 
 ## Introduction
 
@@ -31,56 +31,54 @@ Before you begin, you will need a Google Cloud project.
 Do the following steps to create or select the project that will be used to
 launch Cloud Ops Sandbox and to enable required Google Cloud APIs.
 
-**Note:**
-It is highly recommended that you use a designated project. Launch Cloud Ops
-Sandbox in the project that already host other applications may result in
-unexpected decrease in performance or other conflicts.
+**Note:** It is highly recommended to use a project that is dedicated to
+launch Cloud Ops Sandbox. Using the same project to host other applications
+may result in unexpected decrease in performance or other conflicts.
 
-1. <walkthrough-project-setup billing="true"></walkthrough-project-setup>
-1. <walkthrough-enable-apis apis="container.googleapis.com,cloudprofiler.googleapis.com"></walkthrough-enable-apis>
-1. Open Cloud Shell:
-   <walkthrough-spotlight-pointer spotlightId="cloud-shell-activate-button"></walkthrough-spotlight-pointer>
-1. And configure it to use the selected project:
+<walkthrough-project-setup billing="true"></walkthrough-project-setup>
 
-   ```bash
-   gcloud config set project <walkthrough-project-id/>
-   ```
+Configure Cloud Shell to use the selected project by running the following
+command in Cloud Shell:
 
-   If prompted, authorize Cloud Shell to call listed Google Cloud APIs.
+```bash
+gcloud configure set project <walkthrough-project-id/>
+```
+
+<walkthrough-enable-apis apis=
+   "container.googleapis.com,
+   cloudprofiler.googleapis.com">
+</walkthrough-enable-apis>
+
+If prompted, authorize Cloud Shell to call listed Google Cloud APIs.
 
 ## Launch Cloud Ops Sandbox
 
-When this walkthrough is launched, it clones the Cloud Ops Sandbox repo to
-the Cloud Shell environment. Change to the repo's directory:
+To launch Sandbox using default settings run the following command in Cloud Shell:
 
-```bash
-cd cloud-ops-sandbox
+```shell
+provisioning/sandboxctl create --project-id <walkthrough-project-id/>
 ```
 
-By default the launch script will install [Anthos Service Mesh][3](ASM) into the
-project and will use it to run the Online Boutique services.
-Enabling ASM will let you experiment with SLO monitoring tools but it will
-require more resources. If you decide not to install ASM, add the `--skip-asm`
-parameter to the launch command below.
+By default the launch will install [Anthos Service Mesh][3](ASM) and the
+load generator that will create a simulated load on the demo application.
+Also it will provision the [regional cluster][4] in the `us-central1` region.
+If you wish to customize any of these default settings, you will need to run the
+above command with additional parameters.
 
-If you want to experiment without artificiantly generated load, add the
+By default the launch will run all Online Boutique services in [ASM][3].
+If you are not interested in using ASM, add the `--skip-asm` parameter to the
+launch command.
+
+If you want to experiment with Sandbox without simulated load, add the
 `--skip-loadgenerator` parameter to the launch command below.
 
-During launch Sandbox provisions a new GKE cluster. By default the cluster is
-provisioned as a [regional cluster][4] in the `us-central1` region. If you want
-it to be provisioned in the different region or you want it to be provisioned
-as a [zonal cluster][5], add `--cluster-location [LOC]` parameter to the launch
-command below while replacing `[LOC]` with a name of a region or a zone.
+In order to change the region where GKE cluster is provisioned or to be provisioned
+it as a [zonal cluster][5], add `--cluster-location [LOC]` parameter.
+And provide a name of a region or a zone as `[LOC]`
 
 The GKE cluster name is set to `cloud-ops-sandbox`. If you want to customize it
 add `--cluster-name [NAME]` parameter to the launch command below while
 replacing `[NAME]` with the desired legal cluster name.
-
-Launch Cloud Ops Sandbox by executing the following command:
-
-```bash
-provisioning/sandboxctl create --project-id <walkthrough-project-id/>
-```
 
 During launch process, CLI prints out execution log (mainly from Terraform) to
 console. On completion, you should see the output similar to the following:
@@ -135,8 +133,7 @@ and then click Trace List.
 You will see all traces reported by Online Boutique services.
 Try to select any of them to get more information about call stack.
 
-**Note:**
-There can be not enough information immediately after launch.
+**Note:** There can be not enough information immediately after launch.
 You may want to return to this screen later.
 
 You can also check Overview screen for trace statistics of the project.
@@ -155,10 +152,9 @@ To delete the launched Sandbox, run the following command:
 provisioning/sandboxctl delete --project-id <walkthrough-project-id/>
 ```
 
-**Warning:**
-If you customized your launch with additional parameters (e.g. custom location),
-you will need to use these parameters for delete operations.
-Otherwise, the delete operation may fail.
+**Warning:** If you customized your launch with additional parameters
+(e.g. custom location), you will need to use these parameters for delete
+operations. Otherwise, the delete operation may fail.
 
 If you launched Sandbox in a dedicated project and do not need the project,
 you can simply [shut down the project][6].
