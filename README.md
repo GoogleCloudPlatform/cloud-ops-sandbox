@@ -2,7 +2,7 @@
 
 ![Terraform][tf_badge]
 
-Cloud Operations Sandbox is an end-to-end demo that helps practitioners to
+Cloud Operations (Ops) Sandbox is an end-to-end demo that helps practitioners to
 learn about [Cloud Operations][cloud-ops] (formerly Stackdriver) and Service
 Reliability Engineering practices from Google.
 
@@ -31,7 +31,7 @@ walkthrough instructions:
 [![Launch in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)][1]
 
 Or, you can launch it on your workstation. To run it locally you will need to
-install the following software:
+make sure that the following software is available:
 
 * [Google Cloud CLI][cli] with [gke-gcloud-auth-plugin]
 * [Terraform]
@@ -39,18 +39,25 @@ install the following software:
 * curl
 * sed
 
-Then execute the following commands:
+And to have a Google Cloud project where you want to launch Cloud Ops Sandbox.
+After that, run the following commands while replacing `PROJECT_ID` with your
+project ID:
 
-```terminal
+```bash
 git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox
 gcloud auth application-default loging
-cloud-ops-sandbox/provisioning/install.sh
+cloud-ops-sandbox/provisioning/sandboxctl create -p PROJECT_ID
 ```
 
-These commands will clone this repo to your workstation's current directory,
-will run authentication sequence in front of Google Cloud to allow to Terraform
-to provision necessary resources and will launch Cloud Ops Sandbox with default
+These commands will clone this repo to your local environment's current directory,
+acquire authentication toke for Terraform and launch Cloud Ops Sandbox with default
 settings. The script will prompt you for additional information.
+
+You can learn more about customized options by running:
+
+```bash
+cloud-ops-sandbox/provisioning/sandboxctl -h
+```
 
 ### Use Cloud Ops Sandbox
 
