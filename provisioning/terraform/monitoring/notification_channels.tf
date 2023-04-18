@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Presubmit test that ensures that commit messages are build following convention
-# https://github.com/googleapis/repo-automation-bots/tree/main/packages/conventional-commit-lint
-
-enabled: true
-always_check_pr_title: false
+resource "google_monitoring_notification_channel" "email_notification" {
+  display_name = "Cloud Ops Sandbox notification"
+  type         = "email"
+  labels = {
+    email_address = var.notification_channel_email
+  }
+}

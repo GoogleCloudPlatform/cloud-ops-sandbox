@@ -11,9 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+name: CLI
 
-# Presubmit test that ensures that commit messages are build following convention
-# https://github.com/googleapis/repo-automation-bots/tree/main/packages/conventional-commit-lint
+on:
+  pull_request:
+    types: [opened,synchronize,reopened]
 
-enabled: true
-always_check_pr_title: false
+jobs:
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v3
+      
+    - name: Check CLI script
+      run: shellcheck provisioning/sandboxctl

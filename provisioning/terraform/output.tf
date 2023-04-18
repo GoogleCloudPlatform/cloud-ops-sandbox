@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Presubmit test that ensures that commit messages are build following convention
-# https://github.com/googleapis/repo-automation-bots/tree/main/packages/conventional-commit-lint
-
-enabled: true
-always_check_pr_title: false
+output "frontend_external_ip" {
+  value = length(data.kubernetes_service.frontend_external_service.status) > 0 ? data.kubernetes_service.frontend_external_service.status[0].load_balancer[0].ingress[0].ip : null
+}
