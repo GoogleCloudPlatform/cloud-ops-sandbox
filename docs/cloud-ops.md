@@ -131,13 +131,15 @@ generated metric `istio.io/service/server/response_latencies` as following:
 The request latency for the _service_name_ service is acquired from metrics
 using the following filter:
 
-> metric.type="istio.io/service/server/response_latencies"
-> AND resource.type="`k8s_container`"
-> AND resource.label."`cluster_name`"="`cloud-ops-sandbox`"
-> AND metric.label."`response_code`"="`200`"
-> AND metadata.user_labels."`app`"="<_service_name_>"
+```terminal
+metric.type="istio.io/service/server/response_latencies"
+AND resource.type="`k8s_container`"
+AND resource.label."`cluster_name`"="`cloud-ops-sandbox`"
+AND metric.label."`response_code`"="`200`"
+AND metadata.user_labels."`app`"="<_service_name_>"
+```
 
-> **Note:**
+> **Note**
 > The name of the cluster can be different if you customized it at launch
 (using `--cluster-name` parameter).
 

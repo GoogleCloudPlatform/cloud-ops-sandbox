@@ -20,6 +20,9 @@ The following table describes all input arguments the module accepts:
 The module provisions Cloud Monitoring dashboards, uptime checks and alerts based on the provided configuration.
 Additionally it provisions log-based metrics and configures SLOs for auto-detected and custom services.
 
-> **Note:** The module creates an opinionated observability artifacts to demonstrate best practices in capturing various observability signals using Cloud Operations suite of services.
+> **Note**
+> The module creates an opinionated observability artifacts to demonstrate best
+> practices in capturing various observability signals using Cloud Operations
+> suite of services.
 
 [Google]: https://registry.terraform.io/providers/hashicorp/google/latest/docs

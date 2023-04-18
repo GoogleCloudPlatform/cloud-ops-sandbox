@@ -33,7 +33,7 @@ application's reliability state with:
 * [Monitoring dashboards][custom-dashboards]
 * [Service SLOs][slo-services]
 
-> **Note:**
+> **Note**
 > If one of the above links does not show data you expect, [select project][1]
 that hosts your Sandbox in Cloud Console.
 
