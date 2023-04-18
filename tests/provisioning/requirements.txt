@@ -1,6 +1,0 @@
-google-cloud-container==2.10.8
-google-cloud-error-reporting==0.34.0
-google-api-core==1.31.5
-requests==2.24.0
-parameterized==0.7.4
-google-cloud-logging==1.15.1
