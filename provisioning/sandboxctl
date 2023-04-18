@@ -1,0 +1,518 @@
+#!/bin/bash
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -CeE
+set -o pipefail
+
+if [[ "${BASH_VERSINFO:-0}" -lt 4 ]]; then
+  cat << EOF >&2
+WARNING: bash ${BASH_VERSION} does not support several modern safety features.
+This script was written with the latest POSIX standard in mind, and was only
+tested with modern shell standards. This script may not perform correctly in
+this environment.
+EOF
+  sleep 1
+else
+  set -u
+fi
+
+SCRIPT_NAME="${0##*/}"; readonly SCRIPT_NAME
+SCRIPT_DIR="$(realpath "$(dirname "${0}")")"; readonly SCRIPT_DIR
+SANDBOX_VERSION="$(tr -d '\n' < "${SCRIPT_DIR}/version.txt")"; readonly SANDBOX_VERSION
+SANDBOX_SESSION="${SANDBOX_SESSION:-$(python3 -c 'import uuid; print(uuid.uuid4())')}"; readonly SANDBOX_SESSION
+AGCLOUD=""
+ATERRAFORM=""
+
+main() {
+  if [[ "${*}" = '' ]]; then
+    usage >&2
+    exit 2
+  fi
+
+  # shellcheck disable=SC2064
+  trap "$(shopt -p nocasematch)" RETURN
+  shopt -s nocasematch
+  init
+
+  case "${1}" in
+    create)
+      shift 1
+      create_subcommand "${@}"
+      ;;
+    delete)
+      shift 1
+      delete_subcommand "${@}"
+      ;;
+    *)
+      help_subcommand "${@}"
+      ;;
+  esac
+}
+create_subcommand() {
+  parse_args "${@}"
+
+  ### Validate ###
+  x_exit_if_no_auth_token
+  if [[ -z "${PROJECT_ID}" ]]; then
+    local GCP_CONFIG_PROJECT
+    GCP_CONFIG_PROJECT=$(gcloud config list --format 'value(core.project)')
+    warn "You did not provide project ID. ${SCRIPT_NAME} will launch Cloud Ops Sandbox in project ${GCP_CONFIG_PROJECT}."
+    sleep 1
+    echo "To continue, type 1 for 'yes':"
+    select opt in "yes" "no"; do
+      if [[ "${opt}" == "yes" ]]; then
+        PROJECT_ID="${GCP_CONFIG_PROJECT}"
+        break
+      elif [[ "${opt}" == "no" ]]; then
+        exit 0
+      fi
+    done
+  elif [[ -z $(gcloud projects list --filter="project_id:${PROJECT_ID}") ]]; then
+    fatal "You need to provide a valid project ID."
+    exit 2
+  fi
+
+  ### Configre ###
+  prepare_terraform_state
+  clean_cached_tf_state
+  configure_terraform_input_vars
+
+  pushd "${SCRIPT_DIR}/terraform" > /dev/null
+  {
+    configure_kustomization
+    terraform init -backend-config "bucket=${TF_BUCKET_NAME}" -backend-config "prefix=${TERRAFORM_PREFIX}" -lockfile=false && \
+    terraform apply -auto-approve -var-file="${tf_FILE_LOCATION}" && \
+    print_launch_instructions
+  }
+  popd > /dev/null
+  mv "${KUSTOMIZE_FILE}.origin" "${KUSTOMIZE_FILE}"
+}
+delete_subcommand() {
+  parse_args "${@}"
+
+  ### Validate ###
+  x_exit_if_no_auth_token
+  if [[ -z "${PROJECT_ID}" || -z $(gcloud projects list --filter="project_id:${PROJECT_ID}") ]]; then
+    fatal "You need to provide a valid project ID."
+  fi
+  if ! does_terraform_state_exist; then
+    fatal "Project ${PROJECT_ID} does not run Cloud Ops Sandbox."
+  fi
+
+  ### Configure ###
+  clean_cached_tf_state
+  configure_terraform_input_vars
+
+  pushd "${SCRIPT_DIR}/terraform" > /dev/null
+  {
+    terraform init -backend-config "bucket=${TF_BUCKET_NAME}" -backend-config "prefix=${TERRAFORM_PREFIX}" -lockfile=false && \
+    terraform destroy -auto-approve -var-file="${tf_FILE_LOCATION}" && \
+    info "Successfully deleted Cloud Ops Sandbox from ${PROJECT_ID} project."
+  }
+  popd > /dev/null
+}
+help_subcommand() {
+  local PRINT_HELP; PRINT_HELP=0
+  local PRINT_VERSION; PRINT_VERSION=0
+
+  while [[ $# != 0 ]]; do
+    case "${1}" in
+      -h | --help)
+        PRINT_HELP=1
+        shift 1
+        ;;
+      --version)
+        PRINT_VERSION=1
+        shift 1
+        ;;
+      *)
+        fatal_with_usage "Unknown option ${1}"
+        ;;
+    esac
+  done
+
+  if [[ "${PRINT_HELP}" -eq 1 || "${PRINT_VERSION}" -eq 1 ]]; then
+    if [[ "${PRINT_VERSION}" -eq 1 ]]; then
+      version_message
+    else
+      usage
+    fi
+    exit
+  fi
+}
+
+init() {
+  ATERRAFORM="$(which terraform || true)"; readonly ATERRAFORM;
+  AGCLOUD="$(which gcloud || true)"; readonly AGCLOUD;
+  PROJECT_ID=""
+  CLUSTER_LOCATION=""
+  CLUSTER_NAME=""
+  TERRAFORM_PREFIX=""
+  SKIP_LOADGENERATOR=0
+  SKIP_ASM=0
+  VERBOSE=0
+  CLOUDOPS_SANDBOX_POOL_CFG=${CLOUDOPS_SANDBOX_POOL_CFG:-}
+}
+
+### Support functions ###
+
+warn() {
+  info "[WARNING]: ${1}" >&2
+}
+
+error() {
+  info "[ERROR]: ${1}" >&2
+}
+
+info() {
+  if hash ts 2>/dev/null && [[ "${VERBOSE}" -eq 1 ]]; then
+    echo "${SCRIPT_NAME}: ${1}" | TZ=utc ts '%Y-%m-%dT%.T' >&2
+  else
+    echo "${SCRIPT_NAME}: ${1}" >&2
+  fi
+}
+
+fatal() {
+  error "${1}"
+  exit 2
+}
+
+fatal_with_usage() {
+  error "${1}"
+  usage_short >&2
+  exit 2
+}
+
+version_message() {
+  echo "${VERSION}"
+}
+
+usage() {
+  cat << EOF
+${SCRIPT_NAME} $(version_message)
+usage: ${SCRIPT_NAME} [SUBCOMMAND] [OPTION]...
+
+Create or destroy Cloud Ops Sandbox in a Google Cloud environment. Options
+specified over flags 
+
+SUBCOMMANDS:
+  create                              Create will attempt to launch a new Cloud
+                                      Ops Sandbox
+  delete                              Delete will destroy resources and configurations
+                                      of the Cloud Ops Sandbox from the defined
+                                      Google Cloud environment.
+
+OPTIONS:
+  -l|--cluster_location  <LOCATION>   The GCP location of the target cluster.
+  -n|--cluster_name      <NAME>       The name of the target cluster.
+  -p|--project_id        <ID>         The GCP project ID.
+  --skip-asm                          (Optional) Set to not install Anthos
+                                      Service Mesh. Default is false.
+  --skip-loadgenerator                (Optional) Set to not deploy load
+                                      generator. Default is false.
+  --terraform-prefix                  (Optional) Customize Terraform state
+                                      storage prefix to store multiple states
+                                      in the same project. Default is ''.
+  -v|--verbose                        Print commands before and after execution.
+  -h|--help                           Show this message and exit.
+  --version                           Print the version of this tool and exit.
+EOF
+}
+
+#######
+# run_command takes a list of arguments that represents a command
+# If DRY_RUN or VERBOSE is enabled, it will print the command, and if DRY_RUN is
+# not enabled it runs the command.
+#######
+run_command() {
+  if [[ "${VERBOSE}" -eq 0 ]]; then
+    "${@}" 2>/dev/null
+    return "$?"
+  fi
+  info "Running: '${*}'"
+  info "-------------"
+  local RETVAL
+  { "${@}"; RETVAL="$?"; } || true
+  return $RETVAL
+}
+
+#######
+# retry takes an integer N as the first argument, and a list of arguments
+# representing a command afterwards. It will retry the given command up to N
+# times before returning 1. If the command is kubectl, it will try to
+# re-get credentials in case something caused the k8s IP to change.
+#######
+retry() {
+  local MAX_TRIES; MAX_TRIES="${1}";
+  shift 1
+  for i in $(seq 0 "${MAX_TRIES}"); do
+    if [[ "${i}" -eq "${MAX_TRIES}" ]]; then
+      break
+    fi
+    { "${@}" && return 0; } || true
+    warn "Failed, retrying...($((i+1)) of ${MAX_TRIES})"
+    sleep 2
+  done
+  local CMD="'$*'"
+  warn "Command $CMD failed."
+  false
+}
+
+### Convenience functions ####
+
+gcloud() {
+  run_command "${AGCLOUD}" "${@}"
+}
+
+terraform() {
+  run_command "${ATERRAFORM}" "${@}"
+}
+
+arg_required() {
+  if [[ ! "${2:-}" || "${2:0:1}" = '-' ]]; then
+    fatal "Option ${1} requires an argument."
+  fi
+}
+
+parse_args() {
+  local PRINT_HELP; PRINT_HELP=0
+  local PRINT_VERSION; PRINT_VERSION=0
+
+  # shellcheck disable=SC2064
+  trap "$(shopt -p nocasematch)" RETURN
+  shopt -s nocasematch
+
+  while [[ $# != 0 ]]; do
+    case "${1}" in
+      -l | --cluster_location | --cluster-location)
+        arg_required "${@}"
+        CLUSTER_LOCATION="${2}"; readonly CLUSTER_LOCATION
+        shift 2
+        ;;
+      -n | --cluster_name | --cluster-name)
+        arg_required "${@}"
+        CLUSTER_NAME="${2}"; readonly CLUSTER_NAME
+        shift 2
+        ;;
+      -p | --project_id | --project-id)
+        arg_required "${@}"
+        PROJECT_ID="${2}"; readonly PROJECT_ID
+        shift 2
+        ;;
+      --terraform_prefix | --terraform-prefix)
+        arg_required "${@}"
+        TERRAFORM_PREFIX="${2}"; readonly TERRAFORM_PREFIX
+        shift 2
+        ;;
+      --skip_loadgenerator | --skip-loadgenerator)
+        SKIP_LOADGENERATOR=1; readonly SKIP_LOADGENERATOR
+        shift 1
+        ;;
+      --skip_asm | --skip-asm)
+        SKIP_ASM=1; readonly SKIP_ASM
+        shift 1
+        ;;
+      -v | --verbose)
+        VERBOSE=1; readonly VERBOSE
+        shift 1
+        ;;
+      -h | --help)
+        PRINT_HELP=1; readonly PRINT_HELP
+        shift 1
+        ;;
+      --version)
+        PRINT_VERSION=1; readonly PRINT_VERSION
+        shift 1
+        ;;
+      *)
+        fatal_with_usage "Unknown option ${1}"
+        ;;
+    esac
+  done
+
+  if [[ "${PRINT_HELP}" -eq 1 || "${PRINT_VERSION}" -eq 1 ]]; then
+    if [[ "${PRINT_VERSION}" -eq 1 ]]; then
+      version_message
+    else
+      usage
+    fi
+    exit
+  fi
+}
+
+send_telemetry() {
+  if [[ $# -lt 1 ]]; then
+    fatal "Missing event argument"
+  fi
+  local EVENT_NAME="${1}"
+  local TIMESTAMP; TIMESTAMP=$(date --utc +%s.%N)
+  local OBFUSCATED_PROJECT_ID; OBFUSCATED_PROJECT_ID="$(echo "${PROJECT_ID}" | sha256sum | sed 's/  -//')"
+  gcloud pubsub topics publish "telemetry_test" \
+  --user-output-enabled=false \
+  --project "stackdriver-sandbox-230822" \
+  --message="{ \
+  \"session\":\"${SANDBOX_SESSION}\", \
+  \"project\":\"${OBFUSCATED_PROJECT_ID}\", \
+  \"event\":\"${EVENT_NAME}\", \
+  \"datetime\":\"${TIMESTAMP}\", \
+  \"version\":\"${SANDBOX_VERSION}\"}"
+}
+
+x_exit_if_no_auth_token() {
+  local AUTHTOKEN; AUTHTOKEN="$(get_auth_token)"
+  if [[ -z "${AUTHTOKEN}" ]]; then
+    { read -r -d '' MSG; validation_error "${MSG}"; } <<EOF || true
+Auth token is not obtained successfully. Please login and
+retry, e.g., run 'gcloud auth application-default login' to login.
+EOF
+  fi
+}
+
+get_auth_token() {
+  local TOKEN; TOKEN="$(retry 2 gcloud --project="${PROJECT_ID}" auth print-access-token)"
+  echo "${TOKEN}"
+}
+
+local_iam_user() {
+  info "Getting account information..."
+  ACCOUNT_NAME="$(retry 3 gcloud auth list \
+    --project="${PROJECT_ID}" \
+    --filter="status:ACTIVE" \
+    --format="value(account)")"
+  if [[ -z "${ACCOUNT_NAME}" ]]; then
+    fatal "Failed to get account name from gcloud. Please authorize and re-try installation."
+  fi
+
+  echo "${ACCOUNT_NAME}"
+}
+
+prepare_terraform_state() {
+  TF_BUCKET_NAME="${PROJECT_ID}-cloud-ops-sandbox-tf-state"
+  local URIS
+  URIS=$(gcloud storage buckets list "gs://${TF_BUCKET_NAME}*" --uri --project "${PROJECT_ID}")
+  if [[ -z "${URIS}" ]]; then
+    info "Creating storage bucket to host Cloud Ops Sandbox state..."
+    retry 3 gcloud storage buckets create "gs://${TF_BUCKET_NAME}" --project "${PROJECT_ID}"
+  fi
+  if does_terraform_state_exist; then
+    warn "It is possible that project ${PROJECT_ID} previously hosted Cloud Ops Sandbox. Old state will be removed."
+    sleep 1
+    delete_terraform_state
+  fi
+}
+
+does_terraform_state_exist() {
+  TF_BUCKET_NAME="${PROJECT_ID}-cloud-ops-sandbox-tf-state"
+  local STATE_OBJ_URI
+  if [[ -z "${TERRAFORM_PREFIX}" ]]; then
+    STATE_OBJ_URI="gs://${TF_BUCKET_NAME}/default.tfstate"
+  else
+    STATE_OBJ_URI="gs://${TF_BUCKET_NAME}/${TERRAFORM_PREFIX}/default.tfstate"
+  fi
+  local URIS
+  URIS=$(gcloud storage objects list "${STATE_OBJ_URI}" --uri --project "${PROJECT_ID}")
+  if [[ -z "${URIS}" ]]; then
+    false
+    return
+  fi
+  true
+}
+
+delete_terraform_state() {
+  local STATE_OBJ_URI
+  if [[ -z "${TERRAFORM_PREFIX}" ]]; then
+    STATE_OBJ_URI="gs://${TF_BUCKET_NAME}/default.tfstate"
+  else
+    STATE_OBJ_URI="gs://${TF_BUCKET_NAME}/${TERRAFORM_PREFIX}/default.tfstate"
+  fi
+  gcloud storage rm "${STATE_OBJ_URI}" --project "${PROJECT_ID}" || true
+}
+
+clean_cached_tf_state() {
+  run_command rm -f "${SCRIPT_DIR}/terraform/.terraform/terraform.tfstate"
+}
+
+append_to_terraform_config() {
+  if [[ $# -lt 2 ]]; then
+    fatal "Missing arguments for terraform configuration setup."
+  fi
+
+  local ASSIGNMENT="${1} = \"${2}\""
+  echo "${ASSIGNMENT}" >> "${tf_FILE_LOCATION}"
+}
+
+configure_terraform_input_vars() {
+  tf_FILE_LOCATION="$(mktemp).tfvars"; readonly tf_FILE_LOCATION
+
+  local CONTEXT_TFVARS; CONTEXT_TFVARS=$(cat <<EOF
+state_bucket_name = "${TF_BUCKET_NAME}"
+state_prefix = "${TERRAFORM_PREFIX}"
+gcp_project_id = "${PROJECT_ID}"
+filepath_manifest = "${SCRIPT_DIR}/kustomize/online-boutique/" 
+EOF
+)
+
+  echo "${CONTEXT_TFVARS}" >| "${tf_FILE_LOCATION}"
+  if [ -n "" ]; then
+    echo "? = \"${}\"" >> "${tf_FILE_LOCATION}"
+  fi
+
+  if [[ -n "${CLUSTER_NAME}" ]]; then
+    append_to_terraform_config "gke_cluster_name" "${CLUSTER_NAME}"
+  fi
+  if [[ -n "${CLUSTER_LOCATION}" ]]; then
+    append_to_terraform_config "gke_cluster_location" "${CLUSTER_LOCATION}"
+  fi
+  append_to_terraform_config "enable_asm" "$([ "${SKIP_ASM}" == "1" ] && echo "false" || echo "true")"
+  if [[ -n "${CLOUDOPS_SANDBOX_POOL_CFG}" ]]; then
+    append_to_terraform_config "gke_node_pool" "${CLOUDOPS_SANDBOX_POOL_CFG}"
+  fi
+}
+
+configure_kustomization() {
+  KUSTOMIZE_FILE="${SCRIPT_DIR}/kustomize/online-boutique/kustomization.yaml"; readonly KUSTOMIZE_FILE
+  cp "${KUSTOMIZE_FILE}" "${KUSTOMIZE_FILE}.origin" > /dev/null
+  local SED_EXPRESSION; SED_EXPRESSION=""
+  
+  # uncomment 'without-loadgenerator' component if skip_loadgen is set
+  if [[ "${SKIP_LOADGENERATOR}" == "1" ]]; then
+    SED_EXPRESSION+=" -E '/without-loadgenerator(\?version\=v?[0-9]+\.[0-9]+\.[0-9]+)?$/s/^#//'"
+  fi
+  # uncomment 'service-mesh-istio' component if skip_asm is NOT set
+  if [[ "${SKIP_ASM}" != "1" ]]; then
+    SED_EXPRESSION+=" -E '/service-mesh-istio(\?version\=v?[0-9]+\.[0-9]+\.[0-9]+)?$/s/^#//'"
+  fi
+  if [[ -n "${SED_EXPRESSION}" ]]; then
+    eval "sed ${SED_EXPRESSION} ${KUSTOMIZE_FILE}.origin >| ${KUSTOMIZE_FILE}"
+  fi
+}
+
+print_launch_instructions() {
+  local EXTERNAL_IP
+  EXTERNAL_IP="$(terraform output --raw frontend_external_ip)"
+ 
+  cat <<EOF
+
+Explore Cloud Ops Sandbox features by browsing
+
+GKE Dashboard: https://console.cloud.google.com/kubernetes/workload?project=${PROJECT_ID}
+Monitoring Workspace: https://console.cloud.google.com/monitoring/?project=${PROJECT_ID}
+Trying Online Boutique at http://${EXTERNAL_IP}/
+EOF
+
+}
+
+
+main "${@}"
