@@ -137,9 +137,9 @@ Try to select any of them to get more information about call stack.
 You may want to return to this screen later.
 
 You can also check Overview screen for trace statistics of the project.
-To do it, click on Overview menu in the toolbar on the left.
-
-<walkthrough-spotlight-pointer locator="semantic({link 'Overview, 1 of 3'})"></walkthrough-spotlight-pointer>
+To do it, click
+<walkthrough-spotlight-pointer locator="semantic({link 'Overview, 1 of 3'})">
+Overview item</walkthrough-spotlight-pointer>  in the toolbar on the left.
 
 ## Delete Launched Sandbox
 
