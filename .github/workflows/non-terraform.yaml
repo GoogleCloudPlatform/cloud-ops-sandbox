@@ -22,6 +22,7 @@ on:
 
 jobs:
   tflint:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     concurrency:
@@ -33,6 +34,7 @@ jobs:
   
   
   e2e-deployment:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     concurrency:
