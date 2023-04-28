@@ -110,7 +110,7 @@ under Apache 2.0. Full license text is available in [LICENSE](LICENSE).
 > **Note**
 > This is not an official Google project. Please, report any issues or feature requests related to this project [here].
 
-[1]: https://console.cloud.google.com/?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fgooglecloudplatform%2Fcloud-ops-sandbox&cloudshell_git_branch=0.9.0&cloudshell_tutorial=docs/walkthrough.md
+[1]: https://console.cloud.google.com/?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fgooglecloudplatform%2Fcloud-ops-sandbox&cloudshell_git_branch=0.9.1&cloudshell_tutorial=docs/walkthrough.md
 [tf_badge]: https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/actions/workflows/terraform.yaml/badge.svg
 [cli_badge]: https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/actions/workflows/cli.yaml/badge.svg
 [cloud-ops]: (https://cloud.google.com/products/operations)
