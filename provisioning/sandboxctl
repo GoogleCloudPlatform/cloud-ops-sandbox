@@ -32,6 +32,7 @@ SCRIPT_NAME="${0##*/}"; readonly SCRIPT_NAME
 SCRIPT_DIR="$(realpath "$(dirname "${0}")")"; readonly SCRIPT_DIR
 SANDBOX_VERSION="$(tr -d '\n' < "${SCRIPT_DIR}/version.txt")"; readonly SANDBOX_VERSION
 SANDBOX_SESSION="${SANDBOX_SESSION:-$(python3 -c 'import uuid; print(uuid.uuid4())')}"; readonly SANDBOX_SESSION
+CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY="${CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY:-}"; readonly CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY
 AGCLOUD=""
 ATERRAFORM=""
 
@@ -81,7 +82,6 @@ create_subcommand() {
     done
   elif [[ -z $(gcloud projects list --filter="project_id:${PROJECT_ID}") ]]; then
     fatal "You need to provide a valid project ID."
-    exit 2
   fi
 
   ### Configre ###
@@ -92,10 +92,17 @@ create_subcommand() {
   pushd "${SCRIPT_DIR}/terraform" > /dev/null
   {
     configure_kustomization
+    if [[ -z "${CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY}" ]]; then
+      export TF_APPEND_USER_AGENT="deploystack/cloud-ops-sandbox"
+      export GOOGLE_TERRAFORM_USERAGENT_EXTENSION="${TF_APPEND_USER_AGENT}"
+    fi
     terraform init -backend-config "bucket=${TF_BUCKET_NAME}" -backend-config "prefix=${TERRAFORM_PREFIX}" -lockfile=false && \
     terraform apply -auto-approve -var-file="${tf_FILE_LOCATION}" && \
     print_launch_instructions
+    send_telemetry "hipstershop-available"
   }
+  ### Cleanup ###
+  unset -v GOOGLE_TERRAFORM_USERAGENT_EXTENSION TF_APPEND_USER_AGENT
   popd > /dev/null
   mv "${KUSTOMIZE_FILE}.origin" "${KUSTOMIZE_FILE}"
 }
@@ -117,10 +124,16 @@ delete_subcommand() {
 
   pushd "${SCRIPT_DIR}/terraform" > /dev/null
   {
+    if [[ -z "${CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY}" ]]; then
+      export TF_APPEND_USER_AGENT="deploystack/cloud-ops-sandbox"
+      export GOOGLE_TERRAFORM_USERAGENT_EXTENSION="${TF_APPEND_USER_AGENT}"
+    fi
     terraform init -backend-config "bucket=${TF_BUCKET_NAME}" -backend-config "prefix=${TERRAFORM_PREFIX}" -lockfile=false && \
     terraform destroy -auto-approve -var-file="${tf_FILE_LOCATION}" && \
     info "Successfully deleted Cloud Ops Sandbox from ${PROJECT_ID} project."
   }
+  ### Cleanup ###
+  unset -v GOOGLE_TERRAFORM_USERAGENT_EXTENSION TF_APPEND_USER_AGENT
   popd > /dev/null
 }
 help_subcommand() {
@@ -359,7 +372,7 @@ send_telemetry() {
   local EVENT_NAME="${1}"
   local TIMESTAMP; TIMESTAMP=$(date --utc +%s.%N)
   local OBFUSCATED_PROJECT_ID; OBFUSCATED_PROJECT_ID="$(echo "${PROJECT_ID}" | sha256sum | sed 's/  -//')"
-  gcloud pubsub topics publish "telemetry_test" \
+  ${AGCLOUD} pubsub topics publish "telemetry_test" \
   --user-output-enabled=false \
   --project "stackdriver-sandbox-230822" \
   --message="{ \
@@ -381,7 +394,8 @@ EOF
 }
 
 get_auth_token() {
-  local TOKEN; TOKEN="$(retry 2 gcloud --project="${PROJECT_ID}" auth print-access-token)"
+  local TOKEN
+  TOKEN="$(retry 2 gcloud --project="${PROJECT_ID}" auth print-access-token)"
   echo "${TOKEN}"
 }
 
@@ -509,7 +523,7 @@ Explore Cloud Ops Sandbox features by browsing
 
 GKE Dashboard: https://console.cloud.google.com/kubernetes/workload?project=${PROJECT_ID}
 Monitoring Workspace: https://console.cloud.google.com/monitoring/?project=${PROJECT_ID}
-Trying Online Boutique at http://${EXTERNAL_IP}/
+Try Online Boutique at http://${EXTERNAL_IP}/
 EOF
 
 }
