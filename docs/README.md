@@ -147,7 +147,7 @@ GKE cluster is the core part of the bill. You can see [estimate] costs with
 pricing [calculator].
 
 [1]: https://cloud.google.com/resource-manager/docs/creating-managing-projects#console_1
-[2]: https://console.cloud.google.com/?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fgooglecloudplatform%2Fcloud-ops-sandbox&cloudshell_git_repo=0.9.0&cloudshell_tutorial=docs/walkthrough.md
+[2]: https://console.cloud.google.com/?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fgooglecloudplatform%2Fcloud-ops-sandbox&cloudshell_git_branch=0.9.1&cloudshell_tutorial=docs/walkthrough.md
 [cloud-ops]: <http://cloud.google.com/products/operations
 [ob]: <https://github.com/GoogleCloudPlatform/microservices-demo
 [ob-architecture]: <https://github.com/GoogleCloudPlatform/microservices-demo#architecture

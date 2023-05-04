@@ -55,7 +55,7 @@ If prompted, authorize Cloud Shell to call listed Google Cloud APIs.
 
 To launch Sandbox using default settings run the following command in Cloud Shell:
 
-```shell
+```bash
 provisioning/sandboxctl create --project-id <walkthrough-project-id/>
 ```
 

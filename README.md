@@ -1,6 +1,6 @@
 # 📈 📊 👣 🪵 Cloud Operations Sandbox
 
-![Terraform][tf_badge]
+![Terraform][tf_badge] ![sandboxctl][cli_badge]
 
 Cloud Operations (Ops) Sandbox is an end-to-end demo that helps practitioners to
 learn about [Cloud Operations][cloud-ops] (formerly Stackdriver) and Service
@@ -72,7 +72,7 @@ Read more about Cloud Ops Sandbox and how to use it in the [documentation](docs/
 The following functionality has been changed in the recent versions of Cloud
 Ops Sandbox:
 
-### Version 0.9.0
+### Version 0.9.1
 
 * Rating service is not a part of the demo application. It has the following effects:
   * Launch does not provision AppEngine services and CloudSQL DB.
@@ -110,8 +110,9 @@ under Apache 2.0. Full license text is available in [LICENSE](LICENSE).
 > **Note**
 > This is not an official Google project. Please, report any issues or feature requests related to this project [here].
 
-[1]: https://console.cloud.google.com/?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fgooglecloudplatform%2Fcloud-ops-sandbox&cloudshell_git_repo=0.9.0&cloudshell_tutorial=docs/walkthrough.md
-[tf_badge]: https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/workflows/Terraform/badge.svg
+[1]: https://console.cloud.google.com/?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fgooglecloudplatform%2Fcloud-ops-sandbox&cloudshell_git_branch=0.9.1&cloudshell_tutorial=docs/walkthrough.md
+[tf_badge]: https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/actions/workflows/terraform.yaml/badge.svg
+[cli_badge]: https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/actions/workflows/cli.yaml/badge.svg
 [cloud-ops]: (https://cloud.google.com/products/operations)
 [ob]: https://github.com/GoogleCloudPlatform/microservices-demo
 [gke]: https://cloud.google.com/kubernetes-engine
