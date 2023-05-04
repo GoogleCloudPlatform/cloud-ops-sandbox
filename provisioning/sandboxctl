@@ -372,7 +372,7 @@ send_telemetry() {
   local EVENT_NAME="${1}"
   local TIMESTAMP; TIMESTAMP=$(date --utc +%s.%N)
   local OBFUSCATED_PROJECT_ID; OBFUSCATED_PROJECT_ID="$(echo "${PROJECT_ID}" | sha256sum | sed 's/  -//')"
-  ${AGCLOUD} pubsub topics publish "telemetry_test" \
+  ${AGCLOUD} pubsub topics publish "telemetry_prod" \
   --user-output-enabled=false \
   --project "stackdriver-sandbox-230822" \
   --message="{ \
