@@ -13,6 +13,10 @@
 # limitations under the License.
 name: CLI
 
+concurrency:
+  group: "cli-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
 on:
   pull_request:
     types: [opened,synchronize,reopened]
@@ -23,9 +27,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
 
     steps:
     - name: Checkout source code
