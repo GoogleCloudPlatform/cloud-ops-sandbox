@@ -1,0 +1,112 @@
+{
+    "$id": "https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/provisioning/schemas/notification_channel.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Notification Channel schema",
+    "type": "object",
+    "required": [
+        "app-id",
+        "version",
+        "channels"
+    ],
+    "properties": {
+        "app-id": {
+            "type": "string",
+            "description": "Unique identifier of the application"
+        },
+        "version": {
+            "const": "0.0.1",
+            "description": "Schema version"
+        },
+        "channels": {
+            "type": "array",
+            "description": "A collection of notification channels",
+            "items": {
+                "$ref": "#/$defs/channel"
+            }
+        }
+    },
+    "$defs": {
+        "channel": {
+            "type": "object",
+            "description": "",
+            "required": [
+                "name",
+                "type",
+                "labels"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "A unique resource name for this notification channel",
+                    "maxLength": 30
+                },
+                "display-name": {
+                    "type": "string",
+                    "description": "A human-readable name for this notification channel",
+                    "maxLength": 512
+                },
+                "type": {
+                    "enum": [
+                        "email",
+                        "pubsub",
+                        "sms"
+                    ],
+                    "description": "Supports sending notifications to email, PubSub and SMS"
+                },
+                "labels": {
+                    "description": "Configuration fields that define the channel and its behavior for one of:",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/emailLabels"
+                        },
+                        {
+                            "$ref": "#/$defs/pubsubLabels"
+                        },
+                        {
+                            "$ref": "#/$defs/smsLabels"
+                        }
+                    ]
+                }
+            }
+        },
+        "emailLabels": {
+            "type": "object",
+            "description": "Configuration for email notification channel",
+            "required": [
+                "email_address"
+            ],
+            "properties": {
+                "email_address": {
+                    "type": "string",
+                    "description": "An address to send email"
+                }
+            }
+        },
+        "pubsubLabels": {
+            "type": "object",
+            "description": "Configuration for PubSub notification channel",
+            "required": [
+                "topic"
+            ],
+            "properties": {
+                "topic": {
+                    "type": "string",
+                    "description": "A fully qualified resource name of the Pub/Sub topic to post notifications"
+                }
+            }
+        },
+        "smsLabels": {
+            "type": "object",
+            "description": "Configuration for SMS notification channel",
+            "required": [
+                "number"
+            ],
+            "properties": {
+                "number": {
+                    "type": "string",
+                    "describing": "A phone number to text notifications"
+                }
+            }
+        }
+    }
+}

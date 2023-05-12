@@ -1,0 +1,161 @@
+{
+    "$id": "https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/provisioning/schemas/slo.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Service's SLO schema",
+    "type": "object",
+    "required": [
+        "app-id",
+        "version",
+        "slos"
+    ],
+    "properties": {
+        "app-id": {
+            "type": "string",
+            "description": "Unique identifier of the application"
+        },
+        "version": {
+            "const": "0.0.1",
+            "description": "Schema version"
+        },
+        "slos": {
+            "type": "array",
+            "description": "A collection of service SLOs",
+            "items": {
+                "$ref": "#/$defs/slo"
+            }
+        }
+    },
+    "$defs": {
+        "slo": {
+            "type": "object",
+            "description": "A Service-Level Objective of desired good service",
+            "required": [
+                "name",
+                "service",
+                "goal",
+                "period",
+                "sli"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "A unique SLO resource name for the service"
+                },
+                "display-name": {
+                    "type": "string",
+                    "description": "A name used for UI elements listing this SLO"
+                },
+                "goal": {
+                    "type": "number",
+                    "description": "The fraction of service that must be good in order for this objective to be met",
+                    "minimum": 0,
+                    "maximum": 0.999
+                },
+                "period": {
+                    "description": "The time period over which the objective will be evaluated as one of the following:",
+                    "anyOf": [
+                        {
+                            "description": "A calendar period, semantically 'since the start of the current <calendarPeriod>'",
+                            "enum": [
+                                "DAY",
+                                "WEEK",
+                                "FORTNIGHT",
+                                "MONTH"
+                            ]
+                        },
+                        {
+                            "type": "number",
+                            "description": "A rolling time period, semantically 'in the past <rollingPeriod>' measured in days",
+                            "minimum": 1,
+                            "maximum": 30
+                        }
+                    ]
+                },
+                "service": {
+                    "type": "string",
+                    "description": "A unique service resource name in the project"
+                },
+                "sli": {
+                    "description": "The definition of good service, used to measure and calculate the quality of the Service's performance with respect to a single aspect of service quality",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/basicSLI"
+                        },
+                        {
+                            "$ref": "#/$defs/requestSLI"
+                        }
+                    ]
+                }
+            }
+        },
+        "basicSLI": {
+            "description": "Basic SLI on a well-known service type",
+            "anyOf": [
+                {
+                    "availability": {
+                        "const": true,
+                        "description": "Good service is defined to be the count of requests made to this service that return successfully"
+                    }
+                },
+                {
+                    "latency": {
+                        "type": "object",
+                        "description": "Good service is defined to be the count of requests made to this service that are fast enough with respect to `latency.threshold`",
+                        "properties": {
+                            "threshold": {
+                                "type": "string",
+                                "required": true,
+                                "pattern": "^[0-9]+s$"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "requestSLI": {
+            "description": "Request-based SLI",
+            "anyOf": [
+                {
+                    "type": "object",
+                    "description": "Ratio of good service to total service computed from two time series (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services.serviceLevelObjectives#timeseriesratio)",
+                    "properties": {
+                        "goodServiceFilter": {
+                            "type": "string",
+                            "description": "A monitoring filter quantifying good service (see object's description)"
+                        },
+                        "badServiceFilter": {
+                            "type": "string",
+                            "description": "A monitoring filter quantifying bad service (see object's description)"
+                        },
+                        "totalServiceFilter": {
+                            "type": "string",
+                            "description": "A monitoring filter quantifying total service provided (see object's description)"
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "description": "Ratio of good service as a count of values aggregated in a Distribution that fall into a good range (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services.serviceLevelObjectives#distributioncut)",
+                    "properties": {
+                        "filter": {
+                            "type": "string",
+                            "description": "A monitoring filter specifying a TimeSeries aggregating values (see object's description)"
+                        },
+                        "range": {
+                            "type": "object",
+                            "description": "Range of values considered 'good'. For a one-sided range, set one bound to an infinite value",
+                            "properties": {
+                                "min": {
+                                    "type": "number"
+                                },
+                                "max": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,135 @@
+{
+    "$id": "https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/provisioning/schemas/alert.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Monitoring alert schema",
+    "type": "object",
+    "required": [
+        "app-id",
+        "version",
+        "alerts"
+    ],
+    "properties": {
+        "app-id": {
+            "type": "string",
+            "description": "Unique identifier of the application"
+        },
+        "version": {
+            "const": "0.0.1",
+            "description": "Schema version"
+        },
+        "alerts": {
+            "type": "array",
+            "description": "A collection of alerts",
+            "items": {
+                "$ref": "#/$defs/alert"
+            }
+        }
+    },
+    "$defs": {
+        "alert": {
+            "type": "object",
+            "description": "Alert policy",
+            "required": [
+                "name",
+                "display-name",
+                "conditions"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Unique name of the dashboard resource"
+                },
+                "display-name": {
+                    "type": "string",
+                    "description": "A short name describing alert"
+                },
+                "documentation": {
+                    "type": "string",
+                    "description": "The body of the alert message. This text can be templatized using https://cloud.google.com/monitoring/alerts/doc-variables"
+                },
+                "combiner": {
+                    "enum": [
+                        "COMBINE_UNSPECIFIED",
+                        "AND",
+                        "OR",
+                        "AND_WITH_MATCHING_RESOURCE"
+                    ],
+                    "description": "Method to combine the results of multiple conditions to determine if an incident should be opened.",
+                    "default": "AND"
+                },
+                "conditions": {
+                    "type": "array",
+                    "description": "A collection of policy conditions",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/$defs/condition"
+                    }
+                }
+            }
+        },
+        "condition": {
+            "type": "object",
+            "description": "A true/false test that determines when an alerting policy should open an incident",
+            "required": [
+                "condition"
+            ],
+            "properties": {
+                "display-name": {
+                    "type": "string",
+                    "description": "A short name or phrase used to identify the condition"
+                },
+                "condition": {
+                    "description": "Condition can be only one of the following:",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/conditionThreshold"
+                        },
+                        {
+                            "$ref": "#/$defs/conditionAbsent"
+                        },
+                        {
+                            "$ref": "#/$defs/conditionMatchedLog"
+                        },
+                        {
+                            "$ref": "#/$defs/conditionMonitoringQueryLanguage"
+                        }
+                    ]
+                }
+            }
+        },
+        "conditionThreshold": {
+            "type": "object",
+            "description": "A condition that compares a collection of time series against a threshold",
+            "required": [
+                "filter",
+                "threshold",
+                "comparison"
+            ],
+            "properties": {
+                "filter": {
+                    "type": "string",
+                    "description": "A filter that identifies which time series should be compared with the threshold"
+                },
+                "threshold": {
+                    "type": "number",
+                    "describing": "A value against which to compare the time series"
+                },
+                "duration": {
+                    "type": "string",
+                    "description": "The amount of time that a time series must violate the threshold to be considered failing. only values that are a multiple of a minute--e.g., 0, 60, 120, or 300 seconds--are supported",
+                    "pattern": "^[0-9]+s$"
+                },
+                "comparison": {
+                    "enum": [
+                        "COMPARISON_LT",
+                        "COMPARISON_GT"
+                    ],
+                    "description": "The comparison to apply between the time series (indicated by filter)"
+                }
+            }
+        },
+        "conditionAbsent": {},
+        "conditionMatchedLog": {},
+        "conditionMonitoringQueryLanguage": {}
+    }
+}
