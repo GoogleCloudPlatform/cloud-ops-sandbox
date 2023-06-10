@@ -28,7 +28,7 @@ on:
 
 jobs:
 
-  ci:
+  validation:
     runs-on: ubuntu-latest
     permissions:
       contents: read
