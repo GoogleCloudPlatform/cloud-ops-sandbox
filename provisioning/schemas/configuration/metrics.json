@@ -1,5 +1,4 @@
 {
-    "$id": "https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/provisioning/schemas/log_based_metric.json",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "Log-based metric schema",
     "type": "object",

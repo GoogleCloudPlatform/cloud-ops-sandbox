@@ -1,5 +1,4 @@
 {
-    "$id": "https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/provisioning/schemas/dashboard.json",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "Monitoring dashboard schema",
     "type": "object",

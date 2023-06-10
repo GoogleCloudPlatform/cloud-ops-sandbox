@@ -22,12 +22,13 @@ on:
   pull_request:
     types: [opened,synchronize,reopened]
     paths:
-    - 'applications/**/*.yaml'
+    - 'configurations/**/*.yaml'
+    - 'provisioning/schemas/configuration/**/*.json'
 
 
 jobs:
 
-  yamllint:
+  ci:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -35,6 +36,31 @@ jobs:
     steps:
     - name: Checkout source code
       uses: actions/checkout@v3
-      
-    - name: Check CLI script
-      run: yamllint configurations/**/*.yaml configurations/**/*.yml
+    
+    - name: install ajv
+      run: npm install ajv-cli
+
+    - name: Lint configurations
+      run: find "${{ github.workspace }}/configurations" -mindepth 2 -maxdepth 2 -type f \( -name "*.yaml" -o -name "*.yml" \) -exec echo {} +
+    
+    - name: Lint schemas
+      run: echo "JSON liniting will be here"
+    
+    - name: Schema validation
+      run: |-
+        cd "${{ github.workspace }}"
+        for CONFIG_FILE in $(find configurations -mindepth 2 -maxdepth 2 -type f -name "*.yaml"); do
+          FILENAME=$(basename -s ".yaml" "${CONFIG_FILE@L}")
+          case "${FILENAME}" in
+            alerts | dashboards | healthchecks | metrics | services | slos)
+              ;;
+            *)
+              echo "Unknown file ${CONFIG_FILE}" 1>&2
+              continue
+              ;;
+          esac
+          ajv --spec=draft2020 -s "provisioning/schemas/configuration/${FILENAME}.json" -d "${CONFIG_FILE}"
+        done
+  
+    - name: Dry run
+      run: echo "Validation of Terraform plan for test configuration will be here"

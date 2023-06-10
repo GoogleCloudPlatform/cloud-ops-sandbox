@@ -1,7 +1,6 @@
 {
-    "$id": "https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/provisioning/schemas/alert.json",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "Monitoring alert schema",
+    "title": "Monitoring alerts and notification channels schema",
     "type": "object",
     "required": [
         "app-id",
@@ -19,9 +18,16 @@
         },
         "alerts": {
             "type": "array",
-            "description": "A collection of alerts",
+            "description": "A collection of alert policy definitions",
             "items": {
                 "$ref": "#/$defs/alert"
+            }
+        },
+        "channels": {
+            "type": "array",
+            "description": "A collection of notification channel definitions",
+            "items": {
+                "$ref": "#/$defs/channel"
             }
         }
     },
@@ -64,6 +70,49 @@
                     "items": {
                         "$ref": "#/$defs/condition"
                     }
+                }
+            }
+        },
+        "channel": {
+            "type": "object",
+            "description": "",
+            "required": [
+                "name",
+                "type",
+                "labels"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "A unique resource name for this notification channel",
+                    "maxLength": 30
+                },
+                "display-name": {
+                    "type": "string",
+                    "description": "A human-readable name for this notification channel",
+                    "maxLength": 512
+                },
+                "type": {
+                    "enum": [
+                        "email",
+                        "pubsub",
+                        "sms"
+                    ],
+                    "description": "Supports sending notifications to email, PubSub and SMS"
+                },
+                "labels": {
+                    "description": "Configuration fields that define the channel and its behavior for one of:",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/emailLabels"
+                        },
+                        {
+                            "$ref": "#/$defs/pubsubLabels"
+                        },
+                        {
+                            "$ref": "#/$defs/smsLabels"
+                        }
+                    ]
                 }
             }
         },
@@ -130,6 +179,45 @@
         },
         "conditionAbsent": {},
         "conditionMatchedLog": {},
-        "conditionMonitoringQueryLanguage": {}
+        "conditionMonitoringQueryLanguage": {},
+        "emailLabels": {
+            "type": "object",
+            "description": "Configuration for email notification channel",
+            "required": [
+                "email_address"
+            ],
+            "properties": {
+                "email_address": {
+                    "type": "string",
+                    "description": "An address to send email"
+                }
+            }
+        },
+        "pubsubLabels": {
+            "type": "object",
+            "description": "Configuration for PubSub notification channel",
+            "required": [
+                "topic"
+            ],
+            "properties": {
+                "topic": {
+                    "type": "string",
+                    "description": "A fully qualified resource name of the Pub/Sub topic to post notifications"
+                }
+            }
+        },
+        "smsLabels": {
+            "type": "object",
+            "description": "Configuration for SMS notification channel",
+            "required": [
+                "number"
+            ],
+            "properties": {
+                "number": {
+                    "type": "string",
+                    "describing": "A phone number to text notifications"
+                }
+            }
+        }
     }
 }
