@@ -38,7 +38,7 @@ jobs:
       uses: actions/checkout@v3
     
     - name: install ajv
-      run: npm install ajv-cli
+      run: npm install -g ajv-cli
 
     - name: Lint configurations
       run: find "${{ github.workspace }}/configurations" -mindepth 2 -maxdepth 2 -type f \( -name "*.yaml" -o -name "*.yml" \) -exec echo {} +
