@@ -1,0 +1,89 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Monitored custom service schema",
+    "type": "object",
+    "required": [
+        "app-id",
+        "version",
+        "services"
+    ],
+    "properties": {
+        "app-id": {
+            "type": "string",
+            "description": "Unique identifier of the application"
+        },
+        "version": {
+            "const": "0.0.1",
+            "description": "Schema version"
+        },
+        "services": {
+            "type": "array",
+            "description": "A collection of services",
+            "items": {
+                "$ref": "#/$defs/service"
+            }
+        }
+    },
+    "$defs": {
+        "service": {
+            "type": "object",
+            "description": "",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Unique service ID"
+                },
+                "display-name": {
+                    "type": "string",
+                    "description": "Human friendly name of monitored service"
+                },
+                "labels": {
+                    "description": "Labels which have been used to annotate the service.",
+                    "$ref": "#/$defs/labels"
+                },
+                "basic_service": {
+                    "type": "object",
+                    "description": "",
+                    "required": [
+                        "service_type"
+                    ],
+                    "properties": {
+                        "service_type": {
+                            "description": "The type of service that this basic service defines",
+                            "enum": [
+                                "APP_ENGINE",
+                                "CLOUD_ENDPOINTS",
+                                "CLUSTER_ISTIO",
+                                "ISTIO_CANONICAL_SERVICE",
+                                "CLOUD_RUN"
+                            ]
+                        },
+                        "labels": {
+                            "description": "Labels that specify the resource that emits the monitoring data which is used for SLO reporting of this Service.",
+                            "$ref": "#/$defs/labels"
+                        }
+                    }
+                }
+            }
+        },
+        "labels": {
+            "type": "object",
+            "description": "",
+            "patternProperties": {
+                "^[a-zA-Z][a-zA-Z0-9_\\-]*$": {
+                    "type": "string",
+                    "additionalProperties": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 63
+                    }
+                }
+            },
+            "minProperties": 0,
+            "maxProperties": 64
+        }
+    }
+}
