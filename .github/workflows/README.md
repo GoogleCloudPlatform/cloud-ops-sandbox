@@ -70,6 +70,15 @@ the use of the workflow as [required status check].
 It is configured to run on any "non-terraform" changes, so the required workflow will always
 guaranteed to terminate.
 
+### Configurations workflow ([configurations.yaml])
+
+The `configurations` checks correctness of the Sandbox configurations. It includes:
+
+* yaml linting
+* validation of the configuration's yaml files vs. schema that is defined following JSON schema [draft2020]
+* json linting
+* testing configuration vs. expected terraform plan to make sure that all components are built using "right" provider and resource definitions
+
 ### Required workflows
 
 The workflows triggered by pull request modifications (excluding a closure of the request)
@@ -114,3 +123,4 @@ For information about the customized workflow, see [workfows/README]
 [convention]: https://www.conventionalcommits.org/en/v1.0.0/
 [snippets]: https://github.com/googleapis/repo-automation-bots/tree/main/packages/snippet-bot
 [trusted contributors]: https://github.com/googleapis/repo-automation-bots/tree/main/packages/trusted-contribution
+[draft2020]: https://json-schema.org/draft/2020-12/release-notes.html
