@@ -27,7 +27,7 @@
     "$defs": {
         "dashboard": {
             "type": "object",
-            "description": "Monitoring dashboard properties",
+            "description": "Monitoring dashboard properties using GridLayout (https://cloud.google.com/monitoring/api/ref_v3/rest/v1/projects.dashboards#gridlayout)",
             "required": [
                 "name",
                 "display-name",
@@ -44,7 +44,7 @@
                 },
                 "widgets": {
                     "type": "array",
-                    "description": "A collection of dashboard's widgets",
+                    "description": "A collection of GridLayout widgets",
                     "items": {
                         "$ref": "#/$defs/widget"
                     }
@@ -53,7 +53,7 @@
         },
         "widget": {
             "type": "object",
-            "description": "A chart that displays data on a 2D (X and Y axes) plane (https://cloud.google.com/monitoring/api/ref_v3/rest/v1/projects.dashboards#xychart)",
+            "description": "A widget chart that displays data on a 2D (X and Y axes) plane (https://cloud.google.com/monitoring/api/ref_v3/rest/v1/projects.dashboards#xychart)",
             "required": [
                 "datasets"
             ],
@@ -95,34 +95,38 @@
                     ],
                     "properties": {
                         "filter": {
-                            "query": {
-                                "type": "string",
-                                "description": "Identifies the metric types, resources, and projects to query"
-                            },
-                            "alignment": {
-                                "enum": [
-                                    "ALIGN_NONE",
-                                    "ALIGN_DELTA",
-                                    "ALIGN_RATE",
-                                    "ALIGN_INTERPOLATE",
-                                    "ALIGN_NEXT_OLDER",
-                                    "ALIGN_MIN",
-                                    "ALIGN_MAX",
-                                    "ALIGN_MEAN",
-                                    "ALIGN_COUNT",
-                                    "ALIGN_SUM",
-                                    "ALIGN_STDDEV",
-                                    "ALIGN_COUNT_TRUE",
-                                    "ALIGN_COUNT_FALSE",
-                                    "ALIGN_FRACTION_TRUE",
-                                    "ALIGN_PERCENTILE_99",
-                                    "ALIGN_PERCENTILE_95",
-                                    "ALIGN_PERCENTILE_50",
-                                    "ALIGN_PERCENTILE_05",
-                                    "ALIGN_PERCENT_CHANGE"
-                                ],
-                                "description": "Mathematical method to group data points together into a single time series",
-                                "default": "ALIGN_MEAN"
+                            "type": "object",
+                            "description": "A set of parameters for querying time series data",
+                            "properties": {
+                                "query": {
+                                    "type": "string",
+                                    "description": "Identifies the metric types, resources, and projects to query"
+                                },
+                                "alignment": {
+                                    "enum": [
+                                        "ALIGN_NONE",
+                                        "ALIGN_DELTA",
+                                        "ALIGN_RATE",
+                                        "ALIGN_INTERPOLATE",
+                                        "ALIGN_NEXT_OLDER",
+                                        "ALIGN_MIN",
+                                        "ALIGN_MAX",
+                                        "ALIGN_MEAN",
+                                        "ALIGN_COUNT",
+                                        "ALIGN_SUM",
+                                        "ALIGN_STDDEV",
+                                        "ALIGN_COUNT_TRUE",
+                                        "ALIGN_COUNT_FALSE",
+                                        "ALIGN_FRACTION_TRUE",
+                                        "ALIGN_PERCENTILE_99",
+                                        "ALIGN_PERCENTILE_95",
+                                        "ALIGN_PERCENTILE_50",
+                                        "ALIGN_PERCENTILE_05",
+                                        "ALIGN_PERCENT_CHANGE"
+                                    ],
+                                    "description": "Mathematical method to group data points together into a single time series",
+                                    "default": "ALIGN_MEAN"
+                                }
                             }
                         },
                         "unit-override": {

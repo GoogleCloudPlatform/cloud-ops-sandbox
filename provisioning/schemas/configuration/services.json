@@ -75,11 +75,8 @@
             "patternProperties": {
                 "^[a-zA-Z][a-zA-Z0-9_\\-]*$": {
                     "type": "string",
-                    "additionalProperties": {
-                        "type": "string",
-                        "minLength": 0,
-                        "maxLength": 63
-                    }
+                    "minLength": 0,
+                    "maxLength": 63
                 }
             },
             "minProperties": 0,

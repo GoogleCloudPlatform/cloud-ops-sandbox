@@ -92,28 +92,17 @@
                     "description": "A human-readable name for this notification channel",
                     "maxLength": 512
                 },
-                "type": {
-                    "enum": [
-                        "email",
-                        "pubsub",
-                        "sms"
-                    ],
-                    "description": "Supports sending notifications to email, PubSub and SMS"
-                },
-                "labels": {
-                    "description": "Configuration fields that define the channel and its behavior for one of:",
-                    "anyOf": [
-                        {
-                            "$ref": "#/$defs/emailLabels"
-                        },
-                        {
-                            "$ref": "#/$defs/pubsubLabels"
-                        },
-                        {
-                            "$ref": "#/$defs/smsLabels"
-                        }
-                    ]
-                }
+                "oneOf": [
+                    {
+                        "$ref": "#/$defs/smsChannel"
+                    },
+                    {
+                        "$ref": "#/$defs/emailChannel"
+                    },
+                    {
+                        "$ref": "#/$defs/pubsubChannel"
+                    }
+                ]
             }
         },
         "condition": {
@@ -129,7 +118,7 @@
                 },
                 "condition": {
                     "description": "Condition can be only one of the following:",
-                    "anyOf": [
+                    "oneOf": [
                         {
                             "$ref": "#/$defs/conditionThreshold"
                         },
@@ -161,7 +150,7 @@
                 },
                 "threshold": {
                     "type": "number",
-                    "describing": "A value against which to compare the time series"
+                    "description": "A value against which to compare the time series"
                 },
                 "duration": {
                     "type": "string",
@@ -180,42 +169,57 @@
         "conditionAbsent": {},
         "conditionMatchedLog": {},
         "conditionMonitoringQueryLanguage": {},
-        "emailLabels": {
-            "type": "object",
-            "description": "Configuration for email notification channel",
-            "required": [
-                "email_address"
-            ],
-            "properties": {
-                "email_address": {
-                    "type": "string",
-                    "description": "An address to send email"
+        "emailChannel": {
+            "type": {
+                "const": "email"
+            },
+            "labels": {
+                "type": "object",
+                "description": "Configuration for email notification channel",
+                "required": [
+                    "email_address"
+                ],
+                "properties": {
+                    "email_address": {
+                        "type": "string",
+                        "description": "An address to send email"
+                    }
                 }
             }
         },
-        "pubsubLabels": {
-            "type": "object",
-            "description": "Configuration for PubSub notification channel",
-            "required": [
-                "topic"
-            ],
-            "properties": {
-                "topic": {
-                    "type": "string",
-                    "description": "A fully qualified resource name of the Pub/Sub topic to post notifications"
+        "pubsubChannel": {
+            "type": {
+                "const": "pubsub"
+            },
+            "labels": {
+                "type": "object",
+                "description": "Configuration for PubSub notification channel",
+                "required": [
+                    "topic"
+                ],
+                "properties": {
+                    "topic": {
+                        "type": "string",
+                        "description": "A fully qualified resource name of the Pub/Sub topic to post notifications"
+                    }
                 }
             }
         },
-        "smsLabels": {
-            "type": "object",
-            "description": "Configuration for SMS notification channel",
-            "required": [
-                "number"
-            ],
-            "properties": {
-                "number": {
-                    "type": "string",
-                    "describing": "A phone number to text notifications"
+        "smsChannel": {
+            "type": {
+                "const": "sms"
+            },
+            "labels": {
+                "type": "object",
+                "description": "Configuration for SMS notification channel",
+                "required": [
+                    "number"
+                ],
+                "properties": {
+                    "number": {
+                        "type": "string",
+                        "description": "A phone number to text notifications"
+                    }
                 }
             }
         }
