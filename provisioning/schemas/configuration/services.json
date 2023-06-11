@@ -44,14 +44,14 @@
                     "description": "Labels which have been used to annotate the service.",
                     "$ref": "#/$defs/labels"
                 },
-                "basic_service": {
+                "basic-service": {
                     "type": "object",
                     "description": "",
                     "required": [
-                        "service_type"
+                        "service-type"
                     ],
                     "properties": {
-                        "service_type": {
+                        "service-type": {
                             "description": "The type of service that this basic service defines",
                             "enum": [
                                 "APP_ENGINE",

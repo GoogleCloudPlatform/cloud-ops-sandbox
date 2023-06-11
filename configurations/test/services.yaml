@@ -14,4 +14,19 @@
 
 app-id: "test"
 version: "0.0.1"
-services: []
+services:
+- name: custom-test-service-1
+  display-name: "Custom service 1"
+  labels:
+    abc1: value1
+    abc2: value2
+- name: custom-test-service-2
+  display-name: "Custom service 2"
+  basic-service:
+    service-type: CLOUD_ENDPOINTS
+    labels:
+      endpoint1: value1
+      endpoint2: value2
+  labels:
+    bce1: value1
+    bce2: value2

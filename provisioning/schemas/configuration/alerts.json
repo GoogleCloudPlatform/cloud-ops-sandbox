@@ -53,6 +53,13 @@
                     "type": "string",
                     "description": "The body of the alert message. This text can be templatized using https://cloud.google.com/monitoring/alerts/doc-variables"
                 },
+                "notification-channels": {
+                    "type": "array",
+                    "description": "The notification channels to which notifications should be sent when incidents are opened or closed or when new violations occur on an already opened incident.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "combiner": {
                     "enum": [
                         "COMBINE_UNSPECIFIED",
@@ -77,9 +84,7 @@
             "type": "object",
             "description": "",
             "required": [
-                "name",
-                "type",
-                "labels"
+                "name"
             ],
             "properties": {
                 "name": {
@@ -92,17 +97,19 @@
                     "description": "A human-readable name for this notification channel",
                     "maxLength": 512
                 },
-                "oneOf": [
-                    {
-                        "$ref": "#/$defs/smsChannel"
-                    },
-                    {
-                        "$ref": "#/$defs/emailChannel"
-                    },
-                    {
-                        "$ref": "#/$defs/pubsubChannel"
-                    }
-                ]
+                "channel": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/smsChannel"
+                        },
+                        {
+                            "$ref": "#/$defs/emailChannel"
+                        },
+                        {
+                            "$ref": "#/$defs/pubsubChannel"
+                        }
+                    ]
+                }
             }
         },
         "condition": {
@@ -118,7 +125,7 @@
                 },
                 "condition": {
                     "description": "Condition can be only one of the following:",
-                    "oneOf": [
+                    "anyOf": [
                         {
                             "$ref": "#/$defs/conditionThreshold"
                         },
@@ -170,55 +177,76 @@
         "conditionMatchedLog": {},
         "conditionMonitoringQueryLanguage": {},
         "emailChannel": {
-            "type": {
-                "const": "email"
-            },
-            "labels": {
-                "type": "object",
-                "description": "Configuration for email notification channel",
-                "required": [
-                    "email_address"
-                ],
-                "properties": {
-                    "email_address": {
-                        "type": "string",
-                        "description": "An address to send email"
+            "type": "object",
+            "required": [
+                "type",
+                "labels"
+            ],
+            "properties": {
+                "type": {
+                    "const": "email"
+                },
+                "labels": {
+                    "type": "object",
+                    "description": "Configuration for email notification channel",
+                    "required": [
+                        "email_address"
+                    ],
+                    "properties": {
+                        "email_address": {
+                            "type": "string",
+                            "description": "An address to send email"
+                        }
                     }
                 }
             }
         },
         "pubsubChannel": {
-            "type": {
-                "const": "pubsub"
-            },
-            "labels": {
-                "type": "object",
-                "description": "Configuration for PubSub notification channel",
-                "required": [
-                    "topic"
-                ],
-                "properties": {
-                    "topic": {
-                        "type": "string",
-                        "description": "A fully qualified resource name of the Pub/Sub topic to post notifications"
+            "type": "object",
+            "required": [
+                "type",
+                "labels"
+            ],
+            "properties": {
+                "type": {
+                    "const": "pubsub"
+                },
+                "labels": {
+                    "type": "object",
+                    "description": "Configuration for PubSub notification channel",
+                    "required": [
+                        "topic"
+                    ],
+                    "properties": {
+                        "topic": {
+                            "type": "string",
+                            "description": "A fully qualified resource name of the Pub/Sub topic to post notifications"
+                        }
                     }
                 }
             }
         },
         "smsChannel": {
-            "type": {
-                "const": "sms"
-            },
-            "labels": {
-                "type": "object",
-                "description": "Configuration for SMS notification channel",
-                "required": [
-                    "number"
-                ],
-                "properties": {
-                    "number": {
-                        "type": "string",
-                        "description": "A phone number to text notifications"
+            "type": "object",
+            "required": [
+                "type",
+                "labels"
+            ],
+            "properties": {
+                "type": {
+                    "const": "sms"
+                },
+                "labels": {
+                    "type": "object",
+                    "description": "Configuration for SMS notification channel",
+                    "required": [
+                        "number"
+                    ],
+                    "properties": {
+                        "number": {
+                            "type": "string",
+                            "description": "A phone number to text notifications"
+                        }
                     }
                 }
             }

@@ -14,5 +14,34 @@
 
 app-id: "test"
 version: "0.0.1"
-alerts: []
-channels: []
+alerts:
+- name: test-alert-with-notifications
+  display-name: "Test alert with notification channel"
+  documentation: "Lorem ipsum Lorem ipsum Lorem ipsum"
+  notification-channels: [sms-test-channel, pubsub-test-channel]
+  conditions:
+  - display-name: "test condition 1"
+    condition:
+      filter: "metric.type=\"monitoring.googleapis.com/uptime_check/check_passed\""
+      threshold: 3
+      duration: "300s"
+      comparison: "COMPARISON_GT"
+channels:
+- name: sms-test-channel
+  display-name: "SMS test channel"
+  channel:
+    type: sms
+    labels:
+      number: "1234567890"
+- name: email-test-channel
+  display-name: "E-mail test channel"
+  channel:
+    type: email
+    labels:
+      email_address: "johnsmith@example.com"
+- name: pubsub-test-channel
+  display-name: "PubSub test channel"
+  channel:
+    type: pubsub
+    labels:
+      topic: "projects/unknown/topics/unknown"
