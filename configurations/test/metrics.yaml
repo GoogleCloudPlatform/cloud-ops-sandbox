@@ -14,4 +14,12 @@
 
 app-id: "test"
 version: "0.0.1"
-metrics: []
+metrics:
+- name: test-log-metric-1
+  description: "Count audit resources"
+  filter: "resource.type=\"audited_resource\""
+  labels:
+  - key: resource
+    extractor: "EXTRACT(resource.type)"
+  - key: project
+    extractor: "EXTRACT(resource.labels.project_id)"

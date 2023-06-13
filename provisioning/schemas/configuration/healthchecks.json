@@ -10,6 +10,7 @@
     "properties": {
         "app-id": {
             "type": "string",
+            "pattern": "^[^\\/\\.]+$",
             "description": "Unique identifier of the application"
         },
         "version": {
@@ -123,7 +124,7 @@
             "type": "object",
             "description": "Information involved in an HTTP/HTTPS Uptime check request",
             "properties": {
-                "requestMethod": {
+                "request-method": {
                     "enum": [
                         "METHOD_UNSPECIFIED",
                         "GET",

@@ -14,4 +14,19 @@
 
 app-id: "test"
 version: "0.0.1"
-checks: []
+checks:
+- name: test-uptime-alert-1
+  display-name: "HTTP uptime check"
+  timeout: 10
+  resource:
+    type: k8s_service
+    labels:
+      cluster_name: "test-cluster-1"
+  content:
+    content: "ok"
+    matcher: CONTAINS_STRING
+  type:
+    request-method: "GET"
+    path: "/healtz"
+    port: 8008
+

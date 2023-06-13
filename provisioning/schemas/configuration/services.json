@@ -10,6 +10,7 @@
     "properties": {
         "app-id": {
             "type": "string",
+            "pattern": "^[^\\/\\.]+$",
             "description": "Unique identifier of the application"
         },
         "version": {
