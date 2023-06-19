@@ -14,4 +14,20 @@
 
 app-id: "test"
 version: "0.0.1"
-slos: []
+slos:
+- name: test-service-slo-1
+  display-name: "Test availability SLO for basic service"
+  goal: 0.5
+  period: WEEK
+  service: "gae:test-service"
+  sli:
+    availability: true
+
+- name: test-service-slo-2
+  display-name: "Test latency SLO for basic service"
+  goal: 0.5
+  period: WEEK
+  service: "gae:test-service"
+  sli:
+    latency:
+      threshold: 10s
