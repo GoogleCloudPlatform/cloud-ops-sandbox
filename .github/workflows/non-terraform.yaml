@@ -13,6 +13,10 @@
 # limitations under the License.
 name: Terraform
 
+concurrency:
+  group: "terraform-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
 on:
   pull_request:
     types: [opened,synchronize,reopened]
@@ -21,13 +25,10 @@ on:
 
 
 jobs:
-  tflint:
+  validation:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
 
     steps:
     - run: 'echo "No work to do for non-terraform changes"'
@@ -37,9 +38,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
 
     steps:
     - run: 'echo "No work to do for non-terraform changes"'

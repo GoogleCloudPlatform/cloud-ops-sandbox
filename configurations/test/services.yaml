@@ -11,26 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: CLI
 
-concurrency:
-  group: "cli-${{ github.workflow }}-${{ github.ref }}"
-  cancel-in-progress: true
-
-on:
-  pull_request:
-    types: [opened,synchronize,reopened]
-
-jobs:
-
-  shellcheck:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-    - name: Checkout source code
-      uses: actions/checkout@v3
-      
-    - name: Check CLI script
-      run: shellcheck provisioning/sandboxctl
+app-id: "test"
+version: "0.0.1"
+services:
+- name: custom-test-service-1
+  display-name: "Custom service 1"
+  labels:
+    abc1: value1
+    abc2: value2
+- name: custom-test-service-2
+  display-name: "Custom service 2"
+  basic-service:
+    service-type: CLOUD_ENDPOINTS
+    labels:
+      endpoint1: value1
+      endpoint2: value2
+  labels:
+    bce1: value1
+    bce2: value2
