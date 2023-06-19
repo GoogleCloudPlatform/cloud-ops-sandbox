@@ -1,0 +1,176 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Uptime check schema",
+    "type": "object",
+    "required": [
+        "app-id",
+        "version",
+        "checks"
+    ],
+    "properties": {
+        "app-id": {
+            "type": "string",
+            "pattern": "^[^\\/\\.]+$",
+            "description": "Unique identifier of the application"
+        },
+        "version": {
+            "const": "0.0.1",
+            "description": "Schema version"
+        },
+        "checks": {
+            "type": "array",
+            "description": "A collection of uptime checks",
+            "items": {
+                "$ref": "#/$defs/check"
+            }
+        }
+    },
+    "$defs": {
+        "check": {
+            "type": "object",
+            "description": "Check configuration to monitor resource/service for availability",
+            "required": [
+                "name",
+                "display-name",
+                "timeout",
+                "resource"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "A unique resource name for this Uptime check configuration",
+                    "maxLength": 30
+                },
+                "display-name": {
+                    "type": "string",
+                    "description": "A human-readable name for this Uptime check configuration",
+                    "maxLength": 512
+                },
+                "content": {
+                    "type": "object",
+                    "description": "aAllows matching based on substrings and regular expressions",
+                    "properties": {
+                        "content": {
+                            "type": "string",
+                            "description": "String, regex or JSON content to match",
+                            "maxLength": 1024
+                        },
+                        "matcher": {
+                            "description": "Options to perform content matching",
+                            "enum": [
+                                "CONTENT_MATCHER_OPTION_UNSPECIFIED",
+                                "CONTAINS_STRING",
+                                "NOT_CONTAINS_STRING",
+                                "MATCHES_REGEX",
+                                "NOT_MATCHES_REGEX"
+                            ],
+                            "default": "CONTENT_MATCHER_OPTION_UNSPECIFIED"
+                        }
+                    }
+                },
+                "period": {
+                    "type": "string",
+                    "description": "How often, in seconds, the Uptime check is performed",
+                    "default": "60s",
+                    "pattern": "^[0-9]+s$"
+                },
+                "resource": {
+                    "type": "object",
+                    "description": "The monitored resource associated with the configuration",
+                    "required": [
+                        "type",
+                        "labels"
+                    ],
+                    "properties": {
+                        "type": {
+                            "description": "The monitored resource type",
+                            "enum": [
+                                "uptime_url",
+                                "gce_instance",
+                                "gae_app",
+                                "aws_ec2_instance",
+                                "aws_elb_load_balancer",
+                                "k8s_service",
+                                "servicedirectory_service",
+                                "cloudRunRevision"
+                            ]
+                        },
+                        "labels": {
+                            "description": "Values for all of the labels listed in the associated monitored resource descriptor",
+                            "$ref": "#/$defs/labels"
+                        }
+                    }
+                },
+                "timeout": {
+                    "type": "number",
+                    "description": "A maximum amount of time to wait for the request to complete",
+                    "minimum": 1,
+                    "maximum": 60
+                },
+                "type": {
+                    "description": "One of the following Uptime check types:",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/httpCheck"
+                        },
+                        {
+                            "$ref": "#/$defs/tcpCheck"
+                        }
+                    ]
+                }
+            }
+        },
+        "httpCheck": {
+            "type": "object",
+            "description": "Information involved in an HTTP/HTTPS Uptime check request",
+            "properties": {
+                "request-method": {
+                    "enum": [
+                        "METHOD_UNSPECIFIED",
+                        "GET",
+                        "POST"
+                    ],
+                    "default": "METHOD_UNSPECIFIED"
+                },
+                "path": {
+                    "type": "string",
+                    "default": "/"
+                },
+                "port": {
+                    "type": "number",
+                    "default": 80
+                }
+            }
+        },
+        "labels": {
+            "type": "object",
+            "description": "",
+            "patternProperties": {
+                "^[a-zA-Z][a-zA-Z0-9_\\-]*$": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 63
+                }
+            },
+            "minProperties": 0,
+            "maxProperties": 64
+        },
+        "tcpCheck": {
+            "type": "object",
+            "description": "Information involved in a TCP Uptime check request",
+            "required": [
+                "port"
+            ],
+            "properties": {
+                "port": {
+                    "type": "number"
+                },
+                "pingsCount": {
+                    "type": "number",
+                    "description": "Number of ICMP pings",
+                    "default": 3
+                }
+            }
+        }
+    }
+}

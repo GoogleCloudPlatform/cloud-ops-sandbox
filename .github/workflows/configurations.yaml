@@ -1,0 +1,66 @@
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Configurations
+
+concurrency:
+  group: "configurations-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    types: [opened,synchronize,reopened]
+    paths:
+    - 'configurations/**/*.yaml'
+    - 'provisioning/schemas/configuration/**/*.json'
+
+
+jobs:
+
+  validation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v3
+    
+    - name: install ajv
+      run: npm install -g ajv-cli
+
+    - name: Lint configurations
+      run: find "${{ github.workspace }}/configurations" -mindepth 2 -maxdepth 2 -type f \( -name "*.yaml" -o -name "*.yml" \) -exec echo {} +
+    
+    - name: Lint schemas
+      run: echo "JSON liniting will be here"
+    
+    - name: Schema validation
+      run: |-
+        cd "${{ github.workspace }}"
+        for CONFIG_FILE in $(find configurations -mindepth 2 -maxdepth 2 -type f -name "*.yaml"); do
+          FILENAME=$(basename -s ".yaml" "${CONFIG_FILE@L}")
+          case "${FILENAME}" in
+            alerts | dashboards | healthchecks | metrics | services | slos)
+              ;;
+            *)
+              echo "Unknown file ${CONFIG_FILE}" 1>&2
+              continue
+              ;;
+          esac
+          ajv --spec=draft2020 -s "provisioning/schemas/configuration/${FILENAME}.json" -d "${CONFIG_FILE}"
+        done
+  
+    - name: Dry run
+      run: echo "Validation of Terraform plan for test configuration will be here"

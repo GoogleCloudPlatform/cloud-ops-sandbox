@@ -1,0 +1,256 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Monitoring alerts and notification channels schema",
+    "type": "object",
+    "required": [
+        "app-id",
+        "version",
+        "alerts"
+    ],
+    "properties": {
+        "app-id": {
+            "type": "string",
+            "pattern": "^[^\\/\\.]+$",
+            "description": "Unique identifier of the application"
+        },
+        "version": {
+            "const": "0.0.1",
+            "description": "Schema version"
+        },
+        "alerts": {
+            "type": "array",
+            "description": "A collection of alert policy definitions",
+            "items": {
+                "$ref": "#/$defs/alert"
+            }
+        },
+        "channels": {
+            "type": "array",
+            "description": "A collection of notification channel definitions",
+            "items": {
+                "$ref": "#/$defs/channel"
+            }
+        }
+    },
+    "$defs": {
+        "alert": {
+            "type": "object",
+            "description": "Alert policy",
+            "required": [
+                "name",
+                "display-name",
+                "conditions"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Unique name of the dashboard resource"
+                },
+                "display-name": {
+                    "type": "string",
+                    "description": "A short name describing alert"
+                },
+                "documentation": {
+                    "type": "string",
+                    "description": "The body of the alert message. This text can be templatized using https://cloud.google.com/monitoring/alerts/doc-variables"
+                },
+                "notification-channels": {
+                    "type": "array",
+                    "description": "The notification channels to which notifications should be sent when incidents are opened or closed or when new violations occur on an already opened incident.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "combiner": {
+                    "enum": [
+                        "COMBINE_UNSPECIFIED",
+                        "AND",
+                        "OR",
+                        "AND_WITH_MATCHING_RESOURCE"
+                    ],
+                    "description": "Method to combine the results of multiple conditions to determine if an incident should be opened.",
+                    "default": "AND"
+                },
+                "conditions": {
+                    "type": "array",
+                    "description": "A collection of policy conditions",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/$defs/condition"
+                    }
+                }
+            }
+        },
+        "channel": {
+            "type": "object",
+            "description": "",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "A unique resource name for this notification channel",
+                    "maxLength": 30
+                },
+                "display-name": {
+                    "type": "string",
+                    "description": "A human-readable name for this notification channel",
+                    "maxLength": 512
+                },
+                "channel": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/smsChannel"
+                        },
+                        {
+                            "$ref": "#/$defs/emailChannel"
+                        },
+                        {
+                            "$ref": "#/$defs/pubsubChannel"
+                        }
+                    ]
+                }
+            }
+        },
+        "condition": {
+            "type": "object",
+            "description": "A true/false test that determines when an alerting policy should open an incident",
+            "required": [
+                "condition"
+            ],
+            "properties": {
+                "display-name": {
+                    "type": "string",
+                    "description": "A short name or phrase used to identify the condition"
+                },
+                "condition": {
+                    "description": "Condition can be only one of the following:",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/conditionThreshold"
+                        },
+                        {
+                            "$ref": "#/$defs/conditionAbsent"
+                        },
+                        {
+                            "$ref": "#/$defs/conditionMatchedLog"
+                        },
+                        {
+                            "$ref": "#/$defs/conditionMonitoringQueryLanguage"
+                        }
+                    ]
+                }
+            }
+        },
+        "conditionThreshold": {
+            "type": "object",
+            "description": "A condition that compares a collection of time series against a threshold",
+            "required": [
+                "filter",
+                "threshold",
+                "comparison"
+            ],
+            "properties": {
+                "filter": {
+                    "type": "string",
+                    "description": "A filter that identifies which time series should be compared with the threshold"
+                },
+                "threshold": {
+                    "type": "number",
+                    "description": "A value against which to compare the time series"
+                },
+                "duration": {
+                    "type": "string",
+                    "description": "The amount of time that a time series must violate the threshold to be considered failing. only values that are a multiple of a minute--e.g., 0, 60, 120, or 300 seconds--are supported",
+                    "pattern": "^[0-9]+s$"
+                },
+                "comparison": {
+                    "enum": [
+                        "COMPARISON_LT",
+                        "COMPARISON_GT"
+                    ],
+                    "description": "The comparison to apply between the time series (indicated by filter)"
+                }
+            }
+        },
+        "conditionAbsent": {},
+        "conditionMatchedLog": {},
+        "conditionMonitoringQueryLanguage": {},
+        "emailChannel": {
+            "type": "object",
+            "required": [
+                "type",
+                "labels"
+            ],
+            "properties": {
+                "type": {
+                    "const": "email"
+                },
+                "labels": {
+                    "type": "object",
+                    "description": "Configuration for email notification channel",
+                    "required": [
+                        "email_address"
+                    ],
+                    "properties": {
+                        "email_address": {
+                            "type": "string",
+                            "description": "An address to send email"
+                        }
+                    }
+                }
+            }
+        },
+        "pubsubChannel": {
+            "type": "object",
+            "required": [
+                "type",
+                "labels"
+            ],
+            "properties": {
+                "type": {
+                    "const": "pubsub"
+                },
+                "labels": {
+                    "type": "object",
+                    "description": "Configuration for PubSub notification channel",
+                    "required": [
+                        "topic"
+                    ],
+                    "properties": {
+                        "topic": {
+                            "type": "string",
+                            "description": "A fully qualified resource name of the Pub/Sub topic to post notifications"
+                        }
+                    }
+                }
+            }
+        },
+        "smsChannel": {
+            "type": "object",
+            "required": [
+                "type",
+                "labels"
+            ],
+            "properties": {
+                "type": {
+                    "const": "sms"
+                },
+                "labels": {
+                    "type": "object",
+                    "description": "Configuration for SMS notification channel",
+                    "required": [
+                        "number"
+                    ],
+                    "properties": {
+                        "number": {
+                            "type": "string",
+                            "description": "A phone number to text notifications"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

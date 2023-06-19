@@ -1,0 +1,115 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Log-based metric schema",
+    "type": "object",
+    "required": [
+        "app-id",
+        "version",
+        "metrics"
+    ],
+    "properties": {
+        "app-id": {
+            "type": "string",
+            "pattern": "^[^\\/\\.]+$",
+            "description": "Unique identifier of the application"
+        },
+        "version": {
+            "const": "0.0.1",
+            "description": "Schema version"
+        },
+        "metrics": {
+            "type": "array",
+            "description": "A collection of log-based metric",
+            "items": {
+                "$ref": "#/$defs/metric"
+            }
+        }
+    },
+    "$defs": {
+        "metric": {
+            "type": "object",
+            "description": "Describes a logs-based metric",
+            "required": [
+                "name",
+                "filter"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "A metric identifier",
+                    "pattern": "^[A-Za-z0-9_\\-]+$",
+                    "maxLength": 100
+                },
+                "description": {
+                    "type": "string",
+                    "description": "A description of this metric, which is used in documentation",
+                    "maxLength": 8000
+                },
+                "filter": {
+                    "type": "string",
+                    "description": "A logs filter which is used to match log entries (https://cloud.google.com/logging/docs/view/advanced_filters)"
+                },
+                "bucket-name": {
+                    "type": "string",
+                    "description": "A fully qualified resource name of the Log Bucket that owns the Log Metric. The bucket has to be in the same project as the metric"
+                },
+                "metric-descriptor": {
+                    "type": "object",
+                    "description": "A metric descriptor associated with the logs-based metric. If unspecified, it uses a default metric descriptor with a DELTA metric kind, INT64 value type, with no labels and a unit of '1'",
+                    "properties": {
+                        "kind": {
+                            "const": "DELTA",
+                            "description": "Fixed way to report data"
+                        },
+                        "value-type": {
+                            "enum": [
+                                "INT64",
+                                "DISTRIBUTION"
+                            ],
+                            "description": "Types of the reported metric supported for log based metrics",
+                            "default": "INT64"
+                        },
+                        "unit": {
+                            "const": "1",
+                            "description": "Fixed as dimensionless"
+                        }
+                    }
+                },
+                "extractor": {
+                    "type": "string",
+                    "description": "Method to extract metric values for distribution value type of the metric (https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.metrics#LogMetric.FIELDS.value_extractor)"
+                },
+                "labels": {
+                    "type": "array",
+                    "description": "Collection of labels extracted together with the metric",
+                    "items": {
+                        "$ref": "#/$defs/metric-label"
+                    }
+                }
+            }
+        },
+        "metric-label": {
+            "type": "object",
+            "description": "A pair of label key and extractor expression to load label's value from logs",
+            "required": [
+                "key",
+                "extractor"
+            ],
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "description": "Unique label description",
+                    "pattern": "^[a-z_\\-]+$"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "A human-readable description for the label"
+                },
+                "extractor": {
+                    "type": "string",
+                    "description": "Same as #/$defs/log-based-metric/extractor"
+                }
+            }
+        }
+    }
+}

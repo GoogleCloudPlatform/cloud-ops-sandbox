@@ -1,0 +1,148 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Monitoring dashboard schema",
+    "type": "object",
+    "required": [
+        "app-id",
+        "version",
+        "dashboards"
+    ],
+    "properties": {
+        "app-id": {
+            "type": "string",
+            "pattern": "^[^\\/\\.]+$",
+            "description": "Unique identifier of the application"
+        },
+        "version": {
+            "const": "0.0.1",
+            "description": "Schema version"
+        },
+        "dashboards": {
+            "type": "array",
+            "description": "A collection of dashboards",
+            "items": {
+                "$ref": "#/$defs/dashboard"
+            }
+        }
+    },
+    "$defs": {
+        "dashboard": {
+            "type": "object",
+            "description": "Monitoring dashboard properties using GridLayout (https://cloud.google.com/monitoring/api/ref_v3/rest/v1/projects.dashboards#gridlayout)",
+            "required": [
+                "name",
+                "display-name",
+                "widgets"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Unique name of the dashboard resource"
+                },
+                "display-name": {
+                    "type": "string",
+                    "description": "Human friendly name of dashboard to be displayed in Cloud Console"
+                },
+                "widgets": {
+                    "type": "array",
+                    "description": "A collection of GridLayout widgets",
+                    "items": {
+                        "$ref": "#/$defs/widget"
+                    }
+                }
+            }
+        },
+        "widget": {
+            "type": "object",
+            "description": "A widget chart that displays data on a 2D (X and Y axes) plane (https://cloud.google.com/monitoring/api/ref_v3/rest/v1/projects.dashboards#xychart)",
+            "required": [
+                "datasets"
+            ],
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "Human friendly name of widget"
+                },
+                "x-axis-label": {
+                    "type": "string",
+                    "description": "Human friendly label of axis X"
+                },
+                "y-axis-label": {
+                    "type": "string",
+                    "description": "Human friendly label of axis Y"
+                },
+                "datasets": {
+                    "type": "array",
+                    "description": "The data displayed in this chart.",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/$defs/dataset"
+                    }
+                }
+            }
+        },
+        "dataset": {
+            "type": "object",
+            "description": "Groups a time series query definition with charting options (https://cloud.google.com/monitoring/api/ref_v3/rest/v1/projects.dashboards#dataset)",
+            "required": [
+                "time-series"
+            ],
+            "properties": {
+                "time-series": {
+                    "type": "object",
+                    "description": "A set of parameters for querying time series data",
+                    "required": [
+                        "filter"
+                    ],
+                    "properties": {
+                        "filter": {
+                            "type": "object",
+                            "description": "A set of parameters for querying time series data",
+                            "properties": {
+                                "query": {
+                                    "type": "string",
+                                    "description": "Identifies the metric types, resources, and projects to query"
+                                },
+                                "alignment": {
+                                    "enum": [
+                                        "ALIGN_NONE",
+                                        "ALIGN_DELTA",
+                                        "ALIGN_RATE",
+                                        "ALIGN_INTERPOLATE",
+                                        "ALIGN_NEXT_OLDER",
+                                        "ALIGN_MIN",
+                                        "ALIGN_MAX",
+                                        "ALIGN_MEAN",
+                                        "ALIGN_COUNT",
+                                        "ALIGN_SUM",
+                                        "ALIGN_STDDEV",
+                                        "ALIGN_COUNT_TRUE",
+                                        "ALIGN_COUNT_FALSE",
+                                        "ALIGN_FRACTION_TRUE",
+                                        "ALIGN_PERCENTILE_99",
+                                        "ALIGN_PERCENTILE_95",
+                                        "ALIGN_PERCENTILE_50",
+                                        "ALIGN_PERCENTILE_05",
+                                        "ALIGN_PERCENT_CHANGE"
+                                    ],
+                                    "description": "Mathematical method to group data points together into a single time series",
+                                    "default": "ALIGN_MEAN"
+                                }
+                            }
+                        },
+                        "unit-override": {
+                            "type": "string",
+                            "description": "Label for unit of data contained in fetched time series",
+                            "default": "1"
+                        }
+                    }
+                },
+                "min-alignment-period": {
+                    "type": "string",
+                    "description": "The lower bound on data point frequency for this data set",
+                    "pattern": "^[0-9]+(s|m|h)?$"
+                }
+            }
+        }
+    }
+}

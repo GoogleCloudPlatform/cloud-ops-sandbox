@@ -13,6 +13,10 @@
 # limitations under the License.
 name: Terraform
 
+concurrency:
+  group: "terraform-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
 on:
   pull_request:
     types: [opened,synchronize,reopened]
@@ -22,13 +26,10 @@ on:
 
 jobs:
 
-  tflint:
+  validation:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
 
     steps:
     - name: Checkout source code
@@ -69,9 +70,6 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
 
     steps:
     - name: Checkout source code
