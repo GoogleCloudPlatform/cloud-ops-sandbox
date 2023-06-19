@@ -29,12 +29,6 @@ else
 fi
 
 SCRIPT_NAME="${0##*/}"; readonly SCRIPT_NAME
-SCRIPT_DIR="$(realpath "$(dirname "${0}")")"; readonly SCRIPT_DIR
-SANDBOX_VERSION="$(tr -d '\n' < "${SCRIPT_DIR}/version.txt")"; readonly SANDBOX_VERSION
-SANDBOX_SESSION="${SANDBOX_SESSION:-$(python3 -c 'import uuid; print(uuid.uuid4())')}"; readonly SANDBOX_SESSION
-CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY="${CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY:-}"; readonly CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY
-AGCLOUD=""
-ATERRAFORM=""
 
 main() {
   if [[ "${*}" = '' ]]; then
@@ -168,6 +162,10 @@ help_subcommand() {
 }
 
 init() {
+  SCRIPT_DIR="$(realpath "$(dirname "${0}")")"; readonly SCRIPT_DIR
+  SANDBOX_VERSION="$(tr -d '\n' < "${SCRIPT_DIR}/version.txt")"; readonly SANDBOX_VERSION
+  SANDBOX_SESSION="${SANDBOX_SESSION:-$(python3 -c 'import uuid; print(uuid.uuid4())')}"; readonly SANDBOX_SESSION
+  CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY="${CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY:-}"; readonly CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY
   ATERRAFORM="$(which terraform || true)"; readonly ATERRAFORM;
   AGCLOUD="$(which gcloud || true)"; readonly AGCLOUD;
   PROJECT_ID=""
@@ -179,6 +177,7 @@ init() {
   VERBOSE=0
   CLOUDOPS_SANDBOX_POOL_CFG=${CLOUDOPS_SANDBOX_POOL_CFG:-}
   TF_FILE_LOCATION="$(mktemp).tfvars"; readonly TF_FILE_LOCATION
+  MICROSERVICE_DEMO_KUSTOMIZE="kustomize/microservice-demo"
 }
 
 ### Support functions ###
@@ -474,7 +473,7 @@ configure_terraform_input_vars() {
 state_bucket_name = "${TF_BUCKET_NAME}"
 state_prefix = "${TERRAFORM_PREFIX}"
 gcp_project_id = "${PROJECT_ID}"
-filepath_manifest = "${SCRIPT_DIR}/kustomize/online-boutique/" 
+filepath_manifest = "${SCRIPT_DIR}/${MICROSERVICE_DEMO_KUSTOMIZE}/" 
 EOF
 )
 
@@ -496,7 +495,7 @@ EOF
 }
 
 configure_kustomization() {
-  KUSTOMIZE_FILE="${SCRIPT_DIR}/kustomize/online-boutique/kustomization.yaml"; readonly KUSTOMIZE_FILE
+  KUSTOMIZE_FILE="${SCRIPT_DIR}/${MICROSERVICE_DEMO_KUSTOMIZE}/kustomization.yaml"; readonly KUSTOMIZE_FILE
   cp "${KUSTOMIZE_FILE}" "${KUSTOMIZE_FILE}.origin" > /dev/null
   local SED_EXPRESSION; SED_EXPRESSION=""
   
