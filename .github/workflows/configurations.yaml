@@ -52,7 +52,7 @@ jobs:
         for CONFIG_FILE in $(find configurations -mindepth 2 -maxdepth 2 -type f -name "*.yaml"); do
           FILENAME=$(basename -s ".yaml" "${CONFIG_FILE@L}")
           case "${FILENAME}" in
-            alerts | dashboards | healthchecks | metrics | services | slos)
+            alerts | dashboards | uptimechecks | metrics | services | slos)
               ;;
             *)
               echo "Unknown file ${CONFIG_FILE}" 1>&2
