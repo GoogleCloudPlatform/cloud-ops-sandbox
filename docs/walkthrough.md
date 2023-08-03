@@ -58,7 +58,7 @@ credentials to be used in the provisioning process.
 To establish the credentials, run the following gcloud CLI command in Cloud Shell:
 
 ```bash
-gcloud auth application-default login --project-id <walkthrough-project-id/>
+gcloud auth application-default login --project <walkthrough-project-id/>
 ```
 
 and follow instructions. **Note:** you may be asked to authenticate by opening a
