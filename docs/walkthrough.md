@@ -41,7 +41,7 @@ Configure Cloud Shell to use the selected project by running the following
 command in Cloud Shell:
 
 ```bash
-gcloud configure set project <walkthrough-project-id/>
+gcloud config set project <walkthrough-project-id/>
 ```
 
 <walkthrough-enable-apis apis=
@@ -51,17 +51,34 @@ gcloud configure set project <walkthrough-project-id/>
 
 If prompted, authorize Cloud Shell to call listed Google Cloud APIs.
 
-## Launch Cloud Ops Sandbox
+## Create Cloud Ops Sandbox
 
-To launch Sandbox using default settings run the following command in Cloud Shell:
+Before creating a new Cloud Ops Sandbox you have to establish application
+credentials to be used in the provisioning process.
+To establish the credentials, run the following gcloud CLI command in Cloud Shell:
+
+```bash
+gcloud auth application-default login --project-id <walkthrough-project-id/>
+```
+
+and follow instructions. **Note:** you may be asked to authenticate by opening a
+printed URL in the browser.
+
+To create a new Cloud Ops Sandbox using default settings run the following
+command in Cloud Shell:
 
 ```bash
 provisioning/sandboxctl create --project-id <walkthrough-project-id/>
 ```
 
-By default the launch will install [Anthos Service Mesh][3](ASM) and the
-load generator that will create a simulated load on the demo application.
-Also it will provision the [regional cluster][4] in the `us-central1` region.
+By default the launch installs [Anthos Service Mesh][3](ASM) and provisions
+a load generator that will create a continuous load of requests to the demo
+application.
+The demo application is deployed to the [regional cluster][4] in the
+`us-central1` region unless you customize the location parameter.
+**Note:** creating Sandbox that using the [regional cluster][4] takes longer
+time and bears higher costs than using the [zonal cluster][5].
+
 If you wish to customize any of these default settings, you will need to run the
 above command with additional parameters.
 
@@ -73,7 +90,7 @@ If you want to experiment with Sandbox without simulated load, add the
 `--skip-loadgenerator` parameter to the launch command below.
 
 In order to change the region where GKE cluster is provisioned or to be provisioned
-it as a [zonal cluster][5], add `--cluster-location [LOC]` parameter.
+it as the [zonal cluster][5], add `--cluster-location [LOC]` parameter.
 And provide a name of a region or a zone as `[LOC]`
 
 The GKE cluster name is set to `cloud-ops-sandbox`. If you want to customize it
