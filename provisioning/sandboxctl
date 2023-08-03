@@ -96,11 +96,12 @@ create_subcommand() {
       export TF_APPEND_USER_AGENT="deploystack/cloud-ops-sandbox"
       export GOOGLE_TERRAFORM_USERAGENT_EXTENSION="${TF_APPEND_USER_AGENT}"
     fi
-    terraform init -backend-config "bucket=${TF_BUCKET_NAME}" -backend-config "prefix=${TERRAFORM_PREFIX}" -lockfile=false && \
-    terraform apply -auto-approve -var-file="${tf_FILE_LOCATION}" && \
+    if ! (terraform init -backend-config "bucket=${TF_BUCKET_NAME}" -backend-config "prefix=${TERRAFORM_PREFIX}" -lockfile=false); then error "Failed to apply terraform configuration. Run with --verbose flag to get more details."; fi && \
+    terraform apply -auto-approve -var-file="${TF_FILE_LOCATION}" && \
     print_launch_instructions
     send_telemetry "hipstershop-available"
   }
+
   ### Cleanup ###
   unset -v GOOGLE_TERRAFORM_USERAGENT_EXTENSION TF_APPEND_USER_AGENT
   popd > /dev/null
@@ -128,8 +129,8 @@ delete_subcommand() {
       export TF_APPEND_USER_AGENT="deploystack/cloud-ops-sandbox"
       export GOOGLE_TERRAFORM_USERAGENT_EXTENSION="${TF_APPEND_USER_AGENT}"
     fi
-    terraform init -backend-config "bucket=${TF_BUCKET_NAME}" -backend-config "prefix=${TERRAFORM_PREFIX}" -lockfile=false && \
-    terraform destroy -auto-approve -var-file="${tf_FILE_LOCATION}" && \
+    if ! (terraform init -backend-config "bucket=${TF_BUCKET_NAME}" -backend-config "prefix=${TERRAFORM_PREFIX}" -lockfile=false); then error "Failed to apply terraform configuration. Run with --verbose flag to get more details."; fi && \
+    terraform destroy -auto-approve -var-file="${TF_FILE_LOCATION}" && \
     info "Successfully deleted Cloud Ops Sandbox from ${PROJECT_ID} project."
   }
   ### Cleanup ###
@@ -177,6 +178,7 @@ init() {
   SKIP_ASM=0
   VERBOSE=0
   CLOUDOPS_SANDBOX_POOL_CFG=${CLOUDOPS_SANDBOX_POOL_CFG:-}
+  TF_FILE_LOCATION="$(mktemp).tfvars"; readonly TF_FILE_LOCATION
 }
 
 ### Support functions ###
@@ -204,7 +206,7 @@ fatal() {
 
 fatal_with_usage() {
   error "${1}"
-  usage_short >&2
+  usage >&2
   exit 2
 }
 
@@ -228,9 +230,9 @@ SUBCOMMANDS:
                                       Google Cloud environment.
 
 OPTIONS:
-  -l|--cluster_location  <LOCATION>   The GCP location of the target cluster.
-  -n|--cluster_name      <NAME>       The name of the target cluster.
-  -p|--project_id        <ID>         The GCP project ID.
+  -l|--cluster-location  <LOCATION>   The GCP location of the target cluster.
+  -n|--cluster-name      <NAME>       The name of the target cluster.
+  -p|--project-id        <ID>         The GCP project ID.
   --skip-asm                          (Optional) Set to not install Anthos
                                       Service Mesh. Default is false.
   --skip-loadgenerator                (Optional) Set to not deploy load
@@ -385,10 +387,10 @@ send_telemetry() {
 
 x_exit_if_no_auth_token() {
   local AUTHTOKEN; AUTHTOKEN="$(get_auth_token)"
-  if [[ -z "${AUTHTOKEN}" ]]; then
+  if [[ -z "${AUTHTOKEN}" || "${AUTHTOKEN}" =~ ^"ERROR:" ]]; then
     { read -r -d '' MSG; validation_error "${MSG}"; } <<EOF || true
-Auth token is not obtained successfully. Please login and
-retry, e.g., run 'gcloud auth application-default login' to login.
+Auth token is not obtained successfully. Please login and retry,
+${0}
 EOF
   fi
 }
@@ -415,7 +417,7 @@ local_iam_user() {
 prepare_terraform_state() {
   TF_BUCKET_NAME="${PROJECT_ID}-cloud-ops-sandbox-tf-state"
   local URIS
-  URIS=$(gcloud storage buckets list "gs://${TF_BUCKET_NAME}*" --uri --project "${PROJECT_ID}")
+  URIS=$(gcloud storage buckets list "gs://${TF_BUCKET_NAME}*" --format="value(storage_url)" --project "${PROJECT_ID}")
   if [[ -z "${URIS}" ]]; then
     info "Creating storage bucket to host Cloud Ops Sandbox state..."
     retry 3 gcloud storage buckets create "gs://${TF_BUCKET_NAME}" --project "${PROJECT_ID}"
@@ -436,7 +438,7 @@ does_terraform_state_exist() {
     STATE_OBJ_URI="gs://${TF_BUCKET_NAME}/${TERRAFORM_PREFIX}/default.tfstate"
   fi
   local URIS
-  URIS=$(gcloud storage objects list "${STATE_OBJ_URI}" --uri --project "${PROJECT_ID}")
+  URIS=$(gcloud storage objects list "${STATE_OBJ_URI}" --format="value(storage_url)" --project "${PROJECT_ID}")
   if [[ -z "${URIS}" ]]; then
     false
     return
@@ -464,12 +466,10 @@ append_to_terraform_config() {
   fi
 
   local ASSIGNMENT="${1} = \"${2}\""
-  echo "${ASSIGNMENT}" >> "${tf_FILE_LOCATION}"
+  echo "${ASSIGNMENT}" >> "${TF_FILE_LOCATION}"
 }
 
 configure_terraform_input_vars() {
-  tf_FILE_LOCATION="$(mktemp).tfvars"; readonly tf_FILE_LOCATION
-
   local CONTEXT_TFVARS; CONTEXT_TFVARS=$(cat <<EOF
 state_bucket_name = "${TF_BUCKET_NAME}"
 state_prefix = "${TERRAFORM_PREFIX}"
@@ -478,9 +478,9 @@ filepath_manifest = "${SCRIPT_DIR}/kustomize/online-boutique/"
 EOF
 )
 
-  echo "${CONTEXT_TFVARS}" >| "${tf_FILE_LOCATION}"
+  echo "${CONTEXT_TFVARS}" >| "${TF_FILE_LOCATION}"
   if [ -n "" ]; then
-    echo "? = \"${}\"" >> "${tf_FILE_LOCATION}"
+    echo "? = \"${}\"" >> "${TF_FILE_LOCATION}"
   fi
 
   if [[ -n "${CLUSTER_NAME}" ]]; then
