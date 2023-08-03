@@ -417,7 +417,7 @@ local_iam_user() {
 prepare_terraform_state() {
   TF_BUCKET_NAME="${PROJECT_ID}-cloud-ops-sandbox-tf-state"
   local URIS
-  URIS=$(gcloud storage buckets list "gs://${TF_BUCKET_NAME}*" --uri --project "${PROJECT_ID}")
+  URIS=$(gcloud storage buckets list "gs://${TF_BUCKET_NAME}*" --format="value(storage_url)" --project "${PROJECT_ID}")
   if [[ -z "${URIS}" ]]; then
     info "Creating storage bucket to host Cloud Ops Sandbox state..."
     retry 3 gcloud storage buckets create "gs://${TF_BUCKET_NAME}" --project "${PROJECT_ID}"
@@ -438,7 +438,7 @@ does_terraform_state_exist() {
     STATE_OBJ_URI="gs://${TF_BUCKET_NAME}/${TERRAFORM_PREFIX}/default.tfstate"
   fi
   local URIS
-  URIS=$(gcloud storage objects list "${STATE_OBJ_URI}" --uri --project "${PROJECT_ID}")
+  URIS=$(gcloud storage objects list "${STATE_OBJ_URI}" --format="value(storage_url)" --project "${PROJECT_ID}")
   if [[ -z "${URIS}" ]]; then
     false
     return
