@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Thanks for stopping by to let us know something could be better!
-        Before you submit your problem, please search the [already opened issues](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/issues).
+        Before you submit your problem, please search the [already opened issues](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/issues?q=is%3Aopen+is%3Aissue+label%3A%22type%3A+bug%22).
   - type: input
     id: version
     attributes:
