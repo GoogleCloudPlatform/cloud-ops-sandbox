@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+- name: "Community forum about Google Cloud Operations Suite"
+  url: https://www.googlecloudcommunity.com/gc/Google-Cloud-s-operations-suite/bd-p/cloud-operations
+  about: "Please ask questions about Cloud Monitoring, Logging, Tracing and Alerting services as well as about SLOs and Error Budgets on this forum."
+- name: "Microservice Demo"
+  url: https://github.com/GoogleCloudPlatform/microservices-demo/issues/new/choose
+  about: "Report problems that you experience with the underlying demo application to the microservices-demo repository."
