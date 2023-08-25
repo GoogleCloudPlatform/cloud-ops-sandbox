@@ -36,6 +36,8 @@ body:
     validations:
       required: true
   - type: textarea
+    id: what-expected
+    attributes:
       label: What you expected to happen?
       placeholder: Tell us what you want to see!
     validations:
