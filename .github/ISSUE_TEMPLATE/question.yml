@@ -1,0 +1,36 @@
+name: Ask a question
+description: Inquire about something in the project
+title: "[Question]: "
+labels: ["type: question", "triage me"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for stopping by to ask your question!
+        Before submitting it, please have a look at the [already asked questions](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/issues?q=is%3Aissue+label%3A%22type%3A+question%22+)
+        to see if a similar request has not been already submitted.
+        Try to keep your suggestion useful for the wide user audience.
+  - type: textarea
+    id: what-you-want-to-know
+    attributes:
+      label: Tell us, about your question
+      description: Provide as much information as possible. Use examples and images.
+      placeholder: Tell us what you want to know!
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Specify the version of Cloud Ops Sandbox if relevant
+      description: (Run `sandboxctl --version` to check for the version)
+      placeholder: ex. 0.9.2
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
