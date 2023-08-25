@@ -1,0 +1,50 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug]: "
+labels: ["type: bug", "triage me"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for stopping by to let us know something could be better!
+        Before you submit your problem, please search the [already opened issues](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/issues).
+  - type: input
+    id: version
+    attributes:
+      label: Version of Cloud Ops Sandbox
+      description: (Run `sandboxctl --version` to check for the version)
+      placeholder: ex. 0.9.2
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Your client machine OS?
+      multiple: false
+      options:
+        - iOS
+        - Linux
+        - Windows
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Tell us, what is a problem?
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+  - type: textarea
+      label: What you expected to happen?
+      placeholder: Tell us what you want to see!
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
