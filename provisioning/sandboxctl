@@ -211,7 +211,7 @@ fatal_with_usage() {
 }
 
 version_message() {
-  echo "${VERSION}"
+  echo "${SANDBOX_VERSION}"
 }
 
 usage() {
