@@ -35,4 +35,4 @@ sourceFileExtensions:
   - 'tf'
   - 'proto'
 ignoreFiles:
-  - '.github/ISSUE_TEMPLATE/*.md'
+  - '.github/ISSUE_TEMPLATE/*.yml'
