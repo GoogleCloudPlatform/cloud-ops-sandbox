@@ -34,3 +34,5 @@ sourceFileExtensions:
   - 'go'
   - 'tf'
   - 'proto'
+ignoreFiles:
+  - '.github/ISSUE_TEMPLATE/*.md'
