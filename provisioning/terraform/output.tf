@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "frontend_external_ip" {
-  value = length(data.kubernetes_service.frontend_external_service.status) > 0 ? data.kubernetes_service.frontend_external_service.status[0].load_balancer[0].ingress[0].ip : null
+output "microservice-demo-frontend-ip" {
+  value = (length(module.microservice_demo.frontend-ip) > 0
+  ? module.microservice_demo.frontend-ip : "")
 }

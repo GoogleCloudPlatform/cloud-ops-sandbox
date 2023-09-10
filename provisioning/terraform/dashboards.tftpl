@@ -1,0 +1,38 @@
+{"displayName": "${display-name}",
+ "gridLayout": {
+  "columns": "2",
+  "widgets": ${jsonencode([
+   for widget in widgets: {
+    "title": "${widget.title}",
+    "xyChart": {
+     "xAxis": {
+      "label": "${widget.x-axis-label}",
+      "scale": "LINEAR"
+     },
+     "yAxis": {
+      "label": "${widget.y-axis-label}",
+      "scale": "LINEAR"
+     },
+     "chartOptions": {
+      "mode": "COLOR"
+     },
+     "dataSets": [
+      for ds in widget.datasets: {
+       "timeSeriesQuery": {
+        "timeSeriesFilter": {
+         "filter": "${ds.time-series.filter.query}",
+         "aggregation": {
+          "perSeriesAligner": "${ds.time_series.filter.aggregation.aligner}"
+         }
+        },
+        "unitOverride": "${ds.time_series.unit-override}"
+       },
+       "plotType": "LINE",
+       "minAlignmentPeriod": "${ds.min-alignment-period}"
+      }
+     ]
+    }
+   }
+  ])}
+ }
+}

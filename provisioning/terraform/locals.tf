@@ -12,20 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-app-id: "test"
-version: "0.0.1"
-dashboards:
-- name: test-dashboard-1
-  display-name: "Test Dashboard 1"
-  widgets:
-  - title: "CPU Usage"
-    x-axis-label: "Time"
-    y-axis-label: "%"
-    datasets:
-    - time-series:
-        filter:
-          query: "metric.type=\"compute.googleapis.com/instance/cpu/usage_time\" resource.type=\"gce_instance\""
-          aligner: ALIGN_PERCENTILE_99
-          unit-override: "cpu"
-
-      min-alignment-period: "60s"
+locals {
+  validated_configuration_path = (endswith(var.configuration_path, "/")
+    ? substr(var.configuration_path, 0, -1) : var.configuration_path
+  )
+  template_vars = {
+    project_id       = var.gcp_project_id
+    configuration_id = basename(local.validated_configuration_path)
+    # allow using prefix for terraform state as suffix in the resource names
+    state_suffix = var.state_prefix
+  }
+}

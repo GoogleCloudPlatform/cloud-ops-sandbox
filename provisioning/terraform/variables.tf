@@ -25,6 +25,15 @@ variable "state_bucket_name" {
   description = "The GCS bucket URL where Terraform stores the state"
 }
 
+variable "configuration_path" {
+  type        = string
+  description = "Relative path to Cloud Ops Sandbox configuration"
+  validation {
+    condition     = can(regex("^configurations\\/((?!\\.\\.).)+$", var.configuration_path))
+    error_message = "Path must start with 'configurations/' and cannot include parent redirects i.e. '..'"
+  }
+}
+
 # Optional input variables
 variable "asm_channel" {
   type        = string
@@ -42,11 +51,6 @@ variable "enable_asm" {
   default     = false
 }
 
-variable "filepath_manifest" {
-  type        = string
-  description = "Path to Kubernetes resources, written using Kustomize"
-  default     = "../kustomize/online-boutique/"
-}
 
 variable "gke_cluster_name" {
   type        = string

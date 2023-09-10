@@ -12,20 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-app-id: "test"
-version: "0.0.1"
-dashboards:
-- name: test-dashboard-1
-  display-name: "Test Dashboard 1"
-  widgets:
-  - title: "CPU Usage"
-    x-axis-label: "Time"
-    y-axis-label: "%"
-    datasets:
-    - time-series:
-        filter:
-          query: "metric.type=\"compute.googleapis.com/instance/cpu/usage_time\" resource.type=\"gce_instance\""
-          aligner: ALIGN_PERCENTILE_99
-          unit-override: "cpu"
+locals {
+  dashboards_config = yamldecode(templatefile("${locals.validated_configuration_path}/dashboards.yaml", local.template_vars))
+  dashboards = {
+    for dashboard in local.dashboards_config.dashboards : dashboard.name => dashboard
+  }
+}
 
-      min-alignment-period: "60s"
+resource "google_monitoring_dashboard" "dashboards" {
+  for_each       = local.dashboards
+  dashboard_json = templatefile("dashboards.tftpl", merge(each.value, local.template_vars))
+}

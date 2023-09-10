@@ -19,6 +19,11 @@ locals {
     "cloudprofiler.googleapis.com",
     "container.googleapis.com", /* compute.googleapis.com is provisioned as a dependency */
   ]
+  mesh_apis = [
+    "mesh.googleapis.com",
+    #    "meshtelemetry.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+  ]
 }
 
 # Enable Google Cloud APIs
@@ -29,7 +34,7 @@ module "enable_google_apis" {
   project_id                  = var.gcp_project_id
   disable_services_on_destroy = false
 
-  activate_apis = base_apis
+  activate_apis = concat(local.base_apis, var.enable_asm ? local.mesh_apis : [])
 }
 
 data "google_project" "info" {

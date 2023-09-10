@@ -20,8 +20,8 @@
 # in the data section.
 
 terraform {
-  # The module has syntax validated vs 1.4.1
-  required_version = ">= 1.4.1, < 1.6.0"
+  # The module has 0.12 syntax and is not compatible with any versions below 0.12.
+  required_version = "~> 1.4.1"
 
   required_providers {
     google = {
@@ -35,6 +35,10 @@ terraform {
     null = {
       source  = "hashicorp/null"
       version = "~>3.2.1"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~>2.18.1"
     }
   }
   backend "gcs" {}
@@ -53,6 +57,17 @@ provider "google" {
   project = var.gcp_project_id
 }
 
+# Retrieve an access token as the Terraform runner
+data "google_client_config" "default" {}
+
 provider "google-beta" {
   project = var.gcp_project_id
+}
+
+provider "kubernetes" {
+  host  = "https://${resource.google_container_cluster.sandbox.endpoint}"
+  token = data.google_client_config.default.access_token
+  cluster_ca_certificate = base64decode(
+    resource.google_container_cluster.sandbox.master_auth[0].cluster_ca_certificate,
+  )
 }

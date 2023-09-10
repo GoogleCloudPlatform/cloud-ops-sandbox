@@ -103,7 +103,7 @@
                                     "type": "string",
                                     "description": "Identifies the metric types, resources, and projects to query"
                                 },
-                                "alignment": {
+                                "aligner": {
                                     "enum": [
                                         "ALIGN_NONE",
                                         "ALIGN_DELTA",
