@@ -20,9 +20,6 @@
 # in the data section.
 
 terraform {
-  # The module has 0.12 syntax and is not compatible with any versions below 0.12.
-  required_version = "~> 1.4.1"
-
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -40,16 +37,6 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~>2.18.1"
     }
-  }
-  backend "gcs" {}
-}
-
-# tflint-ignore: terraform_unused_declarations
-data "terraform_remote_state" "state" {
-  backend = "gcs"
-  config = {
-    bucket = var.state_bucket_name
-    prefix = var.state_prefix
   }
 }
 
