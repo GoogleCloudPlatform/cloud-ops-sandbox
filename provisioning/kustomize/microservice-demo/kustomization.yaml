@@ -18,6 +18,6 @@ resources:
 - github.com/GoogleCloudPlatform/microservices-demo/kustomize/base?version=v0.6.0
 components:
 - github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/google-cloud-operations?version=v0.6.0
-#!DO NOT REMOVE FOLLOWING COMMENTED LINES!
+# !!DO NOT REMOVE THE COMMENTED LINES!!
 #- github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/service-mesh-istio?version=v0.6.0
 #- github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/without-loadgenerator?version=v0.6.0

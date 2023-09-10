@@ -65,7 +65,7 @@ variable "name_suffix" {
   description = "Custom suffix to allow provisioning multiple copies of the resource within the same GCP project"
   validation {
     condition     = can(regex("^$|^[\\w_-]{1,100}$", var.name_suffix))
-    error_message = "The value should be a valid email address"
+    error_message = "The value should be a valid resource name"
   }
   default = ""
 }
