@@ -49,7 +49,7 @@ project ID:
 
 ```bash
 git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox
-gcloud auth application-default loging
+gcloud auth application-default login
 cloud-ops-sandbox/provisioning/sandboxctl create -p PROJECT_ID
 ```
 
