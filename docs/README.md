@@ -46,10 +46,10 @@ instructions:
 
 Or, by executing the following commands in your local environment:
 
-```terminal
+```shell
 git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox
-gcloud auth application-default loging
-cloud-ops-sandbox/provisioning/sandboxctl -p PROJECT_ID
+gcloud auth application-default login
+cloud-ops-sandbox/provisioning/sandboxctl create -p PROJECT_ID
 ```
 
 where `PROJECT_ID` identifies the Google Cloud project where you want to
