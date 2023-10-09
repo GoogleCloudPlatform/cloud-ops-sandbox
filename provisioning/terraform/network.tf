@@ -21,6 +21,6 @@ data "google_compute_network" "default" {
 resource "google_compute_network" "default" {
   name = "default"
 
-  # Only create the network if it does not exist
+  # Only create the network if it does not exist.
   count = data.google_compute_network.default.name == "" ? 1 : 0
 }
