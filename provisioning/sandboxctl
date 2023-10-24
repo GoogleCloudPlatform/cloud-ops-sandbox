@@ -164,7 +164,12 @@ help_subcommand() {
 }
 
 init() {
-  MICROSERVICE_DEMO_PATH="kustomize/online-boutique"; readonly MICROSERVICE_DEMO_PATH
+  SANDBOX_VERSION="$(tr -d '\n' < "${SCRIPT_DIR}/version.txt")"; readonly SANDBOX_VERSION
+  SANDBOX_SESSION="${SANDBOX_SESSION:-$(python3 -c 'import uuid; print(uuid.uuid4())')}"; readonly SANDBOX_SESSION
+  CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY="${CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY:-}"; readonly CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY
+  MICROSERVICE_DEMO_KUSTOMIZE="kustomize/microservices-demo"; readonly MICROSERVICE_DEMO_KUSTOMIZE
+  ATERRAFORM="$(which terraform || true)"; readonly ATERRAFORM;
+  AGCLOUD="$(which gcloud || true)"; readonly AGCLOUD;
   PROJECT_ID=""
   CLUSTER_LOCATION=""
   CLUSTER_NAME=""
@@ -471,7 +476,7 @@ configure_terraform_input_vars() {
 state_bucket_name = "${TF_BUCKET_NAME}"
 state_prefix = "${TERRAFORM_PREFIX}"
 gcp_project_id = "${PROJECT_ID}"
-filepath_manifest = "${SCRIPT_DIR}/${MICROSERVICE_DEMO_PATH}" 
+filepath_manifest = "${SCRIPT_DIR}/${MICROSERVICE_DEMO_KUSTOMIZE}/" 
 EOF
 )
 
@@ -493,7 +498,7 @@ EOF
 }
 
 configure_kustomization() {
-  KUSTOMIZE_FILE="${SCRIPT_DIR}/${MICROSERVICE_DEMO_PATH}/kustomization.yaml"; readonly KUSTOMIZE_FILE
+  KUSTOMIZE_FILE="${SCRIPT_DIR}/${MICROSERVICE_DEMO_KUSTOMIZE}/kustomization.yaml"; readonly KUSTOMIZE_FILE
   cp "${KUSTOMIZE_FILE}" "${KUSTOMIZE_FILE}.origin" > /dev/null
   local SED_EXPRESSION; SED_EXPRESSION=""
   

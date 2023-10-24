@@ -2,6 +2,7 @@
 
 ## Overview
 
+various services and instruments in the Google
 Cloud Ops Sandbox (**Sandbox** further in this document) lets you to trial
 [Cloud Operations suite][cloud-ops] of services by using a non-trivial
 microservice application deployed on Kubernetes like [Online Boutique][ob].
