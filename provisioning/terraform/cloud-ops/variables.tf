@@ -38,6 +38,12 @@ variable "configuration_filepath" {
 }
 
 # Optional input variables
+variable "additional_configuration_vars" {
+  type        = object
+  description = "A map of variables that can be used to provision the configurations. By default only project id, configuration id and custom suffix (based on the state) are provided."
+  default     = {}
+}
+
 variable "gke_cluster_name" {
   type        = string
   description = "Name given to the new GKE cluster"
