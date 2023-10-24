@@ -23,6 +23,7 @@ module "k8s_cluster" {
   gke_cluster_location = var.gke_cluster_location
   gke_cluster_name     = var.gke_cluster_name
   gke_node_pool        = var.gke_node_pool
+  sandbox_version      = var.sandbox_version
 }
 
 # ------------------------------------------

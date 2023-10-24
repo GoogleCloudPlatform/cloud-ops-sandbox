@@ -81,6 +81,12 @@ variable "gke_node_pool" {
   }
 }
 
+variable "sandbox_version" {
+  type        = string
+  description = "Cloud Operations Sandbox version"
+  default     = "unknown"
+}
+
 variable "state_prefix" {
   type        = string
   description = "Use to store multiple states when provisioning with the same state_bucket_name"

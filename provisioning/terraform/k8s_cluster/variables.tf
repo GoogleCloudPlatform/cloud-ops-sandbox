@@ -30,6 +30,11 @@ variable "gke_cluster_location" {
   description = "Region or zone of the new GKE cluster"
 }
 
+variable "sandbox_version" {
+  type        = string
+  description = "Cloud Operations Sandbox version"
+}
+
 # Optional input variables
 variable "asm_channel" {
   type        = string

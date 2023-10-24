@@ -35,7 +35,7 @@ resource "google_container_cluster" "sandbox" {
 
   resource_labels = local.resource_labels
 
-  description = "Provisioned for Cloud Ops Sandbox version ${file("../version.txt")}"
+  description = "Provisioned for Cloud Ops Sandbox version ${var.sandbox_version}"
 
   # Enables Workload Identity
   workload_identity_config {
