@@ -32,7 +32,7 @@ module "online_boutique" {
   source            = "./microservice_demo"
   depends_on        = [module.k8s_cluster]
   enable_asm        = var.enable_asm
-  filepath_manifest = var.filepath_manifest
+  manifest_filepath = var.manifest_filepath
   gcp_project_id    = module.enable_google_apis.project_id
 }
 

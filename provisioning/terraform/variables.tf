@@ -42,9 +42,9 @@ variable "enable_asm" {
   default     = false
 }
 
-variable "filepath_manifest" {
+variable "manifest_filepath" {
   type        = string
-  description = "Path to Kubernetes resources, written using Kustomize"
+  description = "Path to Kustomize manifest resource(s)"
 }
 
 variable "gke_cluster_name" {

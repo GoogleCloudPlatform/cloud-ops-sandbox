@@ -25,9 +25,7 @@ variable "enable_asm" {
   description = "If true, installs Anthos Service Mesh (managed version of Istio) on the GKE cluster"
 }
 
-# Optional input variables
-variable "filepath_manifest" {
+variable "manifest_filepath" {
   type        = string
-  description = "Path to Kubernetes resources, written using Kustomize"
-  default     = "../kustomize/microservices-demo/"
+  description = "Path to Kustomize manifest resource(s)"
 }
