@@ -32,13 +32,12 @@ variable "enable_asm" {
   description = "Flags to provision ASM related resources"
 }
 
-# Optional input variables
-variable "filepath_configuration" {
+variable "configuration_filepath" {
   type        = string
   description = "Path to monitoring resource configuration files. Relative path should be defined relative to the root terraform folder."
-  default     = "../configurations/online-boutique"
 }
 
+# Optional input variables
 variable "gke_cluster_name" {
   type        = string
   description = "Name given to the new GKE cluster"
