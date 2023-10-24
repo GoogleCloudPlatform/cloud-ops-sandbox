@@ -112,11 +112,15 @@ resource "google_monitoring_slo" "service_latency" {
   ]
 }
 
+data "google_project" "info" {
+  project_id = var.gcp_project_id
+}
+
 module "slo_service" {
   count  = length(local.slo_services)
   source = "./slo_service"
 
-  project_number = var.gcp_project_number
+  project_number = data.google_project.info.number
   name           = local.slo_services[count.index].id
 }
 

@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "frontend_external_ip" {
-  value = module.online_boutique.frontend_ip_address
+output "frontend_ip_address" {
+  value = data.kubernetes_service.frontend_external_service.status[0].load_balancer[0].ingress[0].ip
 }

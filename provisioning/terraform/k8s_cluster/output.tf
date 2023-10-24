@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "frontend_external_ip" {
-  value = module.online_boutique.frontend_ip_address
+output "certificate" {
+  value = google_container_cluster.sandbox.master_auth[0].cluster_ca_certificate
+  depends_on = [ module.gcloud.wait, null_resource.install_asm ]
+}
+
+output "endpoint" {
+  value = google_container_cluster.sandbox.endpoint
+  depends_on = [ module.gcloud.wait, null_resource.install_asm ]
 }
