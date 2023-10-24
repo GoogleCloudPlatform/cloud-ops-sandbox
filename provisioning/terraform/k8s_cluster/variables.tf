@@ -20,9 +20,14 @@ variable "gcp_project_id" {
   description = "The GCP project ID to apply this config to"
 }
 
-variable "state_bucket_name" {
+variable "gke_cluster_name" {
   type        = string
-  description = "The GCS bucket URL where Terraform stores the state"
+  description = "Name given to the new GKE cluster"
+}
+
+variable "gke_cluster_location" {
+  type        = string
+  description = "Region or zone of the new GKE cluster"
 }
 
 # Optional input variables
@@ -40,23 +45,6 @@ variable "enable_asm" {
   type        = bool
   description = "If true, installs Anthos Service Mesh (managed version of Istio) on the GKE cluster"
   default     = false
-}
-
-variable "filepath_manifest" {
-  type        = string
-  description = "Path to Kubernetes resources, written using Kustomize"
-}
-
-variable "gke_cluster_name" {
-  type        = string
-  description = "Name given to the new GKE cluster"
-  default     = "cloud-ops-sandbox"
-}
-
-variable "gke_cluster_location" {
-  type        = string
-  description = "Region or zone of the new GKE cluster"
-  default     = "us-central1"
 }
 
 # Default values for node pool support connecting the cluster to ASM
@@ -79,10 +67,4 @@ variable "gke_node_pool" {
     machine_type       = "e2-standard-4"
     autoscaling        = null
   }
-}
-
-variable "state_prefix" {
-  type        = string
-  description = "Use to store multiple states when provisioning with the same state_bucket_name"
-  default     = ""
 }

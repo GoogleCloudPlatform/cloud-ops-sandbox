@@ -17,6 +17,10 @@ locals {
   resource_labels = var.enable_asm ? { "mesh_id" = "proj-${data.google_project.info.number}" } : {}
 }
 
+data "google_project" "info" {
+  project_id = var.gcp_project_id
+}
+
 resource "google_container_cluster" "sandbox" {
   name     = var.gke_cluster_name
   location = var.gke_cluster_location
@@ -35,7 +39,7 @@ resource "google_container_cluster" "sandbox" {
 
   # Enables Workload Identity
   workload_identity_config {
-    workload_pool = "${data.google_project.info.project_id}.svc.id.goog"
+    workload_pool = "${var.gcp_project_id}.svc.id.goog"
   }
 
   # Configures default node pool
@@ -61,10 +65,6 @@ resource "google_container_cluster" "sandbox" {
       }
     }
   }
-
-  depends_on = [
-    module.enable_google_apis
-  ]
 }
 
 module "gcloud" {
@@ -78,4 +78,38 @@ module "gcloud" {
   # Module does not support explicit dependency
   # Use 'local.cluster_name' to enforce implicit dependency because 'depends_on' is not available for this module
   create_cmd_body = "container clusters get-credentials ${resource.google_container_cluster.sandbox.name} ${local.location_label}=${resource.google_container_cluster.sandbox.location} --project=${var.gcp_project_id}"
+}
+
+resource "null_resource" "install_asm" {
+  count = var.enable_asm ? 1 : 0
+
+  triggers = {
+    project_id       = var.gcp_project_id
+    cluster_name     = google_container_cluster.sandbox.name
+    cluster_location = google_container_cluster.sandbox.location
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command     = <<-EOT
+      ${path.module}/scripts/install_asm.sh --project ${self.triggers.project_id} \
+        --channel ${var.asm_channel} \
+        --cluster_name ${self.triggers.cluster_name} \
+        --cluster_location ${self.triggers.cluster_location}
+EOT
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      gcloud container fleet memberships unregister ${self.triggers.cluster_name} \
+        --gke-cluster '${self.triggers.cluster_location}/${self.triggers.cluster_name}' \
+        --project=${self.triggers.project_id}
+EOT
+  }
+
+  depends_on = [
+    resource.google_container_cluster.sandbox,
+    module.gcloud,
+  ]
 }

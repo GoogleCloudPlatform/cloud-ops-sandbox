@@ -27,11 +27,6 @@ variable "gcp_project_id" {
   description = "The GCP project ID to apply this config to"
 }
 
-variable "gcp_project_number" {
-  type        = string
-  description = "The GCP project number to apply this config to"
-}
-
 variable "enable_asm" {
   type        = bool
   description = "Flags to provision ASM related resources"
