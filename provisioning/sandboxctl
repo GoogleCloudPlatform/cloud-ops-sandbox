@@ -476,7 +476,8 @@ configure_terraform_input_vars() {
 state_bucket_name = "${TF_BUCKET_NAME}"
 state_prefix = "${TERRAFORM_PREFIX}"
 gcp_project_id = "${PROJECT_ID}"
-manifest_filepath = "${SCRIPT_DIR}/${MICROSERVICE_DEMO_KUSTOMIZE}/"
+configuration_filepath = "${SCRIPT_DIR}/../configurations/microservices-demo"
+manifest_filepath = "${SCRIPT_DIR}/${MICROSERVICE_DEMO_KUSTOMIZE}"
 sandbox_version = "${SANDBOX_VERSION}"
 EOF
 )

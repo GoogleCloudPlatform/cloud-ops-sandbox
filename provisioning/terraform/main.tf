@@ -36,18 +36,19 @@ module "online_boutique" {
   gcp_project_id    = module.enable_google_apis.project_id
 }
 
-# ------------------------------------------
-# Cloud Ops configuration
+# # ------------------------------------------
+# # Cloud Ops configuration
 module "cloud_ops" {
   source     = "./cloud-ops"
   depends_on = [module.online_boutique]
   # hardcoded additional variables for configurations
   # TODO: change to more dynamic solution to support multiple demo apps
   additional_configuration_vars = { public_hostname = module.online_boutique.frontend_ip_address }
-  enable_asm                    = var.enable_asm
-  frontend_external_ip          = module.online_boutique.frontend_ip_address
-  gcp_project_id                = var.gcp_project_id
-  gke_cluster_name              = var.gke_cluster_name
+
+  configuration_filepath = var.configuration_filepath
+  enable_asm             = var.enable_asm
+  gcp_project_id         = module.enable_google_apis.project_id
+  gke_cluster_name       = var.gke_cluster_name
   # re-use prefix to customize resources within the same project
   name_suffix = length(var.state_prefix) > 0 ? var.state_prefix : ""
 }

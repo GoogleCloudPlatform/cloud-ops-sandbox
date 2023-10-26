@@ -59,11 +59,11 @@ resource "kubernetes_annotations" "default_sa" {
 # NOTE: when re-applying the previous resources might not be disposed
 resource "null_resource" "online_boutique_kustomization" {
   triggers = {
-    kustomize_path = sha256(var.filepath_manifest)
+    kustomize_path = sha256(var.manifest_filepath)
   }
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -k ${var.filepath_manifest} -n ${local.namespace_name}"
+    command     = "kubectl apply -k ${var.manifest_filepath} -n ${local.namespace_name}"
   }
 }
 

@@ -15,6 +15,24 @@
  */
 
 # Required input variables
+variable "configuration_filepath" {
+  type        = string
+  description = "Path to Cloud Ops Sandbox configuration for the demo application"
+  validation {
+    condition     = !endswith(var.configuration_filepath, "/")
+    error_message = "Path should not end with /. Remove the trailing / from the value."
+  }
+}
+
+variable "manifest_filepath" {
+  type        = string
+  description = "Path to Kustomize manifest resource(s)"
+  validation {
+    condition     = !endswith(var.manifest_filepath, "/")
+    error_message = "Path should not end with /. Remove the trailing / from the value."
+  }
+}
+
 variable "gcp_project_id" {
   type        = string
   description = "The GCP project ID to apply this config to"
@@ -40,11 +58,6 @@ variable "enable_asm" {
   type        = bool
   description = "If true, installs Anthos Service Mesh (managed version of Istio) on the GKE cluster"
   default     = false
-}
-
-variable "manifest_filepath" {
-  type        = string
-  description = "Path to Kustomize manifest resource(s)"
 }
 
 variable "gke_cluster_name" {

@@ -34,5 +34,5 @@ module "enable_google_apis" {
   project_id                  = var.gcp_project_id
   disable_services_on_destroy = false
 
-  activate_apis           = concat(local.base_apis, var.enable_asm ? local.mesh_apis : [])
+  activate_apis = concat(local.base_apis, var.enable_asm ? local.mesh_apis : [])
 }

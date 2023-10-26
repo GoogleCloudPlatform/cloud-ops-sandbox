@@ -13,15 +13,6 @@
 # limitations under the License.
 
 # Required input variables
-variable "frontend_external_ip" {
-  type        = string
-  description = "Publicly available IP of the frontend service"
-  validation {
-    condition     = can(regex("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$", var.frontend_external_ip))
-    error_message = "The value should be a valid IPv4 address"
-  }
-}
-
 variable "gcp_project_id" {
   type        = string
   description = "The GCP project ID to apply this config to"
@@ -34,12 +25,12 @@ variable "enable_asm" {
 
 variable "configuration_filepath" {
   type        = string
-  description = "Path to monitoring resource configuration files. Relative path should be defined relative to the root terraform folder."
+  description = "Path to Cloud Ops Sandbox configuration for the demo application"
 }
 
 # Optional input variables
 variable "additional_configuration_vars" {
-  type        = object
+  type        = map(string)
   description = "A map of variables that can be used to provision the configurations. By default only project id, configuration id and custom suffix (based on the state) are provided."
   default     = {}
 }
