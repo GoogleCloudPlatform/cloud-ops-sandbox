@@ -1,0 +1,8 @@
+app-id: "microservices-demo"
+version: "0.0.1"
+channels:
+- name: "email"
+  display_name: "Cloud Ops Sandbox notification"
+  type: "email"
+  labels:
+    email_address: "${notification_channel_email}"

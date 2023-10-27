@@ -43,7 +43,10 @@ module "cloud_ops" {
   depends_on = [module.online_boutique]
   # hardcoded additional variables for configurations
   # TODO: change to more dynamic solution to support multiple demo apps
-  additional_configuration_vars = { public_hostname = module.online_boutique.frontend_ip_address }
+  additional_configuration_vars = {
+    public_hostname            = module.online_boutique.frontend_ip_address
+    notification_channel_email = "admin@company.com"
+  }
 
   configuration_filepath = var.configuration_filepath
   enable_asm             = var.enable_asm

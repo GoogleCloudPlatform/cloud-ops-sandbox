@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-resource "google_monitoring_notification_channel" "email_notification" {
-  display_name = "Cloud Ops Sandbox notification"
-  type         = "email"
-  labels = {
-    email_address = var.notification_channel_email
-  }
+resource "google_monitoring_notification_channel" "notification_channels" {
+  for_each     = { for c in local.alerts_raw_data.channels : "${c.name}_${var.name_suffix}" => local.notificatin_channels[c.name] }
+  display_name = each.value.display_name
+  type         = each.value.type
+  labels       = each.value.labels
 }

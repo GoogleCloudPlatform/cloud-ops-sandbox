@@ -29,4 +29,10 @@ locals {
   uptimechecks_raw_data = yamldecode(file("${var.configuration_filepath}/uptimechecks.yaml"))
   uptimechecks_all_data = yamldecode(templatefile("${var.configuration_filepath}/uptimechecks.yaml", local.template_vars))
   uptimechecks          = { for c in local.uptimechecks_all_data.checks : c.name => c }
+
+  # Alerts and notification channels
+  alerts_raw_data = yamldecode(file("${var.configuration_filepath}/alerts.yaml"))
+  alerts_all_data = yamldecode(templatefile("${var.configuration_filepath}/alerts.yaml", local.template_vars))
+  # alerts               = { for a in local.alerts_all_data.alerts : a.name => a }
+  notificatin_channels = { for c in local.alerts_all_data.channels : c.name => c }
 }
