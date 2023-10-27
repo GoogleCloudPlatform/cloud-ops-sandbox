@@ -17,7 +17,7 @@ version: "0.0.1"
 checks:
 - name: test-uptime-alert-1
   display-name: "HTTP uptime check"
-  timeout: 10
+  timeout: "10s"
   resource:
     type: k8s_service
     labels:

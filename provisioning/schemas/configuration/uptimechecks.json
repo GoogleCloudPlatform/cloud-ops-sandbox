@@ -102,10 +102,10 @@
                     }
                 },
                 "timeout": {
-                    "type": "number",
+                    "type": "string",
                     "description": "A maximum amount of time to wait for the request to complete",
-                    "minimum": 1,
-                    "maximum": 60
+                    "default": "60s",
+                    "pattern": "^([1-9]|[1-5][0-9]|60)s$"
                 },
                 "type": {
                     "description": "One of the following Uptime check types:",
