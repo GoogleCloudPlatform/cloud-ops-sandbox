@@ -16,8 +16,14 @@ locals {
   default_template_vars = {
     project_id       = var.gcp_project_id
     configuration_id = basename(var.configuration_filepath)
+    cluster_name     = var.gke_cluster_name
   }
   template_vars = merge(local.default_template_vars, var.additional_configuration_vars)
+
+  # Metrics
+  metrics_raw_data = yamldecode(file("${var.configuration_filepath}/metrics.yaml"))
+  metrics_all_data = yamldecode(templatefile("${var.configuration_filepath}/metrics.yaml", local.template_vars))
+  metrics          = { for c in local.metrics_all_data.metrics : c.name => c }
 
   # Uptime checks
   uptimechecks_raw_data = yamldecode(file("${var.configuration_filepath}/uptimechecks.yaml"))
