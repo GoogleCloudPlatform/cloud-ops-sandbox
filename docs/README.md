@@ -2,10 +2,10 @@
 
 ## Overview
 
+various services and instruments in the Google
 Cloud Ops Sandbox (**Sandbox** further in this document) lets you to trial
-various services and instruments in the Google [Cloud Operations
-suite][cloud-ops] of services by using a non-trivial microservice application
-deployed on Kubernetes like [Online Boutique][ob].
+[Cloud Operations suite][cloud-ops] of services by using a non-trivial
+microservice application deployed on Kubernetes like [Online Boutique][ob].
 With Sandbox you can experiment with existing tools to troubleshoot operational
 problems in a sandboxed environment or to have hands-on experience with
 creating new observability instruments.
@@ -46,10 +46,10 @@ instructions:
 
 Or, by executing the following commands in your local environment:
 
-```terminal
+```shell
 git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox
-gcloud auth application-default loging
-cloud-ops-sandbox/provisioning/sandboxctl -p PROJECT_ID
+gcloud auth application-default login
+cloud-ops-sandbox/provisioning/sandboxctl create -p PROJECT_ID
 ```
 
 where `PROJECT_ID` identifies the Google Cloud project where you want to
@@ -148,17 +148,17 @@ pricing [calculator].
 
 [1]: https://cloud.google.com/resource-manager/docs/creating-managing-projects#console_1
 [2]: https://console.cloud.google.com/?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fgooglecloudplatform%2Fcloud-ops-sandbox&cloudshell_git_branch=0.9.2&cloudshell_tutorial=docs/walkthrough.md
-[cloud-ops]: <<http://cloud.google.com/products/operations>
-[ob]: <<https://github.com/GoogleCloudPlatform/microservices-demo>
-[ob-architecture]: <<https://github.com/GoogleCloudPlatform/microservices-demo#architecture>
-[ob-screens]: <<https://github.com/GoogleCloudPlatform/microservices-demo#screenshots>
-[log-explorer]: <<https://pantheon.corp.google.com/logs/query>
-[uptime-checks]: <<https://pantheon.corp.google.com/monitoring/uptime>
-[custom-dashboards]: <https://console.cloud.google.com/monitoring/dashboards?pageState=("dashboards":("t":"Custom>"))
-[slo-services]: <https://console.cloud.google.com/monitoring/services>
-[gke_pricing]: <https://cloud.google.com/gke/pricing>
-[asm_pricing]: <https://cloud.google.com/service-mesh/pricing>
-[ops_pricing]: <https://cloud.google.com/stackdriver/pricing>
-[estimate]: <https://cloud.google.com/stackdriver/estimating-bills>
-[calculator]: <https://cloud.google.com/products/calculator>
-[gke]: <https://console.cloud.google.com/kubernetes/>
+[cloud-ops]: http://cloud.google.com/products/operations
+[ob]: https://github.com/GoogleCloudPlatform/microservices-demo
+[ob-architecture]: https://github.com/GoogleCloudPlatform/microservices-demo#architecture
+[ob-screens]: https://github.com/GoogleCloudPlatform/microservices-demo#screenshots
+[log-explorer]: https://pantheon.corp.google.com/logs/query
+[uptime-checks]: https://pantheon.corp.google.com/monitoring/uptime
+[custom-dashboards]: https://console.cloud.google.com/monitoring/dashboards?pageState=("dashboards":("t":"Custom>"))
+[slo-services]: https://console.cloud.google.com/monitoring/services
+[gke_pricing]: https://cloud.google.com/gke/pricing
+[asm_pricing]: https://cloud.google.com/service-mesh/pricing
+[ops_pricing]: https://cloud.google.com/stackdriver/pricing
+[estimate]: https://cloud.google.com/stackdriver/estimating-bills
+[calculator]: https://cloud.google.com/products/calculator
+[gke]: https://console.cloud.google.com/kubernetes/
