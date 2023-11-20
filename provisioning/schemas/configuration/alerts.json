@@ -38,7 +38,7 @@
             "description": "Alert policy",
             "required": [
                 "name",
-                "display-name",
+                "display_name",
                 "conditions"
             ],
             "properties": {
@@ -46,7 +46,7 @@
                     "type": "string",
                     "description": "Unique name of the dashboard resource"
                 },
-                "display-name": {
+                "display_name": {
                     "type": "string",
                     "description": "A short name describing alert"
                 },
@@ -54,7 +54,7 @@
                     "type": "string",
                     "description": "The body of the alert message. This text can be templatized using https://cloud.google.com/monitoring/alerts/doc-variables"
                 },
-                "notification-channels": {
+                "notification_channels": {
                     "type": "array",
                     "description": "The notification channels to which notifications should be sent when incidents are opened or closed or when new violations occur on an already opened incident.",
                     "items": {
@@ -127,73 +127,73 @@
                             "minProperties": 1,
                             "maxProperties": 64
                         }
-                    },
-                    "condition": {
-                        "type": "object",
-                        "description": "A true/false test that determines when an alerting policy should open an incident",
-                        "required": [
-                            "condition"
-                        ],
-                        "properties": {
-                            "display-name": {
-                                "type": "string",
-                                "description": "A short name or phrase used to identify the condition"
-                            },
-                            "condition": {
-                                "description": "Condition can be only one of the following:",
-                                "anyOf": [
-                                    {
-                                        "$ref": "#/$defs/conditionThreshold"
-                                    },
-                                    {
-                                        "$ref": "#/$defs/conditionAbsent"
-                                    },
-                                    {
-                                        "$ref": "#/$defs/conditionMatchedLog"
-                                    },
-                                    {
-                                        "$ref": "#/$defs/conditionMonitoringQueryLanguage"
-                                    }
-                                ]
-                            }
-                        }
-                    },
-                    "conditionThreshold": {
-                        "type": "object",
-                        "description": "A condition that compares a collection of time series against a threshold",
-                        "required": [
-                            "filter",
-                            "threshold",
-                            "comparison"
-                        ],
-                        "properties": {
-                            "filter": {
-                                "type": "string",
-                                "description": "A filter that identifies which time series should be compared with the threshold"
-                            },
-                            "threshold": {
-                                "type": "number",
-                                "description": "A value against which to compare the time series"
-                            },
-                            "duration": {
-                                "type": "string",
-                                "description": "The amount of time that a time series must violate the threshold to be considered failing. only values that are a multiple of a minute--e.g., 0, 60, 120, or 300 seconds--are supported",
-                                "pattern": "^[0-9]+s$"
-                            },
-                            "comparison": {
-                                "enum": [
-                                    "COMPARISON_LT",
-                                    "COMPARISON_GT"
-                                ],
-                                "description": "The comparison to apply between the time series (indicated by filter)"
-                            }
-                        }
-                    },
-                    "conditionAbsent": {},
-                    "conditionMatchedLog": {},
-                    "conditionMonitoringQueryLanguage": {}
+                    }
                 }
             }
-        }
+        },
+        "condition": {
+            "type": "object",
+            "description": "A true/false test that determines when an alerting policy should open an incident",
+            "required": [
+                "condition"
+            ],
+            "properties": {
+                "display_name": {
+                    "type": "string",
+                    "description": "A short name or phrase used to identify the condition"
+                },
+                "condition": {
+                    "description": "Condition can be only one of the following:",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/condition_threshold"
+                        },
+                        {
+                            "$ref": "#/$defs/conditionAbsent"
+                        },
+                        {
+                            "$ref": "#/$defs/conditionMatchedLog"
+                        },
+                        {
+                            "$ref": "#/$defs/conditionMonitoringQueryLanguage"
+                        }
+                    ]
+                }
+            }
+        },
+        "condition_threshold": {
+            "type": "object",
+            "description": "A condition that compares a collection of time series against a threshold",
+            "required": [
+                "comparison",
+                "filter",
+                "threshold"
+            ],
+            "properties": {
+                "filter": {
+                    "type": "string",
+                    "description": "A filter that identifies which time series should be compared with the threshold"
+                },
+                "threshold": {
+                    "type": "string",
+                    "description": "A value against which to compare the time series"
+                },
+                "duration": {
+                    "type": "string",
+                    "description": "The amount of time that a time series must violate the threshold to be considered failing. only values that are a multiple of a minute--e.g., 0, 60, 120, or 300 seconds--are supported",
+                    "pattern": "^[0-9]+s$"
+                },
+                "comparison": {
+                    "enum": [
+                        "COMPARISON_LT",
+                        "COMPARISON_GT"
+                    ],
+                    "description": "The comparison to apply between the time series (indicated by filter)"
+                }
+            }
+        },
+        "conditionAbsent": {},
+        "conditionMatchedLog": {},
+        "conditionMonitoringQueryLanguage": {}
     }
 }
