@@ -2,8 +2,6 @@
 
 ## Overview
 
-## Overview
-
 Cloud Ops Sandbox (**Sandbox** further in this document) lets you to trial
 [Cloud Operations suite][cloud-ops] of services by using a non-trivial
 microservice application deployed on Kubernetes like [Online Boutique][ob].
@@ -148,7 +146,7 @@ GKE cluster is the core part of the bill. You can see [estimate] costs with
 pricing [calculator].
 
 [1]: https://cloud.google.com/resource-manager/docs/creating-managing-projects#console_1
-[2]: https://console.cloud.google.com/?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fgooglecloudplatform%2Fcloud-ops-sandbox&cloudshell_git_branch=0.9.2&cloudshell_tutorial=docs/walkthrough.md
+[2]: https://console.cloud.google.com/?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fgooglecloudplatform%2Fcloud-ops-sandbox&cloudshell_git_branch=0.9.3&cloudshell_tutorial=docs/walkthrough.md
 [cloud-ops]: http://cloud.google.com/products/operations
 [ob]: https://github.com/GoogleCloudPlatform/microservices-demo
 [ob-architecture]: https://github.com/GoogleCloudPlatform/microservices-demo#architecture
