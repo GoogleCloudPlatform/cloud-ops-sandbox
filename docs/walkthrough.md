@@ -68,7 +68,7 @@ To create a new Cloud Ops Sandbox using default settings run the following
 command in Cloud Shell:
 
 ```bash
-provisioning/sandboxctl create --project-id <walkthrough-project-id/>
+provisioning/sandboxctl create -p <walkthrough-project-id/>
 ```
 
 By default the launch installs [Anthos Service Mesh][3](ASM) and provisions
@@ -166,7 +166,7 @@ avoid incurring additional costs.
 To delete the launched Sandbox, run the following command:
 
 ```bash
-provisioning/sandboxctl delete --project-id <walkthrough-project-id/>
+provisioning/sandboxctl delete -p <walkthrough-project-id/>
 ```
 
 **Warning:** If you customized your launch with additional parameters

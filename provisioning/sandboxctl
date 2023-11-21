@@ -31,10 +31,6 @@ fi
 SCRIPT_NAME="${0##*/}"; readonly SCRIPT_NAME
 SCRIPT_DIR="$(realpath "$(dirname "${0}")")"; readonly SCRIPT_DIR
 SANDBOX_VERSION="$(tr -d '\n' < "${SCRIPT_DIR}/version.txt")"; readonly SANDBOX_VERSION
-SANDBOX_SESSION="${SANDBOX_SESSION:-$(python3 -c 'import uuid; print(uuid.uuid4())')}"; readonly SANDBOX_SESSION
-CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY="${CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY:-}"; readonly CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY
-AGCLOUD=""
-ATERRAFORM=""
 
 main() {
   if [[ "${*}" = '' ]]; then
@@ -168,8 +164,7 @@ help_subcommand() {
 }
 
 init() {
-  ATERRAFORM="$(which terraform || true)"; readonly ATERRAFORM;
-  AGCLOUD="$(which gcloud || true)"; readonly AGCLOUD;
+  MICROSERVICE_DEMO_PATH="kustomize/online-boutique"; readonly MICROSERVICE_DEMO_PATH
   PROJECT_ID=""
   CLUSTER_LOCATION=""
   CLUSTER_NAME=""
@@ -177,6 +172,10 @@ init() {
   SKIP_LOADGENERATOR=0
   SKIP_ASM=0
   VERBOSE=0
+  SANDBOX_SESSION="${SANDBOX_SESSION:-$(python3 -c 'import uuid; print(uuid.uuid4())')}"; readonly SANDBOX_SESSION
+  CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY="${CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY:-}"; readonly CLOUD_OPS_SANDBOX_DISABLE_TELEMETRY
+  ATERRAFORM="$(which terraform || true)"; readonly ATERRAFORM;
+  AGCLOUD="$(which gcloud || true)"; readonly AGCLOUD;
   CLOUDOPS_SANDBOX_POOL_CFG=${CLOUDOPS_SANDBOX_POOL_CFG:-}
   TF_FILE_LOCATION="$(mktemp).tfvars"; readonly TF_FILE_LOCATION
 }
@@ -211,7 +210,7 @@ fatal_with_usage() {
 }
 
 version_message() {
-  echo "${VERSION}"
+  echo "${SANDBOX_VERSION}"
 }
 
 usage() {
@@ -472,7 +471,7 @@ configure_terraform_input_vars() {
 state_bucket_name = "${TF_BUCKET_NAME}"
 state_prefix = "${TERRAFORM_PREFIX}"
 gcp_project_id = "${PROJECT_ID}"
-filepath_manifest = "${SCRIPT_DIR}/kustomize/online-boutique/" 
+filepath_manifest = "${SCRIPT_DIR}/${MICROSERVICE_DEMO_PATH}" 
 EOF
 )
 
@@ -494,7 +493,7 @@ EOF
 }
 
 configure_kustomization() {
-  KUSTOMIZE_FILE="${SCRIPT_DIR}/kustomize/online-boutique/kustomization.yaml"; readonly KUSTOMIZE_FILE
+  KUSTOMIZE_FILE="${SCRIPT_DIR}/${MICROSERVICE_DEMO_PATH}/kustomization.yaml"; readonly KUSTOMIZE_FILE
   cp "${KUSTOMIZE_FILE}" "${KUSTOMIZE_FILE}.origin" > /dev/null
   local SED_EXPRESSION; SED_EXPRESSION=""
   

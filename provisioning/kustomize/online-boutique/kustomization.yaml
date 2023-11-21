@@ -15,9 +15,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- github.com/GoogleCloudPlatform/microservices-demo/kustomize/base?version=v0.6.0
+- github.com/GoogleCloudPlatform/microservices-demo/kustomize/base?version=v0.8.1
 components:
-- github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/google-cloud-operations?version=v0.6.0
-#!DO NOT REMOVE FOLLOWING COMMENTED LINES!
-#- github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/service-mesh-istio?version=v0.6.0
-#- github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/without-loadgenerator?version=v0.6.0
+- github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/google-cloud-operations?version=v0.8.1
+# !!DO NOT REMOVE THE COMMENTED LINES!!
+#- github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/service-mesh-istio?version=v0.8.1
+#- github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/without-loadgenerator?version=v0.8.1

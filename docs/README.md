@@ -2,10 +2,11 @@
 
 ## Overview
 
+## Overview
+
 Cloud Ops Sandbox (**Sandbox** further in this document) lets you to trial
-various services and instruments in the [Cloud Operations suite][cloud-ops]
-of services by using [Online Boutique][ob], a non-trivial microservice
-application deployed on Kubernetes.
+[Cloud Operations suite][cloud-ops] of services by using a non-trivial
+microservice application deployed on Kubernetes like [Online Boutique][ob].
 With Sandbox you can experiment with existing tools to troubleshoot operational
 problems in a sandboxed environment or to have hands-on experience with
 creating new observability instruments.
@@ -46,7 +47,7 @@ instructions:
 
 Or, by executing the following commands in your local environment:
 
-```terminal
+```shell
 git clone https://github.com/GoogleCloudPlatform/cloud-ops-sandbox
 gcloud auth application-default login
 cloud-ops-sandbox/provisioning/sandboxctl create -p PROJECT_ID

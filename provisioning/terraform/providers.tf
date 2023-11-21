@@ -20,8 +20,7 @@
 # in the data section.
 
 terraform {
-  # The module has syntax validated vs 1.4.1
-  required_version = ">= 1.4.1, < 1.6.0"
+  required_version = ">= 1.4.1"
 
   required_providers {
     google = {
