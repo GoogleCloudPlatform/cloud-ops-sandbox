@@ -92,6 +92,13 @@ the demo application. Follow up GoogleCloudPlatform/microservices-demo#1692 to t
 * SRE recipe functionality is temporary removed. Follow up #1009 to track
 the progress.
 
+### Legacy version (0.8) of Cloud Ops Sandbox
+
+The legacy version (0.8.2) is no longer supported.
+You still should be able to deploy it by pressing
+
+[![Launch in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)][legacy]
+
 ## Code of Conduct
 
 Please see the [code of conduct](CODE_OF_CONDUCT.md)
@@ -121,3 +128,4 @@ under Apache 2.0. Full license text is available in [LICENSE](LICENSE).
 [terraform]: https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 [kubectl]: https://kubernetes.io/docs/tasks/tools/#kubectl
 [here]: https://github.com/GoogleCloudPlatform/cloud-ops-sandbox/issues/new/choose
+[legacy]: https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/cloud-ops-sandbox.git&cloudshell_git_branch=v0.8.2&shellonly=true&cloudshell_image=gcr.io/stackdriver-sandbox-230822/cloudshell-image/uncertified:v0.8.2&cloudshell_tutorial=docs/tutorial.md
