@@ -25,48 +25,45 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~> 4.54.0"
+      version = ">= 5.0"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = "4.54.0"
+      version = ">= 5.0"
     }
     null = {
       source  = "hashicorp/null"
-      version = "~>3.2.1"
+      version = "~> 3.2.1"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~>2.18.1"
+      version = "~> 2.18.1"
     }
   }
-  backend "gcs" {}
+  #  backend "gcs" {}
 }
 
 # tflint-ignore: terraform_unused_declarations
-data "terraform_remote_state" "state" {
-  backend = "gcs"
-  config = {
-    bucket = var.state_bucket_name
-    prefix = var.state_prefix
-  }
-}
+# data "terraform_remote_state" "state" {
+#   backend = "gcs"
+#   config = {
+#     bucket = var.state_bucket_name
+#     prefix = var.state_prefix
+#   }
+# }
 
 provider "google" {
-  project = var.gcp_project_id
+  project = var.project_id
 }
-
-# Retrieve an access token as the Terraform runner
-data "google_client_config" "default" {}
 
 provider "google-beta" {
-  project = var.gcp_project_id
+  project = var.project_id
 }
 
+data "google_client_config" "default" {}
+
 provider "kubernetes" {
-  host  = "https://${resource.google_container_cluster.sandbox.endpoint}"
-  token = data.google_client_config.default.access_token
-  cluster_ca_certificate = base64decode(
-    resource.google_container_cluster.sandbox.master_auth[0].cluster_ca_certificate,
-  )
+  host                   = "https://${module.gke.endpoint}"
+  token                  = data.google_client_config.default.access_token
+  cluster_ca_certificate = base64decode(module.gke.ca_certificate)
 }

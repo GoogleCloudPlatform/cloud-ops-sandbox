@@ -15,7 +15,7 @@
  */
 
 # Required input variables
-variable "gcp_project_id" {
+variable "project_id" {
   type        = string
   description = "The GCP project ID to apply this config to"
 }
@@ -23,17 +23,6 @@ variable "gcp_project_id" {
 variable "state_bucket_name" {
   type        = string
   description = "The GCS bucket URL where Terraform stores the state"
-}
-
-# Optional input variables
-variable "asm_channel" {
-  type        = string
-  description = "Defines one of the following managed ASM channels/revisions: 'rapid', 'regular' or stable'"
-  default     = "stable"
-  validation {
-    condition     = can(regex("^(rapid|regular|stable)$", var.asm_channel))
-    error_message = "ASM channel/revision can be only 'rapid', 'regular' or stable'"
-  }
 }
 
 variable "enable_asm" {
@@ -48,37 +37,48 @@ variable "filepath_manifest" {
   default     = "../kustomize/online-boutique/"
 }
 
-variable "gke_cluster_name" {
+variable "cluster_name" {
   type        = string
   description = "Name given to the new GKE cluster"
   default     = "cloud-ops-sandbox"
 }
 
-variable "gke_cluster_location" {
+variable "cluster_location" {
   type        = string
   description = "Region or zone of the new GKE cluster"
   default     = "us-central1"
 }
 
+variable "cluster_network" {
+  type        = string
+  description = " The VPC network to host the cluster in"
+  default     = "default"
+}
+
+variable "cluster_subnetwork" {
+  type        = string
+  description = " The subnetwork to host the cluster in"
+  default     = "default"
+}
+
+
 # Default values for node pool support connecting the cluster to ASM
 # https://cloud.google.com/service-mesh/docs/unified-install/anthos-service-mesh-prerequisites#cluster_requirements
-variable "gke_node_pool" {
+variable "node_pool_config" {
   type = object({
     initial_node_count = number
     labels             = map(string)
     machine_type       = string
-
-    autoscaling = object({
-      max_node_count = number
-      min_node_count = number
-    })
+    max_node_count     = number
+    min_node_count     = number
   })
   description = "Initial settings and autoscale configuration of the GKE cluster's default node pool"
   default = {
-    initial_node_count = 4
+    initial_node_count = 3
     labels             = {}
     machine_type       = "e2-standard-4"
-    autoscaling        = null
+    min_count          = 3
+    max_count          = 3
   }
 }
 

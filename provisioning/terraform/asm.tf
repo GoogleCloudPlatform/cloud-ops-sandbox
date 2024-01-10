@@ -13,36 +13,13 @@
 # limitations under the License.
 
 
-resource "null_resource" "install_asm" {
-  count = var.enable_asm ? 1 : 0
+module "asm" {
+  source = "terraform-google-modules/kubernetes-engine/google//modules/asm"
 
-  triggers = {
-    project_id       = var.gcp_project_id
-    cluster_name     = google_container_cluster.sandbox.name
-    cluster_location = google_container_cluster.sandbox.location
-  }
-
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command     = <<-EOT
-      ./scripts/install_asm.sh --project ${self.triggers.project_id} \
-        --channel ${var.asm_channel} \
-        --cluster_name ${self.triggers.cluster_name} \
-        --cluster_location ${self.triggers.cluster_location}
-EOT
-  }
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = <<-EOT
-      gcloud container fleet memberships unregister ${self.triggers.cluster_name} \
-        --gke-cluster '${self.triggers.cluster_location}/${self.triggers.cluster_name}' \
-        --project=${self.triggers.project_id}
-EOT
-  }
-
-  depends_on = [
-    resource.google_container_cluster.sandbox,
-    module.gcloud,
-  ]
+  project_id                = var.project_id
+  cluster_name              = module.gke.name
+  cluster_location          = module.gke.location
+  enable_mesh_feature       = true
+  enable_fleet_registration = true
+  count                     = var.enable_asm == true ? 1 : 0
 }

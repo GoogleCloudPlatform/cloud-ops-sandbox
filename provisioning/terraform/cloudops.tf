@@ -18,7 +18,7 @@ module "monitoring" {
   gcp_project_number   = data.google_project.info.number
   enable_asm           = var.enable_asm
   frontend_external_ip = data.kubernetes_service.frontend_external_service.status[0].load_balancer[0].ingress[0].ip
-  gke_cluster_name     = var.gke_cluster_name
+  gke_cluster_name     = var.cluster_name
   # re-use prefix to customize resources within the same project
   name_suffix = length(var.state_prefix) > 0 ? "-${var.state_prefix}" : ""
 
