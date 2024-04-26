@@ -77,8 +77,8 @@ variable "node_pool_config" {
     initial_node_count = 3
     labels             = {}
     machine_type       = "e2-standard-4"
-    min_count          = 3
-    max_count          = 3
+    min_node_count          = 3
+    max_node_count          = 3
   }
 }
 
