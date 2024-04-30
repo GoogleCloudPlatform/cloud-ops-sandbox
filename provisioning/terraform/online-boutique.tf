@@ -13,7 +13,7 @@
 # limitations under the License.
 
 locals {
-  service_name   = var.enable_asm ? "istio-gateway" : "frontend-external"
+  service_name   = var.enable_asm ? "istio-gateway-istio" : "frontend-external"
   namespace_name = "default"
 }
 
