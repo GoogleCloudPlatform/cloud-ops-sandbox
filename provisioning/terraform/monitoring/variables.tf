@@ -46,8 +46,14 @@ variable "filepath_configuration" {
 
 variable "gke_cluster_name" {
   type        = string
-  description = "Name given to the new GKE cluster"
+  description = "Name of the GKE cluster hosting the app"
   default     = "cloud-ops-sandbox"
+}
+
+variable "gke_cluster_location" {
+  type        = string
+  description = "Location of the GKE cluster hosting the app"
+  default     = "us-central1"
 }
 
 variable "notification_channel_email" {
