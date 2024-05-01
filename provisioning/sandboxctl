@@ -101,7 +101,6 @@ create_subcommand() {
   ### Cleanup ###
   unset -v GOOGLE_TERRAFORM_USERAGENT_EXTENSION TF_APPEND_USER_AGENT
   popd > /dev/null
-  mv "${KUSTOMIZE_FILE}.origin" "${KUSTOMIZE_FILE}"
 }
 delete_subcommand() {
   parse_args "${@}"
@@ -164,7 +163,6 @@ help_subcommand() {
 }
 
 init() {
-  MICROSERVICE_DEMO_PATH="kustomize/online-boutique"; readonly MICROSERVICE_DEMO_PATH
   PROJECT_ID=""
   CLUSTER_LOCATION=""
   CLUSTER_NAME=""
@@ -178,6 +176,7 @@ init() {
   AGCLOUD="$(which gcloud || true)"; readonly AGCLOUD;
   CLOUDOPS_SANDBOX_POOL_CFG=${CLOUDOPS_SANDBOX_POOL_CFG:-}
   TF_FILE_LOCATION="$(mktemp).tfvars"; readonly TF_FILE_LOCATION
+  KUSTOMIZE_FILE="$(mktemp -d)/kustomization.yaml"; readonly KUSTOMIZE_FILE
 }
 
 ### Support functions ###
@@ -471,7 +470,7 @@ configure_terraform_input_vars() {
 state_bucket_name = "${TF_BUCKET_NAME}"
 state_prefix = "${TERRAFORM_PREFIX}"
 gcp_project_id = "${PROJECT_ID}"
-filepath_manifest = "${SCRIPT_DIR}/${MICROSERVICE_DEMO_PATH}" 
+filepath_manifest = "${KUSTOMIZE_FILE%/*}" 
 EOF
 )
 
@@ -493,8 +492,8 @@ EOF
 }
 
 configure_kustomization() {
-  KUSTOMIZE_FILE="${SCRIPT_DIR}/${MICROSERVICE_DEMO_PATH}/kustomization.yaml"; readonly KUSTOMIZE_FILE
-  cp "${KUSTOMIZE_FILE}" "${KUSTOMIZE_FILE}.origin" > /dev/null
+  local ORIGINAL_KUSTOMIZE_FILE="${SCRIPT_DIR}/kustomize/online-boutique/kustomization.yaml";
+  cp "${ORIGINAL_KUSTOMIZE_FILE}" "${KUSTOMIZE_FILE}" > /dev/null
   local SED_EXPRESSION; SED_EXPRESSION=""
   
   # uncomment 'without-loadgenerator' component if skip_loadgen is set
@@ -506,7 +505,7 @@ configure_kustomization() {
     SED_EXPRESSION+=" -E '/service-mesh-istio(\?version\=v?[0-9]+\.[0-9]+\.[0-9]+)?$/s/^#//'"
   fi
   if [[ -n "${SED_EXPRESSION}" ]]; then
-    eval "sed ${SED_EXPRESSION} ${KUSTOMIZE_FILE}.origin >| ${KUSTOMIZE_FILE}"
+    eval "sed ${SED_EXPRESSION} ${ORIGINAL_KUSTOMIZE_FILE} >| ${KUSTOMIZE_FILE}"
   fi
 }
 
