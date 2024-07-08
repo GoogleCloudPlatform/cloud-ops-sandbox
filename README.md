@@ -1,6 +1,15 @@
 # 📈 📊 👣 🪵 Cloud Operations Sandbox
 
-<!-- ![Terraform][tf_badge] ![sandboxctl][cli_badge] -->
+> [!CAUTION]
+> **The project is scheduled for sunsetting.**
+>
+> The project will be archived on the last week (35) of August 2024.
+>
+> If you are looking for sample application to try [Observability in Google Cloud](https://cloud.google.com/stackdriver/docs)
+> consider using [Cymbal Shop](https://github.com/GoogleCloudPlatform/microservices-demo) with its [Cloud Ops component](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/kustomize/components/google-cloud-operations)
+> or [OpenTelemetry demo](https://github.com/GoogleCloudPlatform/opentelemetry-demo).
+
+<br/>
 
 Cloud Operations (Ops) Sandbox is an end-to-end demo that helps practitioners to
 learn about [Cloud Operations][cloud-ops] (formerly Stackdriver) and Service
@@ -17,7 +26,7 @@ suite of Google Cloud
 * Experiment with created observability instruments and build new ones
 * Run quick labs using Sandbox Recipes (🚧 _temporary unavailable_)
 
-> **Warning**
+> [!NOTE]
 > Check [discontinued functionality](#discontinued-functionality) for the list
 > of functions that are no longer supported or changed in the recent versions.
 
